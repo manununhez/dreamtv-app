@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dream.dreamtv">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Leanback">
+        <activity
+            android:name=".SplashScreen"
+            android:banner="@drawable/ted_logo"
+            android:icon="@drawable/app_icon_your_company"
+            android:logo="@drawable/app_icon_your_company"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:configChanges="keyboard|keyboardHidden|navigation"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!--configChanges, para evitar que cuando el control se desconecte, interrumpa el app-->
+        <activity android:name=".activity.MainActivity"/>
+        <activity android:name=".activity.DetailsActivity" />
+        <activity android:name=".activity.PlaybackOverlayActivity" />
+        <activity android:name=".activity.SettingsActivity" />
+        <activity android:name=".activity.BrowseErrorActivity" />
+        <activity
+            android:name=".dialog.DialogExampleActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Example.LeanbackDialog"/>
+        <activity
+            android:name=".details.DetailViewExampleActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Example.LeanbackDetails"/>
+    </application>
+
+</manifest>

@@ -1,0 +1,78 @@
+<resources>
+    <string name="app_name">Edi-TED</string>
+    <string name="browse_title"><![CDATA[Edi-TEd]]></string>
+    <string name="related_movies">Related Videos</string>
+    <string name="vertical_grid_title"><![CDATA[Vertical Video Grid]]></string>
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
+    <string name="pause">Pause</string>
+    <string name="play">Play</string>
+    <string name="stop">Stop</string>
+    <string name="init_text">00:00</string>
+    <string name="play_pause_description">Play Pause Button</string>
+    <string name="loading">Loading&#8230;</string>
+    <string name="no_video_found">No video was found</string>
+    <string name="about_app">About DemoCast Player</string>
+    <string name="version">Version: %1$s</string>
+    <string name="popular_header">Popular Videos</string>
+    <string name="preferences">PREFERENCES</string>
+    <string name="grid_view">Grid View</string>
+    <string name="error_fragment">Error Fragment</string>
+    <string name="personal_settings">Personal Settings</string>
+    <string name="play_video">Play video</string>
+    <string name="edit_subtitle">Edit Subtitle</string>
+    <string name="subtitle_languages">Languages</string>
+    <!--<string name="watch_trailer_2">FREE</string>-->
+    <string name="rent_1">Rent By Day</string>
+    <string name="rent_2">From $1.99</string>
+    <string name="buy_1">Buy and Own</string>
+    <string name="buy_2">AT $9.99</string>
+    <string name="movie">Movie</string>
+    <string name="should_start">shouldStart</string>
+    <string name="start_position">startPosition</string>
+    <string name="search_results">Search Results</string>
+
+    <!-- Error messages -->
+    <string name="video_error_media_load_timeout">Media loading timed out</string>
+    <string name="video_error_server_inaccessible">Media server was not reachable</string>
+    <string name="video_error_unknown_error">Failed to load video</string>
+    <string name="error_fragment_message">An error occurred</string>
+    <string name="dismiss_error">Dismiss</string>
+    <string name="oops">Oops</string>
+
+    <!--ERROR NETWORK MESSAGES-->
+    <string name="timeout_server_error">Ha expirado el tiempo de espera, vuelva a intentar</string>
+    <string name="no_network_error">No hay conexión a internet</string>
+    <string name="defaultErrorMessage">No se pudo realizar la acción</string>
+    <string name="generic_server_down">No hay conexión a internet</string>
+
+    <string name="dreamTVApp_token">tedapp_token</string>
+
+    <string name="implement_search">Implement your own in-app search.</string>
+
+
+    <!-- Dialog example -->
+    <string name="dialog_choose_language_title">Choose a languages</string>
+    <string name="dialog_example_title">Use Google\'s location service?</string>
+    <string name="dialog_example_description">Select the language of the subtitle to start editing it.</string>
+    <string name="dialog_example_button_positive">Agree</string>
+    <string name="dialog_example_button_negative">Disagree</string>
+    <string name="dialog_example_button_toast_positive_clicked">\'Agree\' clicked.</string>
+    <string name="dialog_example_button_toast_negative_clicked">\'Disagree\' clicked.</string>
+
+    <string name="wizard_example_payment_method">Payment Method</string>
+    <string name="wizard_example_rent">Rent</string>
+    <string name="wizard_example_input_credit">Input Payment Type</string>
+
+
+    <!--details-->
+    <string name="detail_view_title">DetailView Example</string>
+    <string name="action_buy">Buy </string>
+    <string name="action_rent">Rent </string>
+    <string name="action_wishlist">Add to wishlist</string>
+    <string name="action_related">Related</string>
+    <string name="header_related">Related Items</string>
+    <string name="header_recommended">Recommended</string>
+    <string name="action_clicked">Action clicked. Implement your own handler.</string>
+
+</resources>
