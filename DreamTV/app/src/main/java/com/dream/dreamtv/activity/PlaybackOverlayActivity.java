@@ -16,6 +16,7 @@ package com.dream.dreamtv.activity;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.media.MediaFormat;
 import android.media.MediaMetadata;
 import android.media.MediaPlayer;
 import android.media.session.MediaSession;
@@ -31,6 +32,9 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.fragment.PlaybackOverlayFragment;
+
+import java.io.ByteArrayInputStream;
+import java.util.Locale;
 
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
@@ -93,6 +97,11 @@ public class PlaybackOverlayActivity extends Activity implements
      */
     public void onFragmentPlayPause(Video video, int position, Boolean playPause) {
         mVideoView.setVideoPath(video.getVideoUrl());
+
+        String subtitle = video.subtitle_vtt.subtitles;
+        if (subtitle != null && subtitle.length() > 0)
+            mVideoView.addSubtitleSource(new ByteArrayInputStream(subtitle.getBytes()),
+                    MediaFormat.createSubtitleFormat("text/vtt", Locale.ENGLISH.getLanguage()));
 
         if (position == 0 || mPlaybackState == LeanbackPlaybackState.IDLE) {
             setupCallbacks();

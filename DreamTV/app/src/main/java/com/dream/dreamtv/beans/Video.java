@@ -1,5 +1,6 @@
 package com.dream.dreamtv.beans;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,6 +30,9 @@ public class Video implements Parcelable {
     public String urls_uri;
     public String subtitle_languages_uri;
     public String resource_uri;
+    public SubtitleVtt subtitle_vtt;
+    public SubtitleJson subtitle_json;
+
 
     protected Video(Parcel in) {
         id = in.readString();
@@ -43,10 +47,41 @@ public class Video implements Parcelable {
         team = in.readString();
         project = in.readString();
         all_urls = in.createStringArrayList();
+        languages = in.createTypedArrayList(Language.CREATOR);
         activity_uri = in.readString();
         urls_uri = in.readString();
         subtitle_languages_uri = in.readString();
         resource_uri = in.readString();
+        subtitle_vtt = in.readParcelable(SubtitleVtt.class.getClassLoader());
+        subtitle_json = in.readParcelable(SubtitleJson.class.getClassLoader());
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(video_type);
+        dest.writeString(primary_audio_language_code);
+        dest.writeString(original_language);
+        dest.writeString(title);
+        dest.writeString(description);
+        dest.writeInt(duration);
+        dest.writeString(thumbnail);
+        dest.writeString(created);
+        dest.writeString(team);
+        dest.writeString(project);
+        dest.writeStringList(all_urls);
+        dest.writeTypedList(languages);
+        dest.writeString(activity_uri);
+        dest.writeString(urls_uri);
+        dest.writeString(subtitle_languages_uri);
+        dest.writeString(resource_uri);
+        dest.writeParcelable(subtitle_vtt, flags);
+        dest.writeParcelable(subtitle_json, flags);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<Video> CREATOR = new Creator<Video>() {
@@ -68,9 +103,17 @@ public class Video implements Parcelable {
         else
             url = this.all_urls.get(0);
 
-        DreamTVApp.Logger.d("VideoUrl -> "+url);
+        DreamTVApp.Logger.d("VideoUrl -> " + url);
         return url;
-//        return "http://commondatastorage.googleapis.com/android-tv/Sample%20videos/Zeitgeist/Zeitgeist%202010_%20Year%20in%20Review.mp4";
+    }
+
+    public boolean isFromYoutube() {
+        return this.all_urls.get(0).contains("youtube.com");
+    }
+
+    public String getVideoYoutubeId() {
+        Uri newUrl = Uri.parse(this.all_urls.get(0));
+        return newUrl.getQueryParameter("v");
     }
 
     @Override
@@ -93,31 +136,8 @@ public class Video implements Parcelable {
                 ", urls_uri='" + urls_uri + '\'' +
                 ", subtitle_languages_uri='" + subtitle_languages_uri + '\'' +
                 ", resource_uri='" + resource_uri + '\'' +
+                ", subtitle_vtt=" + subtitle_vtt +
+                ", subtitle_json=" + subtitle_json +
                 '}';
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(id);
-        parcel.writeString(video_type);
-        parcel.writeString(primary_audio_language_code);
-        parcel.writeString(original_language);
-        parcel.writeString(title);
-        parcel.writeString(description);
-        parcel.writeInt(duration);
-        parcel.writeString(thumbnail);
-        parcel.writeString(created);
-        parcel.writeString(team);
-        parcel.writeString(project);
-        parcel.writeStringList(all_urls);
-        parcel.writeString(activity_uri);
-        parcel.writeString(urls_uri);
-        parcel.writeString(subtitle_languages_uri);
-        parcel.writeString(resource_uri);
     }
 }

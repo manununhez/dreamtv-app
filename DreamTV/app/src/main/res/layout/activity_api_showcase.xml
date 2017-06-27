@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:measureWithLargestChild="false"
+    android:orientation="vertical">
+
+    <fr.bmartel.youtubetv.YoutubeTvView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/video_1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        app:yt_debug="false" />
+
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/black_subt"
+        android:gravity="center"
+        android:maxLines="2"
+        android:text="asdasdasd"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/rlPanel"
+        android:padding="3dp"
+        android:textColor="@color/white"
+        android:textSize="25sp"
+        android:visibility="gone" />
+
+    <!--<Chronometer-->
+        <!--android:id="@+id/tvTime"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:gravity="center_horizontal"-->
+        <!--android:textColor="#f00"-->
+        <!--android:layout_above="@+id/rlPanel"-->
+        <!--android:textSize="25sp" />&lt;!&ndash; 25 sp size for displayed text of chronometer &ndash;&gt;-->
+
+    <RelativeLayout
+        android:id="@+id/rlPanel"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="10dp">
+
+        <Button
+            android:id="@+id/play_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/button_focusable"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:text="PLAY" />
+
+        <Button
+            android:id="@+id/pause_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="10dp"
+            android:layout_toEndOf="@+id/play_button"
+            android:background="@drawable/button_focusable"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:padding="2dp"
+            android:text="PAUSE" />
+
+        <Button
+            android:id="@+id/next_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_toRightOf="@+id/pause_button"
+            android:background="@drawable/button_focusable"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:text="NEXT" />
+
+        <Button
+            android:id="@+id/previous_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_toRightOf="@+id/next_button"
+            android:background="@drawable/button_focusable"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:text="PREVIOUS" />
+
+        <Button
+            android:id="@+id/backward_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_toRightOf="@+id/previous_button"
+            android:background="@drawable/button_focusable"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:text="&lt;&lt;" />
+
+        <Button
+            android:id="@+id/forward_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/backward_button"
+            android:background="@drawable/button_focusable"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:text="&gt;&gt;" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

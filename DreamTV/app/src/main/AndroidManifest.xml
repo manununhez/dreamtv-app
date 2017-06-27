@@ -49,6 +49,14 @@
             android:name=".details.DetailViewExampleActivity"
             android:exported="true"
             android:theme="@style/Theme.Example.LeanbackDetails"/>
+        <activity
+            android:name=".activity.YoutubeActivityFragment"
+            android:label="@string/app_name" />
+
+        <activity
+            android:name=".activity.YoutubeActivityApiShowcase"
+            android:label="@string/app_name" />
+
     </application>
 
 </manifest>

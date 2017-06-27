@@ -15,9 +15,7 @@
 package com.dream.dreamtv.fragment;
 
 import android.app.Activity;
-import android.media.MediaDataSource;
 import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,7 +24,6 @@ import android.support.v17.leanback.widget.Action;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.ClassPresenterSelector;
 import android.support.v17.leanback.widget.ControlButtonPresenterSelector;
-import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.ListRowPresenter;
 import android.support.v17.leanback.widget.OnActionClickedListener;
@@ -56,11 +53,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.dream.dreamtv.activity.DetailsActivity;
 import com.dream.dreamtv.beans.Video;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 
 /*
@@ -94,12 +87,11 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     private SkipNextAction mSkipNextAction;
     private SkipPreviousAction mSkipPreviousAction;
     private PlaybackControlsRow mPlaybackControlsRow;
-//    private ArrayList<Video> mItems = new ArrayList<Video>();
+    //    private ArrayList<Video> mItems = new ArrayList<Video>();
 //    private int mCurrentItem;
     private Handler mHandler;
     private Runnable mRunnable;
     private Video mSelectedVideo;
-
     private OnPlayPauseClickedListener mCallback;
 
     @Override
@@ -109,7 +101,6 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 //        mItems = new ArrayList<Video>();
         mSelectedVideo = (Video) getActivity()
                 .getIntent().getParcelableExtra(DetailsActivity.VIDEO);
-
 //        List<Movie> movies = MovieList.list;
 //
 //        for (int j = 0; j < movies.size(); j++) {
@@ -415,8 +406,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
     static class DescriptionPresenter extends AbstractDetailsDescriptionPresenter {
         @Override
         protected void onBindDescription(ViewHolder viewHolder, Object item) {
-            viewHolder.getTitle().setText(((Video)item).title);
-            viewHolder.getSubtitle().setText(((Video)item).description);
+            viewHolder.getTitle().setText(((Video) item).title);
+            viewHolder.getSubtitle().setText(((Video) item).description);
         }
     }
 }

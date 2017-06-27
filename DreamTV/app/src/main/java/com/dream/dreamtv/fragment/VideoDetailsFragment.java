@@ -37,18 +37,30 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.volley.VolleyError;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.activity.DetailsActivity;
 import com.dream.dreamtv.activity.MainActivity;
 import com.dream.dreamtv.activity.PlaybackOverlayActivity;
+import com.dream.dreamtv.activity.YoutubeActivityApiShowcase;
 import com.dream.dreamtv.adapter.DetailsDescriptionPresenter;
+import com.dream.dreamtv.beans.JsonResponseBaseBean;
+import com.dream.dreamtv.beans.SubtitleJson;
+import com.dream.dreamtv.beans.SubtitleVtt;
 import com.dream.dreamtv.beans.Video;
+import com.dream.dreamtv.conn.ConnectionManager;
+import com.dream.dreamtv.conn.ResponseListener;
 import com.dream.dreamtv.dialog.DialogExampleActivity;
 import com.dream.dreamtv.utils.Utils;
+import com.google.gson.Gson;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /*
@@ -184,19 +196,98 @@ public class VideoDetailsFragment extends DetailsFragment {
             @Override
             public void onActionClicked(Action action) {
                 if (action.getId() == ACTION_PLAY_VIDEO) {
-                    Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
-                    intent.putExtra(DetailsActivity.VIDEO, mSelectedVideo);
-                    startActivity(intent);
-                } else if(action.getId() == ACTION_EDIT_SUBTITLE) {
+                    getSubtitleVtt(mSelectedVideo);
+                } else if (action.getId() == ACTION_EDIT_SUBTITLE) {
                     Intent intent = new Intent(getActivity(), DialogExampleActivity.class);
                     intent.putExtra(DetailsActivity.VIDEO, mSelectedVideo);
                     startActivity(intent);
-                }else {
+                } else {
                     Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
         mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
+    }
+
+
+    private void getSubtitleVtt(final Video video) {
+        String url = ConnectionManager.Urls.VIDEOS.value + '/' + video.id + "/languages/" + video.languages.get(1).code + "/subtitles";
+        Map<String, String> urlParams = new HashMap<>();
+        urlParams.put("sub_format", "vtt");
+
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true) {
+
+            @Override
+            public void processResponse(String response) {
+                Gson gson = new Gson();
+                DreamTVApp.Logger.d(response);
+                SubtitleVtt mSubtitleVtt = gson.fromJson(response, SubtitleVtt.class);
+                DreamTVApp.Logger.d(mSubtitleVtt.toString());
+
+                mSelectedVideo.subtitle_vtt = mSubtitleVtt;
+                getSubtitleJson(mSelectedVideo);
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+                DreamTVApp.Logger.d(error.getMessage());
+            }
+
+            @Override
+            public void processError(JsonResponseBaseBean jsonResponse) {
+                super.processError(jsonResponse);
+                DreamTVApp.Logger.d(jsonResponse.toString());
+            }
+        };
+
+        ConnectionManager.get(getActivity(), url, urlParams, responseListener, this);
+
+    }
+
+    private void getSubtitleJson(final Video video) {
+        String url = ConnectionManager.Urls.VIDEOS.value + '/' + video.id + "/languages/" + video.languages.get(1).code + "/subtitles";
+        Map<String, String> urlParams = new HashMap<>();
+        urlParams.put("sub_format", "json");
+
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true) {
+
+            @Override
+            public void processResponse(String response) {
+                Gson gson = new Gson();
+                DreamTVApp.Logger.d(response);
+                SubtitleJson mSubtitleJson = gson.fromJson(response, SubtitleJson.class);
+                DreamTVApp.Logger.d(mSubtitleJson.toString());
+                mSelectedVideo.subtitle_json = mSubtitleJson;
+
+                Intent intent;
+
+                if (mSelectedVideo.isFromYoutube()) {
+//                        intent = new Intent(getActivity(), YoutubeActivityFragment.class);
+                    intent = new Intent(getActivity(), YoutubeActivityApiShowcase.class);
+
+                } else {
+                    intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
+                }
+                intent.putExtra(DetailsActivity.VIDEO, mSelectedVideo);
+                startActivity(intent);
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+                DreamTVApp.Logger.d(error.getMessage());
+            }
+
+            @Override
+            public void processError(JsonResponseBaseBean jsonResponse) {
+                super.processError(jsonResponse);
+                DreamTVApp.Logger.d(jsonResponse.toString());
+            }
+        };
+
+        ConnectionManager.get(getActivity(), url, urlParams, responseListener, this);
+
     }
 
 //    private void setupMovieListRow() {

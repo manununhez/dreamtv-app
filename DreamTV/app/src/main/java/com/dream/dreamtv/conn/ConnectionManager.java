@@ -114,6 +114,74 @@ public class ConnectionManager {
         return volley;
     }
 
+    public static MySingletonVolley get(
+            final Context context,
+            String url, final Map<String, String> urlParams,
+            ResponseListener listener, Object tag) {
+
+        String urlParamsString = "";
+        if (urlParams.entrySet().size() >= 1) {
+            int i = 0;
+            for (Map.Entry<String, String> entry : urlParams.entrySet()) {
+
+                String key = entry.getKey();
+                String value = entry.getValue();
+
+                if (i == 0)
+                    urlParamsString = "?" + key + "=" + value;
+                else
+                    urlParamsString += "&" + key + "=" + value;
+
+                i++;
+
+            }
+        }
+
+        String uri = URL_BASE + url + "/" + urlParamsString;
+
+        DreamTVApp.Logger.d("Url: " + uri);
+
+        MySingletonVolley volley = MySingletonVolley.getInstance(context);
+
+        StringRequest request = new StringRequest(Method.GET, uri, listener, listener) {
+            @Override
+            public String getBodyContentType() {
+                return "application/json; charset=utf-8";
+            }
+
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> map = new HashMap<>();
+//                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.DreamTVApp_token));
+//                DreamTVApp.Logger.d("TOKEN: " + string);
+//                map.put("Authorization", string);
+                return map;
+            }
+
+//            @Override
+//            protected Map<String, String> getParams() throws AuthFailureError {
+//                return urlParams;
+//            }
+        };
+
+        request.setShouldCache(false);
+
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                TIMEOUT_MS,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+
+        if (tag != null)
+            volley.addToRequestQueue(request, tag);
+        else
+            volley.addToRequestQueue(request, context);
+
+        return volley;
+    }
+
+
     public static MySingletonVolley post(
             final Context context,
             @NonNull Urls url, Actions action,
