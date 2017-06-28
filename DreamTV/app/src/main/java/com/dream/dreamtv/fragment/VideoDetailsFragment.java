@@ -14,6 +14,7 @@
 
 package com.dream.dreamtv.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -55,7 +56,7 @@ import com.dream.dreamtv.beans.SubtitleVtt;
 import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.conn.ConnectionManager;
 import com.dream.dreamtv.conn.ResponseListener;
-import com.dream.dreamtv.dialog.DialogExampleActivity;
+import com.dream.dreamtv.dialog.DialogChooseLanguageActivity;
 import com.dream.dreamtv.utils.Utils;
 import com.google.gson.Gson;
 
@@ -71,8 +72,9 @@ public class VideoDetailsFragment extends DetailsFragment {
     private static final String TAG = "VideoDetailsFragment";
 
     private static final int ACTION_PLAY_VIDEO = 1;
-    private static final int ACTION_EDIT_SUBTITLE = 2;
-    private static final int ACTION_BUY = 3;
+    private static final int ACTION_CHOOSE_SUBTITLE_LANG = 2;
+    private static final int ACTION_ADD_MY_LIST = 3;
+    private static final int CHOOSE_SUB_LANG_CODE = 152;
 
     private static final int DETAIL_THUMB_WIDTH = 274;
     private static final int DETAIL_THUMB_HEIGHT = 274;
@@ -87,7 +89,9 @@ public class VideoDetailsFragment extends DetailsFragment {
     private BackgroundManager mBackgroundManager;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;
+    private DetailsOverviewRow rowPresenter;
 
+    private String selectedLanguageCode = "";
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate DetailsFragment");
@@ -140,18 +144,19 @@ public class VideoDetailsFragment extends DetailsFragment {
 
     private void setupAdapter() {
         mPresenterSelector = new ClassPresenterSelector();
+//        mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
         mAdapter = new ArrayObjectAdapter(mPresenterSelector);
         setAdapter(mAdapter);
     }
 
+
     private void setupDetailsOverviewRow() {
         Log.d(TAG, "doInBackground: " + mSelectedVideo.toString());
-        final DetailsOverviewRow row = new DetailsOverviewRow(mSelectedVideo);
-        row.setImageDrawable(getResources().getDrawable(R.drawable.default_background));
-        int width = Utils.convertDpToPixel(getActivity()
-                .getApplicationContext(), DETAIL_THUMB_WIDTH);
-        int height = Utils.convertDpToPixel(getActivity()
-                .getApplicationContext(), DETAIL_THUMB_HEIGHT);
+        rowPresenter = new DetailsOverviewRow(mSelectedVideo);
+        rowPresenter.setImageDrawable(getResources().getDrawable(R.drawable.default_background));
+        int width = Utils.convertDpToPixel(getActivity().getApplicationContext(), DETAIL_THUMB_WIDTH);
+        int height = Utils.convertDpToPixel(getActivity().getApplicationContext(), DETAIL_THUMB_HEIGHT);
+
         Glide.with(getActivity())
                 .load(mSelectedVideo.thumbnail)
                 .centerCrop()
@@ -162,23 +167,19 @@ public class VideoDetailsFragment extends DetailsFragment {
                                                 GlideAnimation<? super GlideDrawable>
                                                         glideAnimation) {
                         Log.d(TAG, "details overview card image url ready: " + resource);
-                        row.setImageDrawable(resource);
+                        rowPresenter.setImageDrawable(resource);
                         mAdapter.notifyArrayItemRangeChanged(0, mAdapter.size());
                     }
                 });
 
-        row.addAction(new Action(ACTION_PLAY_VIDEO, getResources().getString(
+        rowPresenter.addAction(new Action(ACTION_PLAY_VIDEO, getResources().getString(
                 R.string.play_video)));
-        row.addAction(new Action(ACTION_EDIT_SUBTITLE, getResources().getString(
-                R.string.edit_subtitle)));
-//        row.addAction(new Action(ACTION_PLAY_VIDEO, getResources().getString(
-//                R.string.play_video), getResources().getString(R.string.watch_trailer_2)));
-//        row.addAction(new Action(ACTION_RENT, getResources().getString(R.string.rent_1),
-//                getResources().getString(R.string.rent_2)));
-//        row.addAction(new Action(ACTION_BUY, getResources().getString(R.string.buy_1),
-//                getResources().getString(R.string.buy_2)));
+        rowPresenter.addAction(new Action(ACTION_CHOOSE_SUBTITLE_LANG, getResources().getString(
+                R.string.dialog_choose_language_title)));
+        rowPresenter.addAction(new Action(ACTION_ADD_MY_LIST, getResources().getString(
+                R.string.add_to_my_list)));
 
-        mAdapter.add(row);
+        mAdapter.add(rowPresenter);
     }
 
     private void setupDetailsOverviewRowPresenter() {
@@ -197,10 +198,10 @@ public class VideoDetailsFragment extends DetailsFragment {
             public void onActionClicked(Action action) {
                 if (action.getId() == ACTION_PLAY_VIDEO) {
                     getSubtitleVtt(mSelectedVideo);
-                } else if (action.getId() == ACTION_EDIT_SUBTITLE) {
-                    Intent intent = new Intent(getActivity(), DialogExampleActivity.class);
+                } else if (action.getId() == ACTION_CHOOSE_SUBTITLE_LANG) {
+                    Intent intent = new Intent(getActivity(), DialogChooseLanguageActivity.class);
                     intent.putExtra(DetailsActivity.VIDEO, mSelectedVideo);
-                    startActivity(intent);
+                    startActivityForResult(intent, CHOOSE_SUB_LANG_CODE);
                 } else {
                     Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
                 }
@@ -211,7 +212,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
 
     private void getSubtitleVtt(final Video video) {
-        String url = ConnectionManager.Urls.VIDEOS.value + '/' + video.id + "/languages/" + video.languages.get(1).code + "/subtitles";
+        String url = ConnectionManager.Urls.VIDEOS.value + '/' + video.id + "/languages/" + (selectedLanguageCode.isEmpty() ? video.languages.get(1).code : selectedLanguageCode) + "/subtitles";
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put("sub_format", "vtt");
 
@@ -246,7 +247,7 @@ public class VideoDetailsFragment extends DetailsFragment {
     }
 
     private void getSubtitleJson(final Video video) {
-        String url = ConnectionManager.Urls.VIDEOS.value + '/' + video.id + "/languages/" + video.languages.get(1).code + "/subtitles";
+        String url = ConnectionManager.Urls.VIDEOS.value + '/' + video.id + "/languages/" + (selectedLanguageCode.isEmpty() ? video.languages.get(1).code : selectedLanguageCode) + "/subtitles";
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put("sub_format", "json");
 
@@ -290,7 +291,17 @@ public class VideoDetailsFragment extends DetailsFragment {
 
     }
 
-//    private void setupMovieListRow() {
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK)
+            if (requestCode == CHOOSE_SUB_LANG_CODE) {
+                selectedLanguageCode = data.getStringExtra("selectedCodeLanguage");
+            }
+
+    }
+
+    //    private void setupMovieListRow() {
 //        String subcategories[] = {getString(R.string.related_movies), "Mas videos", "More movies", "Documentaries"};
 //        List<Movie> list = MovieList.list;
 //

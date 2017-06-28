@@ -23,17 +23,25 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
+import android.text.Html;
 import android.view.KeyEvent;
+import android.view.View;
+import android.widget.Chronometer;
+import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.beans.Subtitle;
 import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.fragment.PlaybackOverlayFragment;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -46,6 +54,11 @@ public class PlaybackOverlayActivity extends Activity implements
     private VideoView mVideoView;
     private LeanbackPlaybackState mPlaybackState = LeanbackPlaybackState.IDLE;
     private MediaSession mSession;
+    private TextView tvSubtitle;
+    private Handler handler;
+    private Chronometer tvTime;
+    private Runnable myRunnable;
+    private Video mSelectedVideo;
 
     /**
      * Called when the activity is first created.
@@ -54,6 +67,31 @@ public class PlaybackOverlayActivity extends Activity implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.playback_controls);
+        tvSubtitle = (TextView) findViewById(R.id.tvSubtitle);
+        tvTime = new Chronometer(this); // initiate a chronometer
+
+        mSelectedVideo = (Video) getIntent().getParcelableExtra(DetailsActivity.VIDEO);
+
+        handler = new Handler();
+        myRunnable = new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String text = getSyncSubtitleText(SystemClock.elapsedRealtime() - tvTime.getBase());
+                        if (text.isEmpty())
+                            tvSubtitle.setVisibility(View.GONE);
+                        else {
+                            tvSubtitle.setVisibility(View.VISIBLE);
+                            tvSubtitle.setText(Html.fromHtml(text));
+                        }
+                    }
+                });
+
+                handler.postDelayed(myRunnable, 500);
+            }
+        };
         loadViews();
         setupCallbacks();
         mSession = new MediaSession(this, "LeanbackSampleApp");
@@ -62,6 +100,21 @@ public class PlaybackOverlayActivity extends Activity implements
                 MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
         mSession.setActive(true);
+    }
+
+    private String getSyncSubtitleText(long l) {
+        List<Subtitle> subtitleList = mSelectedVideo.subtitle_json.subtitles;
+        String text = "";
+        for (Subtitle subtitle : subtitleList) {
+            if (l >= subtitle.start && l < subtitle.end) { //esta adentro del ciclo
+                text = subtitle.text;
+                break;
+            } else if (l < subtitle.start)
+                break;
+
+        }
+
+        return text;
     }
 
     @Override
@@ -108,15 +161,22 @@ public class PlaybackOverlayActivity extends Activity implements
             mPlaybackState = LeanbackPlaybackState.IDLE;
         }
 
-        if (playPause && mPlaybackState != LeanbackPlaybackState.PLAYING) {
+        if (playPause && mPlaybackState != LeanbackPlaybackState.PLAYING) { //PLAYING
             mPlaybackState = LeanbackPlaybackState.PLAYING;
             if (position > 0) {
                 mVideoView.seekTo(position);
                 mVideoView.start();
             }
-        } else {
+
+//            tvTime.setBase(SystemClock.elapsedRealtime() - position);
+//            tvTime.start();
+//            handler.post(myRunnable);
+        } else { //PAUSE
             mPlaybackState = LeanbackPlaybackState.PAUSED;
             mVideoView.pause();
+
+//            tvTime.stop();
+//            handler.removeCallbacksAndMessages(null);
         }
         updatePlaybackState(position);
         updateMetadata(video);
@@ -213,6 +273,7 @@ public class PlaybackOverlayActivity extends Activity implements
                 mPlaybackState = LeanbackPlaybackState.IDLE;
             }
         });
+
 
     }
 

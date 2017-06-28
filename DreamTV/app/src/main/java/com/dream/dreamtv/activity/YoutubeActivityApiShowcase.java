@@ -26,7 +26,6 @@ package com.dream.dreamtv.activity;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.text.Html;
 import android.util.Log;
@@ -35,7 +34,6 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
 
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.beans.Subtitle;
 import com.dream.dreamtv.beans.Video;
@@ -57,16 +55,16 @@ public class YoutubeActivityApiShowcase extends Activity {
     private final static String TAG = YoutubeActivityApiShowcase.class.getSimpleName();
 
     private YoutubeTvView mYoutubeView1;
-    private Chronometer tvTime;
     private TextView tvSubtitle;
     private Handler handler;
+    private Chronometer tvTime;
     private Runnable myRunnable;
     private Video mSelectedVideo;
     private final static int POSITION_OFFSET = 5;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_api_showcase);
+        setContentView(R.layout.activity_youtube_api_showcase);
 
         tvTime = new Chronometer(this); // initiate a chronometer
         tvSubtitle = (TextView) findViewById(R.id.tvSubtitle); // initiate a chronometer

@@ -7,46 +7,44 @@
     android:orientation="vertical">
 
     <fr.bmartel.youtubetv.YoutubeTvView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/video_1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:focusable="false"
-        android:focusableInTouchMode="false"
-        app:yt_debug="false" />
+        android:focusableInTouchMode="false" />
 
     <TextView
         android:id="@+id/tvSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/rlPanel"
+        android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal"
         android:background="@color/black_subt"
         android:gravity="center"
         android:maxLines="2"
-        android:text="asdasdasd"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/rlPanel"
         android:padding="3dp"
+        android:text="asdasdasd"
         android:textColor="@color/white"
         android:textSize="25sp"
         android:visibility="gone" />
 
     <!--<Chronometer-->
-        <!--android:id="@+id/tvTime"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:gravity="center_horizontal"-->
-        <!--android:textColor="#f00"-->
-        <!--android:layout_above="@+id/rlPanel"-->
-        <!--android:textSize="25sp" />&lt;!&ndash; 25 sp size for displayed text of chronometer &ndash;&gt;-->
+    <!--android:id="@+id/tvTime"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:gravity="center_horizontal"-->
+    <!--android:textColor="#f00"-->
+    <!--android:layout_above="@+id/rlPanel"-->
+    <!--android:textSize="25sp" />&lt;!&ndash; 25 sp size for displayed text of chronometer &ndash;&gt;-->
 
     <RelativeLayout
         android:id="@+id/rlPanel"
-        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="10dp">
+        android:layout_marginLeft="10dp"
+        android:gravity="center">
 
         <Button
             android:id="@+id/play_button"

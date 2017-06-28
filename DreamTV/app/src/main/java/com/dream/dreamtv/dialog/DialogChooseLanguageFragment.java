@@ -15,6 +15,7 @@
 package com.dream.dreamtv.dialog;
 
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,6 +25,8 @@ import android.support.v17.leanback.widget.GuidedAction;
 import android.widget.Toast;
 
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.beans.Language;
+import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.details.DetailViewExampleActivity;
 
 import java.util.ArrayList;
@@ -33,7 +36,7 @@ import java.util.List;
 /**
  * TODO: Javadoc
  */
-public class DialogExampleFragment extends GuidedStepFragment {
+public class DialogChooseLanguageFragment extends GuidedStepFragment {
 
     private static final int ACTION_ID_POSITIVE = 1;
     private static final int ACTION_ID_NEGATIVE = ACTION_ID_POSITIVE + 1;
@@ -41,14 +44,33 @@ public class DialogExampleFragment extends GuidedStepFragment {
     private static final int ACTION_ID_PAYMENT_METHOD = ACTION_ID_CONFIRM + 1;
     private static final int ACTION_ID_NEW_PAYMENT = ACTION_ID_PAYMENT_METHOD + 1;
 
-    protected static ArrayList<String> sCards = new ArrayList();
-    protected static int sSelectedCard = -1;
+    //    protected static ArrayList<String> sCards = new ArrayList();
+    protected static int sSelectedLanguageIndex = -1;
+    protected static int sSelectedLanguage = -1;
+    private Bundle mArgs;
+    private Video mSelectedVideo;
 
-    static {
-        sCards.add("Spanish");
-        sCards.add("English");
-        sCards.add("Polish");
+//    static {
+//        sCards.add("Spanish");
+//        sCards.add("English");
+//        sCards.add("Polish");
+//    }
+
+    public static DialogChooseLanguageFragment newInstance(Video video) {
+        DialogChooseLanguageFragment fragment = new DialogChooseLanguageFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("Video", video);
+
+        fragment.setArguments(bundle);
+        return fragment;
     }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mSelectedVideo = getArguments().getParcelable("Video");
+    }
+
     @NonNull
     @Override
     public Guidance onCreateGuidance(Bundle savedInstanceState) {
@@ -86,9 +108,17 @@ public class DialogExampleFragment extends GuidedStepFragment {
 
         List<GuidedAction> paymentSubActions = payment.getSubActions();
         paymentSubActions.clear();
-        for (int i = 0; i < sCards.size(); i++) {
+//        for (int i = 0; i < sCards.size(); i++) {
+//            paymentSubActions.add(new GuidedAction.Builder(getActivity())
+//                    .title(sCards.get(i))
+//                    .description("")
+//                    .checkSetId(GuidedAction.DEFAULT_CHECK_SET_ID)
+//                    .build()
+//            );
+//        }
+        for (Language language : mSelectedVideo.languages) {
             paymentSubActions.add(new GuidedAction.Builder(getActivity())
-                    .title(sCards.get(i))
+                    .title(language.name)
                     .description("")
                     .checkSetId(GuidedAction.DEFAULT_CHECK_SET_ID)
                     .build()
@@ -101,8 +131,8 @@ public class DialogExampleFragment extends GuidedStepFragment {
                 .editable(false)
                 .build()
         );
-        if ( sSelectedCard >= 0 && sSelectedCard < sCards.size() ) {
-            payment.setDescription(sCards.get(sSelectedCard));
+        if (sSelectedLanguage >= 0 && sSelectedLanguage < mSelectedVideo.languages.size()) {
+            payment.setDescription(mSelectedVideo.languages.get(sSelectedLanguageIndex).name);
             findActionById(ACTION_ID_CONFIRM).setEnabled(true);
         } else
             findActionById(ACTION_ID_CONFIRM).setEnabled(false);
@@ -113,12 +143,16 @@ public class DialogExampleFragment extends GuidedStepFragment {
     public boolean onSubGuidedActionClicked(GuidedAction action) {
 
         if (action.isChecked()) {
-            String payment = action.getTitle().toString();
-            if ( (sSelectedCard = sCards.indexOf(payment)) != -1 ) {
-                findActionById(ACTION_ID_PAYMENT_METHOD).setDescription(payment);
+            String language = action.getTitle().toString();
+            sSelectedLanguageIndex = mSelectedVideo.getLanguageListIndex(language);
+            if ((sSelectedLanguage = sSelectedLanguageIndex) != -1 && mSelectedVideo.languages.get(sSelectedLanguageIndex).published) {
+                findActionById(ACTION_ID_PAYMENT_METHOD).setDescription(language);
                 notifyActionChanged(findActionPositionById(ACTION_ID_PAYMENT_METHOD));
                 findActionById(ACTION_ID_CONFIRM).setEnabled(true);
                 notifyActionChanged(findActionPositionById(ACTION_ID_CONFIRM));
+            }else{
+                Toast.makeText(getActivity(), "Subtitle Not available - Not yet published!!", Toast.LENGTH_SHORT).show();
+                return false;
             }
             return true;
         } else {
@@ -134,15 +168,12 @@ public class DialogExampleFragment extends GuidedStepFragment {
     @Override
     public void onGuidedActionClicked(GuidedAction action) {
         if (ACTION_ID_CONFIRM == action.getId()) {
-            Intent intent = new Intent(getActivity(), DetailViewExampleActivity.class);
-//            intent.putExtra(DetailsActivity.VIDEO, video);
-
-//            Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-//                    getActivity(),
-//                    getView(),
-//                    "share").toBundle();
-//            getActivity().startActivity(intent, bundle);
-            getActivity().startActivity(intent);
+//            Intent intent = new Intent(getActivity(), DetailViewExampleActivity.class);
+//            getActivity().startActivity(intent);
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("selectedCodeLanguage", mSelectedVideo.languages.get(sSelectedLanguageIndex).code);
+            getActivity().setResult(Activity.RESULT_OK, resultIntent);
+            getActivity().finish();
         }
     }
 }

@@ -23,12 +23,12 @@
         <activity
             android:name=".SplashScreen"
             android:banner="@drawable/ted_logo"
-            android:icon="@drawable/app_icon_your_company"
-            android:logo="@drawable/app_icon_your_company"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
             android:configChanges="keyboard|keyboardHidden|navigation"
-            android:screenOrientation="landscape">
+            android:icon="@drawable/app_icon_your_company"
+            android:label="@string/app_name"
+            android:logo="@drawable/app_icon_your_company"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -36,19 +36,19 @@
             </intent-filter>
         </activity>
         <!--configChanges, para evitar que cuando el control se desconecte, interrumpa el app-->
-        <activity android:name=".activity.MainActivity"/>
+        <activity android:name=".activity.MainActivity" />
         <activity android:name=".activity.DetailsActivity" />
         <activity android:name=".activity.PlaybackOverlayActivity" />
         <activity android:name=".activity.SettingsActivity" />
         <activity android:name=".activity.BrowseErrorActivity" />
         <activity
-            android:name=".dialog.DialogExampleActivity"
+            android:name=".dialog.DialogChooseLanguageActivity"
             android:exported="true"
-            android:theme="@style/Theme.Example.LeanbackDialog"/>
+            android:theme="@style/Theme.Example.LeanbackDialog" />
         <activity
             android:name=".details.DetailViewExampleActivity"
             android:exported="true"
-            android:theme="@style/Theme.Example.LeanbackDetails"/>
+            android:theme="@style/Theme.Example.LeanbackDetails" />
         <activity
             android:name=".activity.YoutubeActivityFragment"
             android:label="@string/app_name" />

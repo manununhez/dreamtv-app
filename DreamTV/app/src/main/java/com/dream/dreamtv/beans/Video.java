@@ -116,6 +116,15 @@ public class Video implements Parcelable {
         return newUrl.getQueryParameter("v");
     }
 
+    public int getLanguageListIndex(String languageName){
+        for (int i = 0; i < languages.size(); i++){
+            if(languages.get(i).name.equals(languageName))
+                return i;
+        }
+
+        return -1;
+    }
+
     @Override
     public String toString() {
         return "Video{" +

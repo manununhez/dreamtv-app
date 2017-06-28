@@ -81,7 +81,8 @@ public class MainFragment extends BrowseFragment {
     private URI mBackgroundURI;
     private BackgroundManager mBackgroundManager;
 
-    private String[] projects = {"tedtalks", "tedxtalks", "ted-ed", "otp-resources", "best-of-tedxtalks"};
+    //    private String[] projects = {"tedtalks", "tedxtalks", "ted-ed", "otp-resources", "best-of-tedxtalks"};
+    private String[] projects = {"tedtalks", "tedxtalks", "ted-ed", "otp-resources"};
 
 
     @Override
@@ -94,8 +95,8 @@ public class MainFragment extends BrowseFragment {
         setupUIElements();
         setupVideosList();
         getTedProjects();
-
         setupEventListeners();
+
     }
 
     @Override
@@ -108,36 +109,35 @@ public class MainFragment extends BrowseFragment {
     }
 
     private void getTedProjects() {
-        for (String project : projects) {
-            getVideos(project);
-        }
+        getVideos(projects[0], 0);
 
-        setFootersOptions();
+//        setFootersOptions();
     }
 
     private void setupVideosList() {
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
     }
 
-    private void loadVideos(VideoList videoList, String project) {
+    private void loadVideos(VideoList videoList, String project, int index) {
 
         VideoCardPresenter videoCardPresenter = new VideoCardPresenter();
-
 
         ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(videoCardPresenter);
         for (Video video : videoList.objects) {
             listRowAdapter.add(video);
         }
 
-        HeaderItem header = new HeaderItem(0, project);
+        HeaderItem header = new HeaderItem(project);
         mRowsAdapter.add(new ListRow(header, listRowAdapter));
 
         setAdapter(mRowsAdapter);
 
+        if (index < projects.length - 1)
+            getVideos(projects[index + 1], index + 1);
     }
 
     private void setFootersOptions() {
-        HeaderItem gridHeader = new HeaderItem(1, "PREFERENCES");
+        HeaderItem gridHeader = new HeaderItem("PREFERENCES");
 
         GridItemPresenter mGridPresenter = new GridItemPresenter();
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
@@ -191,7 +191,7 @@ public class MainFragment extends BrowseFragment {
         setOnItemViewSelectedListener(new ItemViewSelectedListener());
     }
 
-    private void getVideos(final String project) {
+    private void getVideos(final String project, final int index) {
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put("team", "ted");
         urlParams.put("project", project);
@@ -206,7 +206,7 @@ public class MainFragment extends BrowseFragment {
                 VideoList videoList = gson.fromJson(response, VideoList.class);
                 DreamTVApp.Logger.d(videoList.toString());
 
-                loadVideos(videoList, project);
+                loadVideos(videoList, project, index);
             }
 
             @Override
@@ -276,6 +276,8 @@ public class MainFragment extends BrowseFragment {
                     Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT)
                             .show();
                 }
+            } else {
+                Toast.makeText(getActivity(), "Some item", Toast.LENGTH_SHORT).show();
             }
         }
     }

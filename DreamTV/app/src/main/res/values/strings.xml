@@ -21,6 +21,7 @@
     <string name="personal_settings">Personal Settings</string>
     <string name="play_video">Play video</string>
     <string name="edit_subtitle">Edit Subtitle</string>
+    <string name="add_to_my_list">Add to my list</string>
     <string name="subtitle_languages">Languages</string>
     <!--<string name="watch_trailer_2">FREE</string>-->
     <string name="rent_1">Rent By Day</string>
@@ -53,7 +54,7 @@
 
 
     <!-- Dialog example -->
-    <string name="dialog_choose_language_title">Choose a languages</string>
+    <string name="dialog_choose_language_title">Choose language</string>
     <string name="dialog_example_title">Use Google\'s location service?</string>
     <string name="dialog_example_description">Select the language of the subtitle to start editing it.</string>
     <string name="dialog_example_button_positive">Agree</string>
@@ -76,4 +77,14 @@
     <string name="header_recommended">Recommended</string>
     <string name="action_clicked">Action clicked. Implement your own handler.</string>
 
+    <string-array name="country_arrays">
+        <item>Malaysia</item>
+        <item>United States</item>
+        <item>Indonesia</item>
+        <item>France</item>
+        <item>Italy</item>
+        <item>Singapore</item>
+        <item>New Zealand</item>
+        <item>India</item>
+    </string-array>
 </resources>

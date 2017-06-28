@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class DreamTVApp extends Application {
 
-    public static final String TAG = "com.cuatroqstudios.geo";
+    public static final String TAG = "com.dream.dreamtv";
 //    private Gson gson;
 
     @Override

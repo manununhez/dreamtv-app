@@ -15,23 +15,32 @@
 package com.dream.dreamtv.dialog;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v17.leanback.app.GuidedStepFragment;
 
+import com.dream.dreamtv.DreamTVApp;
+import com.dream.dreamtv.activity.DetailsActivity;
+import com.dream.dreamtv.beans.Video;
+
 /**
  * TODO: Javadoc
  */
-public class DialogExampleActivity extends Activity {
+public class DialogChooseLanguageActivity extends Activity {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#21272A")));
 
+        Video mSelectedVideo = (Video) getIntent()
+                .getParcelableExtra(DetailsActivity.VIDEO);
+
         if (savedInstanceState == null) {
-            GuidedStepFragment fragment = new DialogExampleFragment();
+            GuidedStepFragment fragment = DialogChooseLanguageFragment.newInstance(mSelectedVideo);
             GuidedStepFragment.addAsRoot(this, fragment, android.R.id.content);
         }
     }
+
 }

@@ -233,25 +233,25 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         mPrimaryActionsAdapter = new ArrayObjectAdapter(presenterSelector);
         mSecondaryActionsAdapter = new ArrayObjectAdapter(presenterSelector);
         mPlaybackControlsRow.setPrimaryActionsAdapter(mPrimaryActionsAdapter);
-        mPlaybackControlsRow.setSecondaryActionsAdapter(mSecondaryActionsAdapter);
+//        mPlaybackControlsRow.setSecondaryActionsAdapter(mSecondaryActionsAdapter);
 
         mPlayPauseAction = new PlayPauseAction(getActivity());
-        mRepeatAction = new RepeatAction(getActivity());
-        mThumbsUpAction = new ThumbsUpAction(getActivity());
-        mThumbsDownAction = new ThumbsDownAction(getActivity());
-        mShuffleAction = new ShuffleAction(getActivity());
-        mSkipNextAction = new SkipNextAction(getActivity());
-        mSkipPreviousAction = new SkipPreviousAction(getActivity());
+//        mRepeatAction = new RepeatAction(getActivity());
+//        mThumbsUpAction = new ThumbsUpAction(getActivity());
+//        mThumbsDownAction = new ThumbsDownAction(getActivity());
+//        mShuffleAction = new ShuffleAction(getActivity());
+//        mSkipNextAction = new SkipNextAction(getActivity());
+//        mSkipPreviousAction = new SkipPreviousAction(getActivity());
         mFastForwardAction = new FastForwardAction(getActivity());
         mRewindAction = new RewindAction(getActivity());
         mCaptionAction = new PlaybackControlsRow.ClosedCaptioningAction(getActivity());
 
-        if (PRIMARY_CONTROLS > 5) {
-            mPrimaryActionsAdapter.add(mThumbsUpAction);
-        } else {
-            mSecondaryActionsAdapter.add(mThumbsUpAction);
-        }
-        mPrimaryActionsAdapter.add(mSkipPreviousAction);
+//        if (PRIMARY_CONTROLS > 5) {
+//            mPrimaryActionsAdapter.add(mThumbsUpAction);
+//        } else {
+//            mSecondaryActionsAdapter.add(mThumbsUpAction);
+//        }
+//        mPrimaryActionsAdapter.add(mSkipPreviousAction);
         if (PRIMARY_CONTROLS > 3) {
             mPrimaryActionsAdapter.add(new RewindAction(getActivity()));
         }
@@ -259,17 +259,18 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         if (PRIMARY_CONTROLS > 3) {
             mPrimaryActionsAdapter.add(new FastForwardAction(getActivity()));
         }
-        mPrimaryActionsAdapter.add(mSkipNextAction);
+//        mPrimaryActionsAdapter.add(mSkipNextAction);
+//        mPrimaryActionsAdapter.add(mCaptionAction);
 
 //        mSecondaryActionsAdapter.add(mRepeatAction);
 //        mSecondaryActionsAdapter.add(mShuffleAction);
-        if (PRIMARY_CONTROLS > 5) {
-            mPrimaryActionsAdapter.add(mThumbsDownAction);
-        } else {
-            mSecondaryActionsAdapter.add(mThumbsDownAction);
-        }
+//        if (PRIMARY_CONTROLS > 5) {
+//            mPrimaryActionsAdapter.add(mThumbsDownAction);
+//        } else {
+//            mSecondaryActionsAdapter.add(mThumbsDownAction);
+//        }
 //        mSecondaryActionsAdapter.add(new PlaybackControlsRow.HighQualityAction(getActivity()));
-        mSecondaryActionsAdapter.add(mCaptionAction);
+//        mSecondaryActionsAdapter.add(mCaptionAction);
     }
 
     private void notifyChanged(Action action) {

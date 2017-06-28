@@ -15,8 +15,10 @@
 package com.dream.dreamtv.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
+import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 
 
@@ -37,4 +39,13 @@ public class DetailsActivity extends Activity {
         setContentView(R.layout.activity_details);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK)
+            if (requestCode == 0152) {
+                DreamTVApp.Logger.d("asd");
+            }
+    }
 }
