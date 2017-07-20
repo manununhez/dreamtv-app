@@ -38,17 +38,17 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
             customLoading.setVisibility(View.VISIBLE);
     }
 
-    public ResponseListener(Context context, boolean displayLoading) {
+    public ResponseListener(Context context, boolean displayLoading, String loadingMessage) {
         this(context);
         if (displayLoading) {
-            loadingDialog = new LoadingDialog(context);
+            loadingDialog = new LoadingDialog(context, loadingMessage);
             loadingDialog.setCanceledOnTouchOutside(false);
             loadingDialog.show();
         }
     }
 
-    public ResponseListener(Context context, boolean displayLoading, boolean showErrorMessage) {
-        this(context, displayLoading);
+    public ResponseListener(Context context, boolean displayLoading, boolean showErrorMessage, String loadingMessage) {
+        this(context, displayLoading, loadingMessage);
         this.showErrorMessage = showErrorMessage;
 
     }

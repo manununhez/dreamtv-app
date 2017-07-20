@@ -29,7 +29,7 @@ import com.dream.dreamtv.beans.Video;
  * A CardPresenter is used to generate Views and bind Objects to them on demand.
  * It contains an Image CardView
  */
-public class VideoCardPresenter extends Presenter {
+public class VideoLangCardPresenter extends Presenter {
     private static final String TAG = "VideoCardPresenter";
 
     private static final int CARD_WIDTH = 313;

@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.dream.dreamtv">
 
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -15,6 +16,7 @@
         android:required="false" />
 
     <application
+        android:name=".DreamTVApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -22,7 +24,7 @@
         android:theme="@style/Theme.Leanback">
         <activity
             android:name=".SplashScreen"
-            android:banner="@drawable/ted_logo"
+            android:banner="@drawable/logo_dream_tv"
             android:configChanges="keyboard|keyboardHidden|navigation"
             android:icon="@drawable/app_icon_your_company"
             android:label="@string/app_name"
@@ -35,28 +37,19 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
-        <!--configChanges, para evitar que cuando el control se desconecte, interrumpa el app-->
+        <!-- configChanges, para evitar que cuando el control se desconecte, interrumpa el app -->
         <activity android:name=".activity.MainActivity" />
         <activity android:name=".activity.DetailsActivity" />
-        <activity android:name=".activity.PlaybackOverlayActivity" />
-        <activity android:name=".activity.SettingsActivity" />
+        <activity android:name=".activity.PlaybackVideoActivity" />
+        <activity android:name=".activity.SeeAllActivity" />
         <activity android:name=".activity.BrowseErrorActivity" />
         <activity
-            android:name=".dialog.DialogChooseLanguageActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Example.LeanbackDialog" />
-        <activity
-            android:name=".details.DetailViewExampleActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Example.LeanbackDetails" />
-        <activity
-            android:name=".activity.YoutubeActivityFragment"
+            android:name=".fragment.PlaybackVideoFromYoutubeFragment"
             android:label="@string/app_name" />
-
         <activity
-            android:name=".activity.YoutubeActivityApiShowcase"
+            android:name=".activity.PlaybackVideoFromYoutubeActivity"
             android:label="@string/app_name" />
-
+        <activity android:name=".activity.PreferencesActivity" />
     </application>
 
 </manifest>

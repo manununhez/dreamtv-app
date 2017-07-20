@@ -50,6 +50,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.activity.DetailsActivity;
 import com.dream.dreamtv.beans.Video;
 
@@ -59,14 +60,14 @@ import java.util.HashMap;
 /*
  * Class for video playback with media control
  */
-public class PlaybackOverlayFragment extends android.support.v17.leanback.app.PlaybackOverlayFragment {
+public class PlaybackVideoFragment extends android.support.v17.leanback.app.PlaybackOverlayFragment {
     private static final String TAG = "PlaybackControlsFragmnt";
 
     private static final boolean SHOW_DETAIL = true;
     private static final boolean HIDE_MORE_ACTIONS = false;
     private static final int PRIMARY_CONTROLS = 5;
     private static final boolean SHOW_IMAGE = true;//PRIMARY_CONTROLS <= 5;
-    private static final int BACKGROUND_TYPE = PlaybackOverlayFragment.BG_LIGHT;
+    private static final int BACKGROUND_TYPE = PlaybackVideoFragment.BG_LIGHT;
     private static final int CARD_WIDTH = 200;
     private static final int CARD_HEIGHT = 240;
     private static final int DEFAULT_UPDATE_PERIOD = 1000;
@@ -131,6 +132,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
                 Log.i(TAG, "onItemClicked: " + item + " row " + row);
             }
         });
+
+//        togglePlayback(mPlayPauseAction.getIndex() == PlayPauseAction.PLAY);
     }
 
     @SuppressWarnings("deprecation")
@@ -156,21 +159,18 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         } else {
             playbackControlsRowPresenter = new PlaybackControlsRowPresenter();
         }
+
         playbackControlsRowPresenter.setOnActionClickedListener(new OnActionClickedListener() {
             public void onActionClicked(Action action) {
                 if (action.getId() == mPlayPauseAction.getId()) {
+                    DreamTVApp.Logger.d("Button PLAY From the pannel");
                     togglePlayback(mPlayPauseAction.getIndex() == PlayPauseAction.PLAY);
-                } else if (action.getId() == mSkipNextAction.getId()) {
-                    next();
-                } else if (action.getId() == mSkipPreviousAction.getId()) {
-                    prev();
                 } else if (action.getId() == mFastForwardAction.getId()) {
                     Toast.makeText(getActivity(), "TODO: Fast Forward", Toast.LENGTH_SHORT).show();
                 } else if (action.getId() == mRewindAction.getId()) {
                     Toast.makeText(getActivity(), "TODO: Rewind", Toast.LENGTH_SHORT).show();
-                } else if (action.getId() == mCaptionAction.getId()) {
-                    Toast.makeText(getActivity(), "TODO: Caption", Toast.LENGTH_SHORT).show();
                 }
+
                 if (action instanceof PlaybackControlsRow.MultiAction) {
                     ((PlaybackControlsRow.MultiAction) action).nextIndex();
                     notifyChanged(action);
@@ -206,17 +206,30 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         notifyChanged(mPlayPauseAction);
     }
 
+    public void togglePlaybackWithoutVideoView(boolean playPause) {
+        if (playPause) {
+            startProgressAutomation();
+            setFadingEnabled(true);
+            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PAUSE));
+        } else {
+            stopProgressAutomation();
+            setFadingEnabled(false);
+            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PLAY));
+        }
+        notifyChanged(mPlayPauseAction);
+    }
+
     private int getDuration() {
         Video video = mSelectedVideo;
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            mmr.setDataSource(video.getVideoUrl(), new HashMap<String, String>());
-        } else {
-            mmr.setDataSource(video.getVideoUrl(), new HashMap<String, String>());
-        }
-        String time = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-        long duration = Long.parseLong(time);
-        return (int) duration;
+//        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//            mmr.setDataSource(video.getVideoUrl(), new HashMap<String, String>());
+//        } else {
+//            mmr.setDataSource(video.getVideoUrl(), new HashMap<String, String>());
+//        }
+//        String time = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+//        long duration = Long.parseLong(time);
+        return mSelectedVideo.duration * 1000;
     }
 
     private void addPlaybackControlsRow() {
@@ -233,7 +246,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
         mPrimaryActionsAdapter = new ArrayObjectAdapter(presenterSelector);
         mSecondaryActionsAdapter = new ArrayObjectAdapter(presenterSelector);
         mPlaybackControlsRow.setPrimaryActionsAdapter(mPrimaryActionsAdapter);
-//        mPlaybackControlsRow.setSecondaryActionsAdapter(mSecondaryActionsAdapter);
+        mPlaybackControlsRow.setSecondaryActionsAdapter(mSecondaryActionsAdapter);
 
         mPlayPauseAction = new PlayPauseAction(getActivity());
 //        mRepeatAction = new RepeatAction(getActivity());
@@ -244,7 +257,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 //        mSkipPreviousAction = new SkipPreviousAction(getActivity());
         mFastForwardAction = new FastForwardAction(getActivity());
         mRewindAction = new RewindAction(getActivity());
-        mCaptionAction = new PlaybackControlsRow.ClosedCaptioningAction(getActivity());
+//        mCaptionAction = new PlaybackControlsRow.ClosedCaptioningAction(getActivity());
 
 //        if (PRIMARY_CONTROLS > 5) {
 //            mPrimaryActionsAdapter.add(mThumbsUpAction);
@@ -270,6 +283,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 //            mSecondaryActionsAdapter.add(mThumbsDownAction);
 //        }
 //        mSecondaryActionsAdapter.add(new PlaybackControlsRow.HighQualityAction(getActivity()));
+
 //        mSecondaryActionsAdapter.add(mCaptionAction);
     }
 
@@ -339,7 +353,7 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
                 mPlaybackControlsRow.setBufferedProgress(currentTime + SIMULATED_BUFFERED_TIME);
 
                 if (totalTime > 0 && totalTime <= currentTime) {
-                    next();
+//                    next();  //Continue to another video
                 }
                 mHandler.postDelayed(this, updatePeriod);
             }
@@ -376,7 +390,8 @@ public class PlaybackOverlayFragment extends android.support.v17.leanback.app.Pl
 
     private void stopProgressAutomation() {
         if (mHandler != null && mRunnable != null) {
-            mHandler.removeCallbacks(mRunnable);
+//            mHandler.removeCallbacks(mRunnable);
+            mHandler.removeCallbacksAndMessages(null);
         }
     }
 

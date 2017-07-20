@@ -47,10 +47,11 @@
     <string name="no_network_error">No hay conexión a internet</string>
     <string name="defaultErrorMessage">No se pudo realizar la acción</string>
     <string name="generic_server_down">No hay conexión a internet</string>
-
-    <string name="dreamTVApp_token">tedapp_token</string>
-
     <string name="implement_search">Implement your own in-app search.</string>
+
+    <!--SHAREDPREFERENCES-->
+    <string name="dreamTVApp_token">tedapp_token</string>
+    <string name="user_preferences">user_preferences</string>
 
 
     <!-- Dialog example -->
@@ -87,4 +88,8 @@
         <item>New Zealand</item>
         <item>India</item>
     </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_reason">ReasonActivity</string>
 </resources>

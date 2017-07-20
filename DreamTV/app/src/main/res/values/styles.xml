@@ -265,4 +265,18 @@
         <item name="android:visibility">visible</item>
         <item name="android:textAppearance">@style/FavoriteMediaItemTextStyle</item>
     </style>
+
+    <!--DeliveryMode buttons-->
+    <style name="DeliveryModeButton">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@drawable/button_textcolor_2</item>
+        <item name="android:background">@drawable/selector_2_1</item>
+    </style>
+    <!--<style name="DeliveryModeButton.Left">-->
+        <!--<item name="android:background">@drawable/selector_2_1</item>-->
+    <!--</style>-->
+
+    <!--<style name="DeliveryModeButton.Right">-->
+        <!--<item name="android:background">@drawable/selector_3_1</item>-->
+    <!--</style>-->
 </resources>

@@ -3,6 +3,10 @@ package com.dream.dreamtv;
 import android.app.Application;
 import android.util.Log;
 
+import com.dream.dreamtv.beans.User;
+import com.dream.dreamtv.utils.SharedPreferenceUtils;
+import com.google.gson.Gson;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,13 +19,30 @@ import java.util.List;
 public class DreamTVApp extends Application {
 
     public static final String TAG = "com.dream.dreamtv";
-//    private Gson gson;
+    private Gson gson;
 
     @Override
     public void onCreate() {
         super.onCreate();
-//        gson = new Gson();
+        gson = new Gson();
 
+    }
+
+    public User getUser() {
+        //todo control cuando viene null
+
+        String userString = SharedPreferenceUtils.getValue(this, getString(R.string.user_preferences));
+        return userString == null ? new User() : gson.fromJson(userString, User.class);
+    }
+
+    public void setUser(User user) {
+        //todo controlar si es que viene token null, entonces no deberia actualizarse ese campo
+        if (user.token != null && !user.token.equals("")) {
+            DreamTVApp.Logger.d("(SetUser) Actualizacion de Token");
+            SharedPreferenceUtils.save(this, this.getString(R.string.dreamTVApp_token), user.token);
+        }
+        String userString = gson.toJson(user);
+        SharedPreferenceUtils.save(this, getString(R.string.user_preferences), userString);
     }
 
     public static class Logger {

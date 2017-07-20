@@ -15,14 +15,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ConnectionManager {
-    public static final String URL_BASE = "https://amara.org/api/";     // Produccion
+//    public static final String URL_BASE = "https://amara.org/api/";     // Produccion
+    public static final String URL_BASE = "http://192.168.1.109:8000/api/";     // Dpto Produccion
+//    public static final String URL_BASE = "http://172.23.2.72:8000/api/";     // Facu Produccion
+//    public static final String URL_BASE = "http://10.0.2.2:8000/api/";     // Produccion
 
     public static int MAX_RETRIES = 3;
-    public static int TIMEOUT_MS = 20000; //20 segundos
+    public static int TIMEOUT_MS = 60000; //60 segundos
 
 
     public enum Urls {
         VIDEOS("videos"),
+        USER_TASKS("tasks/users"),
+        USER_CREATE("users/create"),
+        USER_UPDATE("users/update"),
+        LANGUAGES("languages"),
+        SUBTITLE("subtitle/info"),
+        REASONS("reasons"),
         TED_PROJECTS("teams/ted/projects");
         public String value;
 
@@ -53,7 +62,7 @@ public class ConnectionManager {
             ResponseListener listener, Object tag) {
 
         String urlParamsString = "";
-        if (urlParams.entrySet().size() >= 1) {
+        if (urlParams != null && urlParams.entrySet().size() >= 1) {
             int i = 0;
             for (Map.Entry<String, String> entry : urlParams.entrySet()) {
 
@@ -86,16 +95,14 @@ public class ConnectionManager {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> map = new HashMap<>();
-//                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.DreamTVApp_token));
-//                DreamTVApp.Logger.d("TOKEN: " + string);
-//                map.put("Authorization", string);
+//                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
+                String string = SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
+                DreamTVApp.Logger.d("TOKEN: " + string);
+                map.put("Authorization", string);
                 return map;
             }
 
-//            @Override
-//            protected Map<String, String> getParams() throws AuthFailureError {
-//                return urlParams;
-//            }
+
         };
 
         request.setShouldCache(false);
@@ -210,7 +217,8 @@ public class ConnectionManager {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> map = new HashMap<>();
-                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
+//                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
+                String string = SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
                 DreamTVApp.Logger.d("TOKEN: " + string);
                 map.put("Authorization", string);
                 return map;
@@ -276,7 +284,8 @@ public class ConnectionManager {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> map = new HashMap<>();
 //                map.put("Content-Type", "application/json; charset=utf-8");
-                String string = "bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
+//                String string = "bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
+                String string = SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
                 DreamTVApp.Logger.d("TOKEN: " + string);
                 map.put("Authorization", string);
                 return map;

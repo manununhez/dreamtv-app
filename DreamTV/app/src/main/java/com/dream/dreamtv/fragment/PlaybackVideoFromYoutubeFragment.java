@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.dream.dreamtv.activity;
+package com.dream.dreamtv.fragment;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.activity.DetailsActivity;
 import com.dream.dreamtv.beans.Video;
 
 import fr.bmartel.youtubetv.YoutubeTvFragment;
@@ -35,7 +36,7 @@ import fr.bmartel.youtubetv.YoutubeTvFragment;
 /**
  * Created by bertrandmartel on 03/11/16.
  */
-public class YoutubeActivityFragment extends Activity {
+public class PlaybackVideoFromYoutubeFragment extends Activity {
 
     private YoutubeTvFragment mYtFragment;
 

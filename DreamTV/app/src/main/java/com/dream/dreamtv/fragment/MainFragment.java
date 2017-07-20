@@ -21,7 +21,12 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.Manifest;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -38,7 +43,9 @@ import android.support.v17.leanback.widget.OnItemViewSelectedListener;
 import android.support.v17.leanback.widget.Presenter;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -54,15 +61,18 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.activity.BrowseErrorActivity;
 import com.dream.dreamtv.activity.DetailsActivity;
-import com.dream.dreamtv.activity.SettingsActivity;
+import com.dream.dreamtv.activity.SeeAllActivity;
+import com.dream.dreamtv.activity.PreferencesActivity;
 import com.dream.dreamtv.adapter.VideoCardPresenter;
 import com.dream.dreamtv.beans.JsonResponseBaseBean;
+import com.dream.dreamtv.beans.TaskList;
+import com.dream.dreamtv.beans.User;
+import com.dream.dreamtv.beans.UserTask;
 import com.dream.dreamtv.beans.Video;
-import com.dream.dreamtv.beans.VideoList;
 import com.dream.dreamtv.conn.ConnectionManager;
 import com.dream.dreamtv.conn.ResponseListener;
+import com.dream.dreamtv.utils.JsonUtils;
 import com.google.gson.Gson;
 
 
@@ -72,6 +82,8 @@ public class MainFragment extends BrowseFragment {
     private static final int BACKGROUND_UPDATE_DELAY = 300;
     private static final int GRID_ITEM_WIDTH = 200;
     private static final int GRID_ITEM_HEIGHT = 200;
+    private static final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 1456;
+    private static final int PREFERENCES_SETTINGS_RESULT_CODE = 1256;
 
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
@@ -82,7 +94,7 @@ public class MainFragment extends BrowseFragment {
     private BackgroundManager mBackgroundManager;
 
     //    private String[] projects = {"tedtalks", "tedxtalks", "ted-ed", "otp-resources", "best-of-tedxtalks"};
-    private String[] projects = {"tedtalks", "tedxtalks", "ted-ed", "otp-resources"};
+//    private String[] projects = {"tedtalks", "tedxtalks", "ted-ed", "otp-resources"};
 
 
     @Override
@@ -94,9 +106,114 @@ public class MainFragment extends BrowseFragment {
 
         setupUIElements();
         setupVideosList();
-        getTedProjects();
+
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.GET_ACCOUNTS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                    Manifest.permission.GET_ACCOUNTS)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.GET_ACCOUNTS},
+                        MY_PERMISSIONS_REQUEST_GET_ACCOUNTS);
+
+                // MY_PERMISSIONS_REQUEST_GET_ACCOUNTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            userRegistration();
+        }
+
+
+//        getVideos();
         setupEventListeners();
 
+
+    }
+
+    public void userRegistration() {
+
+        Account primaryAccount = getAccountManager();
+
+        User user = new User();
+        user.name = primaryAccount.name;
+        user.type = primaryAccount.type;
+
+        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), user);
+
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, "Retrieving user data...") {
+
+            @Override
+            public void processResponse(String response) {
+                Gson gson = new Gson();
+                DreamTVApp.Logger.d(response);
+                User user = gson.fromJson(response, User.class);
+
+                ((DreamTVApp) getActivity().getApplication()).setUser(user);
+
+                getUserTasks("1"); //for the mainscreen, only the first page
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+                DreamTVApp.Logger.d(error.getMessage());
+                loadVideos(null); //the settings section is displayed anyway
+
+            }
+
+            @Override
+            public void processError(JsonResponseBaseBean jsonResponse) {
+                super.processError(jsonResponse);
+                DreamTVApp.Logger.d(jsonResponse.toString());
+                loadVideos(null); //the settings section is displayed anyway
+
+            }
+        };
+
+        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_CREATE, null, jsonRequest, responseListener, this);
+
+    }
+
+    public Account getAccountManager() {
+//        ArrayList<String> accountsInfo = new ArrayList<String>();
+        AccountManager manager = AccountManager.get(getActivity());
+        Account[] accounts = manager.getAccounts();
+
+        for (Account account : accounts) {
+            String name = account.name;
+            String type = account.type;
+
+            if (type.equals("com.google"))
+                return account;
+        }
+
+        return accounts[0]; //we assume that account[0] is the primary users account
+
+//            int describeContents = account.describeContents();
+//            int hashCode = account.hashCode();
+//
+//            accountsInfo.add("name = " + name +
+//                    "\ntype = " + type +
+//                    "\ndescribeContents = " + describeContents +
+//                    "\nhashCode = " + hashCode);
+//        }
+//        String[] result = new String[accountsInfo.size()];
+//        accountsInfo.toArray(result);
+//
+//        DreamTVApp.Logger.d("Accounts = "+accountsInfo.toString());
     }
 
     @Override
@@ -108,41 +225,116 @@ public class MainFragment extends BrowseFragment {
         }
     }
 
-    private void getTedProjects() {
-        getVideos(projects[0], 0);
-
-//        setFootersOptions();
-    }
+//    private void getTedProjects() {
+//        getVideos(projects[0], 0);
+//
+////        setFootersOptions();
+//    }
 
     private void setupVideosList() {
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
     }
 
-    private void loadVideos(VideoList videoList, String project, int index) {
+    private void getUserTasks(String pagina) {
+//        SharedPreferenceUtils.save(getActivity(), getString(R.string.dreamTVApp_token), "$2y$10$RCahpKrpkDxcqQvTo4IRju2VXiXoL3be4jJRuHRdc0SbGc4mdvqia");
 
-        VideoCardPresenter videoCardPresenter = new VideoCardPresenter();
+//        Task task = new Task();
+//        task.type_task = new String[]{"Review", "Approve"};
+//        task.team = "ted";
+//        task.limit = 5;
+//        task.offset = 0;
 
-        ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(videoCardPresenter);
-        for (Video video : videoList.objects) {
-            listRowAdapter.add(video);
-        }
+        Map<String, String> urlParams = new HashMap<>();
+        urlParams.put("page", pagina);
 
-        HeaderItem header = new HeaderItem(project);
-        mRowsAdapter.add(new ListRow(header, listRowAdapter));
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, "Retrieving users tasks...") {
 
-        setAdapter(mRowsAdapter);
+            @Override
+            public void processResponse(String response) {
+                Gson gson = new Gson();
+                DreamTVApp.Logger.d(response);
+                TaskList taskList = gson.fromJson(response, TaskList.class);
+                DreamTVApp.Logger.d(taskList.toString());
 
-        if (index < projects.length - 1)
-            getVideos(projects[index + 1], index + 1);
+                loadVideos(taskList);
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+                DreamTVApp.Logger.d(error.getMessage());
+                loadVideos(null); //the settings section is displayed anyway
+            }
+
+            @Override
+            public void processError(JsonResponseBaseBean jsonResponse) {
+                super.processError(jsonResponse);
+                DreamTVApp.Logger.d(jsonResponse.toString());
+                loadVideos(null); //the settings section is displayed anyway
+            }
+        };
+
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS, urlParams, responseListener, this);
+
     }
 
+    private void loadVideos(TaskList taskList) {
+
+        if (taskList != null) {
+            VideoCardPresenter videoCardPresenter = new VideoCardPresenter();
+
+            ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(videoCardPresenter);
+
+            for (UserTask task : taskList.data) {
+                listRowAdapter.add(task.getVideo());
+            }
+
+            Video lastVideoSeeMore = new Video();
+            lastVideoSeeMore.title = "See more videos";
+            lastVideoSeeMore.description = "";
+            lastVideoSeeMore.thumbnail = "https://upload.wikimedia.org/wikipedia/commons/5/59/R2244.png";
+            listRowAdapter.add(lastVideoSeeMore);
+
+//        listRowAdapter.add(lastVideoSeeMore);
+
+            HeaderItem header = new HeaderItem("Check out this videos");
+            mRowsAdapter.add(new ListRow(header, listRowAdapter));
+
+            setAdapter(mRowsAdapter);
+
+
+        }
+        setFootersOptions();
+    }
+
+//    private void loadVideos(VideoList videoList) {
+//
+//        VideoCardPresenter videoCardPresenter = new VideoCardPresenter();
+//
+//        ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(videoCardPresenter);
+//        for (Video video : videoList.objects) {
+//            listRowAdapter.add(video);
+//        }
+//
+//        HeaderItem header = new HeaderItem("Videos para ver");
+//        mRowsAdapter.add(new ListRow(header, listRowAdapter));
+//
+//        setAdapter(mRowsAdapter);
+//
+////        if (index < projects.length - 1)
+////            getVideos(projects[index + 1], index + 1);
+//
+//
+//        setFootersOptions();
+//    }
+
     private void setFootersOptions() {
-        HeaderItem gridHeader = new HeaderItem("PREFERENCES");
+        HeaderItem gridHeader = new HeaderItem("Preferences");
 
         GridItemPresenter mGridPresenter = new GridItemPresenter();
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
-        gridRowAdapter.add(getResources().getString(R.string.grid_view));
-        gridRowAdapter.add(getString(R.string.error_fragment));
+//        gridRowAdapter.add(getResources().getString(R.string.grid_view));
+//        gridRowAdapter.add(getString(R.string.error_fragment));
         gridRowAdapter.add(getResources().getString(R.string.personal_settings));
         mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
 
@@ -161,7 +353,7 @@ public class MainFragment extends BrowseFragment {
 
     private void setupUIElements() {
         setBadgeDrawable(getActivity().getResources().getDrawable(
-                R.drawable.ted_logo));
+                R.drawable.logo_dream_tv));
         setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent
         // over title
         setHeadersState(HEADERS_HIDDEN);
@@ -178,11 +370,7 @@ public class MainFragment extends BrowseFragment {
 
             @Override
             public void onClick(View view) {
-                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        getActivity(),
-                        view, "test").toBundle();
-                getActivity().startActivity(new Intent(getActivity(),
-                        SettingsActivity.class), bundle);
+                Toast.makeText(getActivity(), "Implement Search()", Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -191,40 +379,41 @@ public class MainFragment extends BrowseFragment {
         setOnItemViewSelectedListener(new ItemViewSelectedListener());
     }
 
-    private void getVideos(final String project, final int index) {
-        Map<String, String> urlParams = new HashMap<>();
-        urlParams.put("team", "ted");
-        urlParams.put("project", project);
-        urlParams.put("order_by", "-created");
 
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true) {
-
-            @Override
-            public void processResponse(String response) {
-                Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
-                VideoList videoList = gson.fromJson(response, VideoList.class);
-                DreamTVApp.Logger.d(videoList.toString());
-
-                loadVideos(videoList, project, index);
-            }
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
-            }
-
-            @Override
-            public void processError(JsonResponseBaseBean jsonResponse) {
-                super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
-            }
-        };
-
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.VIDEOS, urlParams, responseListener, this);
-
-    }
+//    private void getVideos() {
+//        Map<String, String> urlParams = new HashMap<>();
+//        urlParams.put("team", "ted");
+//        urlParams.put("project", "tedxtalks");
+//        urlParams.put("order_by", "-created");
+//
+//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, "Retrieving videos...") {
+//
+//            @Override
+//            public void processResponse(String response) {
+//                Gson gson = new Gson();
+//                DreamTVApp.Logger.d(response);
+//                VideoList videoList = gson.fromJson(response, VideoList.class);
+//                DreamTVApp.Logger.d(videoList.toString());
+//
+//                loadVideos(videoList);
+//            }
+//
+//            @Override
+//            public void processError(VolleyError error) {
+//                super.processError(error);
+//                DreamTVApp.Logger.d(error.getMessage());
+//            }
+//
+//            @Override
+//            public void processError(JsonResponseBaseBean jsonResponse) {
+//                super.processError(jsonResponse);
+//                DreamTVApp.Logger.d(jsonResponse.toString());
+//            }
+//        };
+//
+//        ConnectionManager.get(getActivity(), ConnectionManager.Urls.VIDEOS, urlParams, responseListener, this);
+//
+//    }
 
     protected void updateBackground(String uri) {
         int width = mMetrics.widthPixels;
@@ -258,20 +447,37 @@ public class MainFragment extends BrowseFragment {
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
             if (item instanceof Video) {
-                Video video = (Video) item;
-                Log.d(TAG, "Item: " + item.toString());
-                Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                intent.putExtra(DetailsActivity.VIDEO, video);
+                final ListRow listRow = (ListRow) row;
+                final ArrayObjectAdapter currentRowAdapter = (ArrayObjectAdapter) listRow.getAdapter();
+                int selectedIndex = currentRowAdapter.indexOf(item);
 
-                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        getActivity(),
-                        ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
-                getActivity().startActivity(intent, bundle);
+                if (selectedIndex != -1 && (currentRowAdapter.size() - 1) == selectedIndex) {
+                    Intent intent = new Intent(getActivity(), SeeAllActivity.class);
+
+                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            getActivity(),
+                            ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                            DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                    getActivity().startActivity(intent, bundle);
+                } else {
+                    Video video = (Video) item;
+                    DreamTVApp.Logger.d("Item: " + item.toString());
+                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
+                    intent.putExtra(DetailsActivity.VIDEO, video);
+
+                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            getActivity(),
+                            ((ImageCardView) itemViewHolder.view).getMainImageView(),
+                            DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                    getActivity().startActivity(intent, bundle);
+                }
             } else if (item instanceof String) {
-                if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0) {
-                    Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
-                    startActivity(intent);
+//                if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0) {
+//                    Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
+//                    startActivity(intent);
+                if (((String) item).contains(getString(R.string.personal_settings))) {
+                    Intent intent = new Intent(getActivity(), PreferencesActivity.class);
+                    startActivityForResult(intent, PREFERENCES_SETTINGS_RESULT_CODE);
                 } else {
                     Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT)
                             .show();
@@ -286,12 +492,16 @@ public class MainFragment extends BrowseFragment {
         @Override
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
                                    RowPresenter.ViewHolder rowViewHolder, Row row) {
+
+
             if (item instanceof Video) {
-                try {
-                    mBackgroundURI = new URI((((Video) item).thumbnail));
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                }
+                Video video = ((Video) item);
+                if (video.thumbnail != null)
+                    try {
+                        mBackgroundURI = new URI(video.thumbnail);
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
+                    }
                 startBackgroundTimer();
             }
 
@@ -337,4 +547,47 @@ public class MainFragment extends BrowseFragment {
         }
     }
 
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_GET_ACCOUNTS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                    userRegistration();
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE) { //After PreferencesSettings
+                //Clear the screen
+                setSelectedPosition(0);
+                setupVideosList();
+                //Load new video list
+                getUserTasks("1");
+            }
+        }
+    }
 }

@@ -16,7 +16,6 @@ package com.dream.dreamtv.activity;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.media.MediaFormat;
 import android.media.MediaMetadata;
 import android.media.MediaPlayer;
 import android.media.session.MediaSession;
@@ -36,19 +35,14 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.beans.Subtitle;
 import com.dream.dreamtv.beans.Video;
-import com.dream.dreamtv.fragment.PlaybackOverlayFragment;
-
-import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.Locale;
+import com.dream.dreamtv.fragment.PlaybackVideoFragment;
 
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
  */
-public class PlaybackOverlayActivity extends Activity implements
-        PlaybackOverlayFragment.OnPlayPauseClickedListener {
+public class PlaybackVideoActivity extends Activity implements
+        PlaybackVideoFragment.OnPlayPauseClickedListener {
     private static final String TAG = "PlaybackOverlayActivity";
 
     private VideoView mVideoView;
@@ -79,7 +73,7 @@ public class PlaybackOverlayActivity extends Activity implements
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        String text = getSyncSubtitleText(SystemClock.elapsedRealtime() - tvTime.getBase());
+                        String text = mSelectedVideo.getSyncSubtitleText(SystemClock.elapsedRealtime() - tvTime.getBase());
                         if (text.isEmpty())
                             tvSubtitle.setVisibility(View.GONE);
                         else {
@@ -89,7 +83,7 @@ public class PlaybackOverlayActivity extends Activity implements
                     }
                 });
 
-                handler.postDelayed(myRunnable, 500);
+                handler.postDelayed(myRunnable, 100);
             }
         };
         loadViews();
@@ -102,20 +96,7 @@ public class PlaybackOverlayActivity extends Activity implements
         mSession.setActive(true);
     }
 
-    private String getSyncSubtitleText(long l) {
-        List<Subtitle> subtitleList = mSelectedVideo.subtitle_json.subtitles;
-        String text = "";
-        for (Subtitle subtitle : subtitleList) {
-            if (l >= subtitle.start && l < subtitle.end) { //esta adentro del ciclo
-                text = subtitle.text;
-                break;
-            } else if (l < subtitle.start)
-                break;
 
-        }
-
-        return text;
-    }
 
     @Override
     public void onDestroy() {
@@ -125,19 +106,19 @@ public class PlaybackOverlayActivity extends Activity implements
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        PlaybackOverlayFragment playbackOverlayFragment = (PlaybackOverlayFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
+        PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
         switch (keyCode) {
             case KeyEvent.KEYCODE_MEDIA_PLAY:
-                playbackOverlayFragment.togglePlayback(false);
+                playbackVideoFragment.togglePlayback(false);
                 return true;
             case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                playbackOverlayFragment.togglePlayback(false);
+                playbackVideoFragment.togglePlayback(false);
                 return true;
             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
                 if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
-                    playbackOverlayFragment.togglePlayback(false);
+                    playbackVideoFragment.togglePlayback(false);
                 } else {
-                    playbackOverlayFragment.togglePlayback(true);
+                    playbackVideoFragment.togglePlayback(true);
                 }
                 return true;
             default:
@@ -151,10 +132,10 @@ public class PlaybackOverlayActivity extends Activity implements
     public void onFragmentPlayPause(Video video, int position, Boolean playPause) {
         mVideoView.setVideoPath(video.getVideoUrl());
 
-        String subtitle = video.subtitle_vtt.subtitles;
-        if (subtitle != null && subtitle.length() > 0)
-            mVideoView.addSubtitleSource(new ByteArrayInputStream(subtitle.getBytes()),
-                    MediaFormat.createSubtitleFormat("text/vtt", Locale.ENGLISH.getLanguage()));
+//        String subtitle = video.subtitle_vtt.subtitles;
+//        if (subtitle != null && subtitle.length() > 0)
+//            mVideoView.addSubtitleSource(new ByteArrayInputStream(subtitle.getBytes()),
+//                    MediaFormat.createSubtitleFormat("text/vtt", Locale.ENGLISH.getLanguage()));
 
         if (position == 0 || mPlaybackState == LeanbackPlaybackState.IDLE) {
             setupCallbacks();
@@ -168,15 +149,16 @@ public class PlaybackOverlayActivity extends Activity implements
                 mVideoView.start();
             }
 
-//            tvTime.setBase(SystemClock.elapsedRealtime() - position);
-//            tvTime.start();
-//            handler.post(myRunnable);
+            tvTime.setBase(SystemClock.elapsedRealtime() - position);
+            tvTime.start();
+            handler.post(myRunnable);
         } else { //PAUSE
             mPlaybackState = LeanbackPlaybackState.PAUSED;
             mVideoView.pause();
 
-//            tvTime.stop();
-//            handler.removeCallbacksAndMessages(null);
+            tvTime.setBase(SystemClock.elapsedRealtime() - position);
+            tvTime.stop();
+            handler.removeCallbacksAndMessages(null);
         }
         updatePlaybackState(position);
         updateMetadata(video);

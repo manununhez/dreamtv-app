@@ -12,10 +12,10 @@
 
     </style>
 
-    <style name="Theme.Example.Leanback.CustomTitle" parent="Theme.Example.LeanbackBrowse">
-        <item name="browseTitleViewLayout">@layout/titleview</item>
-        <item name="browseRowsMarginTop">120dp</item>
-    </style>
+    <!--<style name="Theme.Example.Leanback.CustomTitle" parent="Theme.Example.LeanbackBrowse">-->
+        <!--<item name="browseTitleViewLayout">@layout/titleview</item>-->
+        <!--<item name="browseRowsMarginTop">120dp</item>-->
+    <!--</style>-->
 
     <style name="Theme.Example.LeanbackBrowse" parent="Theme.Leanback.Browse">
         <item name="android:windowBackground">@color/card_examples_background</item>

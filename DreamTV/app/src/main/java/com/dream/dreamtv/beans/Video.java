@@ -24,14 +24,19 @@ public class Video implements Parcelable {
     public String created;
     public String team;
     public String project;
+    public String video_url;
     public List<String> all_urls;
     public List<Language> languages;
     public String activity_uri;
     public String urls_uri;
     public String subtitle_languages_uri;
     public String resource_uri;
+
     public SubtitleVtt subtitle_vtt;
-    public SubtitleJson subtitle_json;
+    public SubtitleJson subtitle_json; //para ir propagando el subtitulo entre pantallas
+
+    public Video() {
+    }
 
 
     protected Video(Parcel in) {
@@ -46,6 +51,7 @@ public class Video implements Parcelable {
         created = in.readString();
         team = in.readString();
         project = in.readString();
+        video_url = in.readString();
         all_urls = in.createStringArrayList();
         languages = in.createTypedArrayList(Language.CREATOR);
         activity_uri = in.readString();
@@ -54,34 +60,6 @@ public class Video implements Parcelable {
         resource_uri = in.readString();
         subtitle_vtt = in.readParcelable(SubtitleVtt.class.getClassLoader());
         subtitle_json = in.readParcelable(SubtitleJson.class.getClassLoader());
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
-        dest.writeString(video_type);
-        dest.writeString(primary_audio_language_code);
-        dest.writeString(original_language);
-        dest.writeString(title);
-        dest.writeString(description);
-        dest.writeInt(duration);
-        dest.writeString(thumbnail);
-        dest.writeString(created);
-        dest.writeString(team);
-        dest.writeString(project);
-        dest.writeStringList(all_urls);
-        dest.writeTypedList(languages);
-        dest.writeString(activity_uri);
-        dest.writeString(urls_uri);
-        dest.writeString(subtitle_languages_uri);
-        dest.writeString(resource_uri);
-        dest.writeParcelable(subtitle_vtt, flags);
-        dest.writeParcelable(subtitle_json, flags);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
     }
 
     public static final Creator<Video> CREATOR = new Creator<Video>() {
@@ -96,9 +74,41 @@ public class Video implements Parcelable {
         }
     };
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
+        parcel.writeString(video_type);
+        parcel.writeString(primary_audio_language_code);
+        parcel.writeString(original_language);
+        parcel.writeString(title);
+        parcel.writeString(description);
+        parcel.writeInt(duration);
+        parcel.writeString(thumbnail);
+        parcel.writeString(created);
+        parcel.writeString(team);
+        parcel.writeString(project);
+        parcel.writeString(video_url);
+        parcel.writeStringList(all_urls);
+        parcel.writeTypedList(languages);
+        parcel.writeString(activity_uri);
+        parcel.writeString(urls_uri);
+        parcel.writeString(subtitle_languages_uri);
+        parcel.writeString(resource_uri);
+        parcel.writeParcelable(subtitle_vtt, i);
+        parcel.writeParcelable(subtitle_json, i);
+    }
+
+
     public String getVideoUrl() {
         String url;
-        if (this.all_urls.get(0).contains("youtube"))
+        if (this.all_urls == null)
+            url = video_url;
+        else if (this.all_urls.get(0).contains("youtube"))
             url = this.all_urls.get(0).replace("http", "https");
         else
             url = this.all_urls.get(0);
@@ -108,21 +118,44 @@ public class Video implements Parcelable {
     }
 
     public boolean isFromYoutube() {
-        return this.all_urls.get(0).contains("youtube.com");
+        if (this.all_urls != null)
+            return this.all_urls.get(0).contains("youtube.com");
+        else
+            return this.video_url.contains("youtube.com");
     }
 
     public String getVideoYoutubeId() {
-        Uri newUrl = Uri.parse(this.all_urls.get(0));
+        Uri newUrl;
+        if (this.all_urls != null)
+            newUrl = Uri.parse(this.all_urls.get(0));
+        else
+            newUrl = Uri.parse(this.video_url);
+
         return newUrl.getQueryParameter("v");
     }
 
-    public int getLanguageListIndex(String languageName){
-        for (int i = 0; i < languages.size(); i++){
-            if(languages.get(i).name.equals(languageName))
+    public int getLanguageListIndex(String languageName) {
+        for (int i = 0; i < languages.size(); i++) {
+            if (languages.get(i).name.equals(languageName))
                 return i;
         }
 
         return -1;
+    }
+
+    public String getSyncSubtitleText(long l) {
+        List<Subtitle> subtitleList = this.subtitle_json.subtitles;
+        String text = "";
+        for (Subtitle subtitle : subtitleList) {
+            if (l >= subtitle.start && l <= subtitle.end) { //esta adentro del ciclo
+                text = subtitle.text;
+                break;
+            } else if (l < subtitle.start)
+                break;
+
+        }
+
+        return text;
     }
 
     @Override
@@ -139,6 +172,7 @@ public class Video implements Parcelable {
                 ", created='" + created + '\'' +
                 ", team='" + team + '\'' +
                 ", project='" + project + '\'' +
+                ", video_url='" + video_url + '\'' +
                 ", all_urls=" + all_urls +
                 ", languages=" + languages +
                 ", activity_uri='" + activity_uri + '\'' +

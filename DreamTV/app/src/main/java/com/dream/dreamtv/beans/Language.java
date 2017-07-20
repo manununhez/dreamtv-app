@@ -15,6 +15,7 @@ public class Language implements Parcelable{
     public String subtitles_uri;
     public String resource_uri;
 
+
     protected Language(Parcel in) {
         code = in.readString();
         name = in.readString();

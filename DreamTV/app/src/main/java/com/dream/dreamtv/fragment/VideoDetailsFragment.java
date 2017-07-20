@@ -47,21 +47,18 @@ import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.activity.DetailsActivity;
 import com.dream.dreamtv.activity.MainActivity;
-import com.dream.dreamtv.activity.PlaybackOverlayActivity;
-import com.dream.dreamtv.activity.YoutubeActivityApiShowcase;
+import com.dream.dreamtv.activity.PlaybackVideoActivity;
+import com.dream.dreamtv.activity.PlaybackVideoFromYoutubeActivity;
 import com.dream.dreamtv.adapter.DetailsDescriptionPresenter;
 import com.dream.dreamtv.beans.JsonResponseBaseBean;
 import com.dream.dreamtv.beans.SubtitleJson;
-import com.dream.dreamtv.beans.SubtitleVtt;
+import com.dream.dreamtv.beans.User;
 import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.conn.ConnectionManager;
 import com.dream.dreamtv.conn.ResponseListener;
-import com.dream.dreamtv.dialog.DialogChooseLanguageActivity;
+import com.dream.dreamtv.utils.JsonUtils;
 import com.dream.dreamtv.utils.Utils;
 import com.google.gson.Gson;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 /*
@@ -92,6 +89,7 @@ public class VideoDetailsFragment extends DetailsFragment {
     private DetailsOverviewRow rowPresenter;
 
     private String selectedLanguageCode = "";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate DetailsFragment");
@@ -174,8 +172,8 @@ public class VideoDetailsFragment extends DetailsFragment {
 
         rowPresenter.addAction(new Action(ACTION_PLAY_VIDEO, getResources().getString(
                 R.string.play_video)));
-        rowPresenter.addAction(new Action(ACTION_CHOOSE_SUBTITLE_LANG, getResources().getString(
-                R.string.dialog_choose_language_title)));
+//        rowPresenter.addAction(new Action(ACTION_CHOOSE_SUBTITLE_LANG, getResources().getString(
+//                R.string.dialog_choose_language_title)));
         rowPresenter.addAction(new Action(ACTION_ADD_MY_LIST, getResources().getString(
                 R.string.add_to_my_list)));
 
@@ -197,11 +195,11 @@ public class VideoDetailsFragment extends DetailsFragment {
             @Override
             public void onActionClicked(Action action) {
                 if (action.getId() == ACTION_PLAY_VIDEO) {
-                    getSubtitleVtt(mSelectedVideo);
-                } else if (action.getId() == ACTION_CHOOSE_SUBTITLE_LANG) {
-                    Intent intent = new Intent(getActivity(), DialogChooseLanguageActivity.class);
-                    intent.putExtra(DetailsActivity.VIDEO, mSelectedVideo);
-                    startActivityForResult(intent, CHOOSE_SUB_LANG_CODE);
+                    getSubtitleJson(mSelectedVideo);
+//                } else if (action.getId() == ACTION_CHOOSE_SUBTITLE_LANG) {
+//                    Intent intent = new Intent(getActivity(), DialogChooseLanguageActivity.class);
+//                    intent.putExtra(DetailsActivity.VIDEO, mSelectedVideo);
+//                    startActivityForResult(intent, CHOOSE_SUB_LANG_CODE);
                 } else {
                     Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
                 }
@@ -211,47 +209,52 @@ public class VideoDetailsFragment extends DetailsFragment {
     }
 
 
-    private void getSubtitleVtt(final Video video) {
-        String url = ConnectionManager.Urls.VIDEOS.value + '/' + video.id + "/languages/" + (selectedLanguageCode.isEmpty() ? video.languages.get(1).code : selectedLanguageCode) + "/subtitles";
-        Map<String, String> urlParams = new HashMap<>();
-        urlParams.put("sub_format", "vtt");
-
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true) {
-
-            @Override
-            public void processResponse(String response) {
-                Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
-                SubtitleVtt mSubtitleVtt = gson.fromJson(response, SubtitleVtt.class);
-                DreamTVApp.Logger.d(mSubtitleVtt.toString());
-
-                mSelectedVideo.subtitle_vtt = mSubtitleVtt;
-                getSubtitleJson(mSelectedVideo);
-            }
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
-            }
-
-            @Override
-            public void processError(JsonResponseBaseBean jsonResponse) {
-                super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
-            }
-        };
-
-        ConnectionManager.get(getActivity(), url, urlParams, responseListener, this);
-
-    }
+//    private void getSubtitleVtt(final Video video) {
+//        String url = ConnectionManager.Urls.VIDEOS.value + '/' + video.id + "/languages/" + (selectedLanguageCode.isEmpty() ? video.languages.get(1).code : selectedLanguageCode) + "/subtitles";
+//        Map<String, String> urlParams = new HashMap<>();
+//        urlParams.put("sub_format", "vtt");
+//
+//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, "Retrieving subtitle...") {
+//
+//            @Override
+//            public void processResponse(String response) {
+//                Gson gson = new Gson();
+//                DreamTVApp.Logger.d(response);
+//                SubtitleVtt mSubtitleVtt = gson.fromJson(response, SubtitleVtt.class);
+//                DreamTVApp.Logger.d(mSubtitleVtt.toString());
+//
+//                mSelectedVideo.subtitle_vtt = mSubtitleVtt;
+//                getSubtitleJson(mSelectedVideo);
+//            }
+//
+//            @Override
+//            public void processError(VolleyError error) {
+//                super.processError(error);
+//                DreamTVApp.Logger.d(error.getMessage());
+//            }
+//
+//            @Override
+//            public void processError(JsonResponseBaseBean jsonResponse) {
+//                super.processError(jsonResponse);
+//                DreamTVApp.Logger.d(jsonResponse.toString());
+//            }
+//        };
+//
+//        ConnectionManager.get(getActivity(), url, urlParams, responseListener, this);
+//
+//    }
 
     private void getSubtitleJson(final Video video) {
-        String url = ConnectionManager.Urls.VIDEOS.value + '/' + video.id + "/languages/" + (selectedLanguageCode.isEmpty() ? video.languages.get(1).code : selectedLanguageCode) + "/subtitles";
-        Map<String, String> urlParams = new HashMap<>();
-        urlParams.put("sub_format", "json");
+        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+        SubtitleJson subtitleJson = new SubtitleJson();
+        subtitleJson.video_id = video.id;
+        subtitleJson.version = "last";
+        subtitleJson.language_code = user.sub_language;
 
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true) {
+        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), subtitleJson);
+
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
+                "Retrieving subtitle...") {
 
             @Override
             public void processResponse(String response) {
@@ -265,10 +268,10 @@ public class VideoDetailsFragment extends DetailsFragment {
 
                 if (mSelectedVideo.isFromYoutube()) {
 //                        intent = new Intent(getActivity(), YoutubeActivityFragment.class);
-                    intent = new Intent(getActivity(), YoutubeActivityApiShowcase.class);
+                    intent = new Intent(getActivity(), PlaybackVideoFromYoutubeActivity.class);
 
                 } else {
-                    intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
+                    intent = new Intent(getActivity(), PlaybackVideoActivity.class);
                 }
                 intent.putExtra(DetailsActivity.VIDEO, mSelectedVideo);
                 startActivity(intent);
@@ -287,7 +290,7 @@ public class VideoDetailsFragment extends DetailsFragment {
             }
         };
 
-        ConnectionManager.get(getActivity(), url, urlParams, responseListener, this);
+        ConnectionManager.post(getActivity(), ConnectionManager.Urls.SUBTITLE, null, jsonRequest, responseListener, this);
 
     }
 

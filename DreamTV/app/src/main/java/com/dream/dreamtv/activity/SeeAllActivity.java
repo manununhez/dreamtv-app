@@ -19,18 +19,13 @@ import android.os.Bundle;
 
 import com.dream.dreamtv.R;
 
-
-/*
- * MainActivity class that loads MainFragment
+/**
+ * TODO: Javadoc
  */
-public class SettingsActivity extends Activity {
-    /**
-     * Called when the activity is first created.
-     */
+public class SeeAllActivity extends Activity {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
+    @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        setContentView(R.layout.activity_grid_example);
     }
 }
