@@ -26,6 +26,6 @@ public class SeeAllActivity extends Activity {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_grid_example);
+        setContentView(R.layout.activity_see_all);
     }
 }

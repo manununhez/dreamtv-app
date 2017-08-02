@@ -25,10 +25,8 @@ package com.dream.dreamtv.activity;
 
 import android.app.Activity;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.graphics.Bitmap;
 import android.media.MediaMetadata;
-import android.media.MediaPlayer;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
@@ -39,21 +37,20 @@ import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Chronometer;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.beans.Subtitle;
+import com.dream.dreamtv.beans.UserTask;
 import com.dream.dreamtv.beans.Video;
+import com.dream.dreamtv.fragment.MainFragment;
 import com.dream.dreamtv.fragment.PlaybackVideoFragment;
 import com.dream.dreamtv.fragment.ReasonsDialogFragment;
-import com.dream.dreamtv.fragment.VideoDetailsFragment;
 
 import fr.bmartel.youtubetv.YoutubeTvView;
 import fr.bmartel.youtubetv.listener.IPlayerListener;
@@ -65,14 +62,16 @@ import fr.bmartel.youtubetv.model.VideoState;
  *
  * @author Bertrand Martel
  */
-public class PlaybackVideoFromYoutubeActivity extends Activity implements
+public class PlaybackVideoYoutubeActivity extends Activity implements
         PlaybackVideoFragment.OnPlayPauseClickedListener {
 
-    private final static String TAG = PlaybackVideoFromYoutubeActivity.class.getSimpleName();
+    private final static String TAG = PlaybackVideoYoutubeActivity.class.getSimpleName();
+    private final static String STATE_PLAY = "PLAYING";
+    private final static String STATE_PAUSED = "PAUSED";
     private LeanbackPlaybackState mPlaybackState = LeanbackPlaybackState.IDLE;
 
     //    private LinearLayout llReasons;
-    private YoutubeTvView mYoutubeView1;
+    private YoutubeTvView mYoutubeView;
     private TextView tvSubtitle;
     private Handler handler;
     private Chronometer tvTime;
@@ -83,48 +82,48 @@ public class PlaybackVideoFromYoutubeActivity extends Activity implements
     //    private PlaybackVideoFragment playbackVideoFragment;
     private Long elapsedRealtimeTemp;
     private Long timeStoppedTemp;
+    private UserTask selectedUserTask;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_playback_youtube);
+        setContentView(R.layout.activity_playback_videos_youtube);
 
         tvTime = new Chronometer(this); // initiate a chronometer
         tvSubtitle = (TextView) findViewById(R.id.tvSubtitle); // initiate a chronometer
 //        llReasons = (LinearLayout) findViewById(R.id.llReasons); // initiate a chronometer
 
-        mYoutubeView1 = (YoutubeTvView) findViewById(R.id.video_1);
-        mYoutubeView1.updateView(getArgumentos());
-
-        mYoutubeView1.playVideo(getArgumentos().getString("videoId", ""));
+        mYoutubeView = (YoutubeTvView) findViewById(R.id.video_1);
+        mYoutubeView.updateView(getArgumentos());
+        mYoutubeView.playVideo(getArgumentos().getString("videoId", ""));
 
 
 //        Button playBtn = (Button) findViewById(R.id.play_button);
 //        playBtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
-//                mYoutubeView1.start();
+//                mYoutubeView.start();
 //            }
 //        });
 //        Button pauseBtn = (Button) findViewById(R.id.pause_button);
 //        pauseBtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
-//                mYoutubeView1.pause();
+//                mYoutubeView.pause();
 //            }
 //        });
 //        Button nextBtn = (Button) findViewById(R.id.next_button);
 //        nextBtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
-//                mYoutubeView1.nextVideo();
+//                mYoutubeView.nextVideo();
 //            }
 //        });
 //        Button previousBtn = (Button) findViewById(R.id.previous_button);
 //        previousBtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
-//                mYoutubeView1.previousVideo();
+//                mYoutubeView.previousVideo();
 //            }
 //        });
 //
@@ -132,23 +131,23 @@ public class PlaybackVideoFromYoutubeActivity extends Activity implements
 //        backwardBtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
-//                mYoutubeView1.moveBackward(POSITION_OFFSET);
+//                mYoutubeView.moveBackward(POSITION_OFFSET);
 //            }
 //        });
 //        Button forwardBtn = (Button) findViewById(R.id.forward_button);
 //        forwardBtn.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
-//                mYoutubeView1.moveForward(POSITION_OFFSET);
+//                mYoutubeView.moveForward(POSITION_OFFSET);
 //            }
 //        });
 
 
-        mYoutubeView1.addPlayerListener(new IPlayerListener() {
+        mYoutubeView.addPlayerListener(new IPlayerListener() {
             @Override
             public void onPlayerReady(final VideoInfo videoInfo) {
 //                if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
-////                    mYoutubeView1.start();
+////                    mYoutubeView.start();
 //                }
 
 //                Toast.makeText(PlaybackVideoFromYoutubeActivity.this, "onPlayerReady", Toast.LENGTH_SHORT).show();
@@ -162,48 +161,44 @@ public class PlaybackVideoFromYoutubeActivity extends Activity implements
                                             final float duration,
                                             final VideoInfo videoInfo) {
 
-                PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
 
-                if (state.toString().equals("PLAYING")) {
-                    tvTime.setBase(SystemClock.elapsedRealtime() - position);
-                    elapsedRealtimeTemp = elapsedRealtimeTemp == null ? SystemClock.elapsedRealtime() : elapsedRealtimeTemp;
-                    tvTime.setBase(elapsedRealtimeTemp - position);
-                    tvTime.start();
-                    handler.post(myRunnable);
+                if (state.toString().equals(STATE_PLAY)) {
+                    playVideo(position);
+                } else if (state.toString().equals(STATE_PAUSED)) {
+                    pauseVideo();
 
-                    mPlaybackState = LeanbackPlaybackState.PLAYING;
-
-                    if (playbackVideoFragment != null) {
-                        playbackVideoFragment.togglePlaybackWithoutVideoView(true);
-                    }
-
-//                    Toast.makeText(PlaybackVideoFromYoutubeActivity.this, "Playing", Toast.LENGTH_SHORT).show();
+                    if (selectedUserTask != null)
+                        controlReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp, selectedUserTask);
+                    else
+                        controlReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp);
 
                 } else {
-//                    Long elapsedRealtimeTemp = SystemClock.elapsedRealtime();
-//                    Long timeStoppedTemp = tvTime.getBase();
-                    tvTime.stop();
-                    handler.removeCallbacksAndMessages(null);
-
-
-                    if (state.toString().equals("PAUSED")) {
-                        if (playbackVideoFragment != null) {
-                            playbackVideoFragment.togglePlayback(false);
-                        }
-                        mPlaybackState = LeanbackPlaybackState.PAUSED;
-                        String text = mSelectedVideo.getSyncSubtitleText(elapsedRealtimeTemp - timeStoppedTemp);
-                        if (!text.isEmpty()) //only shows the popup when exist an subtitle
-                            showReasonsScreen(text);
-
-                    }
-//                    Toast.makeText(PlaybackVideoFromYoutubeActivity.this, "NOT Playing", Toast.LENGTH_SHORT).show();
-
+                    stopSyncSubtitle();
                 }
 
-                Log.i(TAG, "onPlayerStateChange : " + state.toString() + " | position : " + position + " | speed : " + speed);
+//                Log.i(TAG, "onPlayerStateChange : " + state.toString() + " | position : " + position + " | speed : " + speed);
             }
         });
 
+
+        subtitleHandlerSyncConfig();
+
+
+        mSession = new
+
+                MediaSession(this, "LeanbackSampleApp");
+        mSession.setCallback(new
+
+                MediaSessionCallback());
+        mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS |
+                MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+        mSession.setActive(true);
+
+
+    }
+
+    private void subtitleHandlerSyncConfig() {
         handler = new Handler();
         myRunnable = new Runnable() {
             @Override
@@ -213,49 +208,117 @@ public class PlaybackVideoFromYoutubeActivity extends Activity implements
                     public void run() {
                         timeStoppedTemp = tvTime.getBase();
                         elapsedRealtimeTemp = SystemClock.elapsedRealtime();
-                        String text = mSelectedVideo.getSyncSubtitleText(elapsedRealtimeTemp - timeStoppedTemp);
-                        if (text.isEmpty())
-                            tvSubtitle.setVisibility(View.GONE);
-                        else {
-                            tvSubtitle.setVisibility(View.VISIBLE);
-                            tvSubtitle.setText(Html.fromHtml(text));
+
+                        selectedUserTask = mSelectedVideo.getUserTask(elapsedRealtimeTemp - timeStoppedTemp);
+                        if (selectedUserTask != null) { //pause the video and show the popup
+                            mPlaybackState = LeanbackPlaybackState.PAUSED;
+                            mYoutubeView.pause();
                         }
+
+
+                        controlShowSubtitle(elapsedRealtimeTemp - timeStoppedTemp);
+
                     }
                 });
 
                 handler.postDelayed(myRunnable, 100);
             }
         };
+    }
 
+//    private void controlUsersTask(long subtitleTimePosition, UserTask userTask) {
+////        UserTask userTask = mSelectedVideo.getUserTask(subtitleTimePosition);
+////        if (userTask != null) {
+////        pauseVideo();
+//        mPlaybackState = LeanbackPlaybackState.PAUSED;
+//        mYoutubeView.pause();
+//
+//
+////        }
+//    }
 
-        mSession = new MediaSession(this, "LeanbackSampleApp");
-        mSession.setCallback(new MediaSessionCallback());
-        mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS |
-                MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+    private void playVideo(long position) {
 
-        mSession.setActive(true);
+        PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
+
+        elapsedRealtimeTemp = elapsedRealtimeTemp == null ? SystemClock.elapsedRealtime() : elapsedRealtimeTemp;
+
+        startSyncSubtitle(elapsedRealtimeTemp - position);
+
+        mPlaybackState = LeanbackPlaybackState.PLAYING;
+
+        if (playbackVideoFragment != null) {
+            playbackVideoFragment.togglePlaybackWithoutVideoView(true);
+        }
+
+    }
+
+    private void pauseVideo() {
+        PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
+
+        stopSyncSubtitle();
+        mPlaybackState = LeanbackPlaybackState.PAUSED;
+        if (playbackVideoFragment != null) {
+            playbackVideoFragment.togglePlayback(false);
+        }
 
 
     }
 
+    private void startSyncSubtitle(long base) {
+        tvTime.setBase(base);
+        tvTime.start();
+        handler.post(myRunnable);
+    }
 
-    private void showReasonsScreen(String text) {
-        ReasonsDialogFragment videoDetailsFragment = ReasonsDialogFragment.newInstance(text);
-        FragmentManager fm = getFragmentManager();
-        videoDetailsFragment.show(fm, "Sample Fragment");
+    private void stopSyncSubtitle() {
+        tvTime.stop();
+        handler.removeCallbacksAndMessages(null);
+    }
 
-//        FragmentTransaction fTransaction = getFragmentManager().beginTransaction();
-//
-//        fTransaction.replace(R.id.framelayout_reasons, videoDetailsFragment);
-//        fTransaction.commit();
+    private void controlReasonDialogPopUp(long subtitlePosition) {
+        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
+        if (subtitle != null) //only shows the popup when exist an subtitle
+            showReasonsScreen(subtitle);
+    }
+
+    private void controlReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
+        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
+        if (subtitle != null) //only shows the popup when exist an subtitle
+            showReasonsScreen(subtitle, userTask);
+    }
+
+    private void controlShowSubtitle(long subtitleTimePosition) {
+        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitleTimePosition);
+        if (subtitle == null)
+            tvSubtitle.setVisibility(View.GONE);
+        else {
+            tvSubtitle.setVisibility(View.VISIBLE);
+            tvSubtitle.setText(Html.fromHtml(subtitle.text));
+        }
+    }
+
+    private void showReasonsScreen(Subtitle subtitle) {
+        if (mSelectedVideo.task_state != MainFragment.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(subtitle.text, subtitle.position, mSelectedVideo.task_id, mSelectedVideo.subtitle_json.version_number);
+            FragmentManager fm = getFragmentManager();
+            reasonsDialogFragment.show(fm, "Sample Fragment");
+        }
+    }
+
+    private void showReasonsScreen(Subtitle subtitle, UserTask userTask) {
+        if (mSelectedVideo.task_state != MainFragment.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(subtitle.text, subtitle.position, mSelectedVideo.task_id, mSelectedVideo.subtitle_json.version_number, userTask, mSelectedVideo.task_state);
+            FragmentManager fm = getFragmentManager();
+            reasonsDialogFragment.show(fm, "Sample Fragment");
+        }
     }
 
     private Bundle getArgumentos() {
-        mSelectedVideo = getIntent().getParcelableExtra(DetailsActivity.VIDEO);
+        mSelectedVideo = getIntent().getParcelableExtra(VideoDetailsActivity.VIDEO);
         Bundle args = new Bundle();
         args.putString("videoId", mSelectedVideo.getVideoYoutubeId());
-//        args.putString("closedCaptionLangPref", video.languages.get(0).code);
-//        args.putString("videoQuality", "hd1080");
+        args.putBoolean("autoplay", false);
         args.putBoolean("debug", false);
         args.putBoolean("closedCaptions", false);
         args.putBoolean("showRelatedVideos", false);
@@ -266,7 +329,7 @@ public class PlaybackVideoFromYoutubeActivity extends Activity implements
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        mYoutubeView1.closePlayer();
+        mYoutubeView.closePlayer();
         finish();
     }
 
@@ -274,79 +337,60 @@ public class PlaybackVideoFromYoutubeActivity extends Activity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mYoutubeView1.closePlayer();
+        mYoutubeView.closePlayer();
         finish();
     }
 
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
-
+//    @Override
+//    public boolean onKeyUp(int keyCode, KeyEvent event) {
 //        PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_MEDIA_PLAY:
-                DreamTVApp.Logger.d("Button PLAY");
-//                llReasons.setVisibility(View.VISIBLE);
-
-                playbackVideoFragment.togglePlayback(false);
-                return true;
-            case KeyEvent.KEYCODE_MEDIA_PAUSE:
-//                llReasons.setVisibility(View.VISIBLE);
-
-                playbackVideoFragment.togglePlayback(false);
-                return true;
-            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
-//                    llReasons.setVisibility(View.VISIBLE);
-
-                    playbackVideoFragment.togglePlayback(false);
-                } else {
-//                    llReasons.setVisibility(View.GONE);
-
-                    playbackVideoFragment.togglePlayback(true);
-                }
-                return true;
-            default:
-                return super.onKeyUp(keyCode, event);
-        }
-    }
+//
+////        PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
+//        switch (keyCode) {
+//            case KeyEvent.KEYCODE_MEDIA_PLAY:
+//                DreamTVApp.Logger.d("Button PLAY");
+////                llReasons.setVisibility(View.VISIBLE);
+//
+//                playbackVideoFragment.togglePlayback(false);
+//                return true;
+//            case KeyEvent.KEYCODE_MEDIA_PAUSE:
+////                llReasons.setVisibility(View.VISIBLE);
+//
+//                playbackVideoFragment.togglePlayback(false);
+//                return true;
+//            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+//                if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
+////                    llReasons.setVisibility(View.VISIBLE);
+//
+//                    playbackVideoFragment.togglePlayback(false);
+//                } else {
+////                    llReasons.setVisibility(View.GONE);
+//
+//                    playbackVideoFragment.togglePlayback(true);
+//                }
+//                return true;
+//            default:
+//                return super.onKeyUp(keyCode, event);
+//        }
+//    }
 
 
     /**
      * Implementation of OnPlayPauseClickedListener
      */
     public void onFragmentPlayPause(Video video, int position, Boolean playPause) {
-//        mVideoView.setVideoPath(video.getVideoUrl());
-
-//        String subtitle = video.subtitle_vtt.subtitles;
-//        if (subtitle != null && subtitle.length() > 0)
-//            mVideoView.addSubtitleSource(new ByteArrayInputStream(subtitle.getBytes()),
-//                    MediaFormat.createSubtitleFormat("text/vtt", Locale.ENGLISH.getLanguage()));
-
         if (position == 0 || mPlaybackState == LeanbackPlaybackState.IDLE) {
-//            setupCallbacks();
             mPlaybackState = LeanbackPlaybackState.IDLE;
         }
 
         if (playPause && mPlaybackState != LeanbackPlaybackState.PLAYING) { //PLAYING
             mPlaybackState = LeanbackPlaybackState.PLAYING;
-            if (position > 0) {
-//                llReasons.setVisibility(View.GONE);
-//                mYoutubeView1.seekTo(position);
-                mYoutubeView1.start();
-            }
-
-            tvTime.setBase(SystemClock.elapsedRealtime() - position);
-            tvTime.start();
-            handler.post(myRunnable);
+            mYoutubeView.start();
+            startSyncSubtitle(SystemClock.elapsedRealtime() - position);
         } else { //PAUSE
             mPlaybackState = LeanbackPlaybackState.PAUSED;
-//            llReasons.setVisibility(View.VISIBLE);
-            mYoutubeView1.pause();
-
-            tvTime.setBase(SystemClock.elapsedRealtime() - position);
-            tvTime.stop();
-            handler.removeCallbacksAndMessages(null);
+            mYoutubeView.pause();
+//            stopSyncSubtitle();
         }
         updatePlaybackState(position);
         updateMetadata(video);
@@ -382,6 +426,8 @@ public class PlaybackVideoFromYoutubeActivity extends Activity implements
 
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, title);
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE,
+                video.project);
+        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION,
                 video.description);
         metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI,
                 video.thumbnail);
@@ -412,7 +458,7 @@ public class PlaybackVideoFromYoutubeActivity extends Activity implements
     @Override
     public void onPause() {
         super.onPause();
-        if (mYoutubeView1.isPlaying()) {
+        if (mYoutubeView.isPlaying()) {
             if (!requestVisibleBehind(true)) {
                 // Try to play behind launcher, but if it fails, stop playback.
                 stopPlayback();
@@ -435,8 +481,8 @@ public class PlaybackVideoFromYoutubeActivity extends Activity implements
     }
 
     private void stopPlayback() {
-        if (mYoutubeView1 != null) {
-            mYoutubeView1.stopVideo();
+        if (mYoutubeView != null) {
+            mYoutubeView.stopVideo();
         }
     }
 

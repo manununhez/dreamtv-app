@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Edi-TED</string>
-    <string name="browse_title"><![CDATA[Edi-TEd]]></string>
+    <string name="app_name">DreamTV</string>
+    <string name="browse_title"><![CDATA[DreamTV]]></string>
     <string name="related_movies">Related Videos</string>
     <string name="vertical_grid_title"><![CDATA[Vertical Video Grid]]></string>
     <string name="error">Error</string>
@@ -21,7 +21,7 @@
     <string name="personal_settings">Personal Settings</string>
     <string name="play_video">Play video</string>
     <string name="edit_subtitle">Edit Subtitle</string>
-    <string name="add_to_my_list">Add to my list</string>
+    <string name="add_to_my_list">+ Add to my list</string>
     <string name="subtitle_languages">Languages</string>
     <!--<string name="watch_trailer_2">FREE</string>-->
     <string name="rent_1">Rent By Day</string>
@@ -52,6 +52,8 @@
     <!--SHAREDPREFERENCES-->
     <string name="dreamTVApp_token">tedapp_token</string>
     <string name="user_preferences">user_preferences</string>
+    <string name="reasons_preferences">reasons_preferences</string>
+    <string name="languages_preferences">languages_preferences</string>
 
 
     <!-- Dialog example -->
@@ -78,16 +80,16 @@
     <string name="header_recommended">Recommended</string>
     <string name="action_clicked">Action clicked. Implement your own handler.</string>
 
-    <string-array name="country_arrays">
-        <item>Malaysia</item>
-        <item>United States</item>
-        <item>Indonesia</item>
-        <item>France</item>
-        <item>Italy</item>
-        <item>Singapore</item>
-        <item>New Zealand</item>
-        <item>India</item>
-    </string-array>
+    <!--<string-array name="country_arrays">-->
+        <!--<item>Malaysia</item>-->
+        <!--<item>United States</item>-->
+        <!--<item>Indonesia</item>-->
+        <!--<item>France</item>-->
+        <!--<item>Italy</item>-->
+        <!--<item>Singapore</item>-->
+        <!--<item>New Zealand</item>-->
+        <!--<item>India</item>-->
+    <!--</string-array>-->
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

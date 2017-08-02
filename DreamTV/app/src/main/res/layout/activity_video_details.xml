@@ -5,5 +5,5 @@
     android:name="com.dream.dreamtv.fragment.VideoDetailsFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.DetailsActivity"
+    tools:context=".activity.VideoDetailsActivity"
     tools:deviceIds="tv" />

@@ -27,7 +27,10 @@ public class DetailsDescriptionPresenter extends AbstractDetailsDescriptionPrese
 
         if (video != null) {
             viewHolder.getTitle().setText(video.title);
-            viewHolder.getSubtitle().setText(video.project);
+            viewHolder.getSubtitle().setText(video.project + " | AUDIO: " +
+                    video.primary_audio_language_code + " | SUBT: " +
+                    video.subtitle_language + " | Duration:" +
+                    (video.duration / 60) + " min.");
             viewHolder.getBody().setText(video.description);
         }
     }

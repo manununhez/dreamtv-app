@@ -16,49 +16,34 @@ package com.dream.dreamtv.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v17.leanback.app.VerticalGridFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.FocusHighlight;
 import android.support.v17.leanback.widget.ImageCardView;
-import android.support.v17.leanback.widget.ListRow;
 import android.support.v17.leanback.widget.OnItemViewClickedListener;
 import android.support.v17.leanback.widget.OnItemViewSelectedListener;
 import android.support.v17.leanback.widget.Presenter;
-import android.support.v17.leanback.widget.PresenterSelector;
 import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
-import android.support.v17.leanback.widget.TitleViewAdapter;
 import android.support.v17.leanback.widget.VerticalGridPresenter;
-import android.support.v17.leanback.widget.VerticalGridView;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.activity.DetailsActivity;
+import com.dream.dreamtv.activity.VideoDetailsActivity;
 import com.dream.dreamtv.activity.PreferencesActivity;
 import com.dream.dreamtv.adapter.VideoCardPresenter;
 import com.dream.dreamtv.beans.JsonResponseBaseBean;
-import com.dream.dreamtv.beans.Task;
 import com.dream.dreamtv.beans.TaskList;
-import com.dream.dreamtv.beans.UserTask;
+import com.dream.dreamtv.beans.Task;
 import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.conn.ConnectionManager;
 import com.dream.dreamtv.conn.ResponseListener;
-import com.dream.dreamtv.fragment.MainFragment;
-import com.dream.dreamtv.models.CardRow;
-import com.dream.dreamtv.presenters.CardPresenterSelector;
-import com.dream.dreamtv.presenters.ImageCardViewPresenter;
-import com.dream.dreamtv.utils.JsonUtils;
-import com.dream.dreamtv.utils.Utils;
 import com.google.gson.Gson;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -125,9 +110,8 @@ public class SeeAllFragment extends VerticalGridFragment {
                 else
                     currentPage = -1;
 
-//                Toast.makeText(getActivity(), "Next page: "+currentPage, Toast.LENGTH_SHORT).show();
-                for (UserTask task : taskList.data) {
-                    mAdapter.add(task.getVideo());
+                for (Task task : taskList.data) {
+                    mAdapter.add(task.getVideo(MainFragment.CHECK_NEW_TASKS_CATEGORY)); //SeeAllFragments only appears in Check New Tasks Category
                 }
             }
 
@@ -171,7 +155,7 @@ public class SeeAllFragment extends VerticalGridFragment {
 //                currentOffset += taskList.meta.limit;
 //                total_count = taskList.meta.total_count;
 //                for (Task task : taskList.objects) {
-//                    task.video.language_code = task.language;
+//                    task.video.language_code = task.subtitle_language;
 //                    mAdapter.add(task.video);
 //                }
 ////                mAdapter.addAll(0, taskList.objects);
@@ -234,13 +218,13 @@ public class SeeAllFragment extends VerticalGridFragment {
             if (item instanceof Video) {
                 Video video = (Video) item;
                 DreamTVApp.Logger.d("Item: " + item.toString());
-                Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                intent.putExtra(DetailsActivity.VIDEO, video);
+                Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
+                intent.putExtra(VideoDetailsActivity.VIDEO, video);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
                         getActivity(),
                         ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                        DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                        VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                 getActivity().startActivity(intent, bundle);
 
             } else if (item instanceof String) {

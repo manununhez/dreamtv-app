@@ -65,32 +65,30 @@ public class PreferencesActivity extends Activity {
     private CheckableTextView btnAudio;
     private String selectedSubtitleLanguageCode;
     private String selectedAudioLanguageCode;
+    public static String NONE_OPTIONS_CODE = "NN";
+    public static String NONE_OPTIONS_TEXT = "- None";
+//
+//    private static final String LOG_TAG = "AudioRecordTest";
+//    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+//    private static String mFileName = null;
 
-
-    private static final String LOG_TAG = "AudioRecordTest";
-    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static String mFileName = null;
-
-    //    private RecordButton mRecordButton = null;
-    private MediaRecorder mRecorder = null;
-
-    //    private PlayButton   mPlayButton = null;
-    private MediaPlayer mPlayer = null;
-
-    // Requesting permission to RECORD_AUDIO
-    private boolean permissionToRecordAccepted = false;
-    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
-
-
-    boolean mStartPlaying = true;
-    boolean mStartRecording = true;
-    Button btnPlay;
-    Button btnRecord;
-    Button btnStop;
-
-
-    private TextView voiceInput;
-    private final int REQ_CODE_SPEECH_INPUT = 100;
+//    //    private RecordButton mRecordButton = null;
+//    private MediaRecorder mRecorder = null;
+//
+//    //    private PlayButton   mPlayButton = null;
+//    private MediaPlayer mPlayer = null;
+//
+//    // Requesting permission to RECORD_AUDIO
+//    private boolean permissionToRecordAccepted = false;
+//    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+//
+//
+//    boolean mStartPlaying = true;
+//    boolean mStartRecording = true;
+//
+//
+//
+//    private final int REQ_CODE_SPEECH_INPUT = 100;
 
 
     @Override
@@ -114,11 +112,6 @@ public class PreferencesActivity extends Activity {
 
         btnSubtitle = (CheckableTextView) findViewById(R.id.btnSubtitle);
         btnAudio = (CheckableTextView) findViewById(R.id.btnAudio);
-
-        voiceInput = (TextView) findViewById(R.id.voiceInput);
-        btnPlay = (Button) findViewById(R.id.btnPlay);
-        btnRecord = (Button) findViewById(R.id.btnRecord);
-        btnStop = (Button) findViewById(R.id.btnStop);
 
 
         btnSubtitle.setOnCheckedChangeListener(new CheckableTextView.OnCheckedChangeListener() {
@@ -155,49 +148,49 @@ public class PreferencesActivity extends Activity {
         getLanguages();
 
 
-        audioConfig();
+//        audioConfig();
 
     }
 
-    private void audioConfig(){
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-
-        btnRecord.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onRecord(mStartRecording);
-                if (mStartRecording) {
-                    btnRecord.setText("Stop recording");
-                } else {
-                    btnRecord.setText("Start recording");
-                }
-                mStartRecording = !mStartRecording;
-            }
-        });
-
-        btnPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                onPlay(mStartPlaying);
-//                if (mStartPlaying) {
-//                    btnPlay.setText("Stop playing");
+//    private void audioConfig(){
+//        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+//
+//        btnRecord.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                onRecord(mStartRecording);
+//                if (mStartRecording) {
+//                    btnRecord.setText("Stop recording");
 //                } else {
-//                    btnPlay.setText("Start playing");
+//                    btnRecord.setText("Start recording");
 //                }
-//                mStartPlaying = !mStartPlaying;
+//                mStartRecording = !mStartRecording;
+//            }
+//        });
+//
+//        btnPlay.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+////                onPlay(mStartPlaying);
+////                if (mStartPlaying) {
+////                    btnPlay.setText("Stop playing");
+////                } else {
+////                    btnPlay.setText("Start playing");
+////                }
+////                mStartPlaying = !mStartPlaying;
+//
+//                promptSpeechInput();
+//            }
+//        });
 
-                promptSpeechInput();
-            }
-        });
 
-
-        // Record to the external cache directory for visibility
+    // Record to the external cache directory for visibility
 //        audiofile = File.createTempFile("sound", ".3gp", sampleDir);
 
-        mFileName = getExternalCacheDir().getAbsolutePath();
-        mFileName += "/audiorecordtest.3gp";
-
-    }
+    //        mFileName = getExternalCacheDir().getAbsolutePath();
+//        mFileName += "/audiorecordtest.3gp";
+//
+//    }
     private void updateUserData() {
         User user = new User();
         user.sub_language = selectedSubtitleLanguageCode;
@@ -348,7 +341,7 @@ public class PreferencesActivity extends Activity {
                 Gson gson = new Gson();
                 Languages languagesList = gson.fromJson(response, Languages.class);
 
-                languagesList.languages.put("NN", "- None"); //null option in the list
+                languagesList.languages.put(NONE_OPTIONS_CODE, NONE_OPTIONS_TEXT); //null option in the list
 
                 Map<String, String> orderedMap = MapUtil.sortByValue(languagesList.languages);
 
@@ -396,132 +389,130 @@ public class PreferencesActivity extends Activity {
     }
 
 
-
-
 //    --------- AUDIO RECORD
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode){
-            case REQUEST_RECORD_AUDIO_PERMISSION:
-                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                break;
-        }
-        if (!permissionToRecordAccepted ) finish();
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        switch (requestCode){
+//            case REQUEST_RECORD_AUDIO_PERMISSION:
+//                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+//                break;
+//        }
+//        if (!permissionToRecordAccepted ) finish();
+//
+//    }
 
-    }
+//
+//    /**
+//     * Showing google speech input dialog
+//     * */
+//    private void promptSpeechInput() {
+//        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+//        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+//                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+//        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+//        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+//                "Please, Say the reason");
+//        try {
+//            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+//        } catch (ActivityNotFoundException a) {
+//            Toast.makeText(getApplicationContext(),
+//                    "speech_not_supported",
+//                    Toast.LENGTH_SHORT).show();
+//        }
+//    }
+//
+//    /**
+//     * Receiving speech input
+//     * */
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        switch (requestCode) {
+//            case REQ_CODE_SPEECH_INPUT: {
+//                if (resultCode == RESULT_OK && null != data) {
+//
+//                    ArrayList<String> result = data
+//                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+//                    voiceInput.setText(result.get(0));
+//                }
+//                break;
+//            }
+//
+//        }
+//    }
 
-
-    /**
-     * Showing google speech input dialog
-     * */
-    private void promptSpeechInput() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                "Please, Say the reason");
-        try {
-            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
-        } catch (ActivityNotFoundException a) {
-            Toast.makeText(getApplicationContext(),
-                    "speech_not_supported",
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Receiving speech input
-     * */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch (requestCode) {
-            case REQ_CODE_SPEECH_INPUT: {
-                if (resultCode == RESULT_OK && null != data) {
-
-                    ArrayList<String> result = data
-                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    voiceInput.setText(result.get(0));
-                }
-                break;
-            }
-
-        }
-    }
-
-    private void onRecord(boolean start) {
-        if (start) {
-            startRecording();
-        } else {
-            stopRecording();
-        }
-    }
-
-    private void onPlay(boolean start) {
-        if (start) {
-            startPlaying();
-        } else {
-            stopPlaying();
-        }
-    }
-
-    private void startPlaying() {
-        mPlayer = new MediaPlayer();
-        try {
-            mPlayer.setDataSource(mFileName);
-            mPlayer.prepare();
-            mPlayer.start();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "prepare() failed");
-        }
-    }
-
-    private void stopPlaying() {
-        mPlayer.release();
-        mPlayer = null;
-    }
-
-    private void startRecording() {
-        mRecorder = new MediaRecorder();
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-//        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-//        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-        mRecorder.setOutputFile(mFileName);
-
-        try {
-            mRecorder.prepare();
-            mRecorder.start();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "prepare() failed");
-        }
-
-
-    }
-
-    private void stopRecording() {
-        mRecorder.stop();
-        mRecorder.release();
-        mRecorder = null;
-    }
-
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mRecorder != null) {
-            mRecorder.release();
-            mRecorder = null;
-        }
-
-        if (mPlayer != null) {
-            mPlayer.release();
-            mPlayer = null;
-        }
-    }
+//    private void onRecord(boolean start) {
+//        if (start) {
+//            startRecording();
+//        } else {
+//            stopRecording();
+//        }
+//    }
+//
+//    private void onPlay(boolean start) {
+//        if (start) {
+//            startPlaying();
+//        } else {
+//            stopPlaying();
+//        }
+//    }
+//
+//    private void startPlaying() {
+//        mPlayer = new MediaPlayer();
+//        try {
+//            mPlayer.setDataSource(mFileName);
+//            mPlayer.prepare();
+//            mPlayer.start();
+//        } catch (IOException e) {
+//            Log.e(LOG_TAG, "prepare() failed");
+//        }
+//    }
+//
+//    private void stopPlaying() {
+//        mPlayer.release();
+//        mPlayer = null;
+//    }
+//
+//    private void startRecording() {
+//        mRecorder = new MediaRecorder();
+//        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+//        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+//        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+////        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+////        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+//        mRecorder.setOutputFile(mFileName);
+//
+//        try {
+//            mRecorder.prepare();
+//            mRecorder.start();
+//        } catch (IOException e) {
+//            Log.e(LOG_TAG, "prepare() failed");
+//        }
+//
+//
+//    }
+//
+//    private void stopRecording() {
+//        mRecorder.stop();
+//        mRecorder.release();
+//        mRecorder = null;
+//    }
+//
+//
+//    @Override
+//    public void onStop() {
+//        super.onStop();
+//        if (mRecorder != null) {
+//            mRecorder.release();
+//            mRecorder = null;
+//        }
+//
+//        if (mPlayer != null) {
+//            mPlayer.release();
+//            mPlayer = null;
+//        }
+//    }
 }

@@ -39,15 +39,12 @@
         </activity>
         <!-- configChanges, para evitar que cuando el control se desconecte, interrumpa el app -->
         <activity android:name=".activity.MainActivity" />
-        <activity android:name=".activity.DetailsActivity" />
+        <activity android:name=".activity.VideoDetailsActivity" />
         <activity android:name=".activity.PlaybackVideoActivity" />
         <activity android:name=".activity.SeeAllActivity" />
         <activity android:name=".activity.BrowseErrorActivity" />
         <activity
-            android:name=".fragment.PlaybackVideoFromYoutubeFragment"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".activity.PlaybackVideoFromYoutubeActivity"
+            android:name=".activity.PlaybackVideoYoutubeActivity"
             android:label="@string/app_name" />
         <activity android:name=".activity.PreferencesActivity" />
     </application>

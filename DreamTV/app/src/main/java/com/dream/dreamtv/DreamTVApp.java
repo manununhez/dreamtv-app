@@ -3,6 +3,7 @@ package com.dream.dreamtv;
 import android.app.Application;
 import android.util.Log;
 
+import com.dream.dreamtv.beans.ReasonList;
 import com.dream.dreamtv.beans.User;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.Gson;
@@ -43,6 +44,29 @@ public class DreamTVApp extends Application {
         }
         String userString = gson.toJson(user);
         SharedPreferenceUtils.save(this, getString(R.string.user_preferences), userString);
+    }
+
+    public void setReasons(ReasonList reasons) {
+        String userString = gson.toJson(reasons);
+        SharedPreferenceUtils.save(this, getString(R.string.reasons_preferences), userString);
+    }
+
+//    public void setLanguages(String languages) {
+//        SharedPreferenceUtils.save(this, getString(R.string.languages_preferences), languages);
+//    }
+//
+//    public String getLanguages() {
+//        return SharedPreferenceUtils.getValue(this, getString(R.string.languages_preferences));
+//    }
+//
+//    public void setUserVideoList() {
+//
+//    }
+
+    public ReasonList getReasons() {
+        String reasonString = SharedPreferenceUtils.getValue(this, getString(R.string.reasons_preferences));
+        ReasonList reasonList = gson.fromJson(reasonString, ReasonList.class);
+        return reasonList;
     }
 
     public static class Logger {

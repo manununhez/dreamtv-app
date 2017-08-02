@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <fr.bmartel.youtubetv.YoutubeTvView
+        android:id="@+id/video_1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <fragment
+        android:id="@+id/playback_controls_fragment"
+        android:name="com.dream.dreamtv.fragment.PlaybackVideoFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <FrameLayout
+        android:id="@+id/framelayout_reasons"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:background="@color/black_subt"
+        android:gravity="center"
+        android:maxLines="2"
+        android:padding="3dp"
+        android:text="asdasdasd"
+        android:textColor="@color/white"
+        android:textSize="25sp"
+        android:visibility="gone" />
+
+</RelativeLayout>

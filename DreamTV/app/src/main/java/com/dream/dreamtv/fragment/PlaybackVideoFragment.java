@@ -15,8 +15,6 @@
 package com.dream.dreamtv.fragment;
 
 import android.app.Activity;
-import android.media.MediaMetadataRetriever;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter;
@@ -51,10 +49,8 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.dream.dreamtv.DreamTVApp;
-import com.dream.dreamtv.activity.DetailsActivity;
+import com.dream.dreamtv.activity.VideoDetailsActivity;
 import com.dream.dreamtv.beans.Video;
-
-import java.util.HashMap;
 
 
 /*
@@ -101,7 +97,7 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
 
 //        mItems = new ArrayList<Video>();
         mSelectedVideo = (Video) getActivity()
-                .getIntent().getParcelableExtra(DetailsActivity.VIDEO);
+                .getIntent().getParcelableExtra(VideoDetailsActivity.VIDEO);
 //        List<Movie> movies = MovieList.list;
 //
 //        for (int j = 0; j < movies.size(); j++) {
@@ -163,7 +159,7 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
         playbackControlsRowPresenter.setOnActionClickedListener(new OnActionClickedListener() {
             public void onActionClicked(Action action) {
                 if (action.getId() == mPlayPauseAction.getId()) {
-                    DreamTVApp.Logger.d("Button PLAY From the pannel");
+//                    DreamTVApp.Logger.d("Button PLAY From the pannel");
                     togglePlayback(mPlayPauseAction.getIndex() == PlayPauseAction.PLAY);
                 } else if (action.getId() == mFastForwardAction.getId()) {
                     Toast.makeText(getActivity(), "TODO: Fast Forward", Toast.LENGTH_SHORT).show();
@@ -178,7 +174,6 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
             }
         });
         playbackControlsRowPresenter.setSecondaryActionsHidden(HIDE_MORE_ACTIONS);
-
         ps.addClassPresenter(PlaybackControlsRow.class, playbackControlsRowPresenter);
         ps.addClassPresenter(ListRow.class, new ListRowPresenter());
         mRowsAdapter = new ArrayObjectAdapter(ps);
@@ -188,6 +183,30 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
 
         setAdapter(mRowsAdapter);
     }
+
+//    // When user click to "Rewind".
+//    public void doRewind(View view)  {
+//        int currentPosition = this.mediaPlayer.getCurrentPosition();
+//        int duration = this.mediaPlayer.getDuration();
+//        // 5 seconds.
+//        int SUBTRACT_TIME = 5000;
+//
+//        if(currentPosition - SUBTRACT_TIME > 0 )  {
+//            this.mediaPlayer.seekTo(currentPosition - SUBTRACT_TIME);
+//        }
+//    }
+//
+//    // When user click to "Fast-Forward".
+//    public void doFastForward(View view)  {
+//        int currentPosition = this.mediaPlayer.getCurrentPosition();
+//        int duration = this.mediaPlayer.getDuration();
+//        // 5 seconds.
+//        int ADD_TIME = 5000;
+//
+//        if(currentPosition + ADD_TIME < duration)  {
+//            this.mediaPlayer.seekTo(currentPosition + ADD_TIME);
+//        }
+//    }
 
     public void togglePlayback(boolean playPause) {
         if (playPause) {
@@ -220,7 +239,7 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
     }
 
     private int getDuration() {
-        Video video = mSelectedVideo;
+//        Video video = mSelectedVideo;
 //        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 //            mmr.setDataSource(video.getVideoUrl(), new HashMap<String, String>());
@@ -244,9 +263,9 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
 
         ControlButtonPresenterSelector presenterSelector = new ControlButtonPresenterSelector();
         mPrimaryActionsAdapter = new ArrayObjectAdapter(presenterSelector);
-        mSecondaryActionsAdapter = new ArrayObjectAdapter(presenterSelector);
+//        mSecondaryActionsAdapter = new ArrayObjectAdapter(presenterSelector);
         mPlaybackControlsRow.setPrimaryActionsAdapter(mPrimaryActionsAdapter);
-        mPlaybackControlsRow.setSecondaryActionsAdapter(mSecondaryActionsAdapter);
+//        mPlaybackControlsRow.setSecondaryActionsAdapter(mSecondaryActionsAdapter);
 
         mPlayPauseAction = new PlayPauseAction(getActivity());
 //        mRepeatAction = new RepeatAction(getActivity());
@@ -265,14 +284,10 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
 //            mSecondaryActionsAdapter.add(mThumbsUpAction);
 //        }
 //        mPrimaryActionsAdapter.add(mSkipPreviousAction);
-        if (PRIMARY_CONTROLS > 3) {
-            mPrimaryActionsAdapter.add(new RewindAction(getActivity()));
-        }
+        mPrimaryActionsAdapter.add(mRewindAction);
         mPrimaryActionsAdapter.add(mPlayPauseAction);
-        if (PRIMARY_CONTROLS > 3) {
-            mPrimaryActionsAdapter.add(new FastForwardAction(getActivity()));
-        }
-//        mPrimaryActionsAdapter.add(mSkipNextAction);
+        mPrimaryActionsAdapter.add(mFastForwardAction);
+        //        mPrimaryActionsAdapter.add(mSkipNextAction);
 //        mPrimaryActionsAdapter.add(mCaptionAction);
 
 //        mSecondaryActionsAdapter.add(mRepeatAction);
@@ -361,32 +376,32 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
         mHandler.postDelayed(mRunnable, getUpdatePeriod());
     }
 
-    private void next() {
-//        if (++mCurrentItem >= mItems.size()) {
-//            mCurrentItem = 0;
-//        }
-//
-//        if (mPlayPauseAction.getIndex() == PlayPauseAction.PLAY) {
-//            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, false);
-//        } else {
-//            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
-//        }
-//        updatePlaybackRow(mCurrentItem);
-        Toast.makeText(getActivity(), "Next", Toast.LENGTH_SHORT).show();
-    }
+//    private void next() {
+////        if (++mCurrentItem >= mItems.size()) {
+////            mCurrentItem = 0;
+////        }
+////
+////        if (mPlayPauseAction.getIndex() == PlayPauseAction.PLAY) {
+////            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, false);
+////        } else {
+////            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
+////        }
+////        updatePlaybackRow(mCurrentItem);
+//        Toast.makeText(getActivity(), "Next", Toast.LENGTH_SHORT).show();
+//    }
 
-    private void prev() {
-//        if (--mCurrentItem < 0) {
-//            mCurrentItem = mItems.size() - 1;
-//        }
-//        if (mPlayPauseAction.getIndex() == PlayPauseAction.PLAY) {
-//            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, false);
-//        } else {
-//            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
-//        }
-//        updatePlaybackRow(mCurrentItem);
-        Toast.makeText(getActivity(), "Previous", Toast.LENGTH_SHORT).show();
-    }
+//    private void prev() {
+////        if (--mCurrentItem < 0) {
+////            mCurrentItem = mItems.size() - 1;
+////        }
+////        if (mPlayPauseAction.getIndex() == PlayPauseAction.PLAY) {
+////            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, false);
+////        } else {
+////            mCallback.onFragmentPlayPause(mItems.get(mCurrentItem), 0, true);
+////        }
+////        updatePlaybackRow(mCurrentItem);
+//        Toast.makeText(getActivity(), "Previous", Toast.LENGTH_SHORT).show();
+//    }
 
     private void stopProgressAutomation() {
         if (mHandler != null && mRunnable != null) {
@@ -423,7 +438,8 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
         @Override
         protected void onBindDescription(ViewHolder viewHolder, Object item) {
             viewHolder.getTitle().setText(((Video) item).title);
-            viewHolder.getSubtitle().setText(((Video) item).description);
+            viewHolder.getSubtitle().setText(((Video) item).project);
+            viewHolder.getBody().setText(((Video) item).description);
         }
     }
 }

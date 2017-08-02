@@ -31,6 +31,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v17.leanback.app.BackgroundManager;
 import android.support.v17.leanback.app.BrowseFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
@@ -61,14 +62,14 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.activity.DetailsActivity;
+import com.dream.dreamtv.activity.VideoDetailsActivity;
 import com.dream.dreamtv.activity.SeeAllActivity;
 import com.dream.dreamtv.activity.PreferencesActivity;
 import com.dream.dreamtv.adapter.VideoCardPresenter;
 import com.dream.dreamtv.beans.JsonResponseBaseBean;
 import com.dream.dreamtv.beans.TaskList;
 import com.dream.dreamtv.beans.User;
-import com.dream.dreamtv.beans.UserTask;
+import com.dream.dreamtv.beans.Task;
 import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.conn.ConnectionManager;
 import com.dream.dreamtv.conn.ResponseListener;
@@ -84,6 +85,12 @@ public class MainFragment extends BrowseFragment {
     private static final int GRID_ITEM_HEIGHT = 200;
     private static final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 1456;
     private static final int PREFERENCES_SETTINGS_RESULT_CODE = 1256;
+    public static final int MY_LIST_CATEGORY = 1250;
+    public final String MY_LIST_CATEGORY_TITLE = "My List";
+    public static final int SEE_AGAIN_CATEGORY = 1251;
+    public final String SEE_AGAIN_CATEGORY_TITLE = "See Again";
+    public static final int CHECK_NEW_TASKS_CATEGORY = 1252;
+    public final String CHECK_NEW_TASKS_CATEGORY_TITLE = "Check out this videos";
 
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
@@ -170,7 +177,7 @@ public class MainFragment extends BrowseFragment {
             public void processError(VolleyError error) {
                 super.processError(error);
                 DreamTVApp.Logger.d(error.getMessage());
-                loadVideos(null); //the settings section is displayed anyway
+                setFootersOptions(); //the settings section is displayed anyway
 
             }
 
@@ -178,7 +185,7 @@ public class MainFragment extends BrowseFragment {
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
                 DreamTVApp.Logger.d(jsonResponse.toString());
-                loadVideos(null); //the settings section is displayed anyway
+                setFootersOptions(); //the settings section is displayed anyway
 
             }
         };
@@ -256,21 +263,22 @@ public class MainFragment extends BrowseFragment {
                 TaskList taskList = gson.fromJson(response, TaskList.class);
                 DreamTVApp.Logger.d(taskList.toString());
 
-                loadVideos(taskList);
+                loadVideos(taskList, CHECK_NEW_TASKS_CATEGORY);
+                getUserFinishedTasks("1");
             }
 
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
                 DreamTVApp.Logger.d(error.getMessage());
-                loadVideos(null); //the settings section is displayed anyway
+//                setFootersOptions(); //the settings section is displayed anyway
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
                 DreamTVApp.Logger.d(jsonResponse.toString());
-                loadVideos(null); //the settings section is displayed anyway
+//                setFootersOptions(); //the settings section is displayed anyway
             }
         };
 
@@ -278,33 +286,122 @@ public class MainFragment extends BrowseFragment {
 
     }
 
-    private void loadVideos(TaskList taskList) {
+
+    private void getUserFinishedTasks(String pagina) {
+        Map<String, String> urlParams = new HashMap<>();
+        urlParams.put("page", pagina);
+
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, "Retrieving users tasks...") {
+
+            @Override
+            public void processResponse(String response) {
+                Gson gson = new Gson();
+                DreamTVApp.Logger.d(response);
+                TaskList taskList = gson.fromJson(response, TaskList.class);
+                DreamTVApp.Logger.d(taskList.toString());
+
+                loadVideos(taskList, SEE_AGAIN_CATEGORY);
+
+                getUserVideosList("1");
+
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+                DreamTVApp.Logger.d(error.getMessage());
+//                setFootersOptions(); //the settings section is displayed anyway
+            }
+
+            @Override
+            public void processError(JsonResponseBaseBean jsonResponse) {
+                super.processError(jsonResponse);
+                DreamTVApp.Logger.d(jsonResponse.toString());
+//                setFootersOptions(); //the settings section is displayed anyway
+            }
+        };
+
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS_FINISHED, urlParams, responseListener, this);
+
+    }
+
+    private void getUserVideosList(String pagina) {
+        Map<String, String> urlParams = new HashMap<>();
+        urlParams.put("page", pagina);
+
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, "Retrieving users tasks...") {
+
+            @Override
+            public void processResponse(String response) {
+                Gson gson = new Gson();
+                DreamTVApp.Logger.d(response);
+                TaskList taskList = gson.fromJson(response, TaskList.class);
+                DreamTVApp.Logger.d(taskList.toString());
+
+                loadVideos(taskList, MY_LIST_CATEGORY);
+
+                setFootersOptions();
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+                DreamTVApp.Logger.d(error.getMessage());
+                setFootersOptions(); //the settings section is displayed anyway
+            }
+
+            @Override
+            public void processError(JsonResponseBaseBean jsonResponse) {
+                super.processError(jsonResponse);
+                DreamTVApp.Logger.d(jsonResponse.toString());
+                setFootersOptions(); //the settings section is displayed anyway
+            }
+        };
+
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_VIDEOS, urlParams, responseListener, this);
+
+    }
+
+    private void loadVideos(TaskList taskList, int taskState) {
 
         if (taskList != null) {
             VideoCardPresenter videoCardPresenter = new VideoCardPresenter();
 
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(videoCardPresenter);
 
-            for (UserTask task : taskList.data) {
-                listRowAdapter.add(task.getVideo());
+            int state;
+            HeaderItem header;
+            if (taskState == MY_LIST_CATEGORY) {
+                header = new HeaderItem(MY_LIST_CATEGORY_TITLE);
+                state = MY_LIST_CATEGORY;
+            } else if (taskState == SEE_AGAIN_CATEGORY) {
+                header = new HeaderItem(SEE_AGAIN_CATEGORY_TITLE);
+                state = SEE_AGAIN_CATEGORY;
+            } else {
+                header = new HeaderItem(CHECK_NEW_TASKS_CATEGORY_TITLE);
+                state = CHECK_NEW_TASKS_CATEGORY;
             }
 
-            Video lastVideoSeeMore = new Video();
-            lastVideoSeeMore.title = "See more videos";
-            lastVideoSeeMore.description = "";
-            lastVideoSeeMore.thumbnail = "https://upload.wikimedia.org/wikipedia/commons/5/59/R2244.png";
-            listRowAdapter.add(lastVideoSeeMore);
+            for (Task task : taskList.data) {
+                listRowAdapter.add(task.getVideo(state));
+            }
 
-//        listRowAdapter.add(lastVideoSeeMore);
+            if (state == CHECK_NEW_TASKS_CATEGORY) { //Only in the Check_New_Tasks we add the SeeAll options. In others categories is not necessary
+                Video lastVideoSeeMore = new Video();
+                lastVideoSeeMore.title = "See more videos";
+                lastVideoSeeMore.description = "";
+                lastVideoSeeMore.thumbnail = "https://upload.wikimedia.org/wikipedia/commons/5/59/R2244.png";
+                listRowAdapter.add(lastVideoSeeMore);
+            }
 
-            HeaderItem header = new HeaderItem("Check out this videos");
+
             mRowsAdapter.add(new ListRow(header, listRowAdapter));
 
             setAdapter(mRowsAdapter);
 
 
         }
-        setFootersOptions();
+
     }
 
 //    private void loadVideos(VideoList videoList) {
@@ -451,24 +548,24 @@ public class MainFragment extends BrowseFragment {
                 final ArrayObjectAdapter currentRowAdapter = (ArrayObjectAdapter) listRow.getAdapter();
                 int selectedIndex = currentRowAdapter.indexOf(item);
 
-                if (selectedIndex != -1 && (currentRowAdapter.size() - 1) == selectedIndex) {
+                if (selectedIndex != -1 && (currentRowAdapter.size() - 1) == selectedIndex && listRow.getHeaderItem().getName().equals(CHECK_NEW_TASKS_CATEGORY_TITLE)) { //Es el ultimo elemento de la fila (SEE ALL option)
                     Intent intent = new Intent(getActivity(), SeeAllActivity.class);
 
                     Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
                             getActivity(),
                             ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                            DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                            VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                     getActivity().startActivity(intent, bundle);
                 } else {
                     Video video = (Video) item;
                     DreamTVApp.Logger.d("Item: " + item.toString());
-                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                    intent.putExtra(DetailsActivity.VIDEO, video);
+                    Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
+                    intent.putExtra(VideoDetailsActivity.VIDEO, video);
 
                     Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
                             getActivity(),
                             ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                            DetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                            VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
                     getActivity().startActivity(intent, bundle);
                 }
             } else if (item instanceof String) {

@@ -10,7 +10,12 @@
     <color name="img_full_opaque">#00000000</color>
     <color name="black_subt">#b6000000</color>
     <color name="black_opaque">#AA000000</color>
+    <color name="black_transparent">#b3000000</color>
+    <color name="gray_transparent">#b3414141</color>
+    <color name="pg">#87060606</color>
     <color name="black">#59000000</color>
+    <color name="gray">#5e5d5d</color>
+    <color name="gray_light">#818181</color>
     <color name="black_light">#28020202</color>
     <color name="black_light_2">#0f414141</color>
     <color name="white">#FFFFFF</color>
@@ -40,6 +45,7 @@
     <color name="player_progress_color">#feab91</color>
     <color name="player_background_color">#db2a0f</color>
     <color name="red">#b11800</color>
+    <color name="red_light">#f74428</color>
     <color name="green">#00a10d</color>
     <color name="blue">#0d228f</color>
 

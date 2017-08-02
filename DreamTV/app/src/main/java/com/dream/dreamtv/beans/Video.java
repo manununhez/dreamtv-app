@@ -6,6 +6,8 @@ import android.os.Parcelable;
 
 import com.dream.dreamtv.DreamTVApp;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -32,6 +34,13 @@ public class Video implements Parcelable {
     public String subtitle_languages_uri;
     public String resource_uri;
 
+    //Para almacenar datos de la tarea
+    public String subtitle_language;
+    public int task_id;
+    public int task_state; //indicates if the task have or have not done yet. If it the task comes from the category "See Again", task_state == 1, else task_state == 0
+    public UserTask[] userTaskList; //all user tasks saved
+
+    //Para almacenar los subtitlos e ir propagando entre pantallas
     public SubtitleVtt subtitle_vtt;
     public SubtitleJson subtitle_json; //para ir propagando el subtitulo entre pantallas
 
@@ -58,6 +67,10 @@ public class Video implements Parcelable {
         urls_uri = in.readString();
         subtitle_languages_uri = in.readString();
         resource_uri = in.readString();
+        subtitle_language = in.readString();
+        task_id = in.readInt();
+        task_state = in.readInt();
+        userTaskList = in.createTypedArray(UserTask.CREATOR);
         subtitle_vtt = in.readParcelable(SubtitleVtt.class.getClassLoader());
         subtitle_json = in.readParcelable(SubtitleJson.class.getClassLoader());
     }
@@ -73,36 +86,6 @@ public class Video implements Parcelable {
             return new Video[size];
         }
     };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(id);
-        parcel.writeString(video_type);
-        parcel.writeString(primary_audio_language_code);
-        parcel.writeString(original_language);
-        parcel.writeString(title);
-        parcel.writeString(description);
-        parcel.writeInt(duration);
-        parcel.writeString(thumbnail);
-        parcel.writeString(created);
-        parcel.writeString(team);
-        parcel.writeString(project);
-        parcel.writeString(video_url);
-        parcel.writeStringList(all_urls);
-        parcel.writeTypedList(languages);
-        parcel.writeString(activity_uri);
-        parcel.writeString(urls_uri);
-        parcel.writeString(subtitle_languages_uri);
-        parcel.writeString(resource_uri);
-        parcel.writeParcelable(subtitle_vtt, i);
-        parcel.writeParcelable(subtitle_json, i);
-    }
-
 
     public String getVideoUrl() {
         String url;
@@ -134,28 +117,71 @@ public class Video implements Parcelable {
         return newUrl.getQueryParameter("v");
     }
 
-    public int getLanguageListIndex(String languageName) {
-        for (int i = 0; i < languages.size(); i++) {
-            if (languages.get(i).name.equals(languageName))
-                return i;
+
+    public Subtitle getSyncSubtitleText(long l) {
+        List<Subtitle> subtitleList = this.subtitle_json.subtitles;
+        Subtitle subtitle = null;
+        for (Subtitle subtitleTemp : subtitleList) {
+            if (l >= subtitleTemp.start && l <= subtitleTemp.end) { //esta adentro del ciclo
+                subtitle = subtitleTemp;
+                break;
+            } else if (l < subtitleTemp.start)
+                break;
+
         }
 
-        return -1;
+        return subtitle;
     }
 
-    public String getSyncSubtitleText(long l) {
-        List<Subtitle> subtitleList = this.subtitle_json.subtitles;
-        String text = "";
-        for (Subtitle subtitle : subtitleList) {
-            if (l >= subtitle.start && l <= subtitle.end) { //esta adentro del ciclo
-                text = subtitle.text;
-                break;
-            } else if (l < subtitle.start)
-                break;
-
+    public UserTask getUserTask(long l) {
+        Subtitle subtitle = getSyncSubtitleText(l);
+        if (subtitle != null) { //if subtitle == null, there is not subtitle in the time selected
+            for (UserTask userTask : this.userTaskList) {
+                if (userTask.subtitle_position == subtitle.position) {
+                    //after we find the position, we delete that option from the list. This allow us to show only once the respective reason as a popup
+                    List<UserTask> arrayList = new ArrayList<>(Arrays.asList(this.userTaskList));
+                    arrayList.remove(userTask);
+                    this.userTaskList = arrayList.toArray(new UserTask[arrayList.size()]);
+                    return userTask;
+                }
+            }
         }
 
-        return text;
+        return null;
+    }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
+        parcel.writeString(video_type);
+        parcel.writeString(primary_audio_language_code);
+        parcel.writeString(original_language);
+        parcel.writeString(title);
+        parcel.writeString(description);
+        parcel.writeInt(duration);
+        parcel.writeString(thumbnail);
+        parcel.writeString(created);
+        parcel.writeString(team);
+        parcel.writeString(project);
+        parcel.writeString(video_url);
+        parcel.writeStringList(all_urls);
+        parcel.writeTypedList(languages);
+        parcel.writeString(activity_uri);
+        parcel.writeString(urls_uri);
+        parcel.writeString(subtitle_languages_uri);
+        parcel.writeString(resource_uri);
+        parcel.writeString(subtitle_language);
+        parcel.writeInt(task_id);
+        parcel.writeInt(task_state);
+        parcel.writeTypedArray(userTaskList, i);
+        parcel.writeParcelable(subtitle_vtt, i);
+        parcel.writeParcelable(subtitle_json, i);
     }
 
     @Override
@@ -179,6 +205,10 @@ public class Video implements Parcelable {
                 ", urls_uri='" + urls_uri + '\'' +
                 ", subtitle_languages_uri='" + subtitle_languages_uri + '\'' +
                 ", resource_uri='" + resource_uri + '\'' +
+                ", subtitle_language='" + subtitle_language + '\'' +
+                ", task_id=" + task_id +
+                ", task_state=" + task_state +
+                ", userTaskList=" + Arrays.toString(userTaskList) +
                 ", subtitle_vtt=" + subtitle_vtt +
                 ", subtitle_json=" + subtitle_json +
                 '}';

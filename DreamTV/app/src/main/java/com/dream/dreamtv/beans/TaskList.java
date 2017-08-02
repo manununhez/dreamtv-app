@@ -8,7 +8,7 @@ import java.util.List;
 
 public class TaskList {
     public int current_page;
-    public List<UserTask> data;
+    public List<Task> data;
     public int from;
     public int last_page;
     public int total;

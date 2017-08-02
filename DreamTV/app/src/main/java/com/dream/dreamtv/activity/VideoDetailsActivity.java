@@ -15,17 +15,15 @@
 package com.dream.dreamtv.activity;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 
 
 /*
  * Details activity class that loads LeanbackDetailsFragment class
  */
-public class DetailsActivity extends Activity {
+public class VideoDetailsActivity extends Activity {
     public static final String SHARED_ELEMENT_NAME = "hero";
     public static final String MOVIE = "Movie";
     public static final String VIDEO = "Video";
@@ -36,16 +34,16 @@ public class DetailsActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_details);
+        setContentView(R.layout.activity_video_details);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == Activity.RESULT_OK)
-            if (requestCode == 0152) {
-                DreamTVApp.Logger.d("asd");
-            }
-    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        if (resultCode == Activity.RESULT_OK)
+//            if (requestCode == 0152) {
+//                DreamTVApp.Logger.d("asd");
+//            }
+//    }
 }
