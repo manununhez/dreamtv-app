@@ -280,6 +280,11 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="colorControlNormal">@color/white</item>
     </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
     <!--<style name="DeliveryModeButton.Left">-->
         <!--<item name="android:background">@drawable/selector_2_1</item>-->
     <!--</style>-->

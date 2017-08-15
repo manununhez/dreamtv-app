@@ -410,6 +410,8 @@ public class VideoDetailsFragment extends DetailsFragment {
                     getOtherTasksForThisVideo();
                 } else if ((mSelectedVideo.task_state == MainFragment.SEE_AGAIN_CATEGORY)) {
                     getMyTaskForThisVideo();
+                } else {
+                    goToPlayVideo();
                 }
 
 

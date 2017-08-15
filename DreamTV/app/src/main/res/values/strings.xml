@@ -94,4 +94,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_reason">ReasonActivity</string>
+
+
+    <string name="btn_continue_watching">Continue watching</string>
+    <string name="btn_no_from_beggining">From the beginning</string>
 </resources>

@@ -184,9 +184,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         subtitleHandlerSyncConfig();
 
 
-        mSession = new
-
-                MediaSession(this, "LeanbackSampleApp");
+        mSession = new MediaSession(this, "LeanbackSampleApp");
         mSession.setCallback(new
 
                 MediaSessionCallback());

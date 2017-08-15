@@ -88,7 +88,7 @@ public class MainFragment extends BrowseFragment {
     public static final int MY_LIST_CATEGORY = 1250;
     public final String MY_LIST_CATEGORY_TITLE = "My List";
     public static final int SEE_AGAIN_CATEGORY = 1251;
-    public final String SEE_AGAIN_CATEGORY_TITLE = "See Again";
+    public final String SEE_AGAIN_CATEGORY_TITLE = "Continue watching";
     public static final int CHECK_NEW_TASKS_CATEGORY = 1252;
     public final String CHECK_NEW_TASKS_CATEGORY_TITLE = "Check out this videos";
 

@@ -136,17 +136,30 @@ public class Video implements Parcelable {
     public UserTask getUserTask(long l) {
         Subtitle subtitle = getSyncSubtitleText(l);
         if (subtitle != null) { //if subtitle == null, there is not subtitle in the time selected
-            for (UserTask userTask : this.userTaskList) {
-                if (userTask.subtitle_position == subtitle.position) {
-                    //after we find the position, we delete that option from the list. This allow us to show only once the respective reason as a popup
-                    List<UserTask> arrayList = new ArrayList<>(Arrays.asList(this.userTaskList));
-                    arrayList.remove(userTask);
-                    this.userTaskList = arrayList.toArray(new UserTask[arrayList.size()]);
-                    return userTask;
+            if (this.userTaskList != null && this.userTaskList.length > 0)
+                for (UserTask userTask : this.userTaskList) {
+                    if (userTask.subtitle_position == subtitle.position) {
+                        //after we find the position, we delete that option from the list. This allow us to show only once the respective reason as a popup
+                        List<UserTask> arrayList = new ArrayList<>(Arrays.asList(this.userTaskList));
+                        arrayList.remove(userTask);
+                        this.userTaskList = arrayList.toArray(new UserTask[arrayList.size()]);
+                        return userTask;
+                    }
                 }
-            }
         }
 
+        return null;
+    }
+
+    public Subtitle getLastSubtitlePositionTime() {
+        if (this.userTaskList != null && this.userTaskList.length > 0) {
+            UserTask lastUserTask = this.userTaskList[userTaskList.length - 1];
+            List<Subtitle> subtitleList = this.subtitle_json.subtitles;
+            for (Subtitle subtitle : subtitleList)
+                if (subtitle.position == lastUserTask.subtitle_position)
+                    return subtitle;
+
+        }
         return null;
     }
 

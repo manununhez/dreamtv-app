@@ -46,4 +46,7 @@
 
     <dimen name="playback_now_playing_card_width">240dp</dimen>
     <dimen name="playback_now_playing_card_height">240dp</dimen>
+
+    <dimen name="popup_width">500dp</dimen>
+    <dimen name="popup_height">500dp</dimen>
 </resources>

@@ -22,7 +22,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
@@ -105,6 +107,7 @@ public class ReasonsDialogFragment extends DialogFragment {
         // Required empty public constructor
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,13 +126,22 @@ public class ReasonsDialogFragment extends DialogFragment {
         viewRoot.setContentView(R.layout.fragment_reasons_dialog);
 
         TextView tvSubtitle = (TextView) viewRoot.findViewById(R.id.tvSubtitle);
+        LinearLayout llButtonsOptions1 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions1);
+        LinearLayout llButtonsOptions2 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions2);
         TextView tvTitle = (TextView) viewRoot.findViewById(R.id.tvTitle);
         Button btnCancel = (Button) viewRoot.findViewById(R.id.btnCancel);
         Button btnSave = (Button) viewRoot.findViewById(R.id.btnSave);
+        Button btnOk = (Button) viewRoot.findViewById(R.id.btnOk);
 
         llReasons = (LinearLayout) viewRoot.findViewById(R.id.llReasons);
 
         btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewRoot.dismiss();
+            }
+        });
+        btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 viewRoot.dismiss();
@@ -158,10 +170,16 @@ public class ReasonsDialogFragment extends DialogFragment {
 
         //controlUserTask. We repopulate the form with user task data
         if (userTask != null)
-            if (taskState == MainFragment.SEE_AGAIN_CATEGORY)
+            if (taskState == MainFragment.SEE_AGAIN_CATEGORY) {
                 repopulateFormWithUserTaskData();
-            else if (taskState == MainFragment.CHECK_NEW_TASKS_CATEGORY)
+                llButtonsOptions1.setVisibility(View.VISIBLE);
+                llButtonsOptions2.setVisibility(View.GONE);
+            } else if (taskState == MainFragment.CHECK_NEW_TASKS_CATEGORY) {
                 tvTitle.setText("Others users think there is a mistake here. What do you think?");
+                llButtonsOptions1.setVisibility(View.GONE);
+                llButtonsOptions2.setVisibility(View.VISIBLE);
+            }
+
 
         return viewRoot;
     }
@@ -172,9 +190,15 @@ public class ReasonsDialogFragment extends DialogFragment {
         //re-select the reasons id
         List<String> strArray = Arrays.asList(userTask.reason_id.substring(userTask.reason_id.indexOf("[") + 1, userTask.reason_id.indexOf("]")).split(", "));
         for (int i = 0; i < llReasons.getChildCount(); i++) {
-            ToggleButton childAt = (ToggleButton) llReasons.getChildAt(i);
-            if (strArray.contains(String.valueOf(childAt.getId())))
-                childAt.setChecked(true);
+            LinearLayout childAt = (LinearLayout) llReasons.getChildAt(i);
+            CheckBox checkBox = (CheckBox) childAt.getChildAt(0); //0 -> checkbox, 1->Tooglebutton
+            ToggleButton toggleButton = (ToggleButton) childAt.getChildAt(1); //0 -> checkbox, 1->Tooglebutton
+            checkBox.setEnabled(false);
+            toggleButton.setEnabled(false);
+            if (strArray.contains(String.valueOf(toggleButton.getId()))) {
+                toggleButton.setChecked(true);
+                checkBox.setChecked(true);
+            }
         }
 
     }
@@ -214,6 +238,16 @@ public class ReasonsDialogFragment extends DialogFragment {
 
         ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_TASKS_SAVE, null, jsonRequest, responseListener, this);
 
+    }
+
+    @Override
+    public void onResume() {
+//        int width = getResources().getDimensionPixelSize(R.dimen.popup_width);
+//        int height = getResources().getDimensionPixelSize(R.dimen.popup_height);
+        getDialog().getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+//        getDialog().getWindow().setLayout(width, height);
+
+        super.onResume();
     }
 
     private void audioRecordSettings() {
@@ -312,7 +346,13 @@ public class ReasonsDialogFragment extends DialogFragment {
             final float scale = getActivity().getResources().getDisplayMetrics().density;
             int pixels = (int) (dpsToogle * scale + 0.5f);
 
-            final ToggleButton toggleButton = new ToggleButton(getActivity());
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
+            View inflatedLayout = inflater.inflate(R.layout.reasons_button_layout, null);
+            ToggleButton toggleButton = (ToggleButton) inflatedLayout.findViewById(R.id.toogleButton);
+            final CheckBox chkBox = (CheckBox) inflatedLayout.findViewById(R.id.chkBox);
+//            containerDestacado.addView(inflatedLayout);
+
+//            final ToggleButton toggleButton = new ToggleButton(getActivity());
             toggleButton.setBackgroundResource(R.color.black);
 //            toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.custom_selector));
             toggleButton.setTextColor(ContextCompat.getColor(getActivity(), R.color.white));
@@ -332,14 +372,21 @@ public class ReasonsDialogFragment extends DialogFragment {
                 public void onClick(View view) {
                     if (((ToggleButton) view).isChecked()) { //si no esta chequeado y se hace check
                         //((RadioGroup) view.getParent()).check(view.getId());
-                        if (!selectedReasons.contains(view.getId()))
+                        if (!selectedReasons.contains(view.getId())) {
                             selectedReasons.add(view.getId());
-                    } else //estaba chequeado, pero se desactiva el mismo boton. Ahi se reinicia el selectedFeedbackReason
+                            chkBox.setChecked(true);
+                        }
+                    } else { //estaba chequeado, pero se desactiva el mismo boton. Ahi se reinicia el selectedFeedbackReason
                         selectedReasons.remove(selectedReasons.indexOf(view.getId()));
+                        chkBox.setChecked(false);
+                    }
                 }
             });
 
-            llReasons.addView(toggleButton);
+            if (inflatedLayout.getParent() != null)
+                ((ViewGroup) inflatedLayout.getParent()).removeView(inflatedLayout); // <- fix
+
+            llReasons.addView(inflatedLayout);
         }
     }
 
