@@ -15,12 +15,12 @@
     <color name="pg">#87060606</color>
     <color name="black">#59000000</color>
     <color name="gray">#5e5d5d</color>
-    <color name="dialog_background">#404040</color>
+    <color name="dialog_background">#f1404040</color>
     <color name="gray_light">#818181</color>
     <color name="black_light">#28020202</color>
     <color name="black_light_2">#0f414141</color>
     <color name="white">#FFFFFF</color>
-    <color name="white_transparent">#aaffffff</color>
+    <color name="white_transparent">#5effffff</color>
     <color name="orange_transparent">#AAFADCA7</color>
     <color name="orange">#FADCA7</color>
     <color name="yellow">#EEFF41</color>
@@ -50,6 +50,7 @@
     <color name="dark_red">#660e00</color>
     <color name="red_light">#f74428</color>
     <color name="green">#00a10d</color>
+    <color name="light_green">#08d2b4</color>
     <color name="blue">#0d228f</color>
 
 </resources>

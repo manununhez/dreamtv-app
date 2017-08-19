@@ -90,7 +90,7 @@ public class MainFragment extends BrowseFragment {
     public static final int SEE_AGAIN_CATEGORY = 1251;
     public final String SEE_AGAIN_CATEGORY_TITLE = "Continue watching";
     public static final int CHECK_NEW_TASKS_CATEGORY = 1252;
-    public final String CHECK_NEW_TASKS_CATEGORY_TITLE = "Check out this videos";
+    public final String CHECK_NEW_TASKS_CATEGORY_TITLE = "Check out these videos";
 
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;

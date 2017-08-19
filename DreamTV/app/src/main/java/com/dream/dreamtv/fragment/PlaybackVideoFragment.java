@@ -213,13 +213,13 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
             startProgressAutomation();
             setFadingEnabled(true);
             mCallback.onFragmentPlayPause(mSelectedVideo,
-                    mPlaybackControlsRow.getCurrentTime(), true);
+                    mPlaybackControlsRow.getCurrentTime(), true, mPlaybackControlsRow);
             mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PAUSE));
         } else {
             stopProgressAutomation();
             setFadingEnabled(false);
             mCallback.onFragmentPlayPause(mSelectedVideo,
-                    mPlaybackControlsRow.getCurrentTime(), false);
+                    mPlaybackControlsRow.getCurrentTime(), false, mPlaybackControlsRow);
             mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PLAY));
         }
         notifyChanged(mPlayPauseAction);
@@ -376,6 +376,14 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
         mHandler.postDelayed(mRunnable, getUpdatePeriod());
     }
 
+
+    private void stopProgressAutomation() {
+        if (mHandler != null && mRunnable != null) {
+//            mHandler.removeCallbacks(mRunnable);
+            mHandler.removeCallbacksAndMessages(null);
+        }
+    }
+
 //    private void next() {
 ////        if (++mCurrentItem >= mItems.size()) {
 ////            mCurrentItem = 0;
@@ -403,12 +411,6 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
 //        Toast.makeText(getActivity(), "Previous", Toast.LENGTH_SHORT).show();
 //    }
 
-    private void stopProgressAutomation() {
-        if (mHandler != null && mRunnable != null) {
-//            mHandler.removeCallbacks(mRunnable);
-            mHandler.removeCallbacksAndMessages(null);
-        }
-    }
 
     @Override
     public void onStop() {
@@ -431,7 +433,7 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
 
     // Container Activity must implement this interface
     public interface OnPlayPauseClickedListener {
-        void onFragmentPlayPause(Video video, int position, Boolean playPause);
+        void onFragmentPlayPause(Video video, int position, Boolean playPause, PlaybackControlsRow mPlaybackControlsRow);
     }
 
     static class DescriptionPresenter extends AbstractDetailsDescriptionPresenter {

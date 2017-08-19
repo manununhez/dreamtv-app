@@ -8,54 +8,82 @@
 
     <RelativeLayout
         android:layout_width="500dp"
-        android:layout_height="500dp"
+        android:layout_height="wrap_content"
         android:background="@color/dialog_background"
         android:paddingEnd="20dp"
         android:paddingStart="20dp">
 
         <TextView
-            android:id="@+id/tvTitle"
+            android:id="@+id/tvPreviousSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="15dp"
-            android:text="Is this sentence OK?:"
+            android:background="@color/blue"
+            android:gravity="center"
+            android:padding="3dp"
+            android:text="Previous"
             android:textColor="@color/white"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textSize="15sp"
+            android:textStyle="italic" />
 
         <TextView
-            android:id="@+id/tvSubtitle"
+            android:id="@+id/tvCurrentSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/tvTitle"
+            android:layout_below="@+id/tvPreviousSubtitle"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
             android:background="@color/blue"
             android:gravity="center"
-            android:maxLines="2"
             android:padding="3dp"
             android:text="asdasdasd"
             android:textColor="@color/white"
-            android:textSize="17sp" />
+            android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/titleReasons"
+            android:id="@+id/tvNextSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/tvSubtitle"
-            android:layout_marginTop="25dp"
-            android:text="Select some reasons:"
+            android:layout_below="@+id/tvCurrentSubtitle"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:background="@color/blue"
+            android:gravity="center"
+            android:padding="3dp"
+            android:text="Next"
             android:textColor="@color/white"
-            android:textSize="18sp" />
+            android:textSize="15sp"
+            android:textStyle="italic" />
+        <!--<TextView-->
+        <!--android:id="@+id/titleReasons"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/tvSubtitle"-->
+        <!--android:layout_marginTop="25dp"-->
+        <!--android:text="Select some reasons:"-->
+        <!--android:textColor="@color/white"-->
+        <!--android:textSize="18sp" />-->
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvNextSubtitle"
+            android:layout_marginTop="20dp"
+            android:text="What is wrong here?:"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <ScrollView
             android:id="@+id/scrollView"
-            android:layout_below="@+id/titleReasons"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvTitle">
 
             <LinearLayout
                 android:id="@+id/llReasons"
@@ -126,24 +154,70 @@
             </LinearLayout>
         </ScrollView>
 
-        <TextView
-            android:id="@+id/titleComents"
+        <!--<TextView-->
+        <!--android:id="@+id/titleComents"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/scrollView"-->
+        <!--android:layout_marginTop="25dp"-->
+        <!--android:text="Send some comments (voice):"-->
+        <!--android:textColor="@color/white"-->
+        <!--android:textSize="18sp" />-->
+
+
+        <LinearLayout
+            android:id="@+id/llButtonsOptions1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/scrollView"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="10dp"
             android:layout_marginTop="25dp"
-            android:text="Send some comments (voice):"
-            android:textColor="@color/white"
-            android:textSize="18sp" />
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/btnOk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ok" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llButtonsOptions2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/scrollView"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="25dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:text="Save" />
+
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:text="Cancel" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/llComments"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/titleComents"
+            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <ImageButton
                 android:id="@+id/btnRecord"
@@ -164,48 +238,6 @@
                 android:padding="10dp"
                 android:textStyle="italic" />
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/llButtonsOptions1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="15dp"
-            android:visibility="gone">
-
-            <Button
-                android:id="@+id/btnOk"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ok" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/llButtonsOptions2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="15dp"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnSave"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:text="Save" />
-
-            <Button
-                android:id="@+id/btnCancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:text="Cancel" />
         </LinearLayout>
 
 

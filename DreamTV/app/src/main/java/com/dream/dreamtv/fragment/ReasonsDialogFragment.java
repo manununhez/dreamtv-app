@@ -38,6 +38,8 @@ import com.dream.dreamtv.R;
 import com.dream.dreamtv.beans.JsonResponseBaseBean;
 import com.dream.dreamtv.beans.Reason;
 import com.dream.dreamtv.beans.ReasonList;
+import com.dream.dreamtv.beans.Subtitle;
+import com.dream.dreamtv.beans.SubtitleJson;
 import com.dream.dreamtv.beans.UserTask;
 import com.dream.dreamtv.conn.ConnectionManager;
 import com.dream.dreamtv.conn.ResponseListener;
@@ -62,7 +64,7 @@ public class ReasonsDialogFragment extends DialogFragment {
     private LinearLayout llReasons;
     private List<Reason> reasonList;
     private List<Integer> selectedReasons = new ArrayList<>();
-    private String subTitleText;
+    //    private String subTitleText;
     private ImageButton btnRecord;
     private TextView voiceInput;
     private Dialog viewRoot;
@@ -71,30 +73,31 @@ public class ReasonsDialogFragment extends DialogFragment {
     private int subtitlePosition;
     private int idTask;
     private int taskState;
-    private int subtitleVersion;
+    //    private int subtitleVersion;
+    private SubtitleJson subtitle;
 
-    public static ReasonsDialogFragment newInstance(String subTitleText, int subtitlePosition, int idTask,
-                                                    int subtitleVersion) {
+    public static ReasonsDialogFragment newInstance(SubtitleJson subtitle, int subtitlePosition, int idTask) {
         ReasonsDialogFragment f = new ReasonsDialogFragment();
 
         // Supply num input as an argument.
         Bundle args = new Bundle();
-        args.putString("subTitleText", subTitleText);
-        args.putInt("subtitleVersion", subtitleVersion);
+        args.putParcelable("SubtitleJson", subtitle);
+//        args.putString("subTitleText", subTitleText);
+//        args.putInt("subtitleVersion", subtitleVersion);
         args.putInt("subtitlePosition", subtitlePosition);
         args.putInt("idTask", idTask);
         f.setArguments(args);
         return f;
     }
 
-    public static ReasonsDialogFragment newInstance(String subTitleText, int subtitlePosition, int idTask,
-                                                    int subtitleVersion, UserTask userTask, int taskState) {
+    public static ReasonsDialogFragment newInstance(SubtitleJson subtitle, int subtitlePosition, int idTask, UserTask userTask, int taskState) {
         ReasonsDialogFragment f = new ReasonsDialogFragment();
 
         // Supply num input as an argument.
         Bundle args = new Bundle();
-        args.putString("subTitleText", subTitleText);
-        args.putInt("subtitleVersion", subtitleVersion);
+        args.putParcelable("SubtitleJson", subtitle);
+//        args.putString("subTitleText", subTitleText);
+//        args.putInt("subtitleVersion", subtitleVersion);
         args.putInt("subtitlePosition", subtitlePosition);
         args.putInt("idTask", idTask);
         args.putInt("taskState", taskState);
@@ -111,9 +114,10 @@ public class ReasonsDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        subTitleText = getArguments().getString("subTitleText");
-        subtitleVersion = getArguments().getInt("subtitleVersion");
+//        subTitleText = getArguments().getString("subTitleText");
+//        subtitleVersion = getArguments().getInt("subtitleVersion");
         subtitlePosition = getArguments().getInt("subtitlePosition");
+        subtitle = getArguments().getParcelable("SubtitleJson");
         idTask = getArguments().getInt("idTask");
         taskState = getArguments().getInt("taskState");
         userTask = getArguments().getParcelable("userTask");
@@ -125,7 +129,9 @@ public class ReasonsDialogFragment extends DialogFragment {
         viewRoot = new Dialog(getActivity(), R.style.DefaultDialogFragmentStyle);
         viewRoot.setContentView(R.layout.fragment_reasons_dialog);
 
-        TextView tvSubtitle = (TextView) viewRoot.findViewById(R.id.tvSubtitle);
+        TextView tvCurrentSubtitle = (TextView) viewRoot.findViewById(R.id.tvCurrentSubtitle);
+        TextView tvPreviousSubtitle = (TextView) viewRoot.findViewById(R.id.tvPreviousSubtitle);
+        TextView tvNextSubtitle = (TextView) viewRoot.findViewById(R.id.tvNextSubtitle);
         LinearLayout llButtonsOptions1 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions1);
         LinearLayout llButtonsOptions2 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions2);
         TextView tvTitle = (TextView) viewRoot.findViewById(R.id.tvTitle);
@@ -154,18 +160,23 @@ public class ReasonsDialogFragment extends DialogFragment {
                 Toast.makeText(getActivity(), "Thanks. Saved reason", Toast.LENGTH_SHORT).show();
             }
         });
-        tvSubtitle.setText(Html.fromHtml(subTitleText));
+        tvCurrentSubtitle.setText(Html.fromHtml(subtitle.subtitles.get(subtitlePosition - 1).text));
+        tvNextSubtitle.setText(Html.fromHtml(subtitle.subtitles.get(subtitlePosition).text));
+        if (subtitlePosition > 1)
+            tvPreviousSubtitle.setText(Html.fromHtml(subtitle.subtitles.get(subtitlePosition - 2).text));
+        else
+            tvPreviousSubtitle.setVisibility(View.GONE);
 
         audioRecordSettings();
 
         //The cached reasons are verified
-        ReasonList reasonL = ((DreamTVApp) getActivity().getApplication()).getReasons();
-        if (reasonL == null)
-            getReasons();
-        else {
-            reasonList = reasonL.data;
-            setupReasons();
-        }
+//        ReasonList reasonL = ((DreamTVApp) getActivity().getApplication()).getReasons();
+//        if (reasonL == null)
+        getReasons();
+//        else {
+//            reasonList = reasonL.data;
+//            setupReasons();
+//        }
 
 
         //controlUserTask. We repopulate the form with user task data
@@ -207,7 +218,7 @@ public class ReasonsDialogFragment extends DialogFragment {
         UserTask userTask = new UserTask();
         userTask.comments = voiceInput.getText().toString();
         userTask.subtitle_position = subtitlePosition;
-        userTask.subtitle_version = String.valueOf(subtitleVersion);
+        userTask.subtitle_version = String.valueOf(subtitle.version_number);
         userTask.task_id = idTask;
         userTask.reasonList = selectedReasons.toString();
 

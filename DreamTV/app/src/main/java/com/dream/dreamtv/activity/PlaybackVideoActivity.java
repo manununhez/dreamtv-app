@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.v17.leanback.widget.PlaybackControlsRow;
 import android.text.Html;
 import android.view.KeyEvent;
 import android.view.View;
@@ -94,6 +95,51 @@ public class PlaybackVideoActivity extends Activity implements
         mSession.setActive(true);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mVideoView.suspend();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mSession.setActive(true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mVideoView.isPlaying()) {
+            if (!requestVisibleBehind(true)) {
+                // Try to play behind launcher, but if it fails, stop playback.
+                stopPlayback();
+            }
+        } else {
+            requestVisibleBehind(false);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mSession.release();
+    }
+
+
+    @Override
+    public void onVisibleBehindCanceled() {
+        super.onVisibleBehindCanceled();
+    }
+
     private void subtitleHandlerSyncConfig() {
         handler = new Handler();
         myRunnable = new Runnable() {
@@ -105,22 +151,14 @@ public class PlaybackVideoActivity extends Activity implements
                         if (!handlerRunning)
                             return;
 
-
-                        DreamTVApp.Logger.d("Dr - subtitleHandlerSyncConfig()");
+//                        DreamTVApp.Logger.d("Dr - subtitleHandlerSyncConfig()");
                         timeStoppedTemp = tvTime.getBase();
 
                         selectedUserTask = mSelectedVideo.getUserTask(SystemClock.elapsedRealtime() - timeStoppedTemp);
                         if (selectedUserTask != null) { //pause the video and show the popup
-//                            pauseVideo();
                             PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
-
                             playbackVideoFragment.togglePlayback(false);
-
-
-//                            updatePlaybackState(playbackVideoFragment.togglePlayback(true));
-//                            controlReasonDialogPopUp(SystemClock.elapsedRealtime() - timeStoppedTemp, selectedUserTask);
                         }
-
 
                         controlShowSubtitle(SystemClock.elapsedRealtime() - timeStoppedTemp);
 
@@ -138,7 +176,7 @@ public class PlaybackVideoActivity extends Activity implements
 
 
     private void startSyncSubtitle(long base) {
-        DreamTVApp.Logger.d("Dr - startSyncSubtitle()");
+//        DreamTVApp.Logger.d("Dr - startSyncSubtitle()");
 
         tvTime.setBase(base);
         tvTime.start();
@@ -147,29 +185,14 @@ public class PlaybackVideoActivity extends Activity implements
     }
 
     private void stopSyncSubtitle() {
-        DreamTVApp.Logger.d("Dr - stopSyncSubtitle()");
+//        DreamTVApp.Logger.d("Dr - stopSyncSubtitle()");
         tvTime.stop();
-//        handler.removeCallbacks(myRunnable);
         handlerRunning = false;
 
         handler.removeCallbacks(null);
         handler.removeCallbacksAndMessages(null);
     }
 
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mVideoView.suspend();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
-        }
-        super.onBackPressed();
-    }
 
     //    @Override
 //    public boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -196,7 +219,7 @@ public class PlaybackVideoActivity extends Activity implements
     /**
      * Implementation of OnPlayPauseClickedListener
      */
-    public void onFragmentPlayPause(final Video video, final int position, final Boolean playPause) {
+    public void onFragmentPlayPause(final Video video, final int position, final Boolean playPause, final PlaybackControlsRow mPlaybackControlsRow) {
         mVideoView.setVideoPath(video.getVideoUrl());
 
 //        localPosition = position;
@@ -207,17 +230,13 @@ public class PlaybackVideoActivity extends Activity implements
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
-//                            localPosition = subtitle.position;
-//                            setupCallbacks();
+                            mPlaybackControlsRow.setCurrentTime(subtitle.end);
                             setupReproduction(video, subtitle.end, playPause);
-//                            mPlaybackState = LeanbackPlaybackState.PLAYING;
-//                            currentPositionPlayPause = subtitle.end;
-//                            mVideoView.seekTo(subtitle.end);
-//                            mVideoView.start();
                         }
                     }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            mPlaybackControlsRow.setCurrentTime(position);
                             setupReproduction(video, position, playPause);
                             dialog.dismiss();
                         }
@@ -230,13 +249,9 @@ public class PlaybackVideoActivity extends Activity implements
 
             showContinueDialogOnlyOnce = false;
         } else {
+            mPlaybackControlsRow.setCurrentTime(position);
             setupReproduction(video, position, playPause);
         }
-//        String subtitle = video.subtitle_vtt.subtitles;
-//        if (subtitle != null && subtitle.length() > 0)
-//            mVideoView.addSubtitleSource(new ByteArrayInputStream(subtitle.getBytes()),
-//                    MediaFormat.createSubtitleFormat("text/vtt", Locale.ENGLISH.getLanguage()));
-
 
     }
 
@@ -252,7 +267,7 @@ public class PlaybackVideoActivity extends Activity implements
             mPlaybackState = LeanbackPlaybackState.PLAYING;
 
         } else { //PAUSE
-            DreamTVApp.Logger.d("onFragmentPlayPause - PAUSE!");
+//            DreamTVApp.Logger.d("onFragmentPlayPause - PAUSE!");
             pauseVideo();
 
             if (selectedUserTask != null)
@@ -267,7 +282,7 @@ public class PlaybackVideoActivity extends Activity implements
     }
 
     private void pauseVideo() {
-        DreamTVApp.Logger.d("Dr - pauseVideo()");
+//        DreamTVApp.Logger.d("Dr - pauseVideo()");
         mPlaybackState = LeanbackPlaybackState.PAUSED;
         mVideoView.pause();
 
@@ -277,14 +292,14 @@ public class PlaybackVideoActivity extends Activity implements
     }
 
     private void controlReasonDialogPopUp(long subtitlePosition) {
-        DreamTVApp.Logger.d("Dr - controlReasonDialogPopUp(long subtitlePosition)");
+//        DreamTVApp.Logger.d("Dr - controlReasonDialogPopUp(long subtitlePosition)");
         Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) //only shows the popup when exist an subtitle
             showReasonsScreen(subtitle);
     }
 
     private void controlReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
-        DreamTVApp.Logger.d("Dr - controlReasonDialogPopUp(long subtitlePosition, UserTask userTask)");
+//        DreamTVApp.Logger.d("Dr - controlReasonDialogPopUp(long subtitlePosition, UserTask userTask)");
 
         Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) //only shows the popup when exist an subtitle
@@ -305,7 +320,7 @@ public class PlaybackVideoActivity extends Activity implements
 
     private void showReasonsScreen(Subtitle subtitle) {
         if (mSelectedVideo.task_state != MainFragment.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
-            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(subtitle.text, subtitle.position, mSelectedVideo.task_id, mSelectedVideo.subtitle_json.version_number);
+            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json, subtitle.position, mSelectedVideo.task_id);
             FragmentManager fm = getFragmentManager();
             reasonsDialogFragment.show(fm, "Sample Fragment");
         }
@@ -313,7 +328,7 @@ public class PlaybackVideoActivity extends Activity implements
 
     private void showReasonsScreen(Subtitle subtitle, UserTask userTask) {
         if (mSelectedVideo.task_state != MainFragment.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
-            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(subtitle.text, subtitle.position, mSelectedVideo.task_id, mSelectedVideo.subtitle_json.version_number, userTask, mSelectedVideo.task_state);
+            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json, subtitle.position, mSelectedVideo.task_id, userTask, mSelectedVideo.task_state);
             FragmentManager fm = getFragmentManager();
             reasonsDialogFragment.show(fm, "Sample Fragment");
         }
@@ -325,7 +340,7 @@ public class PlaybackVideoActivity extends Activity implements
                 .setActions(getAvailableActions());
         int state = PlaybackState.STATE_PLAYING;
         if (mPlaybackState == LeanbackPlaybackState.PAUSED) {
-            DreamTVApp.Logger.d("state = PlaybackState.STATE_PAUSED");
+//            DreamTVApp.Logger.d("state = PlaybackState.STATE_PAUSED");
             state = PlaybackState.STATE_PAUSED;
         }
         stateBuilder.setState(state, position, 1.0f);
@@ -402,8 +417,8 @@ public class PlaybackVideoActivity extends Activity implements
         mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                DreamTVApp.Logger.d("OnPreparedListener - function");
-                DreamTVApp.Logger.d("OnPreparedListener - VideView isPlaying?  " + mVideoView.isPlaying());
+//                DreamTVApp.Logger.d("OnPreparedListener - function");
+//                DreamTVApp.Logger.d("OnPreparedListener - VideView isPlaying?  " + mVideoView.isPlaying());
                 final LoadingDialog loadingDialog = new LoadingDialog(PlaybackVideoActivity.this, "Buffering");
                 loadingDialog.setCanceledOnTouchOutside(false);
 
@@ -444,38 +459,6 @@ public class PlaybackVideoActivity extends Activity implements
             }
         });
 
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mSession.setActive(true);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mVideoView.isPlaying()) {
-            if (!requestVisibleBehind(true)) {
-                // Try to play behind launcher, but if it fails, stop playback.
-                stopPlayback();
-            }
-        } else {
-            requestVisibleBehind(false);
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mSession.release();
-    }
-
-
-    @Override
-    public void onVisibleBehindCanceled() {
-        super.onVisibleBehindCanceled();
     }
 
     private void stopPlayback() {
