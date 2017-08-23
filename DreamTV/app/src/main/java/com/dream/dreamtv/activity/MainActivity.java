@@ -15,9 +15,11 @@
 package com.dream.dreamtv.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.utils.LocaleHelper;
 
 
 /*
@@ -32,5 +34,10 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 }

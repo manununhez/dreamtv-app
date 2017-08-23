@@ -1,38 +1,7 @@
 <resources>
     <string name="app_name">DreamTV</string>
     <string name="browse_title"><![CDATA[DreamTV]]></string>
-    <string name="related_movies">Related Videos</string>
-    <string name="vertical_grid_title"><![CDATA[Vertical Video Grid]]></string>
-    <string name="error">Error</string>
-    <string name="ok">OK</string>
-    <string name="pause">Pause</string>
-    <string name="play">Play</string>
-    <string name="stop">Stop</string>
-    <string name="init_text">00:00</string>
-    <string name="play_pause_description">Play Pause Button</string>
-    <string name="loading">Loading&#8230;</string>
-    <string name="no_video_found">No video was found</string>
-    <string name="about_app">About DemoCast Player</string>
-    <string name="version">Version: %1$s</string>
-    <string name="popular_header">Popular Videos</string>
-    <string name="preferences">PREFERENCES</string>
-    <string name="grid_view">Grid View</string>
-    <string name="error_fragment">Error Fragment</string>
-    <string name="personal_settings">fVideo Settings</string>
-    <string name="play_video">Play video</string>
-    <string name="edit_subtitle">Edit Subtitle</string>
-    <string name="add_to_my_list">+ Add to my list</string>
-    <string name="subtitle_languages">Languages</string>
-    <!--<string name="watch_trailer_2">FREE</string>-->
-    <string name="rent_1">Rent By Day</string>
-    <string name="rent_2">From $1.99</string>
-    <string name="buy_1">Buy and Own</string>
-    <string name="buy_2">AT $9.99</string>
-    <string name="movie">Movie</string>
-    <string name="should_start">shouldStart</string>
-    <string name="start_position">startPosition</string>
-    <string name="search_results">Search Results</string>
-    <string name="grid_title">YoutubeTv Showcase</string>
+
 
     <!-- Error messages -->
     <string name="video_error_media_load_timeout">Media loading timed out</string>
@@ -40,62 +9,73 @@
     <string name="video_error_unknown_error">Failed to load video</string>
     <string name="error_fragment_message">An error occurred</string>
     <string name="dismiss_error">Dismiss</string>
-    <string name="oops">Oops</string>
 
     <!--ERROR NETWORK MESSAGES-->
-    <string name="timeout_server_error">Ha expirado el tiempo de espera, vuelva a intentar</string>
-    <string name="no_network_error">No hay conexión a internet</string>
-    <string name="defaultErrorMessage">No se pudo realizar la acción</string>
-    <string name="generic_server_down">No hay conexión a internet</string>
+    <string name="timeout_server_error">Timeout has expired, try again</string>
+    <string name="no_network_error">There is no Internet connection</string>
+    <string name="defaultErrorMessage">Failed to perform</string>
+    <string name="generic_server_down">There is no Internet conection</string>
     <string name="implement_search">Implement your own in-app search.</string>
 
     <!--SHAREDPREFERENCES-->
     <string name="dreamTVApp_token">tedapp_token</string>
     <string name="user_preferences">user_preferences</string>
     <string name="reasons_preferences">reasons_preferences</string>
-    <string name="languages_preferences">languages_preferences</string>
 
 
-    <!-- Dialog example -->
-    <string name="dialog_choose_language_title">Choose language</string>
-    <string name="dialog_example_title">Use Google\'s location service?</string>
-    <string name="dialog_example_description">Select the language of the subtitle to start editing it.</string>
-    <string name="dialog_example_button_positive">Agree</string>
-    <string name="dialog_example_button_negative">Disagree</string>
-    <string name="dialog_example_button_toast_positive_clicked">\'Agree\' clicked.</string>
-    <string name="dialog_example_button_toast_negative_clicked">\'Disagree\' clicked.</string>
+    <!--titles-->
+    <string name="title_user_statistics">Statistics</string>
+    <string name="title_video_settings">Video Settings</string>
+    <string name="title_text_language_settings">Text language</string>
+    <string name="title_reason_dialog_interface_settings">Reason dialog Interface</string>
+    <string name="title_video_languages_settings">Video languages</string>
+    <string name="title_video_languages_type_settings">Select languages of:</string>
+    <string name="title_reasons_dialog">What is wrong here?</string>
+    <string name="title_reasons_dialog_2">Others users think there is a mistake here. What do you think?</string>
+    <string name="title_confirmation_user_saved_data">User data saved correctly</string>
+    <string name="title_confirmation_saved_data">Thank you for your help</string>
+    <string name="title_my_list_category">My List</string>
+    <string name="title_contributions_category">Contributions</string>
+    <string name="title_preferences_category">Preferences</string>
+    <string name="title_see_more_videos_category">See more videos</string>
+    <string name="title_see_again_category">Continue watching</string>
+    <string name="title_see_all_category">See all</string>
+    <string name="title_check_new_tasks_category">Check out these videos</string>
+    <string name="rb_option_text_english">English</string>
+    <string name="rb_option_text_polish">Polish</string>
+    <string name="rb_option_text_advanced">Advanced</string>
+    <string name="rb_option_text_beginner">Beginner</string>
+    <string name="hint_voice_google_input">Please, say the reason</string>
 
-    <string name="wizard_example_payment_method">Payment Method</string>
-    <string name="wizard_example_rent">Rent</string>
-    <string name="wizard_example_input_credit">Input Payment Type</string>
+    <!--buttons-->
+    <string name="btn_subtitle">Subtitle</string>
+    <string name="btn_audio">Audio</string>
+    <string name="btn_save_settings">Save settings</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_start_recording">Start recording</string>
+    <string name="btn_continue_watching">Continue</string>
+    <string name="btn_no_from_beggining">Start from the beginning</string>
+    <string name="btn_play_video">Play video</string>
+    <string name="btn_add_to_my_list">+ Add to my list</string>
+    <string name="btn_remove_from_my_list">- Remove from my list</string>
 
+    <!--alertDialog-->
+    <string name="title_alert_dialog">Attention!</string>
+    <string name="title_continue_from_saved_point">You are in %1$s min. The video is %2$s min. Do you want to:</string>
 
-    <!--details-->
-    <string name="detail_view_title">DetailView Example</string>
-    <string name="action_buy">Buy </string>
-    <string name="action_rent">Rent </string>
-    <string name="action_wishlist">Add to wishlist</string>
-    <string name="action_related">Related</string>
-    <string name="header_related">Related Items</string>
-    <string name="header_recommended">Recommended</string>
-    <string name="action_clicked">Action clicked. Implement your own handler.</string>
-
-    <!--<string-array name="country_arrays">-->
-        <!--<item>Malaysia</item>-->
-        <!--<item>United States</item>-->
-        <!--<item>Indonesia</item>-->
-        <!--<item>France</item>-->
-        <!--<item>Italy</item>-->
-        <!--<item>Singapore</item>-->
-        <!--<item>New Zealand</item>-->
-        <!--<item>India</item>-->
-    <!--</string-array>-->
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_reason">ReasonActivity</string>
-
-
-    <string name="btn_continue_watching">Continue watching</string>
-    <string name="btn_no_from_beggining">From the beginning</string>
+    <!--loadingDialog-->
+    <string name="title_loading_buffering">Buffering...</string>
+    <string name="title_loading_saving_data">Saving user data...</string>
+    <string name="title_loading_retrieve_subtitle">Retrieving subtitle...</string>
+    <string name="title_loading_retrieve_languages">Retrieving languages...</string>
+    <string name="title_loading_retrieve_user_tasks">Retrieving users tasks...</string>
+    <string name="title_loading_retrieve_user_data">Retrieving users data...</string>
+    <string name="title_loading_retrieve_tasks">Retrieving tasks...</string>
+    <string name="title_loading_saving_reasons">Saving reasons...</string>
+    <string name="title_loading_retrieve_options">Retrieving options...</string>
+    <string name="title_loading_verifying_list">Verifying is the current video is in my list...</string>
+    <string name="title_loading_adding_videos_list">Adding video to my list...</string>
+    <string name="title_loading_removing_videos_list">Removing video from my list...</string>
 </resources>

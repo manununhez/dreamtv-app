@@ -1,0 +1,82 @@
+<resources>
+    <string name="app_name">DreamTV</string>
+    <string name="browse_title"><![CDATA[DreamTV]]></string>
+
+    <!-- Error messages -->
+    <string name="video_error_media_load_timeout">Ładowanie multimediów zostało przekroczone</string>
+    <string name="video_error_server_inaccessible">Serwer mediów nie był dostępny</string>
+    <string name="video_error_unknown_error">Nie udało się wczytać filmu</string>
+    <string name="error_fragment_message">Wystąpił błąd</string>
+    <string name="dismiss_error">Oddalić</string>
+
+    <!--ERROR NETWORK MESSAGES-->
+    <string name="timeout_server_error">Limit czasu wygasł, spróbuj ponownie</string>
+    <string name="no_network_error">Nie ma połączenia z Internetem</string>
+    <string name="defaultErrorMessage">Nie udało się wykonać</string>
+    <string name="generic_server_down">Nie ma połączenia z Internetem</string>
+    <string name="implement_search">Wdrażanie własnego wyszukiwania w aplikacji.</string>
+
+    <!--SHAREDPREFERENCES-->
+    <string name="dreamTVApp_token">tedapp_token</string>
+    <string name="user_preferences">user_preferences</string>
+    <string name="reasons_preferences">reasons_preferences</string>
+    <string name="languages_preferences">languages_preferences</string>
+
+
+    <!--titles-->
+    <string name="title_user_statistics">Statystyka</string>
+    <string name="title_video_settings">Ustawienia wideo</string>
+    <string name="title_text_language_settings">Język tekstu</string>
+    <string name="title_reason_dialog_interface_settings">Interfejs dialogowy przyczyny problemu</string>
+    <string name="title_video_languages_settings">Języki wideo</string>
+    <string name="title_video_languages_type_settings">Wybierz języki:</string>
+    <string name="title_reasons_dialog">Co tu jest nie tak?</string>
+    <string name="title_reasons_dialog_2">Inni użytkownicy uważają, że tu jest błąd. Co myślisz?</string>
+    <string name="title_confirmation_user_saved_data">Dane użytkownika zostały zapisane poprawnie</string>
+    <string name="title_confirmation_saved_data">Dziękuję za pomoc</string>
+    <string name="title_my_list_category">Moja lista</string>
+    <string name="title_contributions_category">Składki</string>
+    <string name="title_preferences_category">Preferencje</string>
+    <string name="title_see_more_videos_category">Zobacz więcej filmów</string>
+    <string name="title_see_again_category">Kontynuuj oglądanie</string>
+    <string name="title_see_all_category">Widzieć wszystko</string>
+    <string name="title_check_new_tasks_category">Sprawdź te filmy</string>
+    <string name="rb_option_text_english">Angielski</string>
+    <string name="rb_option_text_polish">Polski</string>
+    <string name="rb_option_text_advanced">Zaawansowane</string>
+    <string name="rb_option_text_beginner">Początkujący</string>
+    <string name="hint_voice_google_input">Powiedz, dlaczego</string>
+
+    <!--buttons-->
+    <string name="btn_subtitle">Napisy</string>
+    <string name="btn_audio">Audio</string>
+    <string name="btn_save_settings">Zapisz ustawienia</string>
+    <string name="btn_save">Zapisz</string>
+    <string name="btn_cancel">Anuluj</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_start_recording">Rozpocznij nagrywanie</string>
+    <string name="btn_continue_watching">Nadal oglądaj</string>
+    <string name="btn_no_from_beggining">Zacząć od nowa</string>
+    <string name="btn_play_video">Odtwórz film</string>
+    <string name="btn_add_to_my_list">+ Dodaj do mojej listy</string>
+    <string name="btn_remove_from_my_list">- Usuń z mojej listy</string>
+
+    <!--alertDialog-->
+    <string name="title_alert_dialog">Uwaga!</string>
+    <string name="title_continue_from_saved_point">Jesteś w %1$s min. Film jest %2$s min. Czy chcesz:</string>
+
+    <!--loadingDialog-->
+    <string name="title_loading_buffering">Buforowanie...</string>
+    <string name="title_loading_saving_data">Zapisywanie danych użytkownika...</string>
+    <string name="title_loading_retrieve_subtitle">Pobieranie napisów...</string>
+    <string name="title_loading_retrieve_languages">Pobieranie języków...</string>
+    <string name="title_loading_retrieve_user_tasks">Odzyskiwanie zadań użytkowników...</string>
+    <string name="title_loading_retrieve_user_data">Pobieranie danych użytkowników...</string>
+    <string name="title_loading_retrieve_tasks">Pobieranie zadań...</string>
+    <string name="title_loading_saving_reasons">Oszczędność...</string>
+    <string name="title_loading_retrieve_options">Pobieranie opcji...</string>
+    <string name="title_loading_verifying_list">Weryfikacja to obecny film znajduje się na mojej liście...</string>
+    <string name="title_loading_adding_videos_list">Dodanie filmu do mojej listy...</string>
+    <string name="title_loading_removing_videos_list">Usunięcie filmu do mojej listy...</string>
+
+</resources>

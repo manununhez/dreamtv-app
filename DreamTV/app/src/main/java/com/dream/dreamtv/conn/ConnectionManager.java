@@ -16,8 +16,8 @@ import java.util.Map;
 
 public class ConnectionManager {
 //    public static final String URL_BASE = "https://amara.org/api/";     // Produccion
-    public static final String URL_BASE = "http://192.168.1.109:8000/api/";     // Dpto Produccion
-//    public static final String URL_BASE = "http://172.23.192.2:8000/api/";     // Facu Produccion
+//    public static final String URL_BASE = "http://192.168.1.109:8000/api/";     // Dpto Produccion
+    public static final String URL_BASE = "http://172.23.1.30:8000/api/";     // Facu Produccion
 //    public static final String URL_BASE = "http://10.0.2.2:8000/api/";     // Produccion
 
     public static int MAX_RETRIES = 3;
@@ -25,7 +25,6 @@ public class ConnectionManager {
 
 
     public enum Urls {
-        VIDEOS("videos"),
         USER_TASKS("tasks/users"),
         USER_TASKS_FINISHED("tasks/users/finished"),
         USER_VIDEOS_DELETE("users/videos/delete"),
@@ -39,8 +38,7 @@ public class ConnectionManager {
         USER_TASKS_OTHER_USER_TASKS("users/task/othersTask"),
         LANGUAGES("languages"),
         SUBTITLE("subtitle/info"),
-        REASONS("reasons"),
-        TED_PROJECTS("teams/ted/projects");
+        REASONS("reasons");
         public String value;
 
         Urls(String value) {

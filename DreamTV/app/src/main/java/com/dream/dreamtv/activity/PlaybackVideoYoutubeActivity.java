@@ -36,8 +36,6 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v17.leanback.widget.PlaybackControlsRow;
 import android.text.Html;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
@@ -50,9 +48,9 @@ import com.dream.dreamtv.R;
 import com.dream.dreamtv.beans.Subtitle;
 import com.dream.dreamtv.beans.UserTask;
 import com.dream.dreamtv.beans.Video;
-import com.dream.dreamtv.fragment.MainFragment;
 import com.dream.dreamtv.fragment.PlaybackVideoFragment;
 import com.dream.dreamtv.fragment.ReasonsDialogFragment;
+import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.Utils;
 
 import fr.bmartel.youtubetv.YoutubeTvView;
@@ -68,25 +66,25 @@ import fr.bmartel.youtubetv.model.VideoState;
 public class PlaybackVideoYoutubeActivity extends Activity implements
         PlaybackVideoFragment.OnPlayPauseClickedListener {
 
-    private final static String TAG = PlaybackVideoYoutubeActivity.class.getSimpleName();
-    private final static String STATE_PLAY = "PLAYING";
-    private final static String STATE_PAUSED = "PAUSED";
+
     private LeanbackPlaybackState mPlaybackState = LeanbackPlaybackState.IDLE;
 
-    //    private LinearLayout llReasons;
     private YoutubeTvView mYoutubeView;
     private TextView tvSubtitle;
     private Handler handler;
+    private Handler mPlayerControlHandler;
+    private PlaybackControlsRow mPlaybackControlsRow;
     private Chronometer tvTime;
     private Runnable myRunnable;
+    private Runnable mPlayerControlRunnable;
     private Video mSelectedVideo;
-    //    private final static int POSITION_OFFSET = 5;
     private MediaSession mSession;
-    //    private PlaybackVideoFragment playbackVideoFragment;
     private Long elapsedRealtimeTemp;
     private Long timeStoppedTemp;
     private UserTask selectedUserTask;
     private boolean showContinueDialogOnlyOnce = true;
+
+    private final static int POSITION_OFFSET = 5;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,56 +93,10 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
         tvTime = new Chronometer(this); // initiate a chronometer
         tvSubtitle = (TextView) findViewById(R.id.tvSubtitle); // initiate a chronometer
-//        llReasons = (LinearLayout) findViewById(R.id.llReasons); // initiate a chronometer
 
         mYoutubeView = (YoutubeTvView) findViewById(R.id.video_1);
         mYoutubeView.updateView(getArgumentos());
         mYoutubeView.playVideo(getArgumentos().getString("videoId", ""));
-
-
-//        Button playBtn = (Button) findViewById(R.id.play_button);
-//        playBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                mYoutubeView.start();
-//            }
-//        });
-//        Button pauseBtn = (Button) findViewById(R.id.pause_button);
-//        pauseBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                mYoutubeView.pause();
-//            }
-//        });
-//        Button nextBtn = (Button) findViewById(R.id.next_button);
-//        nextBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                mYoutubeView.nextVideo();
-//            }
-//        });
-//        Button previousBtn = (Button) findViewById(R.id.previous_button);
-//        previousBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                mYoutubeView.previousVideo();
-//            }
-//        });
-//
-//        Button backwardBtn = (Button) findViewById(R.id.backward_button);
-//        backwardBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                mYoutubeView.moveBackward(POSITION_OFFSET);
-//            }
-//        });
-//        Button forwardBtn = (Button) findViewById(R.id.forward_button);
-//        forwardBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                mYoutubeView.moveForward(POSITION_OFFSET);
-//            }
-//        });
 
 
         mYoutubeView.addPlayerListener(new IPlayerListener() {
@@ -159,10 +111,9 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                                             final float duration,
                                             final VideoInfo videoInfo) {
 
-
-                if (state.toString().equals(STATE_PLAY)) {
+                if (state.toString().equals(Constants.STATE_PLAY)) {
                     playVideo(position);
-                } else if (state.toString().equals(STATE_PAUSED)) {
+                } else if (state.toString().equals(Constants.STATE_PAUSED)) {
                     pauseVideo();
 
                     if (selectedUserTask != null)
@@ -170,14 +121,25 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                     else
                         controlReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp);
 
-                } else {
+                } /*else {
+                    stopPlayback();
                     stopSyncSubtitle();
+                    stopProgressAutomation();
+                }*/
+
+                if (position == mSelectedVideo.duration) {//at this moment we are in the end of the video
+                    stopPlayback();
+                    stopSyncSubtitle();
+                    stopProgressAutomation();
                 }
+
+                DreamTVApp.Logger.d("VIDEO STATE -> " + state.toString());
             }
         });
 
 
         subtitleHandlerSyncConfig();
+        mPlayerControlHandler = new Handler();
 
 
         mSession = new MediaSession(this, "LeanbackSampleApp");
@@ -190,7 +152,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
 
     private Bundle getArgumentos() {
-        mSelectedVideo = getIntent().getParcelableExtra(VideoDetailsActivity.VIDEO);
+        mSelectedVideo = getIntent().getParcelableExtra(Constants.VIDEO);
         Bundle args = new Bundle();
         args.putString("videoId", mSelectedVideo.getVideoYoutubeId());
         args.putBoolean("autoplay", false);
@@ -240,6 +202,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     protected void onStop() {
         super.onStop();
         mSession.release();
+        stopProgressAutomation();
     }
 
 
@@ -285,7 +248,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         elapsedRealtimeTemp = elapsedRealtimeTemp == null ? SystemClock.elapsedRealtime() : elapsedRealtimeTemp;
 
         startSyncSubtitle(elapsedRealtimeTemp - position);
-
+        startProgressAutomation();
         mPlaybackState = LeanbackPlaybackState.PLAYING;
 
         if (playbackVideoFragment != null) {
@@ -295,12 +258,14 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     }
 
     private void pauseVideo() {
-        PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
+        PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().
+                findFragmentById(R.id.playback_controls_fragment);
 
         stopSyncSubtitle();
+        stopProgressAutomation();
         mPlaybackState = LeanbackPlaybackState.PAUSED;
         if (playbackVideoFragment != null) {
-            playbackVideoFragment.togglePlayback(false);
+            playbackVideoFragment.togglePlayback(Constants.Actions.PAUSE);
         }
     }
 
@@ -338,16 +303,18 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     }
 
     private void showReasonsScreen(Subtitle subtitle) {
-        if (mSelectedVideo.task_state != MainFragment.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
-            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json, subtitle.position, mSelectedVideo.task_id);
+        if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
+                    subtitle.position, mSelectedVideo.task_id);
             FragmentManager fm = getFragmentManager();
             reasonsDialogFragment.show(fm, "Sample Fragment");
         }
     }
 
     private void showReasonsScreen(Subtitle subtitle, UserTask userTask) {
-        if (mSelectedVideo.task_state != MainFragment.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
-            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json, subtitle.position, mSelectedVideo.task_id, userTask, mSelectedVideo.task_state);
+        if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
+                    subtitle.position, mSelectedVideo.task_id, userTask, mSelectedVideo.task_state);
             FragmentManager fm = getFragmentManager();
             reasonsDialogFragment.show(fm, "Sample Fragment");
         }
@@ -391,21 +358,25 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     /**
      * Implementation of OnPlayPauseClickedListener
      */
-    public void onFragmentPlayPause(final Video video, final int position, final Boolean playPause, final PlaybackControlsRow mPlaybackControlsRow) {
-        if (mSelectedVideo.task_state == MainFragment.SEE_AGAIN_CATEGORY && showContinueDialogOnlyOnce) {
-            Utils.getAlertDialogWithChoice(this, "Alert!", "Do you want to continue from the last saved point?",
+    public void onFragmentPlayPause(final Video video, final int position,
+                                    final Constants.Actions actions,
+                                    final PlaybackControlsRow playbackControlsRow) {
+        mPlaybackControlsRow = playbackControlsRow;
+
+        if (mSelectedVideo.task_state == Constants.SEE_AGAIN_CATEGORY && showContinueDialogOnlyOnce) {
+            final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
+            Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
                     getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
                             mPlaybackControlsRow.setCurrentTime(subtitle.end);
-                            setupReproduction(subtitle.end, playPause, video);
+                            setupReproduction(subtitle.end, actions, video);
                         }
                     }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             mPlaybackControlsRow.setCurrentTime(position);
-                            setupReproduction(position, playPause, video);
+                            setupReproduction(position, actions, video);
                             dialog.dismiss();
                         }
                     }, new DialogInterface.OnCancelListener() {
@@ -418,24 +389,50 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
             showContinueDialogOnlyOnce = false;
         } else {
             mPlaybackControlsRow.setCurrentTime(position);
-            setupReproduction(position, playPause, video);
+            setupReproduction(position, actions, video);
         }
     }
 
 
-    private void setupReproduction(int position, boolean playPause, Video video) {
+    private void setupReproduction(int position, Constants.Actions actions, Video video) {
         if (position == 0 || mPlaybackState == LeanbackPlaybackState.IDLE) {
             mPlaybackState = LeanbackPlaybackState.IDLE;
         }
 
-        if (playPause && mPlaybackState != LeanbackPlaybackState.PLAYING) { //PLAYING
+        if (actions.value.equals(Constants.Actions.PLAY.value) && mPlaybackState != LeanbackPlaybackState.PLAYING) { //PLAYING
+//            Toast.makeText(this, "Play - Youtube - Position = " + position, Toast.LENGTH_SHORT).show();
             mPlaybackState = LeanbackPlaybackState.PLAYING;
+//            if (position >= 1000) //after the video begins
             mYoutubeView.seekTo(position / 1000);
+//            else
+//                mYoutubeView.seekTo(1);
+
             mYoutubeView.start();
             startSyncSubtitle(SystemClock.elapsedRealtime() - position);
-        } else { //PAUSE
+            startProgressAutomation();
+        } else if (actions.value.equals(Constants.Actions.PAUSE.value)) { //PAUSE
+//            Toast.makeText(this, "Pause - Youtube", Toast.LENGTH_SHORT).show();
             mPlaybackState = LeanbackPlaybackState.PAUSED;
             mYoutubeView.pause();
+        } else if (actions.value.equals(Constants.Actions.FORWARD.value)) {
+            int currentTime = mPlaybackControlsRow.getCurrentTime();
+            int forwardTime = currentTime + POSITION_OFFSET;
+            DreamTVApp.Logger.d("Current Time Forward = " + forwardTime);
+            mPlaybackControlsRow.setCurrentTime(forwardTime);
+            mYoutubeView.moveForward(POSITION_OFFSET);
+            stopProgressAutomation();
+            startProgressAutomation();
+//            Toast.makeText(this, "Forward - Youtube", Toast.LENGTH_SHORT).show();
+        } else if (actions.value.equals(Constants.Actions.REWIND.value)) {
+            int currentTime = mPlaybackControlsRow.getCurrentTime();
+            int rewindTime = currentTime - POSITION_OFFSET;
+            DreamTVApp.Logger.d("Current Time Rewind = " + rewindTime);
+
+            mPlaybackControlsRow.setCurrentTime(rewindTime);
+            mYoutubeView.moveBackward(POSITION_OFFSET);
+            stopProgressAutomation();
+            startProgressAutomation();
+//            Toast.makeText(this, "Rewind - Youtube", Toast.LENGTH_SHORT).show();
         }
         updatePlaybackState(position);
         updateMetadata(video);
@@ -508,6 +505,46 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     }
 
     private class MediaSessionCallback extends MediaSession.Callback {
+    }
+
+    private void startProgressAutomation() {
+        mPlayerControlRunnable = new Runnable() {
+            @Override
+            public void run() {
+                int updatePeriod = getUpdatePeriod();
+//                int updatePeriod = PlaybackVideoFragment.UPDATE_PERIOD;
+                int currentTime = mPlaybackControlsRow.getCurrentTime() + updatePeriod;
+                int totalTime = mPlaybackControlsRow.getTotalTime();
+                mPlaybackControlsRow.setCurrentTime(currentTime);
+                mPlaybackControlsRow.setBufferedProgress(currentTime + PlaybackVideoFragment.SIMULATED_BUFFERED_TIME);
+
+                if (totalTime > 0 && totalTime <= currentTime) {
+//                    next();  //Continue to another video
+                    stopPlayback();
+                }
+                mPlayerControlHandler.postDelayed(this, updatePeriod);
+            }
+        };
+        mPlayerControlHandler.postDelayed(mPlayerControlRunnable, getUpdatePeriod());
+    }
+
+
+    private void stopProgressAutomation() {
+        if (mPlayerControlHandler != null && mPlayerControlRunnable != null) {
+            mPlayerControlHandler.removeCallbacksAndMessages(null);
+        }
+    }
+
+    private int getUpdatePeriod() {
+        PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
+
+        if (playbackVideoFragment.getView() == null || mPlaybackControlsRow.getTotalTime() <= 0) {
+            return PlaybackVideoFragment.DEFAULT_UPDATE_PERIOD;
+        }
+        DreamTVApp.Logger.d("update period -> getTotalTime = " + mPlaybackControlsRow.getTotalTime());
+        DreamTVApp.Logger.d("update period -> getView().getWidth = " + playbackVideoFragment.getView().getWidth());
+        DreamTVApp.Logger.d("update period -> div = " + mPlaybackControlsRow.getTotalTime() / playbackVideoFragment.getView().getWidth());
+        return Math.max(PlaybackVideoFragment.UPDATE_PERIOD, mPlaybackControlsRow.getTotalTime() / playbackVideoFragment.getView().getWidth());
     }
 
 }

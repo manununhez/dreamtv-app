@@ -1,17 +1,15 @@
 package com.dream.dreamtv;
 
 import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 
 import com.dream.dreamtv.beans.ReasonList;
 import com.dream.dreamtv.beans.User;
+import com.dream.dreamtv.utils.LocaleHelper;
+import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.Gson;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 
 /**
@@ -21,6 +19,11 @@ public class DreamTVApp extends Application {
 
     public static final String TAG = "com.dream.dreamtv";
     private Gson gson;
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleHelper.onAttach(base, Constants.LANGUAGE_ENGLISH));
+    }
 
     @Override
     public void onCreate() {
@@ -42,6 +45,10 @@ public class DreamTVApp extends Application {
             DreamTVApp.Logger.d("(SetUser) Actualizacion de Token");
             SharedPreferenceUtils.save(this, this.getString(R.string.dreamTVApp_token), user.token);
         }
+
+//        if(user.interface_mode == null || user.interface_mode.equals(""))
+//            user.interface_mode = Constants.BEGINNER_INTERFACE_MODE; //default mode
+
         String userString = gson.toJson(user);
         SharedPreferenceUtils.save(this, getString(R.string.user_preferences), userString);
     }

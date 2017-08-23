@@ -1,158 +1,289 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="30dp"
     tools:context=".activity.PreferencesActivity">
 
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/title_video_settings"
+        android:textColor="@color/white"
+        android:textSize="30sp" />
+
     <LinearLayout
-        android:id="@+id/llBody"
+        android:id="@+id/llBodyLinear"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:weightSum="1">
+        android:layout_below="@+id/tvTitle"
+        android:layout_toLeftOf="@+id/llSave"
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/white" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.3"
-            android:paddingBottom="20dp"
-            android:paddingLeft="20dp"
-            android:paddingStart="20dp"
-            android:paddingTop="20dp">
-
-            <ListView
-                android:id="@+id/lv"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:choiceMode="multipleChoice"
-                android:focusable="true"
-                android:focusableInTouchMode="true" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.7"
-            android:background="@color/lb_grey"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:paddingBottom="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="20dp">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv"
+                android:id="@+id/tvTextLanguageTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/title_text_language_settings"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/rgInterfaceLanguage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:fontFamily="sans-serif-condensed"
-                android:text="Select languages"
+                android:layout_marginTop="5dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbEnglish"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rb_option_text_english"
+                    android:textColor="@color/white" />
+
+                <RadioButton
+                    android:id="@+id/rbPolish"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/rb_option_text_polish"
+                    android:textColor="@color/white" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/white" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvReasonDialogInterfaceTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/title_reason_dialog_interface_settings"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbAdvanced"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rb_option_text_advanced"
+                    android:textColor="@color/white" />
+
+                <RadioButton
+                    android:id="@+id/rbBeginner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/rb_option_text_beginner"
+                    android:textColor="@color/white" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/white" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvVideoLanguagesTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_video_languages_settings"
+                android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
             <LinearLayout
-                android:id="@+id/llModeButtons"
+                android:id="@+id/llBodyLanguages"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <com.dream.dreamtv.utils.CheckableTextView
-                    android:id="@+id/btnSubtitle"
-                    style="@style/DeliveryModeButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:gravity="center"
-                    android:padding="15dp"
-                    android:text="Subtitle"
-                    android:textAllCaps="true"
-                    android:textSize="15sp" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:background="@color/gray"
+                android:weightSum="1">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:orientation="horizontal">
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.3">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Selected: "
-                        android:textColor="@color/black_opaque"
-                        android:textSize="17sp"
-                        android:textStyle="italic" />
+                    <ListView
+                        android:id="@+id/lv"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:choiceMode="multipleChoice"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true" />
 
-                    <TextView
-                        android:id="@+id/tvSubtitleValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="--"
-                        android:textColor="@color/black_opaque"
-                        android:textSize="18sp" />
                 </LinearLayout>
 
-
-                <com.dream.dreamtv.utils.CheckableTextView
-                    android:id="@+id/btnAudio"
-                    style="@style/DeliveryModeButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="10dp"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:gravity="center"
-                    android:padding="15dp"
-                    android:text="Audio"
-                    android:textAllCaps="true"
-                    android:textSize="15sp" />
-
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:orientation="horizontal">
+                    android:layout_weight="0.7"
+                    android:gravity="center"
+                    android:layout_gravity="center"
+                    android:orientation="vertical"
+                    android:paddingBottom="20dp"
+                    android:paddingEnd="20dp"
+                    android:paddingTop="20dp">
 
                     <TextView
+                        android:id="@+id/tvSelectLanguageTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Selected: "
-                        android:textColor="@color/black_opaque"
-                        android:textSize="17sp"
-                        android:textStyle="italic" />
-
-                    <TextView
-                        android:id="@+id/tvAudioValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="--"
-                        android:textColor="@color/black_opaque"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="sans-serif-condensed"
+                        android:text="@string/title_video_languages_type_settings"
+                        android:textColor="@color/white"
                         android:textSize="18sp" />
+
+                    <LinearLayout
+                        android:id="@+id/llModeButtons"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <com.dream.dreamtv.utils.CheckableTextView
+                            android:id="@+id/btnSubtitle"
+                            style="@style/DeliveryModeButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:focusable="true"
+                            android:focusableInTouchMode="true"
+                            android:gravity="center"
+                            android:padding="15dp"
+                            android:text="@string/btn_subtitle"
+                            android:textAllCaps="true"
+                            android:textSize="15sp" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Selected: "
+                                android:textColor="@color/black_opaque"
+                                android:textSize="17sp"
+                                android:textStyle="italic" />
+
+                            <TextView
+                                android:id="@+id/tvSubtitleValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="--"
+                                android:textColor="@color/black_opaque"
+                                android:textSize="18sp" />
+                        </LinearLayout>
+
+
+                        <com.dream.dreamtv.utils.CheckableTextView
+                            android:id="@+id/btnAudio"
+                            style="@style/DeliveryModeButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="10dp"
+                            android:focusable="true"
+                            android:focusableInTouchMode="true"
+                            android:gravity="center"
+                            android:padding="15dp"
+                            android:text="@string/btn_audio"
+                            android:textAllCaps="true"
+                            android:textSize="15sp" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Selected: "
+                                android:textColor="@color/black_opaque"
+                                android:textSize="17sp"
+                                android:textStyle="italic" />
+
+                            <TextView
+                                android:id="@+id/tvAudioValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="--"
+                                android:textColor="@color/black_opaque"
+                                android:textSize="18sp" />
+                        </LinearLayout>
+
+                    </LinearLayout>
                 </LinearLayout>
 
             </LinearLayout>
-
-            <Button
-                android:id="@+id/btnSave"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="40dp"
-                android:background="@drawable/button_focusable"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:text="Save" />
-
-
         </LinearLayout>
-
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/llSave"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:background="@color/lb_grey"
+        android:padding="20dp">
 
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/button_focusable"
+            android:focusable="true"
+            android:padding="15dp"
+            android:focusableInTouchMode="true"
+            android:text="@string/btn_save_settings" />
+    </LinearLayout>
 </RelativeLayout>

@@ -7,8 +7,8 @@
     tools:context="com.dream.dreamtv.fragment.ReasonsDialogFragment">
 
     <RelativeLayout
-        android:layout_width="500dp"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/popup_width"
+        android:layout_height="@dimen/popup_height"
         android:background="@color/dialog_background"
         android:paddingEnd="20dp"
         android:paddingStart="20dp">
@@ -23,7 +23,6 @@
             android:background="@color/blue"
             android:gravity="center"
             android:padding="3dp"
-            android:text="Previous"
             android:textColor="@color/white"
             android:textSize="15sp"
             android:textStyle="italic" />
@@ -39,7 +38,6 @@
             android:background="@color/blue"
             android:gravity="center"
             android:padding="3dp"
-            android:text="asdasdasd"
             android:textColor="@color/white"
             android:textSize="20sp" />
 
@@ -54,7 +52,6 @@
             android:background="@color/blue"
             android:gravity="center"
             android:padding="3dp"
-            android:text="Next"
             android:textColor="@color/white"
             android:textSize="15sp"
             android:textStyle="italic" />
@@ -74,86 +71,41 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvNextSubtitle"
             android:layout_marginTop="20dp"
-            android:text="What is wrong here?:"
+            android:text="@string/title_reasons_dialog"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <ScrollView
-            android:id="@+id/scrollView"
-            android:layout_width="match_parent"
+        <RelativeLayout
+            android:id="@+id/rlScrollViewReasons"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvTitle">
 
-            <LinearLayout
-                android:id="@+id/llReasons"
+            <ScrollView
+                android:id="@+id/scrollViewAdvanced"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
 
-                <!--<com.dream.dreamtv.utils.CheckableTextView-->
-                <!--android:id="@+id/btnReason1"-->
-                <!--style="@style/DeliveryModeButton"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_gravity="center_horizontal"-->
-                <!--android:layout_marginTop="15dp"-->
-                <!--android:focusable="true"-->
-                <!--android:focusableInTouchMode="true"-->
-                <!--android:gravity="center"-->
-                <!--android:padding="5dp"-->
-                <!--android:text="Reason 1"-->
-                <!--android:textAllCaps="true"-->
-                <!--android:textSize="15sp" />-->
+                <LinearLayout
+                    android:id="@+id/llReasons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </ScrollView>
 
-                <!--<com.dream.dreamtv.utils.CheckableTextView-->
-                <!--android:id="@+id/btnReason2"-->
-                <!--style="@style/DeliveryModeButton"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_gravity="center_horizontal"-->
-                <!--android:layout_marginTop="5dp"-->
-                <!--android:focusable="true"-->
-                <!--android:focusableInTouchMode="true"-->
-                <!--android:gravity="center"-->
-                <!--android:padding="5dp"-->
-                <!--android:text="Reason 2"-->
-                <!--android:textAllCaps="true"-->
-                <!--android:textSize="15sp" />-->
+            <ScrollView
+                android:id="@+id/scrollViewBeginner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-                <!--<com.dream.dreamtv.utils.CheckableTextView-->
-                <!--android:id="@+id/btnReason3"-->
-                <!--style="@style/DeliveryModeButton"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_gravity="center_horizontal"-->
-                <!--android:layout_marginTop="5dp"-->
-                <!--android:focusable="true"-->
-                <!--android:focusableInTouchMode="true"-->
-                <!--android:gravity="center"-->
-                <!--android:padding="5dp"-->
-                <!--android:text="Reason 3"-->
-                <!--android:textAllCaps="true"-->
-                <!--android:textSize="15sp" />-->
-
-                <!--<com.dream.dreamtv.utils.CheckableTextView-->
-                <!--android:id="@+id/btnReason4"-->
-                <!--style="@style/DeliveryModeButton"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_gravity="center_horizontal"-->
-                <!--android:layout_marginBottom="10dp"-->
-                <!--android:layout_marginTop="5dp"-->
-                <!--android:focusable="true"-->
-                <!--android:focusableInTouchMode="true"-->
-                <!--android:gravity="center"-->
-                <!--android:padding="5dp"-->
-                <!--android:text="Reason 4"-->
-                <!--android:textAllCaps="true"-->
-                <!--android:textSize="15sp" />-->
-            </LinearLayout>
-        </ScrollView>
-
+                <RadioGroup
+                    android:id="@+id/rgReasons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </ScrollView>
+        </RelativeLayout>
         <!--<TextView-->
         <!--android:id="@+id/titleComents"-->
         <!--android:layout_width="wrap_content"-->
@@ -167,46 +119,64 @@
 
         <LinearLayout
             android:id="@+id/llButtonsOptions1"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/scrollView"
+            android:layout_above="@+id/llComments"
+            android:layout_below="@+id/rlScrollViewReasons"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="25dp"
+            android:gravity="center"
             android:visibility="gone">
 
             <Button
                 android:id="@+id/btnOk"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ok" />
+                android:layout_gravity="center"
+                android:background="@drawable/button_focusable"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:padding="15dp"
+                android:text="@string/btn_ok" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/llButtonsOptions2"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/scrollView"
+            android:layout_above="@+id/llComments"
+            android:layout_below="@+id/rlScrollViewReasons"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="25dp"
+            android:gravity="center"
             android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnSave"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button_focusable"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:text="Save" />
+                android:padding="15dp"
+                android:text="@string/btn_save" />
 
             <Button
                 android:id="@+id/btnCancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/button_focusable"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:text="Cancel" />
+                android:padding="15dp"
+                android:text="@string/btn_cancel" />
+
+
         </LinearLayout>
 
         <LinearLayout
@@ -224,10 +194,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
+                android:background="@drawable/button_focusable"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:padding="15dp"
                 android:src="@drawable/ic_keyboard_voice"
-                android:text="Start recording" />
+                android:text="@string/btn_start_recording" />
 
             <TextView
                 android:id="@+id/voiceInput"

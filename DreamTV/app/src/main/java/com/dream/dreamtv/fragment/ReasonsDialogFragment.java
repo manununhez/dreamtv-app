@@ -1,33 +1,28 @@
 package com.dream.dreamtv.fragment;
 
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.app.DialogFragment;
 import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.Html;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -38,19 +33,18 @@ import com.dream.dreamtv.R;
 import com.dream.dreamtv.beans.JsonResponseBaseBean;
 import com.dream.dreamtv.beans.Reason;
 import com.dream.dreamtv.beans.ReasonList;
-import com.dream.dreamtv.beans.Subtitle;
 import com.dream.dreamtv.beans.SubtitleJson;
+import com.dream.dreamtv.beans.User;
 import com.dream.dreamtv.beans.UserTask;
 import com.dream.dreamtv.conn.ConnectionManager;
 import com.dream.dreamtv.conn.ResponseListener;
+import com.dream.dreamtv.utils.LocaleHelper;
+import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.google.gson.Gson;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -61,20 +55,22 @@ import java.util.Map;
  */
 public class ReasonsDialogFragment extends DialogFragment {
 
+    private LinearLayout llComments;
     private LinearLayout llReasons;
+    private RadioGroup rgReasons;
     private List<Reason> reasonList;
     private List<Integer> selectedReasons = new ArrayList<>();
-    //    private String subTitleText;
     private ImageButton btnRecord;
     private TextView voiceInput;
     private Dialog viewRoot;
     private UserTask userTask;
-    private static final int REQ_CODE_SPEECH_INPUT = 100;
+    private SubtitleJson subtitle;
+    private ScrollView scrollViewAdvanced;
+    private ScrollView scrollViewBeginner;
     private int subtitlePosition;
     private int idTask;
     private int taskState;
-    //    private int subtitleVersion;
-    private SubtitleJson subtitle;
+    private static final int REQ_CODE_SPEECH_INPUT = 100;
 
     public static ReasonsDialogFragment newInstance(SubtitleJson subtitle, int subtitlePosition, int idTask) {
         ReasonsDialogFragment f = new ReasonsDialogFragment();
@@ -82,8 +78,6 @@ public class ReasonsDialogFragment extends DialogFragment {
         // Supply num input as an argument.
         Bundle args = new Bundle();
         args.putParcelable("SubtitleJson", subtitle);
-//        args.putString("subTitleText", subTitleText);
-//        args.putInt("subtitleVersion", subtitleVersion);
         args.putInt("subtitlePosition", subtitlePosition);
         args.putInt("idTask", idTask);
         f.setArguments(args);
@@ -96,8 +90,6 @@ public class ReasonsDialogFragment extends DialogFragment {
         // Supply num input as an argument.
         Bundle args = new Bundle();
         args.putParcelable("SubtitleJson", subtitle);
-//        args.putString("subTitleText", subTitleText);
-//        args.putInt("subtitleVersion", subtitleVersion);
         args.putInt("subtitlePosition", subtitlePosition);
         args.putInt("idTask", idTask);
         args.putInt("taskState", taskState);
@@ -114,8 +106,6 @@ public class ReasonsDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        subTitleText = getArguments().getString("subTitleText");
-//        subtitleVersion = getArguments().getInt("subtitleVersion");
         subtitlePosition = getArguments().getInt("subtitlePosition");
         subtitle = getArguments().getParcelable("SubtitleJson");
         idTask = getArguments().getInt("idTask");
@@ -139,7 +129,11 @@ public class ReasonsDialogFragment extends DialogFragment {
         Button btnSave = (Button) viewRoot.findViewById(R.id.btnSave);
         Button btnOk = (Button) viewRoot.findViewById(R.id.btnOk);
 
+        scrollViewAdvanced = (ScrollView) viewRoot.findViewById(R.id.scrollViewAdvanced);
+        scrollViewBeginner = (ScrollView) viewRoot.findViewById(R.id.scrollViewBeginner);
+
         llReasons = (LinearLayout) viewRoot.findViewById(R.id.llReasons);
+        rgReasons = (RadioGroup) viewRoot.findViewById(R.id.rgReasons);
 
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -157,15 +151,16 @@ public class ReasonsDialogFragment extends DialogFragment {
             @Override
             public void onClick(View view) {
                 saveReasons();
-                Toast.makeText(getActivity(), "Thanks. Saved reason", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getString(R.string.title_confirmation_saved_data), Toast.LENGTH_SHORT).show();
             }
         });
         tvCurrentSubtitle.setText(Html.fromHtml(subtitle.subtitles.get(subtitlePosition - 1).text));
         tvNextSubtitle.setText(Html.fromHtml(subtitle.subtitles.get(subtitlePosition).text));
+
         if (subtitlePosition > 1)
             tvPreviousSubtitle.setText(Html.fromHtml(subtitle.subtitles.get(subtitlePosition - 2).text));
         else
-            tvPreviousSubtitle.setVisibility(View.GONE);
+            tvPreviousSubtitle.setText("-------------");
 
         audioRecordSettings();
 
@@ -181,12 +176,12 @@ public class ReasonsDialogFragment extends DialogFragment {
 
         //controlUserTask. We repopulate the form with user task data
         if (userTask != null)
-            if (taskState == MainFragment.SEE_AGAIN_CATEGORY) {
+            if (taskState == Constants.SEE_AGAIN_CATEGORY) {
                 repopulateFormWithUserTaskData();
                 llButtonsOptions1.setVisibility(View.VISIBLE);
                 llButtonsOptions2.setVisibility(View.GONE);
-            } else if (taskState == MainFragment.CHECK_NEW_TASKS_CATEGORY) {
-                tvTitle.setText("Others users think there is a mistake here. What do you think?");
+            } else if (taskState == Constants.CHECK_NEW_TASKS_CATEGORY) {
+                tvTitle.setText(getString(R.string.title_reasons_dialog_2));
                 llButtonsOptions1.setVisibility(View.GONE);
                 llButtonsOptions2.setVisibility(View.VISIBLE);
             }
@@ -198,17 +193,31 @@ public class ReasonsDialogFragment extends DialogFragment {
     private void repopulateFormWithUserTaskData() {
         voiceInput.setText(userTask.comments); //repopulate comments
 
-        //re-select the reasons id
         List<String> strArray = Arrays.asList(userTask.reason_id.substring(userTask.reason_id.indexOf("[") + 1, userTask.reason_id.indexOf("]")).split(", "));
-        for (int i = 0; i < llReasons.getChildCount(); i++) {
-            LinearLayout childAt = (LinearLayout) llReasons.getChildAt(i);
-            CheckBox checkBox = (CheckBox) childAt.getChildAt(0); //0 -> checkbox, 1->Tooglebutton
-            ToggleButton toggleButton = (ToggleButton) childAt.getChildAt(1); //0 -> checkbox, 1->Tooglebutton
-            checkBox.setEnabled(false);
-            toggleButton.setEnabled(false);
-            if (strArray.contains(String.valueOf(toggleButton.getId()))) {
-                toggleButton.setChecked(true);
-                checkBox.setChecked(true);
+
+        //Interface mode settings
+        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+        if (user.interface_mode.equals(Constants.BEGINNER_INTERFACE_MODE)) { //BEGINNER MODE
+            for (int i = 0; i < rgReasons.getChildCount(); i++) {
+                RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
+                radioButton.setEnabled(false);
+                if (strArray.contains(String.valueOf(radioButton.getId()))) {
+                    radioButton.setChecked(true);
+                }
+
+            }
+        } else { //ADVANCED MODE
+            //re-select the reasons id
+            for (int i = 0; i < llReasons.getChildCount(); i++) {
+                LinearLayout childAt = (LinearLayout) llReasons.getChildAt(i);
+                CheckBox checkBox = (CheckBox) childAt.getChildAt(0); //0 -> checkbox, 1->Tooglebutton
+                ToggleButton toggleButton = (ToggleButton) childAt.getChildAt(1); //0 -> checkbox, 1->Tooglebutton
+                checkBox.setEnabled(false);
+                toggleButton.setEnabled(false);
+                if (strArray.contains(String.valueOf(toggleButton.getId()))) {
+                    toggleButton.setChecked(true);
+                    checkBox.setChecked(true);
+                }
             }
         }
 
@@ -220,11 +229,18 @@ public class ReasonsDialogFragment extends DialogFragment {
         userTask.subtitle_position = subtitlePosition;
         userTask.subtitle_version = String.valueOf(subtitle.version_number);
         userTask.task_id = idTask;
-        userTask.reasonList = selectedReasons.toString();
+        //Interface mode settings
+        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+        if (user.interface_mode.equals(Constants.BEGINNER_INTERFACE_MODE)) { //We add the selected radio button
+            List<Integer> tempList = new ArrayList<Integer>();
+            tempList.add(rgReasons.getCheckedRadioButtonId());
+            userTask.reasonList = tempList.toString();
+        } else //we add the selected checkbox ADVANCED
+            userTask.reasonList = selectedReasons.toString();
 
         final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), userTask);
 
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, "Saving reasons...") {
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_saving_reasons)) {
 
             @Override
             public void processResponse(String response) {
@@ -262,6 +278,7 @@ public class ReasonsDialogFragment extends DialogFragment {
     }
 
     private void audioRecordSettings() {
+        llComments = (LinearLayout) viewRoot.findViewById(R.id.llComments);
         btnRecord = (ImageButton) viewRoot.findViewById(R.id.btnRecord);
         voiceInput = (TextView) viewRoot.findViewById(R.id.voiceInput);
 
@@ -283,7 +300,7 @@ public class ReasonsDialogFragment extends DialogFragment {
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                "Please, Say the reason");
+                getString(R.string.hint_voice_google_input));
         try {
             startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
         } catch (ActivityNotFoundException a) {
@@ -315,7 +332,7 @@ public class ReasonsDialogFragment extends DialogFragment {
     }
 
     private void getReasons() {
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, "Retrieving options...") {
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_options)) {
 
             @Override
             public void processResponse(String response) {
@@ -327,8 +344,12 @@ public class ReasonsDialogFragment extends DialogFragment {
                 reasonList = reasons.data;
                 DreamTVApp.Logger.d(reasonList.toString());
 
-                setupReasons();
-
+                //Interface mode settings
+                User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+                if (user.interface_mode.equals(Constants.BEGINNER_INTERFACE_MODE))
+                    setupReasonsRadioGroup();
+                else
+                    setupReasons();
             }
 
             @Override
@@ -349,6 +370,10 @@ public class ReasonsDialogFragment extends DialogFragment {
     }
 
     private void setupReasons() {
+        llComments.setVisibility(View.VISIBLE);
+        scrollViewAdvanced.setVisibility(View.VISIBLE);
+        scrollViewBeginner.setVisibility(View.GONE);
+
         llReasons.removeAllViews();
         for (int i = 0; i < reasonList.size(); i++) {
             Reason reason = reasonList.get(i);
@@ -401,5 +426,30 @@ public class ReasonsDialogFragment extends DialogFragment {
         }
     }
 
+    private void setupReasonsRadioGroup() {
+        llComments.setVisibility(View.GONE);
+        scrollViewBeginner.setVisibility(View.VISIBLE);
+        scrollViewAdvanced.setVisibility(View.GONE);
 
+        rgReasons.removeAllViews();
+        for (int i = 0; i < reasonList.size(); i++) {
+            Reason reason = reasonList.get(i);
+
+            int dpsToogle = 25;
+            final float scale = getActivity().getResources().getDisplayMetrics().density;
+            int pixels = (int) (dpsToogle * scale + 0.5f);
+
+            RadioButton radioButton = new RadioButton(getActivity());
+            radioButton.setText(reason.name);
+            radioButton.setId(reason.id);
+            radioButton.setGravity(Gravity.CENTER);
+            radioButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_2_1));
+
+            RadioGroup.LayoutParams layoutParams = new RadioGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, pixels);
+            layoutParams.setMargins(0, 0, 0, 15);
+            radioButton.setLayoutParams(layoutParams);
+
+            rgReasons.addView(radioButton);
+        }
+    }
 }

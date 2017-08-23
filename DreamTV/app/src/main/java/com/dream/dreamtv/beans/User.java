@@ -12,4 +12,7 @@ public class User extends JsonRequestBaseBean{
     public String sub_language;
     public String audio_language;
     public String id;
+
+    public String interface_mode;
+    public String interface_language;
 }

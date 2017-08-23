@@ -42,7 +42,6 @@
         <activity android:name=".activity.VideoDetailsActivity" />
         <activity android:name=".activity.PlaybackVideoActivity" />
         <activity android:name=".activity.SeeAllActivity" />
-        <activity android:name=".activity.BrowseErrorActivity" />
         <activity
             android:name=".activity.PlaybackVideoYoutubeActivity"
             android:label="@string/app_name" />

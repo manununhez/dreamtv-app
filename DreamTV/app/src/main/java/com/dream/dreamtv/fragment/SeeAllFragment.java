@@ -42,6 +42,7 @@ import com.dream.dreamtv.beans.Task;
 import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.conn.ConnectionManager;
 import com.dream.dreamtv.conn.ResponseListener;
+import com.dream.dreamtv.utils.Constants;
 import com.google.gson.Gson;
 
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public class SeeAllFragment extends VerticalGridFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setTitle("See all");
+        setTitle(getString(R.string.title_see_all_category));
         setupRowAdapter();
         setupEventListeners();
         getUserTasks(currentPage);
@@ -85,18 +86,10 @@ public class SeeAllFragment extends VerticalGridFragment {
     }
 
     private void getUserTasks(int pagina) {
-//        SharedPreferenceUtils.save(getActivity(), getString(R.string.dreamTVApp_token), "$2y$10$RCahpKrpkDxcqQvTo4IRju2VXiXoL3be4jJRuHRdc0SbGc4mdvqia");
-
-//        Task task = new Task();
-//        task.type_task = new String[]{"Review", "Approve"};
-//        task.team = "ted";
-//        task.limit = 5;
-//        task.offset = 0;
-
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put("page", String.valueOf(pagina));
 
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, "Retrieving users tasks...") {
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_user_tasks)) {
 
             @Override
             public void processResponse(String response) {
@@ -111,7 +104,7 @@ public class SeeAllFragment extends VerticalGridFragment {
                     currentPage = -1;
 
                 for (Task task : taskList.data) {
-                    mAdapter.add(task.getVideo(MainFragment.CHECK_NEW_TASKS_CATEGORY)); //SeeAllFragments only appears in Check New Tasks Category
+                    mAdapter.add(task.getVideo(Constants.CHECK_NEW_TASKS_CATEGORY)); //SeeAllFragments only appears in Check New Tasks Category
                 }
             }
 
@@ -134,81 +127,18 @@ public class SeeAllFragment extends VerticalGridFragment {
 
     }
 
-//    private void getUserTasks(int offset) {
-//        Task task = new Task();
-//        task.type_task = new String[]{"Review", "Approve"};
-//        task.team = "ted";
-//        task.limit = 10;
-//        task.offset = offset;
-//
-//        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), task);
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, "Retrieving users tasks...") {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                Gson gson = new Gson();
-//                DreamTVApp.Logger.d(response);
-//                TaskList taskList = gson.fromJson(response, TaskList.class);
-//                DreamTVApp.Logger.d(taskList.toString());
-//
-//                currentOffset += taskList.meta.limit;
-//                total_count = taskList.meta.total_count;
-//                for (Task task : taskList.objects) {
-//                    task.video.language_code = task.subtitle_language;
-//                    mAdapter.add(task.video);
-//                }
-////                mAdapter.addAll(0, taskList.objects);
-////                loadVideos(taskList);
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                DreamTVApp.Logger.d(error.getMessage());
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                DreamTVApp.Logger.d(jsonResponse.toString());
-//            }
-//        };
-//
-//        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_TASKS, null, jsonRequest, responseListener, this);
-//
-//    }
-
-
     private void setupRowAdapter() {
         VerticalGridPresenter gridPresenter = new VerticalGridPresenter(ZOOM_FACTOR);
         gridPresenter.setNumberOfColumns(COLUMNS);
         setGridPresenter(gridPresenter);
 
-//        PresenterSelector cardPresenterSelector = new CardPresenterSelector(getActivity());
-
-//        presenter = new ImageCardViewPresenter(mContext, themeResId);
         VideoCardPresenter videoCardPresenter = new VideoCardPresenter();
 
         mAdapter = new ArrayObjectAdapter(videoCardPresenter);
         setAdapter(mAdapter);
 
-//        prepareEntranceTransition();
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                createRows();
-//                startEntranceTransition();
-//            }
-//        }, 1000);
     }
 
-//    private void createRows() {
-//        String json = Utils.inputStreamToString(getResources()
-//                .openRawResource(R.raw.grid_example));
-//        CardRow row = new Gson().fromJson(json, CardRow.class);
-//        mAdapter.addAll(0, row.getCards());
-//    }
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
@@ -219,19 +149,17 @@ public class SeeAllFragment extends VerticalGridFragment {
                 Video video = (Video) item;
                 DreamTVApp.Logger.d("Item: " + item.toString());
                 Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
-                intent.putExtra(VideoDetailsActivity.VIDEO, video);
+                intent.putExtra(Constants.VIDEO, video);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
                         getActivity(),
                         ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                        VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+                        Constants.SHARED_ELEMENT_NAME).toBundle();
                 getActivity().startActivity(intent, bundle);
 
             } else if (item instanceof String) {
-//                if (((String) item).indexOf(getString(R.string.error_fragment)) >= 0) {
-//                    Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
-//                    startActivity(intent);
-                if (((String) item).contains(getString(R.string.personal_settings))) {
+
+                if (((String) item).contains(getActivity().getApplicationContext().getString(R.string.title_video_settings))) {
                     Intent intent = new Intent(getActivity(), PreferencesActivity.class);
                     startActivity(intent);
                 } else {
@@ -254,22 +182,9 @@ public class SeeAllFragment extends VerticalGridFragment {
 
             if (selectedIndex != -1 && (((mAdapter.size() - 1 - COLUMNS) < selectedIndex)
                     && ((mAdapter.size() - 1) >= selectedIndex))) {
-//                Toast.makeText(getActivity(), "Ultima Fila Index: " + selectedIndex, Toast.LENGTH_SHORT).show();
-//                Toast.makeText(getActivity(), "Offset: " + currentOffset, Toast.LENGTH_SHORT).show();
                 if (currentPage != -1)
                     getUserTasks(currentPage);
             }
-//            if (item instanceof Video) {
-//                Video video = ((Video) item);
-//                if (video.thumbnail != null)
-//                    try {
-//                        mBackgroundURI = new URI(video.thumbnail);
-//                    } catch (URISyntaxException e) {
-//                        e.printStackTrace();
-//                    }
-//                startBackgroundTimer();
-//            }
-
         }
     }
 }

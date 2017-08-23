@@ -41,7 +41,6 @@ public class Video implements Parcelable {
     public UserTask[] userTaskList; //all user tasks saved
 
     //Para almacenar los subtitlos e ir propagando entre pantallas
-    public SubtitleVtt subtitle_vtt;
     public SubtitleJson subtitle_json; //para ir propagando el subtitulo entre pantallas
 
     public Video() {
@@ -71,7 +70,6 @@ public class Video implements Parcelable {
         task_id = in.readInt();
         task_state = in.readInt();
         userTaskList = in.createTypedArray(UserTask.CREATOR);
-        subtitle_vtt = in.readParcelable(SubtitleVtt.class.getClassLoader());
         subtitle_json = in.readParcelable(SubtitleJson.class.getClassLoader());
     }
 
@@ -193,7 +191,6 @@ public class Video implements Parcelable {
         parcel.writeInt(task_id);
         parcel.writeInt(task_state);
         parcel.writeTypedArray(userTaskList, i);
-        parcel.writeParcelable(subtitle_vtt, i);
         parcel.writeParcelable(subtitle_json, i);
     }
 
@@ -222,7 +219,6 @@ public class Video implements Parcelable {
                 ", task_id=" + task_id +
                 ", task_state=" + task_state +
                 ", userTaskList=" + Arrays.toString(userTaskList) +
-                ", subtitle_vtt=" + subtitle_vtt +
                 ", subtitle_json=" + subtitle_json +
                 '}';
     }
