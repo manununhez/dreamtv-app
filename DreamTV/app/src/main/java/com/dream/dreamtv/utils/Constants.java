@@ -24,7 +24,7 @@ public class Constants {
     public static final int GRID_ITEM_HEIGHT = 200;
 
     public static final int MY_LIST_CATEGORY = 1250;
-    public static final int SEE_AGAIN_CATEGORY = 1251;
+    public static final int CONTINUE_WATCHING_CATEGORY = 1251;
     public static final int CHECK_NEW_TASKS_CATEGORY = 1252;
 
     public static final int DETAIL_THUMB_WIDTH = 274;

@@ -346,7 +346,7 @@ public class VideoDetailsFragment extends DetailsFragment {
                 //verify the type of task. We get the data from users tasks
                 if (mSelectedVideo.task_state == Constants.CHECK_NEW_TASKS_CATEGORY) {
                     getOtherTasksForThisVideo();
-                } else if ((mSelectedVideo.task_state == Constants.SEE_AGAIN_CATEGORY)) {
+                } else if ((mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY)) {
                     getMyTaskForThisVideo();
                 } else {
                     goToPlayVideo();

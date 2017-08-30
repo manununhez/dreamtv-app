@@ -263,7 +263,7 @@ public class MainFragment extends BrowseFragment {
                 TaskList taskList = gson.fromJson(response, TaskList.class);
                 DreamTVApp.Logger.d(taskList.toString());
 
-                loadVideos(taskList, Constants.SEE_AGAIN_CATEGORY);
+                loadVideos(taskList, Constants.CONTINUE_WATCHING_CATEGORY);
 
                 getUserVideosList("1");
 
@@ -337,9 +337,9 @@ public class MainFragment extends BrowseFragment {
             if (taskState == Constants.MY_LIST_CATEGORY) {
                 header = new HeaderItem(getString(R.string.title_my_list_category));
                 state = Constants.MY_LIST_CATEGORY;
-            } else if (taskState == Constants.SEE_AGAIN_CATEGORY) {
-                header = new HeaderItem(getString(R.string.title_see_again_category));
-                state = Constants.SEE_AGAIN_CATEGORY;
+            } else if (taskState == Constants.CONTINUE_WATCHING_CATEGORY) {
+                header = new HeaderItem(getString(R.string.title_continue_watching_category));
+                state = Constants.CONTINUE_WATCHING_CATEGORY;
             } else {
                 header = new HeaderItem(getString(R.string.title_check_new_tasks_category));
                 state = Constants.CHECK_NEW_TASKS_CATEGORY;
@@ -357,14 +357,10 @@ public class MainFragment extends BrowseFragment {
                 listRowAdapter.add(lastVideoSeeMore);
             }
 
-
             mRowsAdapter.add(new ListRow(header, listRowAdapter));
 
             setAdapter(mRowsAdapter);
-
-
         }
-
     }
 
 
@@ -380,12 +376,10 @@ public class MainFragment extends BrowseFragment {
         mRowsAdapter.add(new ListRow(gridHeader2, gridRowAdapter2));
         mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
 
-
         setAdapter(mRowsAdapter);
     }
 
     private void prepareBackgroundManager() {
-
         mBackgroundManager = BackgroundManager.getInstance(getActivity());
         mBackgroundManager.attach(getActivity().getWindow());
         mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
@@ -483,10 +477,8 @@ public class MainFragment extends BrowseFragment {
                 if (((String) item).contains(getActivity().getApplicationContext().getString(R.string.title_video_settings))) {
                     Intent intent = new Intent(getActivity(), PreferencesActivity.class);
                     startActivityForResult(intent, PREFERENCES_SETTINGS_RESULT_CODE);
-                }
-                if (((String) item).contains(getActivity().getApplicationContext().getString(R.string.title_contributions_category))) {
+                } else if (((String) item).contains(getActivity().getApplicationContext().getString(R.string.title_contributions_category))) {
                     Toast.makeText(getActivity(), "Go to contributions", Toast.LENGTH_SHORT).show();
-
                 } else {
                     Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT)
                             .show();
@@ -501,7 +493,6 @@ public class MainFragment extends BrowseFragment {
         @Override
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
                                    RowPresenter.ViewHolder rowViewHolder, Row row) {
-
 
             if (item instanceof Video) {
                 Video video = ((Video) item);
@@ -518,7 +509,6 @@ public class MainFragment extends BrowseFragment {
     }
 
     private class UpdateBackgroundTask extends TimerTask {
-
         @Override
         public void run() {
             mHandler.post(new Runnable() {

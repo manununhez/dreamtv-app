@@ -17,59 +17,45 @@ package com.dream.dreamtv.activity;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.media.MediaMetadata;
-import android.media.MediaPlayer;
-import android.media.session.MediaSession;
-import android.media.session.PlaybackState;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
-import android.support.v17.leanback.widget.PlaybackControlsRow;
 import android.text.Html;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Chronometer;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.VideoView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.beans.Subtitle;
 import com.dream.dreamtv.beans.UserTask;
 import com.dream.dreamtv.beans.Video;
-import com.dream.dreamtv.fragment.PlaybackVideoFragment;
 import com.dream.dreamtv.fragment.ReasonsDialogFragment;
 import com.dream.dreamtv.utils.Constants;
-import com.dream.dreamtv.utils.LoadingDialog;
 import com.dream.dreamtv.utils.Utils;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
  */
-public class PlaybackVideoActivity extends Activity implements
-        PlaybackVideoFragment.OnPlayPauseClickedListener {
+public class PlaybackVideoActivity extends Activity implements ReasonsDialogFragment.OnDialogClosedListener {
 
     private VideoView mVideoView;
     private Video mSelectedVideo;
-    private LeanbackPlaybackState mPlaybackState = LeanbackPlaybackState.IDLE;
-    private MediaSession mSession;
     private TextView tvSubtitle;
+    private TextView tvTime;
     private Handler handler;
-    private Handler mPlayerControlHandler;
-    private PlaybackControlsRow mPlaybackControlsRow;
-    private Chronometer tvTime;
     private Runnable myRunnable;
-    private Runnable mPlayerControlRunnable;
-    private Long timeStoppedTemp;
     private UserTask selectedUserTask;
-    private int currentPositionPlayPause = 0;
+    private RelativeLayout rlVideoPlayerInfo;
+
     private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
     private boolean showContinueDialogOnlyOnce = true;
+    private int isPlayPauseAction = PAUSE;
+    //    private final static int POSITION_OFFSET = 5;
+    private static int PLAY = 0;
+    private static int PAUSE = 1;
 
     /**
      * Called when the activity is first created.
@@ -79,22 +65,27 @@ public class PlaybackVideoActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playback_videos);
         tvSubtitle = (TextView) findViewById(R.id.tvSubtitle);
-        tvTime = new Chronometer(this); // initiate a chronometer
+        tvTime = (TextView) findViewById(R.id.tvTime);
+        rlVideoPlayerInfo = (RelativeLayout) findViewById(R.id.rlVideoPlayerInfo);
 
         mSelectedVideo = (Video) getIntent().getParcelableExtra(Constants.VIDEO);
 
 
-        loadViews();
-        setupCallbacks();
+//        tvTime.setText("0:00/"+videoCurrentTimeFormat(mSelectedVideo.duration));
         subtitleHandlerSyncConfig();
-        mPlayerControlHandler = new Handler();
+        loadViews();
 
-        mSession = new MediaSession(this, "LeanbackSampleApp");
-        mSession.setCallback(new MediaSessionCallback());
-        mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS |
-                MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+    }
 
-        mSession.setActive(true);
+
+    private void loadViews() {
+        mVideoView = (VideoView) findViewById(R.id.videoView);
+        mVideoView.setFocusable(false);
+        mVideoView.setFocusableInTouchMode(false);
+
+        mVideoView.setVideoPath(mSelectedVideo.getVideoUrl());
+
+        playVideo(null);
     }
 
     @Override
@@ -111,11 +102,6 @@ public class PlaybackVideoActivity extends Activity implements
         super.onBackPressed();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        mSession.setActive(true);
-    }
 
     @Override
     public void onPause() {
@@ -130,18 +116,13 @@ public class PlaybackVideoActivity extends Activity implements
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mSession.release();
-        stopProgressAutomation();
-    }
 
 
     @Override
     public void onVisibleBehindCanceled() {
         super.onVisibleBehindCanceled();
     }
+
 
     private void subtitleHandlerSyncConfig() {
         handler = new Handler();
@@ -154,39 +135,36 @@ public class PlaybackVideoActivity extends Activity implements
                         if (!handlerRunning)
                             return;
 
-                        timeStoppedTemp = tvTime.getBase();
-
-                        selectedUserTask = mSelectedVideo.getUserTask(SystemClock.elapsedRealtime() - timeStoppedTemp);
+                        selectedUserTask = mSelectedVideo.getUserTask(mVideoView.getCurrentPosition());
                         if (selectedUserTask != null) { //pause the video and show the popup
-                            PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().
-                                    findFragmentById(R.id.playback_controls_fragment);
-                            playbackVideoFragment.togglePlayback(Constants.Actions.PAUSE);
+                            pauseAction();
                         }
 
-                        controlShowSubtitle(SystemClock.elapsedRealtime() - timeStoppedTemp);
-
+                        controlShowSubtitle(mVideoView.getCurrentPosition());
                     }
-
                 });
 
                 if (handlerRunning)
                     handler.postDelayed(myRunnable, 100);
-
-
             }
         };
     }
 
+    private void pauseAction() {
+        pauseVideo();
 
-    private void startSyncSubtitle(long base) {
-        tvTime.setBase(base);
-        tvTime.start();
+        if (selectedUserTask != null)
+            controlReasonDialogPopUp(mVideoView.getCurrentPosition(), selectedUserTask);
+        else
+            controlReasonDialogPopUp(mVideoView.getCurrentPosition());
+    }
+
+    private void startSyncSubtitle() {
         handlerRunning = true;
         handler.post(myRunnable);
     }
 
     private void stopSyncSubtitle() {
-        tvTime.stop();
         handlerRunning = false;
 
         handler.removeCallbacks(null);
@@ -194,105 +172,129 @@ public class PlaybackVideoActivity extends Activity implements
     }
 
 
-    //    @Override
-//    public boolean onKeyUp(int keyCode, KeyEvent event) {
-//        PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
-//        switch (keyCode) {
-//            case KeyEvent.KEYCODE_MEDIA_PLAY:
-//                playbackVideoFragment.togglePlayback(false);
-//                return true;
-//            case KeyEvent.KEYCODE_MEDIA_PAUSE:
-//                playbackVideoFragment.togglePlayback(false);
-//                return true;
-//            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-//                if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
-//                    playbackVideoFragment.togglePlayback(false);
-//                } else {
-//                    playbackVideoFragment.togglePlayback(true);
-//                }
-//                return true;
-//            default:
-//                return super.onKeyUp(keyCode, event);
-//        }
-//    }
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+
+        int action = event.getAction();
+        int keyCode = event.getKeyCode();
+
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                if (action == KeyEvent.ACTION_UP) {
+                    if (isPlayPauseAction == PLAY) { //Pause
+
+                        pauseVideo();
+
+                        if (selectedUserTask != null)
+                            controlReasonDialogPopUp(mVideoView.getCurrentPosition(), selectedUserTask);
+                        else
+                            controlReasonDialogPopUp(mVideoView.getCurrentPosition());
+
+                    } else { //Play
 
 
-    /**
-     * Implementation of OnPlayPauseClickedListener
-     */
-    public void onFragmentPlayPause(final Video video, final int position, final Constants.Actions actions,
-                                    final PlaybackControlsRow playbackControlsRow) {
-        mVideoView.setVideoPath(video.getVideoUrl());
+                        if (mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
+                            final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
+                            Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
+                                    getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            playVideo(subtitle.end);
+                                        }
+                                    }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            playVideo(null);
+                                            dialog.dismiss();
+                                        }
+                                    }, new DialogInterface.OnCancelListener() {
+                                        @Override
+                                        public void onCancel(DialogInterface dialog) {
+                                            dialog.dismiss();
+                                        }
+                                    }).show();
 
-        mPlaybackControlsRow = playbackControlsRow;
-        if (mSelectedVideo.task_state == Constants.SEE_AGAIN_CATEGORY && showContinueDialogOnlyOnce) {
-            final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
-            Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
-                    getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            mPlaybackControlsRow.setCurrentTime(subtitle.end);
-                            setupReproduction(video, subtitle.end, actions);
+                            showContinueDialogOnlyOnce = false;
+                        } else {
+                            playVideo(null);
                         }
-                    }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            mPlaybackControlsRow.setCurrentTime(position);
-                            setupReproduction(video, position, actions);
-                            dialog.dismiss();
-                        }
-                    }, new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            dialog.dismiss();
-                        }
-                    }).show();
-
-            showContinueDialogOnlyOnce = false;
-        } else {
-            mPlaybackControlsRow.setCurrentTime(position);
-            setupReproduction(video, position, actions);
+                    }
+                    return true;
+                }
+            default:
+                return super.dispatchKeyEvent(event);
         }
-
     }
 
-    private void setupReproduction(Video video, int position, Constants.Actions actions) {
-        if (position == 0 || mPlaybackState == LeanbackPlaybackState.IDLE) {
-            setupCallbacks();
-            mPlaybackState = LeanbackPlaybackState.IDLE;
-        }
 
-        currentPositionPlayPause = position;
+    //
+//    /**
+//     * Implementation of OnPlayPauseClickedListener
+//     */
+//    public void onFragmentPlayPause(final Video video, final int position, final Constants.Actions actions,
+//                                    final PlaybackControlsRow playbackControlsRow) {
+//        mVideoView.setVideoPath(video.getVideoUrl());
+//
+//        mPlaybackControlsRow = playbackControlsRow;
+//        if (mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
+//            final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
+//            Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
+//                    getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//                            mPlaybackControlsRow.setCurrentTime(subtitle.end);
+//                            setupReproduction(video, subtitle.end, actions);
+//                        }
+//                    }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//                            mPlaybackControlsRow.setCurrentTime(position);
+//                            setupReproduction(video, position, actions);
+//                            dialog.dismiss();
+//                        }
+//                    }, new DialogInterface.OnCancelListener() {
+//                        @Override
+//                        public void onCancel(DialogInterface dialog) {
+//                            dialog.dismiss();
+//                        }
+//                    }).show();
+//
+//            showContinueDialogOnlyOnce = false;
+//        } else {
+//            mPlaybackControlsRow.setCurrentTime(position);
+//            setupReproduction(video, position, actions);
+//        }
+//
+//    }
 
-        if (actions.value.equals(Constants.Actions.PLAY.value) && mPlaybackState != LeanbackPlaybackState.PLAYING) { //PLAYING
-            mPlaybackState = LeanbackPlaybackState.PLAYING;
+    private void playVideo(Integer seekToPosition) {
+        isPlayPauseAction = PLAY;
 
-        } else if (actions.value.equals(Constants.Actions.PAUSE.value)) { //PAUSE
-            pauseVideo();
+        if (seekToPosition != null)
+            mVideoView.seekTo(seekToPosition);
 
-            if (selectedUserTask != null)
-                controlReasonDialogPopUp(SystemClock.elapsedRealtime() - timeStoppedTemp, selectedUserTask);
-            else
-                controlReasonDialogPopUp(SystemClock.elapsedRealtime() - timeStoppedTemp);
-
-        } else if (actions.value.equals(Constants.Actions.FORWARD.value)) {
-            Toast.makeText(this, "Forward - Normal", Toast.LENGTH_SHORT).show();
-        } else if (actions.value.equals(Constants.Actions.REWIND.value)) {
-            Toast.makeText(this, "Rewind - Normal", Toast.LENGTH_SHORT).show();
-
-        }
-
-        updatePlaybackState(position);
-        updateMetadata(video);
+        rlVideoPlayerInfo.setVisibility(View.GONE);
+        startSyncSubtitle();
+        mVideoView.start();
     }
 
     private void pauseVideo() {
-        mPlaybackState = LeanbackPlaybackState.PAUSED;
-        mVideoView.pause();
-        timeStoppedTemp = tvTime.getBase();
+        isPlayPauseAction = PAUSE;
 
-        stopProgressAutomation();
+
+        tvTime.setText(videoCurrentTimeFormat(mVideoView.getCurrentPosition())+"/"+videoCurrentTimeFormat(mSelectedVideo.duration*1000));
+        rlVideoPlayerInfo.setVisibility(View.VISIBLE);
+        mVideoView.pause();
         stopSyncSubtitle();
+    }
+
+    private String videoCurrentTimeFormat(long millis) {
+        String hms = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
+
+        return hms;
+
+
     }
 
     private void controlReasonDialogPopUp(long subtitlePosition) {
@@ -336,132 +338,6 @@ public class PlaybackVideoActivity extends Activity implements
         }
     }
 
-    private void updatePlaybackState(int position) {
-        DreamTVApp.Logger.d("position =" + position);
-        PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
-                .setActions(getAvailableActions());
-        int state = PlaybackState.STATE_PLAYING;
-        if (mPlaybackState == LeanbackPlaybackState.PAUSED) {
-            state = PlaybackState.STATE_PAUSED;
-        }
-        stateBuilder.setState(state, position, 1.0f);
-        mSession.setPlaybackState(stateBuilder.build());
-    }
-
-    private long getAvailableActions() {
-        long actions = PlaybackState.ACTION_PLAY |
-                PlaybackState.ACTION_PLAY_FROM_MEDIA_ID |
-                PlaybackState.ACTION_PLAY_FROM_SEARCH;
-
-        if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
-            actions |= PlaybackState.ACTION_PAUSE;
-        }
-
-        return actions;
-    }
-
-    private void updateMetadata(final Video video) {
-        final MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder();
-
-        String title = video.title.replace("_", " -");
-
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, title);
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE,
-                video.project);
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION,
-                video.description);
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI,
-                video.thumbnail);
-
-        // And at minimum the title and artist for legacy support
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE, title);
-        metadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST, video.project);
-
-        Glide.with(this)
-                .load(Uri.parse(video.thumbnail))
-                .asBitmap()
-                .into(new SimpleTarget<Bitmap>(500, 500) {
-                    @Override
-                    public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
-                        metadataBuilder.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap);
-                        mSession.setMetadata(metadataBuilder.build());
-                    }
-                });
-    }
-
-    private void loadViews() {
-        mVideoView = (VideoView) findViewById(R.id.videoView);
-        mVideoView.setFocusable(false);
-        mVideoView.setFocusableInTouchMode(false);
-    }
-
-    private void setupCallbacks() {
-
-        mVideoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra) {
-                String msg = "";
-                if (extra == MediaPlayer.MEDIA_ERROR_TIMED_OUT) {
-                    msg = getString(R.string.video_error_media_load_timeout);
-                } else if (what == MediaPlayer.MEDIA_ERROR_SERVER_DIED) {
-                    msg = getString(R.string.video_error_server_inaccessible);
-                } else {
-                    msg = getString(R.string.video_error_unknown_error);
-                }
-                mVideoView.stopPlayback();
-                mPlaybackState = LeanbackPlaybackState.IDLE;
-                return false;
-            }
-        });
-
-        mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                final LoadingDialog loadingDialog = new LoadingDialog(PlaybackVideoActivity.this, getString(R.string.title_loading_buffering));
-                loadingDialog.setCanceledOnTouchOutside(false);
-
-                mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
-                    @Override
-                    public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                        if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
-                            loadingDialog.show();
-                            DreamTVApp.Logger.d("OnPreparedListener - MEDIA_INFO_BUFFERING_START");
-                        }
-                        if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
-                            DreamTVApp.Logger.d("OnPreparedListener - MEDIA_INFO_BUFFERING_END");
-                            loadingDialog.dismiss();
-
-                            startSyncSubtitle(SystemClock.elapsedRealtime() - currentPositionPlayPause);
-                            startProgressAutomation();
-                        }
-
-                        return false;
-                    }
-                });
-
-
-                if (mPlaybackState == LeanbackPlaybackState.PLAYING) {
-                    DreamTVApp.Logger.d("Dr - PLAYING - OnPreparedListener");
-//                    mp.seekTo(currentPositionPlayPause);
-                    mVideoView.seekTo(currentPositionPlayPause);
-                    mVideoView.start();
-
-                } else if (mPlaybackState == LeanbackPlaybackState.PAUSED) {
-                    DreamTVApp.Logger.d("Dr - PAUSED - OnPreparedListener");
-
-                }
-            }
-        });
-
-        mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                mPlaybackState = LeanbackPlaybackState.IDLE;
-            }
-        });
-
-    }
 
     private void stopPlayback() {
         if (mVideoView != null) {
@@ -469,56 +345,8 @@ public class PlaybackVideoActivity extends Activity implements
         }
     }
 
-
-    /*
-     * List of various states that we can be in
-     */
-    public enum LeanbackPlaybackState {
-        PLAYING, PAUSED, BUFFERING, IDLE
+    @Override
+    public void onDialogClosed() {
+        playVideo(null);
     }
-
-    private class MediaSessionCallback extends MediaSession.Callback {
-    }
-
-
-    private void startProgressAutomation() {
-        mPlayerControlRunnable = new Runnable() {
-            @Override
-            public void run() {
-                int updatePeriod = getUpdatePeriod();
-//                int updatePeriod = PlaybackVideoFragment.UPDATE_PERIOD;
-                int currentTime = mPlaybackControlsRow.getCurrentTime() + updatePeriod;
-                int totalTime = mPlaybackControlsRow.getTotalTime();
-                mPlaybackControlsRow.setCurrentTime(currentTime);
-                mPlaybackControlsRow.setBufferedProgress(currentTime + PlaybackVideoFragment.SIMULATED_BUFFERED_TIME);
-
-                if (totalTime > 0 && totalTime <= currentTime) {
-//                    next();  //Continue to another video
-                    stopPlayback();
-                }
-                mPlayerControlHandler.postDelayed(this, updatePeriod);
-            }
-        };
-        mPlayerControlHandler.postDelayed(mPlayerControlRunnable, getUpdatePeriod());
-    }
-
-
-    private void stopProgressAutomation() {
-        if (mPlayerControlHandler != null && mPlayerControlRunnable != null) {
-            mPlayerControlHandler.removeCallbacksAndMessages(null);
-        }
-    }
-
-    private int getUpdatePeriod() {
-        PlaybackVideoFragment playbackVideoFragment = (PlaybackVideoFragment) getFragmentManager().findFragmentById(R.id.playback_controls_fragment);
-
-        if (playbackVideoFragment.getView() == null || mPlaybackControlsRow.getTotalTime() <= 0) {
-            return PlaybackVideoFragment.DEFAULT_UPDATE_PERIOD;
-        }
-        DreamTVApp.Logger.d("update period -> getTotalTime = " + mPlaybackControlsRow.getTotalTime());
-        DreamTVApp.Logger.d("update period -> getView().getWidth = " + playbackVideoFragment.getView().getWidth());
-        DreamTVApp.Logger.d("update period -> div = " + mPlaybackControlsRow.getTotalTime() / playbackVideoFragment.getView().getWidth());
-        return Math.max(PlaybackVideoFragment.UPDATE_PERIOD, mPlaybackControlsRow.getTotalTime() / playbackVideoFragment.getView().getWidth());
-    }
-
 }

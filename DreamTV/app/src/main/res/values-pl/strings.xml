@@ -24,6 +24,8 @@
 
 
     <!--titles-->
+    <string name="title_audio">Audio: </string>
+    <string name="title_subtitle">Podtytuł: </string>
     <string name="title_user_statistics">Statystyka</string>
     <string name="title_video_settings">Ustawienia wideo</string>
     <string name="title_text_language_settings">Język tekstu</string>
@@ -32,13 +34,14 @@
     <string name="title_video_languages_type_settings">Wybierz języki:</string>
     <string name="title_reasons_dialog">Co tu jest nie tak?</string>
     <string name="title_reasons_dialog_2">Inni użytkownicy uważają, że tu jest błąd. Co myślisz?</string>
+    <string name="title_reasons_dialog_3">Wy wybraliście to:</string>
     <string name="title_confirmation_user_saved_data">Dane użytkownika zostały zapisane poprawnie</string>
     <string name="title_confirmation_saved_data">Dziękuję za pomoc</string>
     <string name="title_my_list_category">Moja lista</string>
     <string name="title_contributions_category">Składki</string>
     <string name="title_preferences_category">Preferencje</string>
     <string name="title_see_more_videos_category">Zobacz więcej filmów</string>
-    <string name="title_see_again_category">Kontynuuj oglądanie</string>
+    <string name="title_continue_watching_category">Kontynuuj oglądanie</string>
     <string name="title_see_all_category">Widzieć wszystko</string>
     <string name="title_check_new_tasks_category">Sprawdź te filmy</string>
     <string name="rb_option_text_english">Angielski</string>
@@ -56,7 +59,7 @@
     <string name="btn_ok">OK</string>
     <string name="btn_start_recording">Rozpocznij nagrywanie</string>
     <string name="btn_continue_watching">Nadal oglądaj</string>
-    <string name="btn_no_from_beggining">Zacząć od nowa</string>
+    <string name="btn_no_from_beggining">Zrestartuj rozmowę</string>
     <string name="btn_play_video">Odtwórz film</string>
     <string name="btn_add_to_my_list">+ Dodaj do mojej listy</string>
     <string name="btn_remove_from_my_list">- Usuń z mojej listy</string>

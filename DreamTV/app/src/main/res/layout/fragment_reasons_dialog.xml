@@ -2,14 +2,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white_transparent"
     android:gravity="center"
     tools:context="com.dream.dreamtv.fragment.ReasonsDialogFragment">
 
     <RelativeLayout
         android:layout_width="@dimen/popup_width"
         android:layout_height="@dimen/popup_height"
-        android:background="@color/dialog_background"
+        android:background="@color/gray_transparent"
         android:paddingEnd="20dp"
         android:paddingStart="20dp">
 
@@ -24,7 +23,7 @@
             android:gravity="center"
             android:padding="3dp"
             android:textColor="@color/white"
-            android:textSize="15sp"
+            android:textSize="14sp"
             android:textStyle="italic" />
 
         <TextView
@@ -39,7 +38,7 @@
             android:gravity="center"
             android:padding="3dp"
             android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/tvNextSubtitle"
@@ -53,7 +52,7 @@
             android:gravity="center"
             android:padding="3dp"
             android:textColor="@color/white"
-            android:textSize="15sp"
+            android:textSize="14sp"
             android:textStyle="italic" />
         <!--<TextView-->
         <!--android:id="@+id/titleReasons"-->
@@ -73,8 +72,7 @@
             android:layout_marginTop="20dp"
             android:text="@string/title_reasons_dialog"
             android:textColor="@color/white"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textSize="18sp" />
 
         <RelativeLayout
             android:id="@+id/rlScrollViewReasons"
@@ -137,8 +135,9 @@
                 android:background="@drawable/button_focusable"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:padding="15dp"
-                android:text="@string/btn_ok" />
+                android:padding="10dp"
+                android:text="@string/btn_ok"
+                android:textColor="@color/white" />
         </LinearLayout>
 
         <LinearLayout
@@ -161,8 +160,9 @@
                 android:background="@drawable/button_focusable"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:padding="15dp"
-                android:text="@string/btn_save" />
+                android:padding="10dp"
+                android:text="@string/btn_save"
+                android:textColor="@color/white" />
 
             <Button
                 android:id="@+id/btnCancel"
@@ -173,8 +173,9 @@
                 android:background="@drawable/button_focusable"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:padding="15dp"
-                android:text="@string/btn_cancel" />
+                android:padding="10dp"
+                android:text="@string/btn_cancel"
+                android:textColor="@color/white" />
 
 
         </LinearLayout>
@@ -186,8 +187,7 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:visibility="gone">
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/btnRecord"
@@ -197,9 +197,10 @@
                 android:background="@drawable/button_focusable"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:padding="15dp"
+                android:padding="10dp"
                 android:src="@drawable/ic_keyboard_voice"
-                android:text="@string/btn_start_recording" />
+                android:text="@string/btn_start_recording"
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/voiceInput"

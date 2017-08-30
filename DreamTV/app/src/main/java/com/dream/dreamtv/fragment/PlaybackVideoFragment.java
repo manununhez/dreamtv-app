@@ -95,7 +95,8 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
         mHandler = new Handler();
 
         setBackgroundType(BACKGROUND_TYPE);
-        setFadingEnabled(false);
+//        setFadingEnabled(false);
+        setFadingEnabled(true);
 
         setupRows();
 
@@ -145,7 +146,7 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
             public void onActionClicked(Action action) {
                 if (action.getId() == mPlayPauseAction.getId()) {
 //                    DreamTVApp.Logger.d("Button PLAY From the pannel");
-                    togglePlayback(mPlayPauseAction.getIndex() == PlayPauseAction.PLAY ? Constants.Actions.PLAY : Constants.Actions.PAUSE);
+//                    togglePlayback(mPlayPauseAction.getIndex() == PlayPauseAction.PLAY ? Constants.Actions.PLAY : Constants.Actions.PAUSE);
                 } else if (action.getId() == mFastForwardAction.getId()) {
                     fastForwardAction(Constants.Actions.FORWARD);
                 } else if (action.getId() == mRewindAction.getId()) {
@@ -206,35 +207,35 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
 //        }
 //    }
 
-    public void togglePlayback(Constants.Actions actions) {
-        mCallback.onFragmentPlayPause(mSelectedVideo,
-                mPlaybackControlsRow.getCurrentTime(), actions, mPlaybackControlsRow);
-        if (actions.value.equals(Constants.Actions.PLAY.value)) {
-//            startProgressAutomation();
-            setFadingEnabled(true);
-            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PAUSE));
-        } else {
-//            stopProgressAutomation();
-            setFadingEnabled(false);
-//            mCallback.onFragmentPlayPause(mSelectedVideo,
-//                    mPlaybackControlsRow.getCurrentTime(), actions, mPlaybackControlsRow);
-            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PLAY));
-        }
-        notifyChanged(mPlayPauseAction);
-    }
+//    public void togglePlayback(Constants.Actions actions) {
+//        mCallback.onFragmentPlayPause(mSelectedVideo,
+//                mPlaybackControlsRow.getCurrentTime(), actions, mPlaybackControlsRow);
+////        if (actions.value.equals(Constants.Actions.PLAY.value)) {
+//////            startProgressAutomation();
+////            setFadingEnabled(true);
+////            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PAUSE));
+////        } else {
+//////            stopProgressAutomation();
+////            setFadingEnabled(false);
+//////            mCallback.onFragmentPlayPause(mSelectedVideo,
+//////                    mPlaybackControlsRow.getCurrentTime(), actions, mPlaybackControlsRow);
+////            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PLAY));
+////        }
+//        notifyChanged(mPlayPauseAction);
+//    }
 
-    public void togglePlaybackWithoutVideoView(boolean playPause) {
-        if (playPause) {
-//            startProgressAutomation();
-            setFadingEnabled(true);
-            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PAUSE));
-        } else {
-//            stopProgressAutomation();
-            setFadingEnabled(false);
-            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PLAY));
-        }
-        notifyChanged(mPlayPauseAction);
-    }
+//    public void togglePlaybackWithoutVideoView(boolean playPause) {
+////        if (playPause) {
+//////            startProgressAutomation();
+////            setFadingEnabled(true);
+////            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PAUSE));
+////        } else {
+//////            stopProgressAutomation();
+////            setFadingEnabled(false);
+////            mPlayPauseAction.setIcon(mPlayPauseAction.getDrawable(PlayPauseAction.PLAY));
+////        }
+//        notifyChanged(mPlayPauseAction);
+//    }
 
     private int getDuration() {
 
@@ -282,6 +283,7 @@ public class PlaybackVideoFragment extends android.support.v17.leanback.app.Play
 
     private void updatePlaybackRow() {
         if (mPlaybackControlsRow.getItem() != null) {
+
             Video item = (Video) mPlaybackControlsRow.getItem();
             item.title = mSelectedVideo.title;
             item.project = mSelectedVideo.project;

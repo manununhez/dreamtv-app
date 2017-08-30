@@ -4,37 +4,81 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <fr.bmartel.youtubetv.YoutubeTvView
-        android:id="@+id/video_1"
+    <RelativeLayout
+        android:id="@+id/rlMedia"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_above="@+id/llTest"
+        android:animateLayoutChanges="true">
 
-    <fragment
-        android:id="@+id/playback_controls_fragment"
-        android:name="com.dream.dreamtv.fragment.PlaybackVideoFragment"
+        <fr.bmartel.youtubetv.YoutubeTvView
+            android:id="@+id/video_1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!--<fragment-->
+        <!--android:id="@+id/playback_controls_fragment"-->
+        <!--android:name="com.dream.dreamtv.fragment.PlaybackVideoFragment"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent" />-->
+
+        <!--<FrameLayout-->
+        <!--android:id="@+id/framelayout_reasons"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent" />-->
+
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp"
+            android:background="@color/black_subt"
+            android:gravity="center"
+            android:maxLines="2"
+            android:padding="3dp"
+            android:text="asdasdasd"
+            android:textColor="@color/white"
+            android:textSize="25sp"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/llTest"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <FrameLayout
-        android:id="@+id/framelayout_reasons"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <TextView
-        android:id="@+id/tvSubtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="150dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="20dp"
-        android:background="@color/black_subt"
-        android:gravity="center"
-        android:maxLines="2"
-        android:padding="3dp"
-        android:text="asdasdasd"
-        android:textColor="@color/white"
-        android:textSize="25sp"
-        android:visibility="gone" />
+        android:animateLayoutChanges="true"
+        android:background="@color/gray"
+        android:orientation="horizontal"
+        android:visibility="gone">
 
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlVideoPlayerInfo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="30dp"
+            android:text="0:12 / 3:44"
+            android:textSize="25sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="40dp"
+            android:layout_marginTop="30dp"
+            android:text="PAUSE"
+            android:textSize="30sp" />
+    </RelativeLayout>
 </RelativeLayout>

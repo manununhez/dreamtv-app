@@ -32,6 +32,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class PreferencesActivity extends Activity {
     private Activity mActivity;
 
     private ListView mListView;
-    private TextView mTextView;
+    //    private TextView mTextView;
     private TextView tvSubtitleValue;
     private TextView tvAudioValue;
     private TextView tvTitle;
@@ -89,7 +90,7 @@ public class PreferencesActivity extends Activity {
         tvTextLanguageTitle = (TextView) findViewById(R.id.tvTextLanguageTitle);
         tvReasonDialogInterfaceTitle = (TextView) findViewById(R.id.tvReasonDialogInterfaceTitle);
         tvVideoLanguagesTitle = (TextView) findViewById(R.id.tvVideoLanguagesTitle);
-        mTextView = (TextView) findViewById(R.id.tvSelectLanguageTitle);
+//        mTextView = (TextView) findViewById(R.id.tvSelectLanguageTitle);
         tvSubtitleValue = (TextView) findViewById(R.id.tvSubtitleValue);
         tvAudioValue = (TextView) findViewById(R.id.tvAudioValue);
 
@@ -99,25 +100,45 @@ public class PreferencesActivity extends Activity {
         btnSave = (Button) findViewById(R.id.btnSave);
 
 
-        btnSubtitle.setOnCheckedChangeListener(new CheckableTextView.OnCheckedChangeListener() {
+        btnSubtitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
-                if (isChecked) {
+            public void onFocusChange(View view, boolean b) {
+                if (b) {
                     btnAudio.setChecked(false);
+                    btnSubtitle.setChecked(true);
                     checkTemporaryUserData(true);
                 }
             }
         });
+//        btnSubtitle.setOnCheckedChangeListener(new CheckableTextView.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
+//                if (isChecked) {
+//                    btnAudio.setChecked(false);
+//                    checkTemporaryUserData(true);
+//                }
+//            }
+//        });
 
-        btnAudio.setOnCheckedChangeListener(new CheckableTextView.OnCheckedChangeListener() {
+        btnAudio.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
-                if (isChecked) {
+            public void onFocusChange(View view, boolean b) {
+                if (b) {
                     btnSubtitle.setChecked(false);
+                    btnAudio.setChecked(true);
                     checkTemporaryUserData(false);
                 }
             }
         });
+//        btnAudio.setOnCheckedChangeListener(new CheckableTextView.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
+//                if (isChecked) {
+//                    btnSubtitle.setChecked(false);
+//                    checkTemporaryUserData(false);
+//                }
+//            }
+//        });
 
 
         rgInterfaceLanguage.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -145,8 +166,32 @@ public class PreferencesActivity extends Activity {
         interfaceLanguageSettings();
         interfaceModeSettings();
 
-        getLanguages();
+//        getLanguages();
+        setupLanguages();
 
+    }
+
+    private void setupLanguages() { //based on the 10 most spoken languages http://www.foxnewspoint.com/top-10-most-spoken-language-in-the-world-2017/
+        Map<String, String> languages = new HashMap<>();
+
+        languages.put(Constants.NONE_OPTIONS_CODE, Constants.NONE_OPTIONS_TEXT);
+        languages.put("zh", "Chinese, Yue");
+        languages.put("en", "English");
+        languages.put("es", "Spanish");
+        languages.put("ar", "Arabic");
+//        languages.put("hi", "Hindi");
+//        languages.put("ru", "Russian");
+//        languages.put("bn", "Bengali");
+//        languages.put("pt", "Portuguese");
+        languages.put("fr", "French");
+        languages.put("pl", "Polish");
+
+        Map<String, String> orderedMap = MapUtil.sortByValue(languages);
+
+        keyList = new ArrayList<String>(orderedMap.values());
+        keyListCode = new ArrayList<String>(orderedMap.keySet());
+
+        settingListLanguage(keyList);
     }
 
     private void interfaceLanguageSettings() {
@@ -181,7 +226,7 @@ public class PreferencesActivity extends Activity {
         tvReasonDialogInterfaceTitle.setText(resources.getString(R.string.title_reason_dialog_interface_settings));
         rbAdvanced.setText(resources.getString(R.string.rb_option_text_advanced));
         rbBeginner.setText(resources.getString(R.string.rb_option_text_beginner));
-        mTextView.setText(resources.getString(R.string.title_video_languages_type_settings));
+//        mTextView.setText(resources.getString(R.string.title_video_languages_type_settings));
         tvVideoLanguagesTitle.setText(resources.getString(R.string.title_video_languages_settings));
         btnSubtitle.setText(resources.getString(R.string.btn_subtitle));
         btnAudio.setText(resources.getString(R.string.btn_audio));
@@ -238,7 +283,7 @@ public class PreferencesActivity extends Activity {
         // Initialize a new ArrayAdapter
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 mActivity,
-                android.R.layout.simple_list_item_multiple_choice,
+                R.layout.simple_list_item_single_choice,
                 keyList
         );
 

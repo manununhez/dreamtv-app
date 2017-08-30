@@ -4,6 +4,7 @@ package com.dream.dreamtv.fragment;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.DialogFragment;
@@ -38,17 +39,14 @@ import com.dream.dreamtv.beans.User;
 import com.dream.dreamtv.beans.UserTask;
 import com.dream.dreamtv.conn.ConnectionManager;
 import com.dream.dreamtv.conn.ResponseListener;
-import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -57,11 +55,14 @@ public class ReasonsDialogFragment extends DialogFragment {
 
     private LinearLayout llComments;
     private LinearLayout llReasons;
+    private LinearLayout llButtonsOptions1;
+    private LinearLayout llButtonsOptions2;
     private RadioGroup rgReasons;
     private List<Reason> reasonList;
     private List<Integer> selectedReasons = new ArrayList<>();
     private ImageButton btnRecord;
     private TextView voiceInput;
+    private TextView tvTitle;
     private Dialog viewRoot;
     private UserTask userTask;
     private SubtitleJson subtitle;
@@ -71,6 +72,7 @@ public class ReasonsDialogFragment extends DialogFragment {
     private int idTask;
     private int taskState;
     private static final int REQ_CODE_SPEECH_INPUT = 100;
+    private OnDialogClosedListener mCallback;
 
     public static ReasonsDialogFragment newInstance(SubtitleJson subtitle, int subtitlePosition, int idTask) {
         ReasonsDialogFragment f = new ReasonsDialogFragment();
@@ -103,6 +105,26 @@ public class ReasonsDialogFragment extends DialogFragment {
     }
 
 
+
+    // Container Activity must implement this interface
+    public interface OnDialogClosedListener {
+        void onDialogClosed();
+    }
+
+
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void onAttach(Activity context) {
+        super.onAttach(context);
+        if (context instanceof OnDialogClosedListener) {
+            mCallback = (OnDialogClosedListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnDialogClosedListener");
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,9 +144,9 @@ public class ReasonsDialogFragment extends DialogFragment {
         TextView tvCurrentSubtitle = (TextView) viewRoot.findViewById(R.id.tvCurrentSubtitle);
         TextView tvPreviousSubtitle = (TextView) viewRoot.findViewById(R.id.tvPreviousSubtitle);
         TextView tvNextSubtitle = (TextView) viewRoot.findViewById(R.id.tvNextSubtitle);
-        LinearLayout llButtonsOptions1 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions1);
-        LinearLayout llButtonsOptions2 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions2);
-        TextView tvTitle = (TextView) viewRoot.findViewById(R.id.tvTitle);
+        llButtonsOptions1 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions1);
+        llButtonsOptions2 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions2);
+        tvTitle = (TextView) viewRoot.findViewById(R.id.tvTitle);
         Button btnCancel = (Button) viewRoot.findViewById(R.id.btnCancel);
         Button btnSave = (Button) viewRoot.findViewById(R.id.btnSave);
         Button btnOk = (Button) viewRoot.findViewById(R.id.btnOk);
@@ -139,12 +161,16 @@ public class ReasonsDialogFragment extends DialogFragment {
             @Override
             public void onClick(View view) {
                 viewRoot.dismiss();
+//                mCallback.onDialogClosed();
+
             }
         });
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 viewRoot.dismiss();
+//                mCallback.onDialogClosed();
+
             }
         });
         btnSave.setOnClickListener(new View.OnClickListener() {
@@ -174,10 +200,17 @@ public class ReasonsDialogFragment extends DialogFragment {
 //        }
 
 
+
+
+        return viewRoot;
+    }
+
+    private void controlUserTask(){
         //controlUserTask. We repopulate the form with user task data
         if (userTask != null)
-            if (taskState == Constants.SEE_AGAIN_CATEGORY) {
+            if (taskState == Constants.CONTINUE_WATCHING_CATEGORY) {
                 repopulateFormWithUserTaskData();
+                tvTitle.setText(getString(R.string.title_reasons_dialog_3));
                 llButtonsOptions1.setVisibility(View.VISIBLE);
                 llButtonsOptions2.setVisibility(View.GONE);
             } else if (taskState == Constants.CHECK_NEW_TASKS_CATEGORY) {
@@ -186,11 +219,9 @@ public class ReasonsDialogFragment extends DialogFragment {
                 llButtonsOptions2.setVisibility(View.VISIBLE);
             }
 
-
-        return viewRoot;
     }
-
     private void repopulateFormWithUserTaskData() {
+        DreamTVApp.Logger.d("repopulateFormWithUserTaskData()");
         voiceInput.setText(userTask.comments); //repopulate comments
 
         List<String> strArray = Arrays.asList(userTask.reason_id.substring(userTask.reason_id.indexOf("[") + 1, userTask.reason_id.indexOf("]")).split(", "));
@@ -201,6 +232,8 @@ public class ReasonsDialogFragment extends DialogFragment {
             for (int i = 0; i < rgReasons.getChildCount(); i++) {
                 RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
                 radioButton.setEnabled(false);
+                radioButton.setFocusable(false);
+                radioButton.setFocusableInTouchMode(false);
                 if (strArray.contains(String.valueOf(radioButton.getId()))) {
                     radioButton.setChecked(true);
                 }
@@ -214,6 +247,8 @@ public class ReasonsDialogFragment extends DialogFragment {
                 ToggleButton toggleButton = (ToggleButton) childAt.getChildAt(1); //0 -> checkbox, 1->Tooglebutton
                 checkBox.setEnabled(false);
                 toggleButton.setEnabled(false);
+                toggleButton.setFocusable(false);
+                toggleButton.setFocusableInTouchMode(false);
                 if (strArray.contains(String.valueOf(toggleButton.getId()))) {
                     toggleButton.setChecked(true);
                     checkBox.setChecked(true);
@@ -248,6 +283,8 @@ public class ReasonsDialogFragment extends DialogFragment {
                 DreamTVApp.Logger.d(response);
 
                 viewRoot.dismiss();
+
+//                mCallback.onDialogClosed();
             }
 
             @Override
@@ -350,6 +387,9 @@ public class ReasonsDialogFragment extends DialogFragment {
                     setupReasonsRadioGroup();
                 else
                     setupReasons();
+
+                controlUserTask(); //To verify if we receive usertask, to repopulate the dialog
+
             }
 
             @Override
@@ -401,7 +441,7 @@ public class ReasonsDialogFragment extends DialogFragment {
             toggleButton.setLayoutParams(layoutParams);
             toggleButton.setFocusable(true);
             toggleButton.setFocusableInTouchMode(true);
-            toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_2_1));
+            toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_1));
 
             toggleButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -443,7 +483,7 @@ public class ReasonsDialogFragment extends DialogFragment {
             radioButton.setText(reason.name);
             radioButton.setId(reason.id);
             radioButton.setGravity(Gravity.CENTER);
-            radioButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_2_1));
+            radioButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_1));
 
             RadioGroup.LayoutParams layoutParams = new RadioGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, pixels);
             layoutParams.setMargins(0, 0, 0, 15);
@@ -451,5 +491,12 @@ public class ReasonsDialogFragment extends DialogFragment {
 
             rgReasons.addView(radioButton);
         }
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        mCallback.onDialogClosed();
+
     }
 }
