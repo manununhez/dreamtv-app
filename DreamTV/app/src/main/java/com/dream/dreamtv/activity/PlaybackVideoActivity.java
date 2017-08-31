@@ -17,21 +17,26 @@ package com.dream.dreamtv.activity;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.beans.Subtitle;
 import com.dream.dreamtv.beans.UserTask;
 import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.fragment.ReasonsDialogFragment;
 import com.dream.dreamtv.utils.Constants;
+import com.dream.dreamtv.utils.LoadingDialog;
 import com.dream.dreamtv.utils.Utils;
 
 import java.util.concurrent.TimeUnit;
@@ -49,13 +54,14 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     private Runnable myRunnable;
     private UserTask selectedUserTask;
     private RelativeLayout rlVideoPlayerInfo;
-
+    private LoadingDialog loadingDialog;
     private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
     private boolean showContinueDialogOnlyOnce = true;
     private int isPlayPauseAction = PAUSE;
     //    private final static int POSITION_OFFSET = 5;
     private static int PLAY = 0;
     private static int PAUSE = 1;
+    private final static int POSITION_OFFSET = 30000;//30 secs
 
     /**
      * Called when the activity is first created.
@@ -85,7 +91,51 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
 
         mVideoView.setVideoPath(mSelectedVideo.getVideoUrl());
 
-        playVideo(null);
+        mVideoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                String msg = "";
+                if (extra == MediaPlayer.MEDIA_ERROR_TIMED_OUT) {
+                    msg = getString(R.string.video_error_media_load_timeout);
+                } else if (what == MediaPlayer.MEDIA_ERROR_SERVER_DIED) {
+                    msg = getString(R.string.video_error_server_inaccessible);
+                } else {
+                    msg = getString(R.string.video_error_unknown_error);
+                }
+                mVideoView.stopPlayback();
+                return false;
+            }
+        });
+
+        mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+
+                mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+                    @Override
+                    public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                        if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
+
+                            DreamTVApp.Logger.d("OnPreparedListener - MEDIA_INFO_BUFFERING_START");
+                        }
+                        if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
+                            DreamTVApp.Logger.d("OnPreparedListener - MEDIA_INFO_BUFFERING_END");
+                            loadingDialog.dismiss();
+                        }
+
+                        return false;
+                    }
+                });
+
+            }
+        });
+
+        loadingDialog = new LoadingDialog(PlaybackVideoActivity.this, getString(R.string.title_loading_buffering));
+        loadingDialog.setCanceledOnTouchOutside(false);
+        loadingDialog.show();
+
+        playVideoMode();
     }
 
     @Override
@@ -115,7 +165,6 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
             requestVisibleBehind(false);
         }
     }
-
 
 
     @Override
@@ -173,6 +222,51 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
 
 
     @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+
+        switch (keyCode) {
+
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                Log.d(this.getClass().getName(), "KEYCODE_DPAD_DOWN");
+                // Do something...
+
+                //PAUSE
+                pauseVideo();
+
+                if (selectedUserTask != null)
+                    controlReasonDialogPopUp(mVideoView.getCurrentPosition(), selectedUserTask);
+                else
+                    controlReasonDialogPopUp(mVideoView.getCurrentPosition());
+                return true;
+
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                Log.d(this.getClass().getName(), "KEYCODE_DPAD_LEFT");
+                // Do something...
+                mVideoView.seekTo(mVideoView.getCurrentPosition() - POSITION_OFFSET);
+                Toast.makeText(this, "- " + (POSITION_OFFSET / 1000) + " secs", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "Left", Toast.LENGTH_SHORT).show();
+                return true;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                Log.d(this.getClass().getName(), "KEYCODE_DPAD_RIGHT");
+                // Do something...
+                mVideoView.seekTo(mVideoView.getCurrentPosition() + POSITION_OFFSET);
+
+                Toast.makeText(this, "+ " + (POSITION_OFFSET / 1000) + " secs", Toast.LENGTH_SHORT).show();
+
+                return true;
+            case KeyEvent.KEYCODE_DPAD_UP:
+                Log.d(this.getClass().getName(), "KEYCODE_DPAD_UP");
+                // Do something...
+                //PLAY
+                playVideoMode();
+                return true;
+
+            default:
+                return super.onKeyUp(keyCode, event);
+        }
+    }
+
+    @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
 
         int action = event.getAction();
@@ -191,33 +285,8 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
                             controlReasonDialogPopUp(mVideoView.getCurrentPosition());
 
                     } else { //Play
+                        playVideoMode();
 
-
-                        if (mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
-                            final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
-                            Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
-                                    getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            playVideo(subtitle.end);
-                                        }
-                                    }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            playVideo(null);
-                                            dialog.dismiss();
-                                        }
-                                    }, new DialogInterface.OnCancelListener() {
-                                        @Override
-                                        public void onCancel(DialogInterface dialog) {
-                                            dialog.dismiss();
-                                        }
-                                    }).show();
-
-                            showContinueDialogOnlyOnce = false;
-                        } else {
-                            playVideo(null);
-                        }
                     }
                     return true;
                 }
@@ -226,6 +295,34 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         }
     }
 
+
+    private void playVideoMode() {
+        if (mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
+            final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
+            Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
+                    getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            playVideo(subtitle.end);
+                        }
+                    }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            playVideo(null);
+                            dialog.dismiss();
+                        }
+                    }, new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialog) {
+                            dialog.dismiss();
+                        }
+                    }).show();
+
+            showContinueDialogOnlyOnce = false;
+        } else {
+            playVideo(null);
+        }
+    }
 
     //
 //    /**
@@ -282,7 +379,7 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         isPlayPauseAction = PAUSE;
 
 
-        tvTime.setText(videoCurrentTimeFormat(mVideoView.getCurrentPosition())+"/"+videoCurrentTimeFormat(mSelectedVideo.duration*1000));
+        tvTime.setText(videoCurrentTimeFormat(mVideoView.getCurrentPosition()) + "/" + videoCurrentTimeFormat(mSelectedVideo.duration * 1000));
         rlVideoPlayerInfo.setVisibility(View.VISIBLE);
         mVideoView.pause();
         stopSyncSubtitle();
@@ -321,6 +418,8 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     }
 
     private void showReasonsScreen(Subtitle subtitle) {
+        loadingDialog.dismiss(); //in case the loading is still visible
+
         if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
             ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
                     subtitle.position, mSelectedVideo.task_id);
@@ -330,6 +429,8 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     }
 
     private void showReasonsScreen(Subtitle subtitle, UserTask userTask) {
+        loadingDialog.dismiss(); //in case the loading is still visible
+
         if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
             ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
                     subtitle.position, mSelectedVideo.task_id, userTask, mSelectedVideo.task_state);

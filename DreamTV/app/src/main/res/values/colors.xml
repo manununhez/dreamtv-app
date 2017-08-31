@@ -51,6 +51,7 @@
     <color name="red_light">#f74428</color>
     <color name="green">#00a10d</color>
     <color name="light_green">#08d2b4</color>
+    <color name="dark_green">#005649</color>
     <color name="blue">#0d228f</color>
 
 </resources>

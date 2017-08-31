@@ -25,6 +25,7 @@ package com.dream.dreamtv.activity;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -44,6 +45,7 @@ import com.dream.dreamtv.beans.UserTask;
 import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.fragment.ReasonsDialogFragment;
 import com.dream.dreamtv.utils.Constants;
+import com.dream.dreamtv.utils.Utils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -75,7 +77,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     private Long timeStoppedTemp;
     private UserTask selectedUserTask;
     private boolean showContinueDialogOnlyOnce = true;
-    private LinearLayout llTest;
+    //    private LinearLayout llTest;
     private int isPlayPauseAction = PAUSE;
     private final static int POSITION_OFFSET = 5;
     private static int PLAY = 0;
@@ -89,13 +91,13 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         chronometer = new Chronometer(this); // initiate a chronometer
         tvTime = (TextView) findViewById(R.id.tvTime);
         tvSubtitle = (TextView) findViewById(R.id.tvSubtitle); // initiate a chronometer
-        llTest = (LinearLayout) findViewById(R.id.llTest); // initiate a chronometer
+//        llTest = (LinearLayout) findViewById(R.id.llTest); // initiate a chronometer
         rlVideoPlayerInfo = (RelativeLayout) findViewById(R.id.rlVideoPlayerInfo);
 
         mYoutubeView = (YoutubeTvView) findViewById(R.id.video_1);
         mYoutubeView.updateView(getArgumentos());
         mYoutubeView.playVideo(getArgumentos().getString("videoId", ""));
-
+//        mYoutubeView.start();
 
         mYoutubeView.addPlayerListener(new IPlayerListener() {
             @Override
@@ -139,6 +141,8 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
         subtitleHandlerSyncConfig();
 
+        playVideoMode();
+
     }
 
 
@@ -172,7 +176,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     }
 
 
-
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
 
@@ -204,12 +207,12 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                 return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 Log.d(this.getClass().getName(), "KEYCODE_VOLUME_DOWN");
-                llTest.setVisibility(View.GONE);
+//                llTest.setVisibility(View.GONE);
                 return true;
             case KeyEvent.KEYCODE_VOLUME_UP:
                 Log.d(this.getClass().getName(), "KEYCODE_VOLUME_UP");
                 // Do something...
-                llTest.setVisibility(View.VISIBLE);
+//                llTest.setVisibility(View.VISIBLE);
 
                 return true;
 
@@ -234,9 +237,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                         mYoutubeView.pause();
 
                     } else { //Play
-                        isPlayPauseAction = PLAY;
-
-                        mYoutubeView.start();
+                        playVideoMode();
                     }
                     Log.d(this.getClass().getName(), "KEYCODE_DPAD_CENTER - dispatchKeyEvent");
                     return true;
@@ -244,6 +245,42 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
             default:
                 return super.dispatchKeyEvent(event);
         }
+    }
+
+    private void playVideoMode(){
+        if (mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
+            final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
+            Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
+                    getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            playVideo(subtitle.end);
+                        }
+                    }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            playVideo(null);
+                            dialog.dismiss();
+                        }
+                    }, new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialog) {
+                            dialog.dismiss();
+                        }
+                    }).show();
+
+            showContinueDialogOnlyOnce = false;
+        } else {
+            playVideo(null);
+        }
+    }
+    private void playVideo(Integer seekToSecs) {
+        isPlayPauseAction = PLAY;
+
+        if (seekToSecs != null)
+            mYoutubeView.seekTo(seekToSecs);
+
+        mYoutubeView.start();
     }
 
     @Override

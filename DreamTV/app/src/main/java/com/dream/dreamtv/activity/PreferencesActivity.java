@@ -51,6 +51,8 @@ public class PreferencesActivity extends Activity {
     private TextView tvTextLanguageTitle;
     private TextView tvReasonDialogInterfaceTitle;
     private TextView tvVideoLanguagesTitle;
+    private TextView tvAudioLabel;
+    private TextView tvSubtitleLabel;
     private List<String> keyList;
     private List<String> keyListCode;
     private CheckableTextView btnSubtitle;
@@ -88,6 +90,8 @@ public class PreferencesActivity extends Activity {
 
         tvTitle = (TextView) findViewById(R.id.tvTitle);
         tvTextLanguageTitle = (TextView) findViewById(R.id.tvTextLanguageTitle);
+        tvAudioLabel = (TextView) findViewById(R.id.tvAudioLabel);
+        tvSubtitleLabel = (TextView) findViewById(R.id.tvSubtitleLabel);
         tvReasonDialogInterfaceTitle = (TextView) findViewById(R.id.tvReasonDialogInterfaceTitle);
         tvVideoLanguagesTitle = (TextView) findViewById(R.id.tvVideoLanguagesTitle);
 //        mTextView = (TextView) findViewById(R.id.tvSelectLanguageTitle);
@@ -175,16 +179,16 @@ public class PreferencesActivity extends Activity {
         Map<String, String> languages = new HashMap<>();
 
         languages.put(Constants.NONE_OPTIONS_CODE, Constants.NONE_OPTIONS_TEXT);
-        languages.put("zh", "Chinese, Yue");
-        languages.put("en", "English");
-        languages.put("es", "Spanish");
-        languages.put("ar", "Arabic");
+        languages.put("zh", getString(R.string.language_chinese));
+        languages.put("en", getString(R.string.language_english));
+        languages.put("es", getString(R.string.language_spanish));
+        languages.put("ar", getString(R.string.language_arabic));
 //        languages.put("hi", "Hindi");
 //        languages.put("ru", "Russian");
 //        languages.put("bn", "Bengali");
 //        languages.put("pt", "Portuguese");
-        languages.put("fr", "French");
-        languages.put("pl", "Polish");
+        languages.put("fr", getString(R.string.language_french));
+        languages.put("pl", getString(R.string.language_polish));
 
         Map<String, String> orderedMap = MapUtil.sortByValue(languages);
 
@@ -231,6 +235,9 @@ public class PreferencesActivity extends Activity {
         btnSubtitle.setText(resources.getString(R.string.btn_subtitle));
         btnAudio.setText(resources.getString(R.string.btn_audio));
         btnSave.setText(resources.getString(R.string.btn_save_settings));
+        tvAudioLabel.setText(getString(R.string.title_audio));
+        tvSubtitleLabel.setText(getString(R.string.title_subtitle));
+        setupLanguages();
     }
 
     private void updateUserData() {

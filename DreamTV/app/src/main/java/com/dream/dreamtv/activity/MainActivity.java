@@ -136,71 +136,71 @@ public class MainActivity extends Activity {
 //    }
 
 
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-
-        switch (keyCode) {
-
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_CENTER - onKeyUp");
-                // Do something...
-
-                return true;
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_DOWN");
-                // Do something...
-
-                return true;
-            case KeyEvent.KEYCODE_DPAD_DOWN_LEFT:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_DOWN_LEFT");
-                // Do something...
-
-                return true;
-            case KeyEvent.KEYCODE_DPAD_DOWN_RIGHT:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_DOWN_RIGHT");
-                // Do something...
-
-                return true;
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_LEFT");
-                // Do something...
-
-                return true;
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_RIGHT");
-                // Do something...
-
-                return true;
-            case KeyEvent.KEYCODE_DPAD_UP:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_UP");
-                // Do something...
-
-                return true;
-            case KeyEvent.KEYCODE_DPAD_UP_LEFT:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_UP_LEFT");
-                // Do something...
-
-                return true;
-            case KeyEvent.KEYCODE_DPAD_UP_RIGHT:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_UP_RIGHT");
-                // Do something...
-
-                return true;
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-                Log.d(this.getClass().getName(), "KEYCODE_VOLUME_DOWN");
-                // Do something...
-
-                return true;
-            case KeyEvent.KEYCODE_VOLUME_UP:
-                Log.d(this.getClass().getName(), "KEYCODE_VOLUME_UP");
-                // Do something...
-
-                return true;
-
-            default:
-                return super.onKeyUp(keyCode, event);
-        }
-    }
+//    @Override
+//    public boolean onKeyUp(int keyCode, KeyEvent event) {
+//
+//        switch (keyCode) {
+//
+//            case KeyEvent.KEYCODE_DPAD_CENTER:
+//                Log.d(this.getClass().getName(), "KEYCODE_DPAD_CENTER - onKeyUp");
+//                // Do something...
+//
+//                return true;
+//            case KeyEvent.KEYCODE_DPAD_DOWN:
+//                Log.d(this.getClass().getName(), "KEYCODE_DPAD_DOWN");
+//                // Do something...
+//
+//                return true;
+//            case KeyEvent.KEYCODE_DPAD_DOWN_LEFT:
+//                Log.d(this.getClass().getName(), "KEYCODE_DPAD_DOWN_LEFT");
+//                // Do something...
+//
+//                return true;
+//            case KeyEvent.KEYCODE_DPAD_DOWN_RIGHT:
+//                Log.d(this.getClass().getName(), "KEYCODE_DPAD_DOWN_RIGHT");
+//                // Do something...
+//
+//                return true;
+//            case KeyEvent.KEYCODE_DPAD_LEFT:
+//                Log.d(this.getClass().getName(), "KEYCODE_DPAD_LEFT");
+//                // Do something...
+//
+//                return true;
+//            case KeyEvent.KEYCODE_DPAD_RIGHT:
+//                Log.d(this.getClass().getName(), "KEYCODE_DPAD_RIGHT");
+//                // Do something...
+//
+//                return true;
+//            case KeyEvent.KEYCODE_DPAD_UP:
+//                Log.d(this.getClass().getName(), "KEYCODE_DPAD_UP");
+//                // Do something...
+//
+//                return true;
+//            case KeyEvent.KEYCODE_DPAD_UP_LEFT:
+//                Log.d(this.getClass().getName(), "KEYCODE_DPAD_UP_LEFT");
+//                // Do something...
+//
+//                return true;
+//            case KeyEvent.KEYCODE_DPAD_UP_RIGHT:
+//                Log.d(this.getClass().getName(), "KEYCODE_DPAD_UP_RIGHT");
+//                // Do something...
+//
+//                return true;
+//            case KeyEvent.KEYCODE_VOICE_ASSIST:
+//                Log.d(this.getClass().getName(), "KEYCODE_VOLUME_DOWN");
+//                // Do something...
+//
+//                return true;
+//            case KeyEvent.KEYCODE_VOLUME_UP:
+//                Log.d(this.getClass().getName(), "KEYCODE_VOLUME_UP");
+//                // Do something...
+//
+//                return true;
+//
+//            default:
+//                return super.onKeyUp(keyCode, event);
+//        }
+//    }
 
 //    @Override
 //    public boolean dispatchKeyEvent(KeyEvent event) {

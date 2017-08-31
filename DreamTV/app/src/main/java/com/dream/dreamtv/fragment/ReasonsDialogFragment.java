@@ -9,11 +9,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.app.DialogFragment;
 import android.speech.RecognizerIntent;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.Html;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,6 +64,9 @@ public class ReasonsDialogFragment extends DialogFragment {
     private List<Reason> reasonList;
     private List<Integer> selectedReasons = new ArrayList<>();
     private ImageButton btnRecord;
+    private Button btnOk;
+    private Button btnSave;
+    private Button btnCancel;
     private TextView voiceInput;
     private TextView tvTitle;
     private Dialog viewRoot;
@@ -105,12 +111,10 @@ public class ReasonsDialogFragment extends DialogFragment {
     }
 
 
-
     // Container Activity must implement this interface
     public interface OnDialogClosedListener {
         void onDialogClosed();
     }
-
 
 
     @SuppressWarnings("deprecation")
@@ -147,9 +151,9 @@ public class ReasonsDialogFragment extends DialogFragment {
         llButtonsOptions1 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions1);
         llButtonsOptions2 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions2);
         tvTitle = (TextView) viewRoot.findViewById(R.id.tvTitle);
-        Button btnCancel = (Button) viewRoot.findViewById(R.id.btnCancel);
-        Button btnSave = (Button) viewRoot.findViewById(R.id.btnSave);
-        Button btnOk = (Button) viewRoot.findViewById(R.id.btnOk);
+        btnCancel = (Button) viewRoot.findViewById(R.id.btnCancel);
+        btnSave = (Button) viewRoot.findViewById(R.id.btnSave);
+        btnOk = (Button) viewRoot.findViewById(R.id.btnOk);
 
         scrollViewAdvanced = (ScrollView) viewRoot.findViewById(R.id.scrollViewAdvanced);
         scrollViewBeginner = (ScrollView) viewRoot.findViewById(R.id.scrollViewBeginner);
@@ -200,12 +204,10 @@ public class ReasonsDialogFragment extends DialogFragment {
 //        }
 
 
-
-
         return viewRoot;
     }
 
-    private void controlUserTask(){
+    private void controlUserTask() {
         //controlUserTask. We repopulate the form with user task data
         if (userTask != null)
             if (taskState == Constants.CONTINUE_WATCHING_CATEGORY) {
@@ -220,6 +222,7 @@ public class ReasonsDialogFragment extends DialogFragment {
             }
 
     }
+
     private void repopulateFormWithUserTaskData() {
         DreamTVApp.Logger.d("repopulateFormWithUserTaskData()");
         voiceInput.setText(userTask.comments); //repopulate comments
@@ -240,6 +243,12 @@ public class ReasonsDialogFragment extends DialogFragment {
 
             }
         } else { //ADVANCED MODE
+            llComments.setEnabled(false);
+            llComments.setFocusable(false);
+            llComments.setFocusableInTouchMode(false);
+            btnRecord.setFocusable(false);
+            btnRecord.setEnabled(false);
+            btnRecord.setFocusableInTouchMode(false);
             //re-select the reasons id
             for (int i = 0; i < llReasons.getChildCount(); i++) {
                 LinearLayout childAt = (LinearLayout) llReasons.getChildAt(i);
@@ -256,6 +265,8 @@ public class ReasonsDialogFragment extends DialogFragment {
             }
         }
 
+
+        btnOk.requestFocus(); //Nos posicionamos en este boton
     }
 
     private void saveReasons() {
@@ -311,6 +322,29 @@ public class ReasonsDialogFragment extends DialogFragment {
         getDialog().getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 //        getDialog().getWindow().setLayout(width, height);
 
+        getDialog().setOnKeyListener(new DialogInterface.OnKeyListener() {
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                switch (keyCode) {
+
+                    case KeyEvent.KEYCODE_VOICE_ASSIST:
+                        Log.d(this.getClass().getName(), "KEYCODE_VOICE_ASSIST - onKeyUp");
+                        // Do something...
+
+                        return true;
+
+                    case KeyEvent.KEYCODE_SEARCH:
+                        Log.d(this.getClass().getName(), "KEYCODE_SEARCH - onKeyUp");
+                        // Do something...
+                        promptSpeechInput();
+                        return true;
+
+                    default:
+                        return false;
+                }
+
+            }
+        });
+
         super.onResume();
     }
 
@@ -323,6 +357,20 @@ public class ReasonsDialogFragment extends DialogFragment {
             @Override
             public void onClick(View view) {
                 promptSpeechInput();
+            }
+        });
+
+        btnRecord.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (b) {
+//                    if (voiceInput.getText().equals("")) {
+                    voiceInput.setHint("Click here to send comments");
+//                    }
+                } else {
+                    voiceInput.setHint("");
+
+                }
             }
         });
     }
@@ -472,6 +520,14 @@ public class ReasonsDialogFragment extends DialogFragment {
         scrollViewAdvanced.setVisibility(View.GONE);
 
         rgReasons.removeAllViews();
+
+        rgReasons.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, @IdRes int i) {
+                btnSave.requestFocus(); //Nos posicionamos en el boton guardar
+            }
+        });
+
         for (int i = 0; i < reasonList.size(); i++) {
             Reason reason = reasonList.get(i);
 
@@ -499,4 +555,5 @@ public class ReasonsDialogFragment extends DialogFragment {
         mCallback.onDialogClosed();
 
     }
+
 }
