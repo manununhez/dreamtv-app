@@ -15,7 +15,9 @@
 package com.dream.dreamtv.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 import com.dream.dreamtv.R;
 
@@ -23,8 +25,10 @@ import com.dream.dreamtv.R;
 /*
  * Details activity class that loads LeanbackDetailsFragment class
  */
-public class VideoDetailsActivity extends Activity {
+public class VideoDetailsActivity extends FragmentActivity {
 
+
+    public boolean updateScreenAfterChanges = false;
 
     /**
      * Called when the activity is first created.
@@ -35,4 +39,14 @@ public class VideoDetailsActivity extends Activity {
         setContentView(R.layout.activity_video_details);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (updateScreenAfterChanges) {
+            Intent returnIntent = new Intent();
+            setResult(Activity.RESULT_OK, returnIntent);
+            finish();
+        } else {
+            super.onBackPressed();
+        }
+    }
 }

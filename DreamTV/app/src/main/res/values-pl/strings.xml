@@ -82,6 +82,8 @@
     <string name="title_loading_adding_videos_list">Dodanie filmu do mojej listy...</string>
     <string name="title_loading_removing_videos_list">Usunięcie filmu do mojej listy...</string>
 
+    <!--Languages-->
+    <string name="all_languages">Wszystkie języki</string>
     <string name="language_chinese">Chińczycy, Yue</string>
     <string name="language_english">Angielski</string>
     <string name="language_spanish">Hiszpański</string>

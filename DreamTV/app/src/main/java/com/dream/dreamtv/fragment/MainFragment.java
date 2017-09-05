@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v17.leanback.app.BackgroundManager;
@@ -46,6 +47,7 @@ import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -74,7 +76,11 @@ import com.dream.dreamtv.conn.ConnectionManager;
 import com.dream.dreamtv.conn.ResponseListener;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
+import com.dream.dreamtv.utils.PermissionUtil;
+import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.Gson;
+
+import static android.support.v4.content.PermissionChecker.checkSelfPermission;
 
 
 public class MainFragment extends BrowseFragment {
@@ -88,9 +94,10 @@ public class MainFragment extends BrowseFragment {
     private BackgroundManager mBackgroundManager;
     private Handler mHandler = new Handler();
 
-    private String URL_THUMBNAIL_ICON = "https://upload.wikimedia.org/wikipedia/commons/5/59/R2244.png";
+    private String URL_THUMBNAIL_ICON = "https://image.flaticon.com/icons/png/128/181/181532.png";
     public static final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 1456;
     public static final int PREFERENCES_SETTINGS_RESULT_CODE = 1256;
+    public static final int VIDEO_DETAILS_RESULT_CODE = 1257;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -103,33 +110,44 @@ public class MainFragment extends BrowseFragment {
         setupVideosList();
 
         // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.GET_ACCOUNTS)
-                != PackageManager.PERMISSION_GRANTED) {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//        if (ContextCompat.checkSelfPermission(getActivity(),
+//                Manifest.permission.GET_ACCOUNTS)
+//                != PackageManager.PERMISSION_GRANTED) {
 
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                    Manifest.permission.GET_ACCOUNTS)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
+            if (PermissionUtil.shouldAskPermission(getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+/*
+            * If permission denied previously
+            * */
+                if (shouldShowRequestPermissionRationale(Manifest.permission.GET_ACCOUNTS)) {
+                    //listener.onPermissionPreviouslyDenied();
+                    //show a dialog explaining permission and then request permission
+                    Toast.makeText(getActivity(), "Get accounts permission disabled and app will not work. Please proceed and give permission to access to accounts", Toast.LENGTH_SHORT).show();
+                    requestPermissions(new String[]{Manifest.permission.GET_ACCOUNTS},
+                            MY_PERMISSIONS_REQUEST_GET_ACCOUNTS
+                    );
+                } else {
+                /*
+                * Permission denied or first time requested
+                * */
+                    if (SharedPreferenceUtils.isFirstTimeAskingPermission(getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+                        SharedPreferenceUtils.firstTimeAskingPermission(getActivity(), Manifest.permission.GET_ACCOUNTS, false);
+                        //listener.onNeedPermission();
+                        requestPermissions(new String[]{Manifest.permission.GET_ACCOUNTS},
+                                MY_PERMISSIONS_REQUEST_GET_ACCOUNTS
+                        );
+                    } else {
+                    /*
+                    * Handle the feature without permission or ask user to manually allow permission
+                    * */
+                        //listener.onPermissionDisabled();
+                        Toast.makeText(getActivity(), "Permission Disabled.", Toast.LENGTH_SHORT).show();
+                    }
+                }
             } else {
-
-                // No explanation needed, we can request the permission.
-
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.GET_ACCOUNTS},
-                        MY_PERMISSIONS_REQUEST_GET_ACCOUNTS);
-
-                // MY_PERMISSIONS_REQUEST_GET_ACCOUNTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
+                //listener.onPermissionGranted();
+                userRegistration();
             }
-        } else {
-            userRegistration();
-        }
 
 
 //        getVideos();
@@ -226,7 +244,9 @@ public class MainFragment extends BrowseFragment {
                 TaskList taskList = gson.fromJson(response, TaskList.class);
                 DreamTVApp.Logger.d(taskList.toString());
 
-                loadVideos(taskList, Constants.CHECK_NEW_TASKS_CATEGORY);
+                if (taskList.data.size() > 0)
+                    loadVideos(taskList, Constants.CHECK_NEW_TASKS_CATEGORY);
+
                 getUserFinishedTasks("1");
             }
 
@@ -263,7 +283,8 @@ public class MainFragment extends BrowseFragment {
                 TaskList taskList = gson.fromJson(response, TaskList.class);
                 DreamTVApp.Logger.d(taskList.toString());
 
-                loadVideos(taskList, Constants.CONTINUE_WATCHING_CATEGORY);
+                if (taskList.data.size() > 0)
+                    loadVideos(taskList, Constants.CONTINUE_WATCHING_CATEGORY);
 
                 getUserVideosList("1");
 
@@ -301,7 +322,8 @@ public class MainFragment extends BrowseFragment {
                 TaskList taskList = gson.fromJson(response, TaskList.class);
                 DreamTVApp.Logger.d(taskList.toString());
 
-                loadVideos(taskList, Constants.MY_LIST_CATEGORY);
+                if (taskList.data.size() > 0)
+                    loadVideos(taskList, Constants.MY_LIST_CATEGORY);
 
                 setFootersOptions();
             }
@@ -389,7 +411,7 @@ public class MainFragment extends BrowseFragment {
 
     private void setupUIElements() {
         setBadgeDrawable(getActivity().getResources().getDrawable(
-                R.drawable.logo_dream_tv));
+                R.drawable.logo_tv));
         setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent
         // over title
         setHeadersState(HEADERS_HIDDEN);
@@ -470,7 +492,8 @@ public class MainFragment extends BrowseFragment {
                             getActivity(),
                             ((ImageCardView) itemViewHolder.view).getMainImageView(),
                             Constants.SHARED_ELEMENT_NAME).toBundle();
-                    getActivity().startActivity(intent, bundle);
+                    startActivityForResult(intent, VIDEO_DETAILS_RESULT_CODE, bundle);
+
                 }
             } else if (item instanceof String) {
 
@@ -580,7 +603,7 @@ public class MainFragment extends BrowseFragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE) { //After PreferencesSettings
+            if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE || requestCode == VIDEO_DETAILS_RESULT_CODE) { //After PreferencesSettings or after add videos to userlist (in videoDetailsActivity)
                 //Clear the screen
                 setSelectedPosition(0);
                 setupVideosList();

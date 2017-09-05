@@ -14,17 +14,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <!--<fragment-->
-        <!--android:id="@+id/playback_controls_fragment"-->
-        <!--android:name="com.dream.dreamtv.fragment.PlaybackVideoFragment"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent" />-->
-
-        <!--<FrameLayout-->
-        <!--android:id="@+id/framelayout_reasons"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent" />-->
-
         <TextView
             android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"

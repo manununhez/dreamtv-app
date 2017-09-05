@@ -58,7 +58,6 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
     private boolean showContinueDialogOnlyOnce = true;
     private int isPlayPauseAction = PAUSE;
-    //    private final static int POSITION_OFFSET = 5;
     private static int PLAY = 0;
     private static int PAUSE = 1;
     private final static int POSITION_OFFSET = 30000;//30 secs
@@ -76,8 +75,6 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
 
         mSelectedVideo = (Video) getIntent().getParcelableExtra(Constants.VIDEO);
 
-
-//        tvTime.setText("0:00/"+videoCurrentTimeFormat(mSelectedVideo.duration));
         subtitleHandlerSyncConfig();
         loadViews();
 
@@ -225,20 +222,6 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     public boolean onKeyUp(int keyCode, KeyEvent event) {
 
         switch (keyCode) {
-
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_DOWN");
-                // Do something...
-
-                //PAUSE
-                pauseVideo();
-
-                if (selectedUserTask != null)
-                    controlReasonDialogPopUp(mVideoView.getCurrentPosition(), selectedUserTask);
-                else
-                    controlReasonDialogPopUp(mVideoView.getCurrentPosition());
-                return true;
-
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 Log.d(this.getClass().getName(), "KEYCODE_DPAD_LEFT");
                 // Do something...
@@ -253,12 +236,6 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
 
                 Toast.makeText(this, "+ " + (POSITION_OFFSET / 1000) + " secs", Toast.LENGTH_SHORT).show();
 
-                return true;
-            case KeyEvent.KEYCODE_DPAD_UP:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_UP");
-                // Do something...
-                //PLAY
-                playVideoMode();
                 return true;
 
             default:
@@ -323,46 +300,6 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
             playVideo(null);
         }
     }
-
-    //
-//    /**
-//     * Implementation of OnPlayPauseClickedListener
-//     */
-//    public void onFragmentPlayPause(final Video video, final int position, final Constants.Actions actions,
-//                                    final PlaybackControlsRow playbackControlsRow) {
-//        mVideoView.setVideoPath(video.getVideoUrl());
-//
-//        mPlaybackControlsRow = playbackControlsRow;
-//        if (mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
-//            final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
-//            Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
-//                    getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            mPlaybackControlsRow.setCurrentTime(subtitle.end);
-//                            setupReproduction(video, subtitle.end, actions);
-//                        }
-//                    }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            mPlaybackControlsRow.setCurrentTime(position);
-//                            setupReproduction(video, position, actions);
-//                            dialog.dismiss();
-//                        }
-//                    }, new DialogInterface.OnCancelListener() {
-//                        @Override
-//                        public void onCancel(DialogInterface dialog) {
-//                            dialog.dismiss();
-//                        }
-//                    }).show();
-//
-//            showContinueDialogOnlyOnce = false;
-//        } else {
-//            mPlaybackControlsRow.setCurrentTime(position);
-//            setupReproduction(video, position, actions);
-//        }
-//
-//    }
 
     private void playVideo(Integer seekToPosition) {
         isPlayPauseAction = PLAY;

@@ -37,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class PreferencesActivity extends Activity {
 
@@ -94,7 +95,6 @@ public class PreferencesActivity extends Activity {
         tvSubtitleLabel = (TextView) findViewById(R.id.tvSubtitleLabel);
         tvReasonDialogInterfaceTitle = (TextView) findViewById(R.id.tvReasonDialogInterfaceTitle);
         tvVideoLanguagesTitle = (TextView) findViewById(R.id.tvVideoLanguagesTitle);
-//        mTextView = (TextView) findViewById(R.id.tvSelectLanguageTitle);
         tvSubtitleValue = (TextView) findViewById(R.id.tvSubtitleValue);
         tvAudioValue = (TextView) findViewById(R.id.tvAudioValue);
 
@@ -114,15 +114,7 @@ public class PreferencesActivity extends Activity {
                 }
             }
         });
-//        btnSubtitle.setOnCheckedChangeListener(new CheckableTextView.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
-//                if (isChecked) {
-//                    btnAudio.setChecked(false);
-//                    checkTemporaryUserData(true);
-//                }
-//            }
-//        });
+
 
         btnAudio.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -134,15 +126,6 @@ public class PreferencesActivity extends Activity {
                 }
             }
         });
-//        btnAudio.setOnCheckedChangeListener(new CheckableTextView.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
-//                if (isChecked) {
-//                    btnSubtitle.setChecked(false);
-//                    checkTemporaryUserData(false);
-//                }
-//            }
-//        });
 
 
         rgInterfaceLanguage.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -176,9 +159,9 @@ public class PreferencesActivity extends Activity {
     }
 
     private void setupLanguages() { //based on the 10 most spoken languages http://www.foxnewspoint.com/top-10-most-spoken-language-in-the-world-2017/
-        Map<String, String> languages = new HashMap<>();
+        Map<String, String> languages = new TreeMap<>();
 
-        languages.put(Constants.NONE_OPTIONS_CODE, Constants.NONE_OPTIONS_TEXT);
+        languages.put(Constants.NONE_OPTIONS_CODE, getString(R.string.all_languages)); //Always as the first item of the list
         languages.put("zh", getString(R.string.language_chinese));
         languages.put("en", getString(R.string.language_english));
         languages.put("es", getString(R.string.language_spanish));
@@ -190,17 +173,17 @@ public class PreferencesActivity extends Activity {
         languages.put("fr", getString(R.string.language_french));
         languages.put("pl", getString(R.string.language_polish));
 
-        Map<String, String> orderedMap = MapUtil.sortByValue(languages);
+//        Map<String, String> orderedMap = MapUtil.sortByValue(languages);
 
-        keyList = new ArrayList<String>(orderedMap.values());
-        keyListCode = new ArrayList<String>(orderedMap.keySet());
+
+        keyList = new ArrayList<String>(languages.values());
+        keyListCode = new ArrayList<String>(languages.keySet());
 
         settingListLanguage(keyList);
     }
 
     private void interfaceLanguageSettings() {
         User user = ((DreamTVApp) getApplication()).getUser();
-//        String localeLanguage = LocaleHelper.getLanguage(this);
         if (user.interface_language.equals(Constants.LANGUAGE_ENGLISH))
             rbEnglish.setChecked(true);
         else if (user.interface_language.equals(Constants.LANGUAGE_POLISH))
@@ -359,12 +342,12 @@ public class PreferencesActivity extends Activity {
                 Gson gson = new Gson();
                 Languages languagesList = gson.fromJson(response, Languages.class);
 
-                languagesList.languages.put(Constants.NONE_OPTIONS_CODE, Constants.NONE_OPTIONS_TEXT); //null option in the list
+                languagesList.languages.put(Constants.NONE_OPTIONS_CODE, getString(R.string.all_languages)); //null option in the list
 
                 Map<String, String> orderedMap = MapUtil.sortByValue(languagesList.languages);
 
-                keyList = new ArrayList<String>(orderedMap.values());
-                keyListCode = new ArrayList<String>(orderedMap.keySet());
+                keyList = new ArrayList<>(orderedMap.values());
+                keyListCode = new ArrayList<>(orderedMap.keySet());
 
                 settingListLanguage(keyList);
 
@@ -406,4 +389,16 @@ public class PreferencesActivity extends Activity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        //We check if the language interface has changed. if not, we go back to the previous value
+        String selectedMode = rbPolish.isChecked() ? Constants.LANGUAGE_POLISH :
+                Constants.LANGUAGE_ENGLISH;
+        User user = ((DreamTVApp) getApplication()).getUser();
+        if (!user.interface_language.equals(selectedMode)) {
+            LocaleHelper.setLocale(this, user.interface_language);
+        }
+    }
 }

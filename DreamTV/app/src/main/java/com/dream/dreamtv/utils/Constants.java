@@ -12,7 +12,6 @@ public class Constants {
     public final static String STATE_PAUSED = "PAUSED";
 
     public static String NONE_OPTIONS_CODE = "NN";
-    public static String NONE_OPTIONS_TEXT = "- None";
     public static String BEGINNER_INTERFACE_MODE = "beginner";
     public static String ADVANCED_INTERFACE_MODE = "advanced";
 

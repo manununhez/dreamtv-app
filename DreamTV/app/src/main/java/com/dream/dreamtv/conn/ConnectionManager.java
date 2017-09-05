@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class ConnectionManager {
 //    public static final String URL_BASE = "https://amara.org/api/";     // Produccion
-    public static final String URL_BASE = "http://192.168.0.160:8000/api/";     // Dpto Produccion
+    public static final String URL_BASE = "http://192.168.1.109:8000/api/";     // Dpto Produccion
 //    public static final String URL_BASE = "http://172.23.2.72:8000/api/";     // Facu Produccion
 //    public static final String URL_BASE = "http://10.0.2.2:8000/api/";     // Produccion
 

@@ -83,6 +83,7 @@
     <string name="title_loading_removing_videos_list">Removing video from my list...</string>
 
     <!--Languages-->
+    <string name="all_languages">All languages</string>
     <string name="language_chinese">Chinese, Yue</string>
     <string name="language_english">English</string>
     <string name="language_spanish">Spanish</string>

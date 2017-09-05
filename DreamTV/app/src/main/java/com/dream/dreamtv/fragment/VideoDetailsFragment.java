@@ -38,6 +38,7 @@ import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.activity.PlaybackVideoActivity;
 import com.dream.dreamtv.activity.PlaybackVideoYoutubeActivity;
+import com.dream.dreamtv.activity.VideoDetailsActivity;
 import com.dream.dreamtv.adapter.DetailsDescriptionPresenter;
 import com.dream.dreamtv.beans.JsonResponseBaseBean;
 import com.dream.dreamtv.beans.SubtitleJson;
@@ -130,7 +131,6 @@ public class VideoDetailsFragment extends DetailsFragment {
         mAdapter = new ArrayObjectAdapter(mPresenterSelector);
         setAdapter(mAdapter);
     }
-
 
     private void setupDetailsOverviewRow() {
 //        Log.d(TAG, "doInBackground: " + mSelectedVideo.toString());
@@ -259,6 +259,8 @@ public class VideoDetailsFragment extends DetailsFragment {
                     }
 
                 }
+
+                ((VideoDetailsActivity)getActivity()).updateScreenAfterChanges = true;
             }
 
             @Override
@@ -299,6 +301,9 @@ public class VideoDetailsFragment extends DetailsFragment {
                     }
 
                 }
+
+                ((VideoDetailsActivity)getActivity()).updateScreenAfterChanges = true;
+
 
 
             }
@@ -463,5 +468,6 @@ public class VideoDetailsFragment extends DetailsFragment {
         ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_TASKS_OTHER_USER_TASKS, null, jsonRequest, responseListener, this);
 
     }
+
 
 }

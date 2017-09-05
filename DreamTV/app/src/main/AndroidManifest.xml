@@ -27,7 +27,7 @@
         android:theme="@style/Theme.Leanback">
         <activity
             android:name=".SplashScreen"
-            android:banner="@drawable/logo_dream_tv"
+            android:banner="@drawable/logo_tv"
             android:configChanges="keyboard|keyboardHidden|navigation"
             android:icon="@drawable/app_icon_your_company"
             android:label="@string/app_name"

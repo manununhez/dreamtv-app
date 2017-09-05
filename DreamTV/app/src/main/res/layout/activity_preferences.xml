@@ -176,6 +176,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
+                        android:enabled="false"
                         android:focusable="true"
                         android:focusableInTouchMode="true"
                         android:gravity="center"
@@ -193,6 +194,7 @@
                         android:layout_gravity="center_horizontal"
                         android:layout_marginStart="10dp"
                         android:layout_marginTop="10dp"
+                        android:enabled="false"
                         android:focusable="true"
                         android:focusableInTouchMode="true"
                         android:gravity="center"
@@ -228,8 +230,8 @@
                             android:id="@+id/tvAudioValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="--"
                             android:layout_marginStart="5dp"
+                            android:text="--"
                             android:textColor="@color/white"
                             android:textSize="18sp" />
                     </LinearLayout>
@@ -252,8 +254,8 @@
                             android:id="@+id/tvSubtitleValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="--"
                             android:layout_marginStart="5dp"
+                            android:text="--"
                             android:textColor="@color/white"
                             android:textSize="18sp" />
                     </LinearLayout>
