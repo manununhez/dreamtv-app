@@ -14,7 +14,7 @@
     <string name="timeout_server_error">Timeout has expired, try again</string>
     <string name="no_network_error">There is no Internet connection</string>
     <string name="defaultErrorMessage">Failed to perform</string>
-    <string name="generic_server_down">There is no Internet conection</string>
+    <string name="generic_server_down">There is no Internet connection</string>
     <string name="implement_search">Implement your own in-app search.</string>
 
     <!--SHAREDPREFERENCES-->
@@ -25,39 +25,39 @@
 
     <!--titles-->
     <string name="title_audio">Audio: </string>
-    <string name="title_subtitle">Subtitle: </string>
+    <string name="title_subtitle">Subtitles: </string>
     <string name="title_user_statistics">Statistics</string>
     <string name="title_video_settings">Video Settings</string>
-    <string name="title_text_language_settings">Text language</string>
-    <string name="title_reason_dialog_interface_settings">Reason dialog Interface</string>
+    <string name="title_text_language_settings">Application language</string>
+    <string name="title_reason_dialog_interface_settings">Interface</string>
     <string name="title_video_languages_settings">Video languages</string>
-    <string name="title_video_languages_type_settings">Select languages of:</string>
+    <string name="title_video_languages_type_settings">Select languages:</string>
     <string name="title_reasons_dialog">What is wrong here?</string>
-    <string name="title_reasons_dialog_2">Others users think there is a mistake here. What do you think?</string>
+    <string name="title_reasons_dialog_2">Someone found a mistake here. What do you think?</string>
     <string name="title_reasons_dialog_3">You chose this:</string>
     <string name="title_confirmation_user_saved_data">User data saved correctly</string>
     <string name="title_confirmation_saved_data">Thank you for your help</string>
     <string name="title_my_list_category">My List</string>
     <string name="title_contributions_category">Contributions</string>
-    <string name="title_preferences_category">Preferences</string>
+    <string name="title_preferences_category">Video and Editing</string>
     <string name="title_see_more_videos_category">See more videos</string>
     <string name="title_continue_watching_category">Continue watching</string>
-    <string name="title_see_all_category">See all</string>
-    <string name="title_check_new_tasks_category">Check out these videos</string>
+    <string name="title_see_all_category">All videos</string>
+    <string name="title_check_new_tasks_category">New releases</string>
     <string name="rb_option_text_english">English</string>
     <string name="rb_option_text_polish">Polish</string>
     <string name="rb_option_text_advanced">Advanced</string>
-    <string name="rb_option_text_beginner">Beginner</string>
-    <string name="hint_voice_google_input">Please, say the reason</string>
+    <string name="rb_option_text_beginner">Simple</string>
+    <string name="hint_voice_google_input">Please, say your comment</string>
 
     <!--buttons-->
-    <string name="btn_subtitle">Subtitle</string>
+    <string name="btn_subtitle">Subtitles</string>
     <string name="btn_audio">Audio</string>
     <string name="btn_save_settings">Save settings</string>
     <string name="btn_save">Save</string>
     <string name="btn_cancel">Cancel</string>
     <string name="btn_ok">OK</string>
-    <string name="btn_start_recording">Start recording</string>
+    <string name="btn_start_recording">Click the mic to record your comment</string>
     <string name="btn_continue_watching">Continue</string>
     <string name="btn_no_from_beggining">Restart the talk</string>
     <string name="btn_play_video">Play video</string>
@@ -65,16 +65,16 @@
     <string name="btn_remove_from_my_list">- Remove from my list</string>
 
     <!--alertDialog-->
-    <string name="title_alert_dialog">Attention!</string>
+    <string name="title_alert_dialog">Welcome back</string>
     <string name="title_continue_from_saved_point">You are in %1$s min. The video is %2$s min. Do you want to:</string>
 
     <!--loadingDialog-->
     <string name="title_loading_buffering">Loading...</string>
     <string name="title_loading_saving_data">Saving user data...</string>
-    <string name="title_loading_retrieve_subtitle">Retrieving subtitle...</string>
+    <string name="title_loading_retrieve_subtitle">Retrieving subtitles...</string>
     <string name="title_loading_retrieve_languages">Retrieving languages...</string>
-    <string name="title_loading_retrieve_user_tasks">Retrieving users tasks...</string>
-    <string name="title_loading_retrieve_user_data">Retrieving users data...</string>
+    <string name="title_loading_retrieve_user_tasks">Retrieving user tasks...</string>
+    <string name="title_loading_retrieve_user_data">Retrieving user data...</string>
     <string name="title_loading_retrieve_tasks">Retrieving tasks...</string>
     <string name="title_loading_saving_reasons">Saving reasons...</string>
     <string name="title_loading_retrieve_options">Retrieving options...</string>
