@@ -90,10 +90,11 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         tvSubtitle = (TextView) findViewById(R.id.tvSubtitle); // initiate a chronometer
         rlVideoPlayerInfo = (RelativeLayout) findViewById(R.id.rlVideoPlayerInfo);
 
+
+        Bundle bundle = getArgumentos();
         mYoutubeView = (YoutubeTvView) findViewById(R.id.video_1);
-        mYoutubeView.updateView(getArgumentos());
-        mYoutubeView.playVideo(getArgumentos().getString("videoId", ""));
-        isPlayPauseAction = PLAY; //autoplay TRUE
+        mYoutubeView.updateView(bundle);
+        mYoutubeView.playVideo(bundle.getString("videoId", ""));
 
         mYoutubeView.addPlayerListener(new IPlayerListener() {
             @Override
@@ -110,7 +111,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                 if (state.toString().equals(Constants.STATE_PLAY)) {
                     DreamTVApp.Logger.d("State : " + Constants.STATE_PLAY);
 
-                    playVideo(position);
+                    playVideoOnPlayerStateChange(position);
                 } else if (state.toString().equals(Constants.STATE_PAUSED)) {
                     DreamTVApp.Logger.d("State : " + Constants.STATE_PAUSED);
                     pauseVideo(position);
@@ -142,10 +143,13 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         mSelectedVideo = getIntent().getParcelableExtra(Constants.VIDEO);
         Bundle args = new Bundle();
         args.putString("videoId", mSelectedVideo.getVideoYoutubeId());
-        args.putBoolean("autoplay", true);
-        args.putBoolean("debug", false);
-        args.putBoolean("closedCaptions", false);
-        args.putBoolean("showRelatedVideos", false);
+//        args.putBoolean("debug", false);
+//        args.putBoolean("closedCaptions", false);
+//        args.putBoolean("showRelatedVideos", false);
+        if (mSelectedVideo.task_state != Constants.CONTINUE_WATCHING_CATEGORY)
+            args.putBoolean("autoplay", true);
+        else
+            args.putBoolean("autoplay", false);
 
         return args;
     }
@@ -226,7 +230,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                     getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            playVideo(subtitle.end);
+                            playVideo(subtitle.end / 1000);
                         }
                     }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
                         @Override
@@ -247,14 +251,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         }
     }
 
-    private void playVideo(Integer seekToSecs) {
-        isPlayPauseAction = PLAY;
-
-        if (seekToSecs != null)
-            mYoutubeView.seekTo(seekToSecs);
-
-        mYoutubeView.start();
-    }
 
     @Override
     public void onPause() {
@@ -293,7 +289,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                         timeStoppedTemp = chronometer.getBase();
                         elapsedRealtimeTemp = SystemClock.elapsedRealtime();
 
-                        DreamTVApp.Logger.d("CurrentTime: " + (elapsedRealtimeTemp - timeStoppedTemp));
+//                        DreamTVApp.Logger.d("CurrentTime: " + (elapsedRealtimeTemp - timeStoppedTemp));
                         selectedUserTask = mSelectedVideo.getUserTask(elapsedRealtimeTemp - timeStoppedTemp);
                         if (selectedUserTask != null)  //pause the video and show the popup
                             mYoutubeView.pause();
@@ -307,8 +303,16 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         };
     }
 
+    private void playVideo(Integer seekToSecs) {
+        isPlayPauseAction = PLAY;
 
-    private void playVideo(long position) {
+        if (seekToSecs != null)
+            mYoutubeView.seekTo(seekToSecs);
+
+        mYoutubeView.start();
+    }
+
+    private void playVideoOnPlayerStateChange(long position) {
         rlVideoPlayerInfo.setVisibility(View.GONE);
 //        DreamTVApp.Logger.d("Position: " + (SystemClock.elapsedRealtime() - position));
         startSyncSubtitle(SystemClock.elapsedRealtime() - position);
@@ -379,10 +383,25 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     }
 
     @Override
-    public void onDialogClosed() {
-        isPlayPauseAction = PLAY;
+    public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
 
+
+        Subtitle subtitle = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
+
+        if (selectedSubtitle != null) //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
+            if (selectedSubtitle.position != subtitle.position) {
+                if (selectedSubtitle.position > subtitle.position)
+                    mYoutubeView.moveForward(((selectedSubtitle.start - subtitle.end) / 1000)); //offset time. Error (we add 2seconds)
+                else
+                    mYoutubeView.moveBackward(((subtitle.end - selectedSubtitle.start) / 1000)); //offset time. Error (we add 2seconds)
+
+//            Toast.makeText(this, "Cambiar video timing: " + ((selectedSubtitle.start - subtitle.end) / 1000), Toast.LENGTH_SHORT).show();
+            }
+
+        isPlayPauseAction = PLAY;
         mYoutubeView.start();
+
+
     }
 
 }

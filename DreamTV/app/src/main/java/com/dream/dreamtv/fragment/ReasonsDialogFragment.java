@@ -13,17 +13,18 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
@@ -34,9 +35,11 @@ import android.widget.ToggleButton;
 import com.android.volley.VolleyError;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.adapter.MySubtitleAdapter;
 import com.dream.dreamtv.beans.JsonResponseBaseBean;
 import com.dream.dreamtv.beans.Reason;
 import com.dream.dreamtv.beans.ReasonList;
+import com.dream.dreamtv.beans.Subtitle;
 import com.dream.dreamtv.beans.SubtitleJson;
 import com.dream.dreamtv.beans.User;
 import com.dream.dreamtv.beans.UserTask;
@@ -74,7 +77,10 @@ public class ReasonsDialogFragment extends DialogFragment {
     private SubtitleJson subtitle;
     private ScrollView scrollViewAdvanced;
     private ScrollView scrollViewBeginner;
-    private int subtitlePosition;
+    private ListView mListView;
+    private Subtitle selectedSubtitle;
+    private int subtitleOriginalPosition;
+    private int currentSubtitlePosition;
     private int idTask;
     private int taskState;
     private static final int REQ_CODE_SPEECH_INPUT = 100;
@@ -86,7 +92,7 @@ public class ReasonsDialogFragment extends DialogFragment {
         // Supply num input as an argument.
         Bundle args = new Bundle();
         args.putParcelable("SubtitleJson", subtitle);
-        args.putInt("subtitlePosition", subtitlePosition);
+        args.putInt("subtitleOriginalPosition", subtitlePosition);
         args.putInt("idTask", idTask);
         f.setArguments(args);
         return f;
@@ -98,7 +104,7 @@ public class ReasonsDialogFragment extends DialogFragment {
         // Supply num input as an argument.
         Bundle args = new Bundle();
         args.putParcelable("SubtitleJson", subtitle);
-        args.putInt("subtitlePosition", subtitlePosition);
+        args.putInt("subtitleOriginalPosition", subtitlePosition);
         args.putInt("idTask", idTask);
         args.putInt("taskState", taskState);
         args.putParcelable("userTask", userTask);
@@ -113,7 +119,7 @@ public class ReasonsDialogFragment extends DialogFragment {
 
     // Container Activity must implement this interface
     public interface OnDialogClosedListener {
-        void onDialogClosed();
+        void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition);
     }
 
 
@@ -132,7 +138,7 @@ public class ReasonsDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        subtitlePosition = getArguments().getInt("subtitlePosition");
+        subtitleOriginalPosition = getArguments().getInt("subtitleOriginalPosition");
         subtitle = getArguments().getParcelable("SubtitleJson");
         idTask = getArguments().getInt("idTask");
         taskState = getArguments().getInt("taskState");
@@ -145,9 +151,9 @@ public class ReasonsDialogFragment extends DialogFragment {
         viewRoot = new Dialog(getActivity(), R.style.DefaultDialogFragmentStyle);
         viewRoot.setContentView(R.layout.fragment_reasons_dialog);
 
-        TextView tvCurrentSubtitle = (TextView) viewRoot.findViewById(R.id.tvCurrentSubtitle);
-        TextView tvPreviousSubtitle = (TextView) viewRoot.findViewById(R.id.tvPreviousSubtitle);
-        TextView tvNextSubtitle = (TextView) viewRoot.findViewById(R.id.tvNextSubtitle);
+//        TextView tvCurrentSubtitle = (TextView) viewRoot.findViewById(R.id.tvCurrentSubtitle);
+//        TextView tvPreviousSubtitle = (TextView) viewRoot.findViewById(R.id.tvPreviousSubtitle);
+//        TextView tvNextSubtitle = (TextView) viewRoot.findViewById(R.id.tvNextSubtitle);
         llButtonsOptions1 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions1);
         llButtonsOptions2 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions2);
         tvTitle = (TextView) viewRoot.findViewById(R.id.tvTitle);
@@ -184,14 +190,15 @@ public class ReasonsDialogFragment extends DialogFragment {
                 Toast.makeText(getActivity(), getString(R.string.title_confirmation_saved_data), Toast.LENGTH_SHORT).show();
             }
         });
-        tvCurrentSubtitle.setText(Html.fromHtml(subtitle.subtitles.get(subtitlePosition - 1).text));
-        tvNextSubtitle.setText(Html.fromHtml(subtitle.subtitles.get(subtitlePosition).text));
+//        tvCurrentSubtitle.setText(Html.fromHtml(subtitle.subtitles.get(subtitleOriginalPosition - 1).text));
+//        tvNextSubtitle.setText(Html.fromHtml(subtitle.subtitles.get(subtitleOriginalPosition).text));
+//
+//        if (subtitleOriginalPosition > 1)
+//            tvPreviousSubtitle.setText(Html.fromHtml(subtitle.subtitles.get(subtitleOriginalPosition - 2).text));
+//        else
+//            tvPreviousSubtitle.setText("-------------");
 
-        if (subtitlePosition > 1)
-            tvPreviousSubtitle.setText(Html.fromHtml(subtitle.subtitles.get(subtitlePosition - 2).text));
-        else
-            tvPreviousSubtitle.setText("-------------");
-
+        settingUpSubtitleNavigation(subtitleOriginalPosition);
         audioRecordSettings();
 
         //The cached reasons are verified
@@ -203,8 +210,95 @@ public class ReasonsDialogFragment extends DialogFragment {
 //            setupReasons();
 //        }
 
+        currentSubtitlePosition = subtitleOriginalPosition; //We save the original subtitleOriginalPosition
 
         return viewRoot;
+    }
+
+    private void settingUpSubtitleNavigation(final int subtPosition) {
+
+        mListView = (ListView) viewRoot.findViewById(R.id.lv);
+
+        // Initialize a new ArrayAdapter
+//        ArrayAdapter adapter = new ArrayAdapter<>(
+//                getActivity(),
+//                android.R.layout.simple_list_item_1,
+//                subtitle.subtitles
+//        );
+        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+
+        MySubtitleAdapter mySubtitleAdapter = new MySubtitleAdapter(getActivity(), subtitle.subtitles,
+                subtPosition, user.interface_mode);
+
+        // Set the adapter for ListView
+        mListView.setAdapter(mySubtitleAdapter);
+
+//        mListView.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+       /* if (subtitleOriginalPosition - 3 > -1) {
+            mListView.setSelection(subtitleOriginalPosition - 3);
+            mListView.smoothScrollToPosition(subtitleOriginalPosition - 3);
+//                    mListView.getChildAt(subtitleOriginalPosition - 3).requestFocus();
+        } else if (subtitleOriginalPosition - 2 > -1) {
+            mListView.setSelection(subtitleOriginalPosition - 2);
+            mListView.smoothScrollToPosition(subtitleOriginalPosition - 2);
+
+        } else */
+//        Display display = viewRoot.getWindow().getWindowManager().getDefaultDisplay();
+//
+//        int h1 = mListView.getHeight();
+//        int h2 = display.getHeight();
+//
+//        DreamTVApp.Logger.d("h1/2 - h2/2 -> "+(h1/2 - h2/2));
+        if (subtPosition - 1 > -1) {
+            mListView.setSelectionFromTop(subtPosition - 1, 280);
+//            mListView.smoothScrollToPosition(subtitleOriginalPosition - 1);
+//            mListView.smoothScrollByOffset(10);
+        }
+//            }
+//        }, 500);
+
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                selectedSubtitle = (Subtitle) adapterView.getItemAtPosition(i);
+                DreamTVApp.Logger.d("CPRCurrentPosition: " + currentSubtitlePosition);
+                DreamTVApp.Logger.d("CPRNewPosition: " + (i + 1));
+                currentSubtitlePosition = i + 1;
+//                subtitleOriginalPosition - 1
+//                ListView ls = (ListView) view.getParent();
+//                TextView txtviewNew = (TextView) ((RelativeLayout)view).getChildAt(1); //id/tvText -> subtitle_layout
+//                txtviewNew.setBackgroundColor(getActivity().getResources().getColor(R.color.light_green, null));
+//                txtviewNew.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10, getActivity().getResources().getDisplayMetrics()));
+//                txtviewNew.setTypeface(txtviewNew.getTypeface(), Typeface.NORMAL);
+//
+//                TextView previousText = (TextView) ((RelativeLayout)ls.getAdapter().getView(subtitleOriginalPosition - 1, view, null)).getChildAt(1);
+//                previousText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, getActivity().getResources().getDisplayMetrics()));
+//                previousText.setTypeface(previousText.getTypeface(), Typeface.ITALIC);
+//                previousText.setBackgroundColor(getActivity().getResources().getColor(R.color.blue, null));
+
+                settingUpSubtitleNavigation(i + 1);
+
+//                subtitleOriginalPosition = i + 1;
+                // Display the selected item text on TextView
+//                Toast.makeText(getActivity(), "selectedItem: " + selectedItem.text, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(), "selectedPreviousItem: " + previousText.getText(), Toast.LENGTH_SHORT).show();
+            }
+        });
+//        mListView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+//                DreamTVApp.Logger.d("Position: " + i);
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> adapterView) {
+//
+//            }
+//        });
+
+
     }
 
     private void controlUserTask() {
@@ -272,7 +366,7 @@ public class ReasonsDialogFragment extends DialogFragment {
     private void saveReasons() {
         UserTask userTask = new UserTask();
         userTask.comments = voiceInput.getText().toString();
-        userTask.subtitle_position = subtitlePosition;
+        userTask.subtitle_position = currentSubtitlePosition;
         userTask.subtitle_version = String.valueOf(subtitle.version_number);
         userTask.task_id = idTask;
         //Interface mode settings
@@ -360,19 +454,19 @@ public class ReasonsDialogFragment extends DialogFragment {
             }
         });
 
-        btnRecord.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (b) {
-//                    if (voiceInput.getText().equals("")) {
-                    voiceInput.setHint("Click here to send comments");
-//                    }
-                } else {
-                    voiceInput.setHint("");
-
-                }
-            }
-        });
+//        btnRecord.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//            @Override
+//            public void onFocusChange(View view, boolean b) {
+//                if (b) {
+////                    if (voiceInput.getText().equals("")) {
+//                    voiceInput.setHint("Click here to send comments");
+////                    }
+//                } else {
+//                    voiceInput.setHint("");
+//
+//                }
+//            }
+//        });
     }
 
 
@@ -552,7 +646,7 @@ public class ReasonsDialogFragment extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        mCallback.onDialogClosed();
+        mCallback.onDialogClosed(selectedSubtitle, subtitleOriginalPosition);
 
     }
 

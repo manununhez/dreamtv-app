@@ -327,8 +327,6 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
                 TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
 
         return hms;
-
-
     }
 
     private void controlReasonDialogPopUp(long subtitlePosition) {
@@ -384,7 +382,22 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     }
 
     @Override
-    public void onDialogClosed() {
+    public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
+        Subtitle subtitle = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
+
+//        if (subtitle == null)
+//            DreamTVApp.Logger.d("subtitle is null");
+//        else if (selectedSubtitle == null)
+//            DreamTVApp.Logger.d("selectedSubtitle is null");
+
+        if (selectedSubtitle != null) //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
+            if (selectedSubtitle.position != subtitle.position) {
+                mVideoView.seekTo(selectedSubtitle.start);
+//                Toast.makeText(this, "Cambiar video timing", Toast.LENGTH_SHORT).show();
+            }
+
         playVideo(null);
     }
+
+
 }
