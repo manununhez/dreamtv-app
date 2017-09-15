@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -66,7 +68,7 @@ public class PreferencesActivity extends Activity {
     private RadioButton rbAdvanced;
     private RadioButton rbBeginner;
     private Button btnSave;
-
+    private EditText etBaseURL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +104,8 @@ public class PreferencesActivity extends Activity {
         btnAudio = (CheckableTextView) findViewById(R.id.btnAudio);
 
         btnSave = (Button) findViewById(R.id.btnSave);
+
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
 
         btnSubtitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -156,6 +160,13 @@ public class PreferencesActivity extends Activity {
 //        getLanguages();
         setupLanguages();
 
+        setupBaseURL();
+    }
+
+    private void setupBaseURL() {
+        etBaseURL = (EditText) findViewById(R.id.etBaseURL);
+
+        etBaseURL.setText(((DreamTVApp) getApplication()).getBaseURL());
     }
 
     private void setupLanguages() { //based on the 10 most spoken languages http://www.foxnewspoint.com/top-10-most-spoken-language-in-the-world-2017/
@@ -224,6 +235,11 @@ public class PreferencesActivity extends Activity {
     }
 
     private void updateUserData() {
+        //developer mode. Save URL
+        DreamTVApp dreamTVApp = ((DreamTVApp) getApplication());
+        dreamTVApp.setBaseURL(etBaseURL.getText().toString());
+
+
         User user = new User();
         user.sub_language = selectedSubtitleLanguageCode;
         user.audio_language = selectedAudioLanguageCode;
@@ -242,7 +258,8 @@ public class PreferencesActivity extends Activity {
                 DreamTVApp.Logger.d(response);
                 User user = gson.fromJson(response, User.class);
 
-                ((DreamTVApp) getApplication()).setUser(user);
+                DreamTVApp dreamTVApp = ((DreamTVApp) getApplication());
+                dreamTVApp.setUser(user);
 
                 Intent returnIntent = new Intent();
                 setResult(Activity.RESULT_OK, returnIntent);
@@ -254,12 +271,14 @@ public class PreferencesActivity extends Activity {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
+                Toast.makeText(PreferencesActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                 DreamTVApp.Logger.d(error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
+                Toast.makeText(PreferencesActivity.this, jsonResponse.toString(), Toast.LENGTH_SHORT).show();
                 DreamTVApp.Logger.d(jsonResponse.toString());
             }
         };

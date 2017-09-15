@@ -32,6 +32,22 @@ public class DreamTVApp extends Application {
 
     }
 
+    public String getBaseURL() {
+
+        String defaultURL = "http://172.23.192.2:8000/api/";
+
+        String urlBaseString = SharedPreferenceUtils.getValue(this, getString(R.string.url_base_preferences));
+
+        if (urlBaseString == null)
+            return defaultURL;
+        else
+            return urlBaseString;
+    }
+
+    public void setBaseURL(String url){
+        SharedPreferenceUtils.save(this, getString(R.string.url_base_preferences), url);
+    }
+
     public User getUser() {
         //todo control cuando viene null
 

@@ -1,5 +1,6 @@
 package com.dream.dreamtv.conn;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
@@ -16,8 +17,8 @@ import java.util.Map;
 
 public class ConnectionManager {
 //    public static final String URL_BASE = "https://amara.org/api/";     // Produccion
-//    public static final String URL_BASE = "http://192.168.1.109:8000/api/";     // Dpto Produccion
-    public static final String URL_BASE = "http://172.23.2.72:8000/api/";     // Facu Produccion
+    public static final String URL_BASE = "http://192.168.1.109:8000/api/";     // Dpto Produccion
+//    public static final String URL_BASE = "http://172.23.2.72:8000/api/";     // Facu Produccion
 //    public static final String URL_BASE = "http://10.0.2.2:8000/api/";     // Produccion
 
     public static int MAX_RETRIES = 3;
@@ -85,6 +86,7 @@ public class ConnectionManager {
             }
         }
 
+        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
         String uri = URL_BASE + url.value + "/" + urlParamsString;
 
         DreamTVApp.Logger.d("Url: " + uri);
@@ -150,6 +152,8 @@ public class ConnectionManager {
             }
         }
 
+//        String uri = URL_BASE + url + "/" + urlParamsString;
+        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
         String uri = URL_BASE + url + "/" + urlParamsString;
 
         DreamTVApp.Logger.d("Url: " + uri);
@@ -200,6 +204,7 @@ public class ConnectionManager {
             @NonNull Urls url, Actions action,
             final String json, ResponseListener listener, Object tag) {
 
+        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
         String uri = URL_BASE + url.value;
 
         if (action != null)
@@ -263,6 +268,7 @@ public class ConnectionManager {
             @NonNull Urls url, String params, Actions action,
             final String json, ResponseListener listener, Object tag, boolean shouldCache) {
 
+        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
         String uri = URL_BASE + url.value;
 
         if (action != null)

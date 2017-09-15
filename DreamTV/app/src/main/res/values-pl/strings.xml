@@ -37,8 +37,8 @@
     <string name="title_reasons_dialog_3">Wy wybraliście to:</string>
     <string name="title_confirmation_user_saved_data">Dane użytkownika zostały zapisane poprawnie</string>
     <string name="title_confirmation_saved_data">Dziękujemy za pomoc</string>
-    <string name="title_my_list_category">Moja lista</string>
-    <string name="title_contributions_category">Moje filmy</string>
+    <string name="title_my_list_category">Moje filmy</string>
+    <string name="title_contributions_category">Mój wkład</string>
     <string name="title_preferences_category">Filmy i edytowanie</string>
     <string name="title_see_more_videos_category">Zobacz więcej filmów</string>
     <string name="title_continue_watching_category">Kontynuuj oglądanie</string>
