@@ -30,6 +30,7 @@ import com.dream.dreamtv.utils.CheckableTextView;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -160,14 +161,14 @@ public class PreferencesActivity extends Activity {
 //        getLanguages();
         setupLanguages();
 
-        setupBaseURL();
+//        setupBaseURL();
     }
 
-    private void setupBaseURL() {
-        etBaseURL = (EditText) findViewById(R.id.etBaseURL);
-
-        etBaseURL.setText(((DreamTVApp) getApplication()).getBaseURL());
-    }
+//    private void setupBaseURL() {
+//        etBaseURL = (EditText) findViewById(R.id.etBaseURL);
+//
+//        etBaseURL.setText(((DreamTVApp) getApplication()).getBaseURL());
+//    }
 
     private void setupLanguages() { //based on the 10 most spoken languages http://www.foxnewspoint.com/top-10-most-spoken-language-in-the-world-2017/
         Map<String, String> languages = new TreeMap<>();
@@ -195,18 +196,20 @@ public class PreferencesActivity extends Activity {
 
     private void interfaceLanguageSettings() {
         User user = ((DreamTVApp) getApplication()).getUser();
-        if (user.interface_language.equals(Constants.LANGUAGE_ENGLISH))
-            rbEnglish.setChecked(true);
-        else if (user.interface_language.equals(Constants.LANGUAGE_POLISH))
-            rbPolish.setChecked(true);
+        if (user != null)
+            if (user.interface_language.equals(Constants.LANGUAGE_ENGLISH))
+                rbEnglish.setChecked(true);
+            else if (user.interface_language.equals(Constants.LANGUAGE_POLISH))
+                rbPolish.setChecked(true);
     }
 
     private void interfaceModeSettings() {
         User user = ((DreamTVApp) getApplication()).getUser();
-        if (user.interface_mode.equals(Constants.BEGINNER_INTERFACE_MODE))
-            rbBeginner.setChecked(true);
-        else if (user.interface_mode.equals(Constants.ADVANCED_INTERFACE_MODE))
-            rbAdvanced.setChecked(true);
+        if (user != null)
+            if (user.interface_mode.equals(Constants.BEGINNER_INTERFACE_MODE))
+                rbBeginner.setChecked(true);
+            else if (user.interface_mode.equals(Constants.ADVANCED_INTERFACE_MODE))
+                rbAdvanced.setChecked(true);
     }
 
     @Override
@@ -236,8 +239,8 @@ public class PreferencesActivity extends Activity {
 
     private void updateUserData() {
         //developer mode. Save URL
-        DreamTVApp dreamTVApp = ((DreamTVApp) getApplication());
-        dreamTVApp.setBaseURL(etBaseURL.getText().toString());
+//        DreamTVApp dreamTVApp = ((DreamTVApp) getApplication());
+//        dreamTVApp.setBaseURL(etBaseURL.getText().toString());
 
 
         User user = new User();
@@ -254,9 +257,13 @@ public class PreferencesActivity extends Activity {
 
             @Override
             public void processResponse(String response) {
-                Gson gson = new Gson();
                 DreamTVApp.Logger.d(response);
-                User user = gson.fromJson(response, User.class);
+//                Gson gson = new Gson();
+//                User user = gson.fromJson(response, User.class);
+                TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
+                };
+                JsonResponseBaseBean<User> jsonResponse = JsonUtils.getJsonResponse(response, type);
+                User user = jsonResponse.data;
 
                 DreamTVApp dreamTVApp = ((DreamTVApp) getApplication());
                 dreamTVApp.setUser(user);
@@ -416,8 +423,9 @@ public class PreferencesActivity extends Activity {
         String selectedMode = rbPolish.isChecked() ? Constants.LANGUAGE_POLISH :
                 Constants.LANGUAGE_ENGLISH;
         User user = ((DreamTVApp) getApplication()).getUser();
-        if (!user.interface_language.equals(selectedMode)) {
-            LocaleHelper.setLocale(this, user.interface_language);
-        }
+        if (user != null)
+            if (!user.interface_language.equals(selectedMode)) {
+                LocaleHelper.setLocale(this, user.interface_language);
+            }
     }
 }

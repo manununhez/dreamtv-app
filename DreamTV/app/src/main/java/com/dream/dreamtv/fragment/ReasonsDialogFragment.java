@@ -48,6 +48,7 @@ import com.dream.dreamtv.conn.ResponseListener;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,7 +171,7 @@ public class ReasonsDialogFragment extends DialogFragment {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                viewRoot.dismiss();
+                dismiss();
 //                mCallback.onDialogClosed();
 
             }
@@ -178,7 +179,7 @@ public class ReasonsDialogFragment extends DialogFragment {
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                viewRoot.dismiss();
+                dismiss();
 //                mCallback.onDialogClosed();
 
             }
@@ -387,7 +388,7 @@ public class ReasonsDialogFragment extends DialogFragment {
                 Gson gson = new Gson();
                 DreamTVApp.Logger.d(response);
 
-                viewRoot.dismiss();
+                dismiss();
 
 //                mCallback.onDialogClosed();
             }
@@ -518,9 +519,13 @@ public class ReasonsDialogFragment extends DialogFragment {
                 Gson gson = new Gson();
                 DreamTVApp.Logger.d(response);
 
-                ReasonList reasons = gson.fromJson(response, ReasonList.class);
-                ((DreamTVApp) getActivity().getApplication()).setReasons(reasons); //save reasons in cache
-                reasonList = reasons.data;
+                TypeToken type = new TypeToken<JsonResponseBaseBean<List<Reason>>>() {
+                };
+                JsonResponseBaseBean<List<Reason>> jsonResponse = JsonUtils.getJsonResponse(response, type);
+
+//                ReasonList reasons = gson.fromJson(response, ReasonList.class);
+//                ((DreamTVApp) getActivity().getApplication()).setReasons(jsonResponse.data); //save reasons in cache
+                reasonList = jsonResponse.data;
                 DreamTVApp.Logger.d(reasonList.toString());
 
                 //Interface mode settings

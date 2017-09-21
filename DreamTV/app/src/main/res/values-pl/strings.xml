@@ -7,6 +7,7 @@
     <string name="video_error_server_inaccessible">Serwer mediów nie był dostępny</string>
     <string name="video_error_unknown_error">Nie udało się wczytać filmu</string>
     <string name="error_fragment_message">Wystąpił błąd</string>
+    <string name="error_subtitle_not_found">Niestety, nie można znaleźć napisów dla tego filmu</string>
     <string name="dismiss_error">Oddalić</string>
 
     <!--ERROR NETWORK MESSAGES-->

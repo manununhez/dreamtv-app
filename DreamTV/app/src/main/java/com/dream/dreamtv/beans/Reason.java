@@ -4,7 +4,7 @@ package com.dream.dreamtv.beans;
  * Created by manuel on 7/18/17.
  */
 
-public class Reason {
+public class Reason extends JsonRequestBaseBean {
     public int id;
     public String code;
     public String name;

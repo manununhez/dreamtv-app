@@ -46,7 +46,7 @@ public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
         TextView tvTime = (TextView) rowView.findViewById(R.id.tvTime);
 
         if (position == (currentSubtitlePosition - 1)) {
-            tvText.setBackgroundColor(context.getResources().getColor(R.color.light_green, null));
+            tvText.setBackgroundColor(context.getResources().getColor(R.color.blue, null));
             tvText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10, context.getResources().getDisplayMetrics()));
             tvText.setTypeface(tvText.getTypeface(), Typeface.NORMAL);
         } else {
@@ -54,7 +54,7 @@ public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
 //            android:textStyle="italic"
             tvText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, context.getResources().getDisplayMetrics()));
             tvText.setTypeface(tvText.getTypeface(), Typeface.ITALIC);
-            tvText.setBackgroundColor(context.getResources().getColor(R.color.blue, null));
+            tvText.setBackgroundColor(context.getResources().getColor(R.color.black_opaque, null));
         }
 
         tvText.setText(Html.fromHtml(values.get(position).text));

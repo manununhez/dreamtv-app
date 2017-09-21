@@ -25,6 +25,7 @@ package com.dream.dreamtv.activity;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -226,26 +227,30 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     private void playVideoMode() {
         if (mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
             final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
-            Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
-                    getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            playVideo(subtitle.end / 1000);
-                        }
-                    }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            playVideo(null);
-                            dialog.dismiss();
-                        }
-                    }, new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            dialog.dismiss();
-                        }
-                    }).show();
+            if (subtitle != null) { //Si por alguna razon no se cuenta con subtitulo (algun fallo en el servicio al traer el requerido subt)
+                Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
+                        getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                playVideo(subtitle.end / 1000);
+                            }
+                        }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                playVideo(null);
+                                dialog.dismiss();
+                            }
+                        }, new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                dialog.dismiss();
+                            }
+                        }).show();
 
-            showContinueDialogOnlyOnce = false;
+                showContinueDialogOnlyOnce = false;
+            } else {
+                playVideo(null);
+            }
         } else {
             playVideo(null);
         }
@@ -362,8 +367,11 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
             ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
                     subtitle.position, mSelectedVideo.task_id);
-            FragmentManager fm = getFragmentManager();
-            reasonsDialogFragment.show(fm, "Sample Fragment");
+            if (!isFinishing()) {
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction transaction = fm.beginTransaction();
+                reasonsDialogFragment.show(transaction, "Sample Fragment");
+            }
         }
     }
 
@@ -371,8 +379,11 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
             ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
                     subtitle.position, mSelectedVideo.task_id, userTask, mSelectedVideo.task_state);
-            FragmentManager fm = getFragmentManager();
-            reasonsDialogFragment.show(fm, "Sample Fragment");
+            if (!isFinishing()) {
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction transaction = fm.beginTransaction();
+                reasonsDialogFragment.show(transaction, "Sample Fragment");
+            }
         }
     }
 
@@ -386,17 +397,25 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
 
 
-        Subtitle subtitle = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
+        Subtitle subtitleOld = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
+        int currentTimeStopped = (int) (SystemClock.elapsedRealtime() - timeStoppedTemp);
 
         if (selectedSubtitle != null) //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
-            if (selectedSubtitle.position != subtitle.position) {
-                if (selectedSubtitle.position > subtitle.position)
-                    mYoutubeView.moveForward(((selectedSubtitle.start - subtitle.end) / 1000)); //offset time. Error (we add 2seconds)
+        {
+            Subtitle subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2);
+            if (selectedSubtitle.position != subtitleOld.position) {
+//                if (selectedSubtitle.position > subtitleOld.position) {
+                if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000)
+                    mYoutubeView.seekTo((subtitleOneBeforeNew.end - 1000) / 1000);
                 else
-                    mYoutubeView.moveBackward(((subtitle.end - selectedSubtitle.start) / 1000)); //offset time. Error (we add 2seconds)
+                    mYoutubeView.seekTo(subtitleOneBeforeNew.end / 1000);
 
-//            Toast.makeText(this, "Cambiar video timing: " + ((selectedSubtitle.start - subtitle.end) / 1000), Toast.LENGTH_SHORT).show();
+//                    mYoutubeView.moveForward(((subtitleOneBeforeNew.end - currentTimeStopped)) / 1000); //offset time. Error (we add 2seconds)
+//                }else{
+//                    mYoutubeView.moveBackward(((currentTimeStopped - subtitleOneBeforeNew.end) / 1000)); //offset time. Error (we add 2seconds)
+//            }
             }
+        }
 
         isPlayPauseAction = PLAY;
         mYoutubeView.start();

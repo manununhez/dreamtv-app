@@ -17,8 +17,9 @@ import java.util.Map;
 
 public class ConnectionManager {
 //    public static final String URL_BASE = "https://amara.org/api/";     // Produccion
-    public static final String URL_BASE = "http://192.168.1.109:8000/api/";     // Dpto Produccion
-//    public static final String URL_BASE = "http://172.23.2.72:8000/api/";     // Facu Produccion
+//    public static final String URL_BASE = "http://192.168.1.109:8000/api/";     // Dpto Produccion
+//    public static final String URL_BASE = "http://172.23.192.2:8000/api/";     // Facu Produccion
+    public static final String URL_BASE = "http://www.dreamproject.pjwstk.edu.pl:8000/api/";     // Facu Produccion
 //    public static final String URL_BASE = "http://10.0.2.2:8000/api/";     // Produccion
 
     public static int MAX_RETRIES = 3;
@@ -26,19 +27,25 @@ public class ConnectionManager {
 
 
     public enum Urls {
+        USER_CREATE("users"),
+        USER_UPDATE("users/update"),
+
+        USER_TASKS_SAVE("users/task"),
+        USER_TASKS_MY_TASKS("users/task"),
+        USER_TASKS_OTHER_USER_TASKS("users/task/others"),
+
         USER_TASKS("tasks/users"),
         USER_TASKS_FINISHED("tasks/users/finished"),
-        USER_VIDEOS_DELETE("users/videos/delete"),
-        USER_VIDEOS_CREATE("users/videos/create"),
-        USER_VIDEOS_INFO("users/videos/info"),
+
         USER_VIDEOS("users/videos"),
-        USER_CREATE("users/create"),
-        USER_UPDATE("users/update"),
-        USER_TASKS_SAVE("users/task/create"),
-        USER_TASKS_MY_TASKS("users/task/myTask"),
-        USER_TASKS_OTHER_USER_TASKS("users/task/othersTask"),
+        USER_VIDEOS_CREATE("users/videos"),
+        USER_VIDEOS_DELETE("users/videos/delete"),
+        USER_VIDEOS_INFO("users/videos/info"),
+
         LANGUAGES("languages"),
+
         SUBTITLE("subtitle/info"),
+
         REASONS("reasons");
         public String value;
 
@@ -86,7 +93,7 @@ public class ConnectionManager {
             }
         }
 
-        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
+//        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
         String uri = URL_BASE + url.value + "/" + urlParamsString;
 
         DreamTVApp.Logger.d("Url: " + uri);
@@ -152,8 +159,7 @@ public class ConnectionManager {
             }
         }
 
-//        String uri = URL_BASE + url + "/" + urlParamsString;
-        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
+//        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
         String uri = URL_BASE + url + "/" + urlParamsString;
 
         DreamTVApp.Logger.d("Url: " + uri);
@@ -204,7 +210,7 @@ public class ConnectionManager {
             @NonNull Urls url, Actions action,
             final String json, ResponseListener listener, Object tag) {
 
-        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
+//        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
         String uri = URL_BASE + url.value;
 
         if (action != null)
@@ -268,7 +274,7 @@ public class ConnectionManager {
             @NonNull Urls url, String params, Actions action,
             final String json, ResponseListener listener, Object tag, boolean shouldCache) {
 
-        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
+//        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
         String uri = URL_BASE + url.value;
 
         if (action != null)

@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:padding="3dp"
         android:textColor="@color/white"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:gravity="center"
         android:layout_toEndOf="@+id/tvText"
         android:layout_marginStart="10dp"

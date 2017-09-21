@@ -45,6 +45,7 @@ import com.dream.dreamtv.beans.SubtitleJson;
 import com.dream.dreamtv.beans.Task;
 import com.dream.dreamtv.beans.User;
 import com.dream.dreamtv.beans.UserTask;
+import com.dream.dreamtv.beans.UserVideo;
 import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.conn.ConnectionManager;
 import com.dream.dreamtv.conn.ResponseListener;
@@ -52,8 +53,11 @@ import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.dream.dreamtv.utils.Utils;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /*
@@ -195,11 +199,13 @@ public class VideoDetailsFragment extends DetailsFragment {
     }
 
     private void verifyIfVideoIsInMyList() {
-        Task task = new Task();
-        task.video_id = mSelectedVideo.id;
+//        Task task = new Task();
+//        task.video_id = mSelectedVideo.id;
 
+        Map<String, String> urlParams = new HashMap<>();
+        urlParams.put("video_id", mSelectedVideo.id);
 
-        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), task);
+//        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), task);
 
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_verifying_list)) {
 
@@ -207,7 +213,12 @@ public class VideoDetailsFragment extends DetailsFragment {
             public void processResponse(String response) {
                 Gson gson = new Gson();
                 DreamTVApp.Logger.d(response);
-                if (!Boolean.valueOf(response)) {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserVideo[]>>() {
+                };
+                JsonResponseBaseBean<UserVideo[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
+
+
+                if (jsonResponse.data.length > 0) {
                     List<Action> actionList = rowPresenter.getActions();
                     for (Action action : actionList) { //We change the actions values
                         if (action.getId() == ACTION_ADD_MY_LIST) {
@@ -217,7 +228,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
                     }
                 }
-
+                //TODO corregir con el response
 
             }
 
@@ -234,7 +245,7 @@ public class VideoDetailsFragment extends DetailsFragment {
             }
         };
 
-        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_VIDEOS_INFO, null, jsonRequest, responseListener, this);
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_VIDEOS_INFO, urlParams, responseListener, this);
 
     }
 
@@ -260,7 +271,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
                 }
 
-                ((VideoDetailsActivity)getActivity()).updateScreenAfterChanges = true;
+                ((VideoDetailsActivity) getActivity()).updateScreenAfterChanges = true;
             }
 
             @Override
@@ -302,8 +313,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
                 }
 
-                ((VideoDetailsActivity)getActivity()).updateScreenAfterChanges = true;
-
+                ((VideoDetailsActivity) getActivity()).updateScreenAfterChanges = true;
 
 
             }
@@ -327,36 +337,54 @@ public class VideoDetailsFragment extends DetailsFragment {
 
 
     private void getSubtitleJson(final Video video) {
+        //TODO hay que hacer un IF para ubicar la ubicacion correcta para el video correspondiente
         User user = ((DreamTVApp) getActivity().getApplication()).getUser();
-        SubtitleJson subtitleJson = new SubtitleJson();
-        subtitleJson.video_id = video.id;
-        subtitleJson.version = LAST_VERSION;
-        subtitleJson.language_code = (user.sub_language != null &&
-                !user.sub_language.equals(Constants.NONE_OPTIONS_CODE)) ?
-                user.sub_language : video.subtitle_language;
+//        SubtitleJson subtitleJson = new SubtitleJson();
+//        subtitleJson.video_id = video.id;
+//        subtitleJson.version = LAST_VERSION;
+//        subtitleJson.language_code = (user.sub_language != null &&
+//                !user.sub_language.equals(Constants.NONE_OPTIONS_CODE)) ?
+//                user.sub_language : video.subtitle_language;
+//
+//        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), subtitleJson);
 
-        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), subtitleJson);
+        Map<String, String> urlParams = new HashMap<>();
+        urlParams.put("video_id", video.id);
+        urlParams.put("version", LAST_VERSION);
+        urlParams.put("language_code", (user.sub_language != null &&
+                !user.sub_language.equals(Constants.NONE_OPTIONS_CODE)) ?
+                user.sub_language : video.subtitle_language);
+
 
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
                 getString(R.string.title_loading_retrieve_subtitle)) {
 
             @Override
             public void processResponse(String response) {
-                Gson gson = new Gson();
+//                Gson gson = new Gson();
                 DreamTVApp.Logger.d(response);
-                SubtitleJson mSubtitleJson = gson.fromJson(response, SubtitleJson.class);
-                DreamTVApp.Logger.d(mSubtitleJson.toString());
-                mSelectedVideo.subtitle_json = mSubtitleJson;
+//                SubtitleJson mSubtitleJson = gson.fromJson(response, SubtitleJson.class);
 
-                //verify the type of task. We get the data from users tasks
-                if (mSelectedVideo.task_state == Constants.CHECK_NEW_TASKS_CATEGORY) {
-                    getOtherTasksForThisVideo();
-                } else if ((mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY)) {
-                    getMyTaskForThisVideo();
+                TypeToken type = new TypeToken<JsonResponseBaseBean<SubtitleJson>>() {
+                };
+                JsonResponseBaseBean<SubtitleJson> jsonResponse = JsonUtils.getJsonResponse(response, type);
+
+
+                DreamTVApp.Logger.d(jsonResponse.data.toString());
+                mSelectedVideo.subtitle_json = jsonResponse.data;
+
+                if (mSelectedVideo.subtitle_json.subtitles != null) { //Si se encontraron los subtitulos, vamos a la pantalla de reproduccion
+                    //verify the type of task. We get the data from users tasks
+                    if (mSelectedVideo.task_state == Constants.CHECK_NEW_TASKS_CATEGORY) {
+                        getOtherTasksForThisVideo();
+                    } else if ((mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY)) {
+                        getMyTaskForThisVideo();
+                    } else {
+                        goToPlayVideo();
+                    }
                 } else {
-                    goToPlayVideo();
+                    Toast.makeText(getActivity(), getString(R.string.error_subtitle_not_found), Toast.LENGTH_SHORT).show();
                 }
-
 
             }
 
@@ -373,7 +401,7 @@ public class VideoDetailsFragment extends DetailsFragment {
             }
         };
 
-        ConnectionManager.post(getActivity(), ConnectionManager.Urls.SUBTITLE, null, jsonRequest, responseListener, this);
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.SUBTITLE, urlParams, responseListener, this);
 
     }
 
@@ -394,20 +422,25 @@ public class VideoDetailsFragment extends DetailsFragment {
 
 
     private void getMyTaskForThisVideo() {
-        Task task = new Task();
-        task.task_id = mSelectedVideo.task_id;
+//        Task task = new Task();
+//        task.task_id = mSelectedVideo.task_id;
 
+        Map<String, String> urlParams = new HashMap<>();
+        urlParams.put("task_id", String.valueOf(mSelectedVideo.task_id));
 
-        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), task);
+//        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), task);
 
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_tasks)) {
 
             @Override
             public void processResponse(String response) {
-                Gson gson = new Gson();
+//                Gson gson = new Gson();
                 DreamTVApp.Logger.d("Tasks -> Mine: " + response);
-
-                mSelectedVideo.userTaskList = gson.fromJson(response, UserTask[].class);
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask[]>>() {
+                };
+                JsonResponseBaseBean<UserTask[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
+                mSelectedVideo.userTaskList = jsonResponse.data;
+//                mSelectedVideo.userTaskList = gson.fromJson(response, UserTask[].class);
 
                 goToPlayVideo();
 
@@ -427,25 +460,32 @@ public class VideoDetailsFragment extends DetailsFragment {
             }
         };
 
-        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_TASKS_MY_TASKS, null, jsonRequest, responseListener, this);
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS_MY_TASKS, urlParams, responseListener, this);
 
     }
 
     private void getOtherTasksForThisVideo() {
-        Task task = new Task();
-        task.task_id = mSelectedVideo.task_id;
+//        Task task = new Task();
+//        task.task_id = mSelectedVideo.task_id;
 
+        Map<String, String> urlParams = new HashMap<>();
+        urlParams.put("task_id", String.valueOf(mSelectedVideo.task_id));
 
-        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), task);
+//        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), task);
 
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_tasks)) {
 
             @Override
             public void processResponse(String response) {
-                Gson gson = new Gson();
-                DreamTVApp.Logger.d("Tasks -> Others: " + response);
+//                Gson gson = new Gson();
+//                DreamTVApp.Logger.d("Tasks -> Others: " + response);
 
-                mSelectedVideo.userTaskList = gson.fromJson(response, UserTask[].class);
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask[]>>() {
+                };
+                JsonResponseBaseBean<UserTask[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
+                mSelectedVideo.userTaskList = jsonResponse.data;
+
+//                mSelectedVideo.userTaskList = gson.fromJson(response, UserTask[].class);
 
                 goToPlayVideo();
 
@@ -465,7 +505,7 @@ public class VideoDetailsFragment extends DetailsFragment {
             }
         };
 
-        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_TASKS_OTHER_USER_TASKS, null, jsonRequest, responseListener, this);
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS_OTHER_USER_TASKS, urlParams, responseListener, this);
 
     }
 

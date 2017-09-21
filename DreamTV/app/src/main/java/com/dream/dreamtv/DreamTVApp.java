@@ -4,12 +4,15 @@ import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
+import com.dream.dreamtv.beans.Reason;
 import com.dream.dreamtv.beans.ReasonList;
 import com.dream.dreamtv.beans.User;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.Gson;
+
+import java.util.List;
 
 
 /**
@@ -32,27 +35,27 @@ public class DreamTVApp extends Application {
 
     }
 
-    public String getBaseURL() {
-
-        String defaultURL = "http://172.23.192.2:8000/api/";
-
-        String urlBaseString = SharedPreferenceUtils.getValue(this, getString(R.string.url_base_preferences));
-
-        if (urlBaseString == null)
-            return defaultURL;
-        else
-            return urlBaseString;
-    }
-
-    public void setBaseURL(String url){
-        SharedPreferenceUtils.save(this, getString(R.string.url_base_preferences), url);
-    }
+//    public String getBaseURL() {
+//
+//        String defaultURL = "http://172.23.192.2:8000/api/";
+//
+//        String urlBaseString = SharedPreferenceUtils.getValue(this, getString(R.string.url_base_preferences));
+//
+//        if (urlBaseString == null)
+//            return defaultURL;
+//        else
+//            return urlBaseString;
+//    }
+//
+//    public void setBaseURL(String url){
+//        SharedPreferenceUtils.save(this, getString(R.string.url_base_preferences), url);
+//    }
 
     public User getUser() {
         //todo control cuando viene null
 
         String userString = SharedPreferenceUtils.getValue(this, getString(R.string.user_preferences));
-        return userString == null ? new User() : gson.fromJson(userString, User.class);
+        return userString == null ? null : gson.fromJson(userString, User.class);
     }
 
     public void setUser(User user) {
@@ -69,7 +72,7 @@ public class DreamTVApp extends Application {
         SharedPreferenceUtils.save(this, getString(R.string.user_preferences), userString);
     }
 
-    public void setReasons(ReasonList reasons) {
+    public void setReasons(List<Reason> reasons) {
         String userString = gson.toJson(reasons);
         SharedPreferenceUtils.save(this, getString(R.string.reasons_preferences), userString);
     }

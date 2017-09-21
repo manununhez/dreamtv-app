@@ -11,11 +11,11 @@ import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.beans.JsonResponseBaseBean;
+import com.dream.dreamtv.utils.JsonUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.google.gson.reflect.TypeToken;
 
 import org.greenrobot.eventbus.EventBus;
-
 
 
 /**
@@ -84,23 +84,29 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
 
         DreamTVApp.Logger.d("Respuesta: " + response);
 //
-//        TypeToken typeToken = new TypeToken<JsonResponseBaseBean>() {
-//        };
-//        final JsonResponseBaseBean jsonResponse =
-//                JsonUtils.getJsonResponse(response, typeToken, false);
+        TypeToken typeToken = new TypeToken<JsonResponseBaseBean>() {
+        };
+        final JsonResponseBaseBean jsonResponse =
+                JsonUtils.getJsonResponse(response, typeToken, false);
 //
-//        if (jsonResponse.success) {
-            processResponse(response);
-//        } else {
-//            if (showErrorMessage) {
-//                if (jsonResponse.data == null) {
+        if (jsonResponse.success != null) {
+            if (jsonResponse.success) {
+                processResponse(response);
+            } else {
+                if (showErrorMessage) {
+                    if (jsonResponse.data == null) {
+                        Toast.makeText(context, "Error en la conexión", Toast.LENGTH_SHORT).show();
 //                    EventBus.getDefault().post(new ResponseListenerEvent("Error en la conexión"));
-//                } else if (!jsonResponse.data.equals("")) {
+                    } else if (!jsonResponse.data.equals("")) {
+                        Toast.makeText(context, jsonResponse.data.toString(), Toast.LENGTH_SHORT).show();
 //                    EventBus.getDefault().post(new ResponseListenerEvent(jsonResponse.data.toString()));
-//                }
-//            }
-//            processError(jsonResponse);
-//        }
+                    }
+                }
+                processError(jsonResponse);
+            }
+        } else {
+            processResponse(response);
+        }
     }
 
     public abstract void processResponse(String response);

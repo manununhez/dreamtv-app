@@ -16,6 +16,7 @@ package com.dream.dreamtv.activity;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -276,26 +277,30 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     private void playVideoMode() {
         if (mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
             final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
-            Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
-                    getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            playVideo(subtitle.end);
-                        }
-                    }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            playVideo(null);
-                            dialog.dismiss();
-                        }
-                    }, new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            dialog.dismiss();
-                        }
-                    }).show();
+            if (subtitle != null) { //Si por alguna razon no se cuenta con subtitulo (algun fallo en el servicio al traer el requerido subt)
+                Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
+                        getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                playVideo(subtitle.end);
+                            }
+                        }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                playVideo(null);
+                                dialog.dismiss();
+                            }
+                        }, new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                dialog.dismiss();
+                            }
+                        }).show();
 
-            showContinueDialogOnlyOnce = false;
+                showContinueDialogOnlyOnce = false;
+            } else {
+                playVideo(null);
+            }
         } else {
             playVideo(null);
         }
@@ -358,8 +363,11 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
             ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
                     subtitle.position, mSelectedVideo.task_id);
-            FragmentManager fm = getFragmentManager();
-            reasonsDialogFragment.show(fm, "Sample Fragment");
+            if (!isFinishing()) {
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction transaction = fm.beginTransaction();
+                reasonsDialogFragment.show(transaction, "Sample Fragment");
+            }
         }
     }
 
@@ -369,8 +377,11 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
             ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
                     subtitle.position, mSelectedVideo.task_id, userTask, mSelectedVideo.task_state);
-            FragmentManager fm = getFragmentManager();
-            reasonsDialogFragment.show(fm, "Sample Fragment");
+            if (!isFinishing()) {
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction transaction = fm.beginTransaction();
+                reasonsDialogFragment.show(transaction, "Sample Fragment");
+            }
         }
     }
 
@@ -385,16 +396,17 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
         Subtitle subtitle = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
 
-//        if (subtitle == null)
-//            DreamTVApp.Logger.d("subtitle is null");
-//        else if (selectedSubtitle == null)
-//            DreamTVApp.Logger.d("selectedSubtitle is null");
+        if (selectedSubtitle != null) { //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
+            Subtitle subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2);
 
-        if (selectedSubtitle != null) //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
             if (selectedSubtitle.position != subtitle.position) {
-                mVideoView.seekTo(selectedSubtitle.start);
-//                Toast.makeText(this, "Cambiar video timing", Toast.LENGTH_SHORT).show();
+                if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000)
+                    mVideoView.seekTo(subtitleOneBeforeNew.end - 1000);
+                else
+                    mVideoView.seekTo(subtitleOneBeforeNew.end);
+
             }
+        }
 
         playVideo(null);
     }

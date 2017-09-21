@@ -79,6 +79,7 @@ import com.dream.dreamtv.utils.JsonUtils;
 import com.dream.dreamtv.utils.PermissionUtil;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import static android.support.v4.content.PermissionChecker.checkSelfPermission;
 
@@ -170,9 +171,14 @@ public class MainFragment extends BrowseFragment {
 
             @Override
             public void processResponse(String response) {
-                Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
-                User user = gson.fromJson(response, User.class);
+                TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
+                };
+                JsonResponseBaseBean<User> jsonResponse = JsonUtils.getJsonResponse(response, type);
+                User user = jsonResponse.data;
+
+//                Gson gson = new Gson();
+//                DreamTVApp.Logger.d(response);
+//                User user = gson.fromJson(response, User.class);
 
                 ((DreamTVApp) getActivity().getApplication()).setUser(user);
 

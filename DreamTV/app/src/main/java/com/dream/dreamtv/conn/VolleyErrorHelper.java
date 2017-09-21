@@ -15,7 +15,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 
-
 /**
  * Created by Manuel on 11/30/2015.
  */
@@ -31,11 +30,9 @@ public class VolleyErrorHelper {
     public static String getMessage(Object error, Context context) {
         if (error instanceof TimeoutError) {
             return context.getResources().getString(R.string.timeout_server_error);
-        }
-        else if (isServerProblem(error)) {
+        } else if (isServerProblem(error)) {
             return handleServerError(error, context);
-        }
-        else if (isNetworkProblem(error)) {
+        } else if (isNetworkProblem(error)) {
             return context.getResources().getString(R.string.no_network_error);
         }
         return context.getResources().getString(R.string.defaultErrorMessage);
@@ -43,20 +40,24 @@ public class VolleyErrorHelper {
 
     /**
      * Determines whether the error is related to network
+     *
      * @param error
      * @return
      */
     private static boolean isNetworkProblem(Object error) {
         return (error instanceof NetworkError) || (error instanceof NoConnectionError);
     }
+
     /**
      * Determines whether the error is related to server
+     *
      * @param error
      * @return
      */
     private static boolean isServerProblem(Object error) {
         return (error instanceof ServerError) || (error instanceof AuthFailureError);
     }
+
     /**
      * Handles the server error, tries to determine whether to show a stock message or to
      * show a message retrieved from the server.
@@ -80,11 +81,13 @@ public class VolleyErrorHelper {
                         // server might return error like this { "error": "Some error occured" }
                         // Use "Gson" to parse the rult
                         JsonResponseBaseBean<String> result = new Gson().fromJson(new String(response.data),
-                                new TypeToken<JsonResponseBaseBean<String>>(){}.getType());
+                                new TypeToken<JsonResponseBaseBean<String>>() {
+                                }.getType());
 
-                        if (result != null && !result.data.equals("")) {
-                            return result.data;
-                        }
+                        if (result != null)
+                            if (!result.data.equals(""))
+                                return result.data;
+
 
                     } catch (Exception e) {
                         e.printStackTrace();
