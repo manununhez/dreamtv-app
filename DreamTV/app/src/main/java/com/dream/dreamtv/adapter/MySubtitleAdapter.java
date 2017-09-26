@@ -47,12 +47,12 @@ public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
 
         if (position == (currentSubtitlePosition - 1)) {
             tvText.setBackgroundColor(context.getResources().getColor(R.color.blue, null));
-            tvText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10, context.getResources().getDisplayMetrics()));
+            tvText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, context.getResources().getDisplayMetrics()));
             tvText.setTypeface(tvText.getTypeface(), Typeface.NORMAL);
         } else {
 //            android:textSize="14sp"
 //            android:textStyle="italic"
-            tvText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, context.getResources().getDisplayMetrics()));
+            tvText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 8, context.getResources().getDisplayMetrics()));
             tvText.setTypeface(tvText.getTypeface(), Typeface.ITALIC);
             tvText.setBackgroundColor(context.getResources().getColor(R.color.black_opaque, null));
         }
@@ -60,8 +60,9 @@ public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
         tvText.setText(Html.fromHtml(values.get(position).text));
 
         if (userInterfaceMode.equals(Constants.ADVANCED_INTERFACE_MODE)) { //Advanced MODE
-            tvTime.setText(videoCurrentTimeFormat(values.get(position).start) + " - "
-                    + videoCurrentTimeFormat(values.get(position).end));
+            tvTime.setText(videoCurrentReadVeloc(values.get(position).text, (values.get(position).end - values.get(position).start)));
+//            tvTime.setText(videoCurrentTimeFormat(values.get(position).start) + " - "
+//                    + videoCurrentTimeFormat(values.get(position).end));
         }
         return rowView;
     }
@@ -71,5 +72,9 @@ public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
                 TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
 
         return hms;
+    }
+
+    private String videoCurrentReadVeloc(String text, long millis){
+        return text.length()/ (millis/1000) + " char/seg";
     }
 }

@@ -35,7 +35,6 @@ import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,6 +63,8 @@ public class PreferencesActivity extends Activity {
     private String selectedSubtitleLanguageCode;
     private String selectedAudioLanguageCode;
     private RadioGroup rgInterfaceLanguage;
+    private RadioButton rbNot;
+    private RadioButton rbYes;
     private RadioButton rbEnglish;
     private RadioButton rbPolish;
     private RadioButton rbAdvanced;
@@ -89,6 +90,7 @@ public class PreferencesActivity extends Activity {
         rbPolish = (RadioButton) findViewById(R.id.rbPolish);
         rbAdvanced = (RadioButton) findViewById(R.id.rbAdvanced);
         rbBeginner = (RadioButton) findViewById(R.id.rbBeginner);
+
 
         rgInterfaceLanguage = (RadioGroup) findViewById(R.id.rgInterfaceLanguage);
 
@@ -151,13 +153,13 @@ public class PreferencesActivity extends Activity {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                updateUserData();
+                saveUSerPreferences();
             }
         });
 
         interfaceLanguageSettings();
         interfaceModeSettings();
-
+        testingModeSettings();
 //        getLanguages();
         setupLanguages();
 
@@ -169,6 +171,19 @@ public class PreferencesActivity extends Activity {
 //
 //        etBaseURL.setText(((DreamTVApp) getApplication()).getBaseURL());
 //    }
+
+    private void testingModeSettings() {
+        rbYes = (RadioButton) findViewById(R.id.rbYes);
+        rbNot = (RadioButton) findViewById(R.id.rbNot);
+
+        String mode = ((DreamTVApp) getApplication()).getTestingMode();
+
+        if (mode == null || mode.equals("N"))
+            rbNot.setChecked(true);
+        else if (mode.equals("Y"))
+            rbYes.setChecked(true);
+
+    }
 
     private void setupLanguages() { //based on the 10 most spoken languages http://www.foxnewspoint.com/top-10-most-spoken-language-in-the-world-2017/
         Map<String, String> languages = new TreeMap<>();
@@ -237,7 +252,7 @@ public class PreferencesActivity extends Activity {
         setupLanguages();
     }
 
-    private void updateUserData() {
+    private void saveUSerPreferences() {
         //developer mode. Save URL
 //        DreamTVApp dreamTVApp = ((DreamTVApp) getApplication());
 //        dreamTVApp.setBaseURL(etBaseURL.getText().toString());
@@ -267,6 +282,13 @@ public class PreferencesActivity extends Activity {
 
                 DreamTVApp dreamTVApp = ((DreamTVApp) getApplication());
                 dreamTVApp.setUser(user);
+
+
+                //Save testing mode
+                if (rbYes.isChecked())
+                    dreamTVApp.setTestingMode("Y");
+                else
+                    dreamTVApp.setTestingMode("N");
 
                 Intent returnIntent = new Intent();
                 setResult(Activity.RESULT_OK, returnIntent);

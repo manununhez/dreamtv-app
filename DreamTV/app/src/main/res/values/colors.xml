@@ -12,6 +12,7 @@
     <color name="black_opaque">#AA000000</color>
     <color name="black_transparent">#b3000000</color>
     <color name="gray_transparent">#d4535252</color>
+    <color name="gray_transparent_2">#4c2b2b2b</color>
     <color name="pg">#87060606</color>
     <color name="black">#59000000</color>
     <color name="gray">#5e5d5d</color>

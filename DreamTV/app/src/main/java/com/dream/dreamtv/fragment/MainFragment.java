@@ -116,39 +116,39 @@ public class MainFragment extends BrowseFragment {
 //                Manifest.permission.GET_ACCOUNTS)
 //                != PackageManager.PERMISSION_GRANTED) {
 
-            if (PermissionUtil.shouldAskPermission(getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+        if (PermissionUtil.shouldAskPermission(getActivity(), Manifest.permission.GET_ACCOUNTS)) {
 /*
             * If permission denied previously
             * */
-                if (shouldShowRequestPermissionRationale(Manifest.permission.GET_ACCOUNTS)) {
-                    //listener.onPermissionPreviouslyDenied();
-                    //show a dialog explaining permission and then request permission
-                    Toast.makeText(getActivity(), "Get accounts permission disabled and app will not work. Please proceed and give permission to access to accounts", Toast.LENGTH_SHORT).show();
+            if (shouldShowRequestPermissionRationale(Manifest.permission.GET_ACCOUNTS)) {
+                //listener.onPermissionPreviouslyDenied();
+                //show a dialog explaining permission and then request permission
+                Toast.makeText(getActivity(), "Get accounts permission disabled and app will not work. Please proceed and give permission to access to accounts", Toast.LENGTH_SHORT).show();
+                requestPermissions(new String[]{Manifest.permission.GET_ACCOUNTS},
+                        MY_PERMISSIONS_REQUEST_GET_ACCOUNTS
+                );
+            } else {
+                /*
+                * Permission denied or first time requested
+                * */
+                if (SharedPreferenceUtils.isFirstTimeAskingPermission(getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+                    SharedPreferenceUtils.firstTimeAskingPermission(getActivity(), Manifest.permission.GET_ACCOUNTS, false);
+                    //listener.onNeedPermission();
                     requestPermissions(new String[]{Manifest.permission.GET_ACCOUNTS},
                             MY_PERMISSIONS_REQUEST_GET_ACCOUNTS
                     );
                 } else {
-                /*
-                * Permission denied or first time requested
-                * */
-                    if (SharedPreferenceUtils.isFirstTimeAskingPermission(getActivity(), Manifest.permission.GET_ACCOUNTS)) {
-                        SharedPreferenceUtils.firstTimeAskingPermission(getActivity(), Manifest.permission.GET_ACCOUNTS, false);
-                        //listener.onNeedPermission();
-                        requestPermissions(new String[]{Manifest.permission.GET_ACCOUNTS},
-                                MY_PERMISSIONS_REQUEST_GET_ACCOUNTS
-                        );
-                    } else {
                     /*
                     * Handle the feature without permission or ask user to manually allow permission
                     * */
-                        //listener.onPermissionDisabled();
-                        Toast.makeText(getActivity(), "Permission Disabled.", Toast.LENGTH_SHORT).show();
-                    }
+                    //listener.onPermissionDisabled();
+                    Toast.makeText(getActivity(), "Permission Disabled.", Toast.LENGTH_SHORT).show();
                 }
-            } else {
-                //listener.onPermissionGranted();
-                userRegistration();
             }
+        } else {
+            //listener.onPermissionGranted();
+            userRegistration();
+        }
 
 
 //        getVideos();
@@ -176,11 +176,13 @@ public class MainFragment extends BrowseFragment {
                 JsonResponseBaseBean<User> jsonResponse = JsonUtils.getJsonResponse(response, type);
                 User user = jsonResponse.data;
 
+
 //                Gson gson = new Gson();
 //                DreamTVApp.Logger.d(response);
 //                User user = gson.fromJson(response, User.class);
 
                 ((DreamTVApp) getActivity().getApplication()).setUser(user);
+
 
                 getUserTasks("1"); //for the mainscreen, only the first page
             }
@@ -271,7 +273,13 @@ public class MainFragment extends BrowseFragment {
             }
         };
 
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS, urlParams, responseListener, this);
+
+        //testing mode
+        String mode = ((DreamTVApp) getActivity().getApplication()).getTestingMode();
+        if (mode == null || mode.equals("N"))
+            ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS, urlParams, responseListener, this);
+        else if (mode.equals("Y"))
+            ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS_TESTS, urlParams, responseListener, this);
 
     }
 

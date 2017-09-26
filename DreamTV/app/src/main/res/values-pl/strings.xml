@@ -20,7 +20,9 @@
     <!--SHAREDPREFERENCES-->
     <string name="dreamTVApp_token">tedapp_token</string>
     <string name="user_preferences">user_preferences</string>
+    <string name="url_base_preferences">url_base_preferences</string>
     <string name="reasons_preferences">reasons_preferences</string>
+    <string name="testing_mode_preferences">testing_mode_preferences</string>
     <string name="languages_preferences">languages_preferences</string>
 
 
@@ -31,6 +33,7 @@
     <string name="title_video_settings">Ustawienia filmu</string>
     <string name="title_text_language_settings">Język aplikacji</string>
     <string name="title_reason_dialog_interface_settings">Interfejs</string>
+    <string name="title_testing_mode_settings">Tryb testowy</string>
     <string name="title_video_languages_settings">Języki wideo</string>
     <string name="title_video_languages_type_settings">Wybierz języki:</string>
     <string name="title_reasons_dialog">Co tu jest nie tak?</string>
@@ -47,6 +50,8 @@
     <string name="title_check_new_tasks_category">Ostatnio dodane filmy</string>
     <string name="rb_option_text_english">Angielski</string>
     <string name="rb_option_text_polish">Polski</string>
+    <string name="rb_option_text_yes">Tak</string>
+    <string name="rb_option_text_not">Nie</string>
     <string name="rb_option_text_advanced">Zaawansowany</string>
     <string name="rb_option_text_beginner">Prosty</string>
     <string name="hint_voice_google_input">Nagraj wiadomość</string>

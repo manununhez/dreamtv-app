@@ -123,7 +123,13 @@ public class SeeAllFragment extends VerticalGridFragment {
             }
         };
 
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS, urlParams, responseListener, this);
+        //testing mode
+        String mode = ((DreamTVApp) getActivity().getApplication()).getTestingMode();
+        if (mode == null || mode.equals("N"))
+            ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS, urlParams, responseListener, this);
+        else if (mode.equals("Y"))
+            ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS_TESTS, urlParams, responseListener, this);
+
 
     }
 

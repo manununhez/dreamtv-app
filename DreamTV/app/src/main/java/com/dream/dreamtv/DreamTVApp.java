@@ -35,21 +35,21 @@ public class DreamTVApp extends Application {
 
     }
 
-//    public String getBaseURL() {
-//
-//        String defaultURL = "http://172.23.192.2:8000/api/";
-//
-//        String urlBaseString = SharedPreferenceUtils.getValue(this, getString(R.string.url_base_preferences));
-//
-//        if (urlBaseString == null)
-//            return defaultURL;
-//        else
-//            return urlBaseString;
-//    }
-//
-//    public void setBaseURL(String url){
-//        SharedPreferenceUtils.save(this, getString(R.string.url_base_preferences), url);
-//    }
+    public String getBaseURL() {
+
+        String defaultURL = "http://172.23.192.2:8000/api/";
+
+        String urlBaseString = SharedPreferenceUtils.getValue(this, getString(R.string.url_base_preferences));
+
+        if (urlBaseString == null)
+            return defaultURL;
+        else
+            return urlBaseString;
+    }
+
+    public void setBaseURL(String url) {
+        SharedPreferenceUtils.save(this, getString(R.string.url_base_preferences), url);
+    }
 
     public User getUser() {
         //todo control cuando viene null
@@ -72,22 +72,30 @@ public class DreamTVApp extends Application {
         SharedPreferenceUtils.save(this, getString(R.string.user_preferences), userString);
     }
 
+    public String getTestingMode() {
+        return SharedPreferenceUtils.getValue(this, getString(R.string.testing_mode_preferences));
+    }
+
+    public void setTestingMode(String mode) {
+        SharedPreferenceUtils.save(this, getString(R.string.testing_mode_preferences), mode);
+    }
+
     public void setReasons(List<Reason> reasons) {
         String userString = gson.toJson(reasons);
         SharedPreferenceUtils.save(this, getString(R.string.reasons_preferences), userString);
     }
 
-//    public void setLanguages(String languages) {
-//        SharedPreferenceUtils.save(this, getString(R.string.languages_preferences), languages);
-//    }
-//
-//    public String getLanguages() {
-//        return SharedPreferenceUtils.getValue(this, getString(R.string.languages_preferences));
-//    }
-//
-//    public void setUserVideoList() {
-//
-//    }
+    public void setLanguages(String languages) {
+        SharedPreferenceUtils.save(this, getString(R.string.languages_preferences), languages);
+    }
+
+    public String getLanguages() {
+        return SharedPreferenceUtils.getValue(this, getString(R.string.languages_preferences));
+    }
+
+    public void setUserVideoList() {
+
+    }
 
     public ReasonList getReasons() {
         String reasonString = SharedPreferenceUtils.getValue(this, getString(R.string.reasons_preferences));
