@@ -369,11 +369,10 @@ public class VideoDetailsFragment extends DetailsFragment {
                 };
                 JsonResponseBaseBean<SubtitleJson> jsonResponse = JsonUtils.getJsonResponse(response, type);
 
-
-                DreamTVApp.Logger.d(jsonResponse.data.toString());
                 mSelectedVideo.subtitle_json = jsonResponse.data;
 
-                if (mSelectedVideo.subtitle_json.subtitles != null) { //Si se encontraron los subtitulos, vamos a la pantalla de reproduccion
+                if (mSelectedVideo.subtitle_json != null && mSelectedVideo.subtitle_json.subtitles != null) { //Si se encontraron los subtitulos, vamos a la pantalla de reproduccion
+                    DreamTVApp.Logger.d(jsonResponse.data.toString());
                     //verify the type of task. We get the data from users tasks
                     if (mSelectedVideo.task_state == Constants.CHECK_NEW_TASKS_CATEGORY) {
                         getOtherTasksForThisVideo();

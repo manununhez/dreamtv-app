@@ -51,6 +51,7 @@ public class PreferencesActivity extends Activity {
     private TextView tvSubtitleValue;
     private TextView tvAudioValue;
     private TextView tvTitle;
+    private TextView tvTestingModeTitle;
     private TextView tvTextLanguageTitle;
     private TextView tvReasonDialogInterfaceTitle;
     private TextView tvVideoLanguagesTitle;
@@ -95,6 +96,8 @@ public class PreferencesActivity extends Activity {
         rgInterfaceLanguage = (RadioGroup) findViewById(R.id.rgInterfaceLanguage);
 
         tvTitle = (TextView) findViewById(R.id.tvTitle);
+        tvTestingModeTitle = (TextView) findViewById(R.id.tvTestingModeTitle);
+
         tvTextLanguageTitle = (TextView) findViewById(R.id.tvTextLanguageTitle);
         tvAudioLabel = (TextView) findViewById(R.id.tvAudioLabel);
         tvSubtitleLabel = (TextView) findViewById(R.id.tvSubtitleLabel);
@@ -236,6 +239,7 @@ public class PreferencesActivity extends Activity {
         Context context = LocaleHelper.setLocale(this, languageCode);
         Resources resources = context.getResources();
         tvTitle.setText(resources.getString(R.string.title_video_settings));
+        tvTestingModeTitle.setText(resources.getString(R.string.title_testing_mode_settings));
         rbPolish.setText(resources.getString(R.string.rb_option_text_polish));
         tvTextLanguageTitle.setText(resources.getString(R.string.title_text_language_settings));
         rbEnglish.setText(resources.getString(R.string.rb_option_text_english));
