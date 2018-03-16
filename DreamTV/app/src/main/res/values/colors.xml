@@ -10,6 +10,7 @@
     <color name="img_full_opaque">#00000000</color>
     <color name="black_subt">#b6000000</color>
     <color name="black_opaque">#AA000000</color>
+    <color name="blue_opaque">#72a1f1</color>
     <color name="black_transparent">#b3000000</color>
     <color name="gray_transparent">#d4535252</color>
     <color name="gray_transparent_2">#4c2b2b2b</color>

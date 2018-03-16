@@ -576,6 +576,7 @@ public class ReasonsDialogFragment extends DialogFragment {
 //            containerDestacado.addView(inflatedLayout);
 
 //            final ToggleButton toggleButton = new ToggleButton(getActivity());
+//            toggleButton.setBackgroundResource(R.color.black);
             toggleButton.setBackgroundResource(R.color.black);
 //            toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.custom_selector));
             toggleButton.setTextColor(ContextCompat.getColor(getActivity(), R.color.white));
