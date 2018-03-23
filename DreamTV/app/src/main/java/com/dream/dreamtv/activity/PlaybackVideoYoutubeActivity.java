@@ -396,24 +396,23 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     @Override
     public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
 
-
         Subtitle subtitleOld = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
-        int currentTimeStopped = (int) (SystemClock.elapsedRealtime() - timeStoppedTemp);
+        Subtitle subtitleOneBeforeNew;
 
         if (selectedSubtitle != null) //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
         {
-            Subtitle subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2);
-            if (selectedSubtitle.position != subtitleOld.position) {
-//                if (selectedSubtitle.position > subtitleOld.position) {
-                if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000)
-                    mYoutubeView.seekTo((subtitleOneBeforeNew.end - 1000) / 1000);
-                else
-                    mYoutubeView.seekTo(subtitleOneBeforeNew.end / 1000);
+            if (selectedSubtitle.position != subtitleOld.position) { //a different subtitle from the original was selected
+                if(selectedSubtitle.position - 2 >= 0) { //avoid index out of range
+                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
+                    if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000) //1000ms de diff
+                        mYoutubeView.seekTo((subtitleOneBeforeNew.end - 1000) / 1000); //damos mas tiempo, para leer subtitulos anterioires
+                    else
+                        mYoutubeView.seekTo(subtitleOneBeforeNew.end / 1000);
+                } else {
+                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(0); //we go to the first subtitle
+                    mYoutubeView.seekTo((subtitleOneBeforeNew.start - 1000) / 1000); //inicio del primer sub
+                }
 
-//                    mYoutubeView.moveForward(((subtitleOneBeforeNew.end - currentTimeStopped)) / 1000); //offset time. Error (we add 2seconds)
-//                }else{
-//                    mYoutubeView.moveBackward(((currentTimeStopped - subtitleOneBeforeNew.end) / 1000)); //offset time. Error (we add 2seconds)
-//            }
             }
         }
 

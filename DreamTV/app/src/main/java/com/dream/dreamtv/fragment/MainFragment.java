@@ -402,14 +402,14 @@ public class MainFragment extends BrowseFragment {
 
     private void setFootersOptions() {
         HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
-        HeaderItem gridHeader2 = new HeaderItem(getString(R.string.title_contributions_category));
+        //HeaderItem gridHeader2 = new HeaderItem(getString(R.string.title_contributions_category));
 
         GridItemPresenter mGridPresenter = new GridItemPresenter();
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
         ArrayObjectAdapter gridRowAdapter2 = new ArrayObjectAdapter(mGridPresenter);
         gridRowAdapter.add(getResources().getString(R.string.title_video_settings));
-        gridRowAdapter2.add(getResources().getString(R.string.title_user_statistics));
-        mRowsAdapter.add(new ListRow(gridHeader2, gridRowAdapter2));
+        //gridRowAdapter2.add(getResources().getString(R.string.title_user_statistics));
+        //mRowsAdapter.add(new ListRow(gridHeader2, gridRowAdapter2));
         mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
 
         setAdapter(mRowsAdapter);

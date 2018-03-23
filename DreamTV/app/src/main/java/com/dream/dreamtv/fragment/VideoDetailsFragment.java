@@ -339,6 +339,7 @@ public class VideoDetailsFragment extends DetailsFragment {
     private void getSubtitleJson(final Video video) {
         //TODO hay que hacer un IF para ubicar la ubicacion correcta para el video correspondiente
         User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+        String mode = ((DreamTVApp) getActivity().getApplication()).getTestingMode();
 //        SubtitleJson subtitleJson = new SubtitleJson();
 //        subtitleJson.video_id = video.id;
 //        subtitleJson.version = LAST_VERSION;
@@ -355,6 +356,25 @@ public class VideoDetailsFragment extends DetailsFragment {
                 !user.sub_language.equals(Constants.NONE_OPTIONS_CODE)) ?
                 user.sub_language : video.subtitle_language);
 
+        //Testing mode true
+        if (mode != null && mode.equals("Y"))
+            switch (video.id) {
+                case "tNE5imiv27uA":
+                    urlParams.put("version_number", "3");
+                    break;
+                case "DJlZ5QYcHSQB":
+                    urlParams.put("version_number", "6");
+                    break;
+                case "eC0ZoBNXwcwA":
+                    urlParams.put("version_number", "11");
+                    break;
+                case "cYjdKCNfh989":
+                    urlParams.put("version_number", "14");
+                    break;
+                case "8ULN8kSqfMkk":
+                    urlParams.put("version_number", "8");
+                    break;
+            }
 
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
                 getString(R.string.title_loading_retrieve_subtitle)) {

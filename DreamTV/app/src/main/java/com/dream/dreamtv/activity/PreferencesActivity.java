@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -47,7 +48,8 @@ public class PreferencesActivity extends Activity {
     private Activity mActivity;
 
     private ListView mListView;
-    //    private TextView mTextView;
+        private LinearLayout llVideosSettings;
+        private LinearLayout llBodyLanguages;
     private TextView tvSubtitleValue;
     private TextView tvAudioValue;
     private TextView tvTitle;
@@ -87,6 +89,9 @@ public class PreferencesActivity extends Activity {
         // Get the widgets reference from XML layout
         mListView = (ListView) findViewById(R.id.lv);
 
+        llVideosSettings = (LinearLayout) findViewById(R.id.llVideosSettings);
+        llBodyLanguages = (LinearLayout) findViewById(R.id.llBodyLanguages);
+
         rbEnglish = (RadioButton) findViewById(R.id.rbEnglish);
         rbPolish = (RadioButton) findViewById(R.id.rbPolish);
         rbAdvanced = (RadioButton) findViewById(R.id.rbAdvanced);
@@ -120,8 +125,30 @@ public class PreferencesActivity extends Activity {
                 if (b) {
                     btnAudio.setChecked(false);
                     btnSubtitle.setChecked(true);
+                    //llBodyLanguages.setVisibility(View.VISIBLE);
                     checkTemporaryUserData(true);
-                }
+                } /*else {
+                    btnSubtitle.setChecked(false);
+//                    if(!btnAudio.isChecked()) //si tampoco esta seleccionado audio significa que nos fuimos hacia otro sector del menu, fuera de la seccion de lenguajes
+//                        llBodyLanguages.setVisibility(View.GONE);
+                }*/
+            }
+        });
+
+        btnSubtitle.setOnCheckedChangeListener(new CheckableTextView.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
+                if(isChecked)
+                    tvVideoLanguagesTitle.setText("Subtitle languages");
+            }
+        });
+
+        btnAudio.setOnCheckedChangeListener(new CheckableTextView.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
+                if(isChecked)
+                tvVideoLanguagesTitle.setText("Audio languages");
+
             }
         });
 
@@ -132,7 +159,27 @@ public class PreferencesActivity extends Activity {
                 if (b) {
                     btnSubtitle.setChecked(false);
                     btnAudio.setChecked(true);
+                    //llBodyLanguages.setVisibility(View.VISIBLE);
                     checkTemporaryUserData(false);
+                }/*else{
+                    btnAudio.setChecked(false);
+//                    if(!btnSubtitle.isChecked()) //si tampoco esta seleccionado subtitulado significa que nos fuimos hacia otro sector del menu, fuera de la seccion de lenguajes
+//                        llBodyLanguages.setVisibility(View.GONE);
+
+                }*/
+            }
+        });
+
+        llVideosSettings.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if(b)
+                    llBodyLanguages.setVisibility(View.VISIBLE);
+                else{
+                    llBodyLanguages.setVisibility(View.GONE);
+                    btnSubtitle.setChecked(false);
+                    btnAudio.setChecked(false);
+
                 }
             }
         });

@@ -395,15 +395,20 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     @Override
     public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
         Subtitle subtitle = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
-
+        Subtitle subtitleOneBeforeNew;
         if (selectedSubtitle != null) { //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
-            Subtitle subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2);
 
-            if (selectedSubtitle.position != subtitle.position) {
-                if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000)
-                    mVideoView.seekTo(subtitleOneBeforeNew.end - 1000);
-                else
-                    mVideoView.seekTo(subtitleOneBeforeNew.end);
+            if (selectedSubtitle.position != subtitle.position) { //a different subtitle from the original was selected
+                if(selectedSubtitle.position - 2 >= 0) { //avoid index out of range
+                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
+                    if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000)
+                        mVideoView.seekTo(subtitleOneBeforeNew.end - 1000);
+                    else
+                        mVideoView.seekTo(subtitleOneBeforeNew.end);
+                } else {
+                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(0); //nos vamos al primer subtitulo
+                    mVideoView.seekTo(subtitleOneBeforeNew.start - 1000); //inicio del primer sub
+                }
 
             }
         }

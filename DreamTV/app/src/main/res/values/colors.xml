@@ -15,8 +15,8 @@
     <color name="gray_transparent">#d4535252</color>
     <color name="gray_transparent_2">#4c2b2b2b</color>
     <color name="pg">#87060606</color>
-    <color name="black">#59000000</color>
-    <color name="gray">#5e5d5d</color>
+    <color name="black">#e3000000</color>
+    <color name="gray">#59000000</color>
     <color name="dialog_background">#f1404040</color>
     <color name="gray_light">#818181</color>
     <color name="black_light">#28020202</color>
