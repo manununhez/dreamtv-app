@@ -360,7 +360,7 @@ public class VideoDetailsFragment extends DetailsFragment {
         if (mode != null && mode.equals("Y"))
             switch (video.id) {
                 case "tNE5imiv27uA":
-                    urlParams.put("version_number", "3");
+                    urlParams.put("version_number", "4");
                     break;
                 case "DJlZ5QYcHSQB":
                     urlParams.put("version_number", "6");
