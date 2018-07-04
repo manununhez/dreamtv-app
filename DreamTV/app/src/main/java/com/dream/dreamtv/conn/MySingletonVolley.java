@@ -13,8 +13,8 @@ import com.dream.dreamtv.DreamTVApp;
 public class MySingletonVolley {
     private static MySingletonVolley mInstance;
     private RequestQueue mRequestQueue;
-    private static Context mCtx;
-    public static final String TAG = MySingletonVolley.class
+    private  Context mCtx;
+    private static final String TAG = MySingletonVolley.class
             .getSimpleName();
 
     private MySingletonVolley(Context context) {
@@ -25,12 +25,13 @@ public class MySingletonVolley {
 
     public static synchronized MySingletonVolley getInstance(Context context) {
         if (mInstance == null) {
+
             mInstance = new MySingletonVolley(context);
         }
         return mInstance;
     }
 
-    public RequestQueue getRequestQueue() {
+    private RequestQueue getRequestQueue() {
         if (mRequestQueue == null) {
             // getApplicationContext() is key, it keeps you from leaking the
             // Activity or BroadcastReceiver if someone passes one in.

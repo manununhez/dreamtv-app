@@ -1,33 +1,27 @@
 package com.dream.dreamtv.beans;
 
-import android.support.v17.leanback.widget.HeaderItem;
-
-import com.dream.dreamtv.fragment.MainFragment;
-
-import java.util.List;
-
 /**
  * Created by manuel on 7/8/17.
  */
 
 public class Task extends JsonRequestBaseBean {
     public int id;
-    public int task_id;
+    private int task_id;
     public String video_id;
     public int priority;
-    public String type;
-    public String language;
+    private String type;
+    private String language;
     public String created_at;
     public String updated_at;
-    public String primary_audio_language_code;
-    public String original_language;
-    public String video_url;
-    public String title;
-    public String description;
-    public int duration;
-    public String thumbnail;
-    public String team;
-    public String project;
+    private String primary_audio_language_code;
+    private String original_language;
+    private String video_url;
+    private String title;
+    private String description;
+    private int duration;
+    private String thumbnail;
+    private String team;
+    private String project;
 
 
     public Video getVideo(int taskState){

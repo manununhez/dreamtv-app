@@ -23,10 +23,8 @@
         android:weightSum="1">
 
         <LinearLayout
-            android:id="@+id/llSettings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
             android:layout_weight="0.5"
             android:orientation="vertical">
 
@@ -224,7 +222,6 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
-                    android:id="@+id/llModeButtons"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -330,11 +327,6 @@
                 android:orientation="horizontal"
                 android:weightSum="1">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center">
-
                     <ListView
                         android:id="@+id/lv"
                         android:layout_width="match_parent"
@@ -344,38 +336,12 @@
                         android:focusable="true"
                         android:focusableInTouchMode="true" />
 
-                </LinearLayout>
-
-                <!--<LinearLayout-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_gravity="center"-->
-                <!--android:gravity="center"-->
-                <!--android:orientation="vertical"-->
-                <!--android:paddingBottom="20dp"-->
-                <!--android:paddingEnd="20dp"-->
-                <!--android:paddingTop="20dp">-->
-
-                <!--&lt;!&ndash;<TextView&ndash;&gt;-->
-                <!--&lt;!&ndash;android:id="@+id/tvSelectLanguageTitle"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:layout_marginBottom="10dp"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:fontFamily="sans-serif-condensed"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:text="@string/title_video_languages_type_settings"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:textColor="@color/white"&ndash;&gt;-->
-                <!--&lt;!&ndash;android:textSize="18sp" />&ndash;&gt;-->
-
-                <!---->
-                <!--</LinearLayout>-->
-
             </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/llSave"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/llBodyLinear"

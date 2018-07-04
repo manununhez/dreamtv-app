@@ -7,8 +7,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.dream.dreamtv.R;
@@ -18,7 +16,7 @@ import com.dream.dreamtv.R;
  */
 public class LoadingDialog extends Dialog {
 
-    private String message;
+    private final String message;
 
     public LoadingDialog(Context context, String message) {
         super(context);
@@ -31,7 +29,7 @@ public class LoadingDialog extends Dialog {
 
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.progress_layout, null);
-        TextView text = (TextView) view.findViewById(R.id.myTextProgress);
+        TextView text = view.findViewById(R.id.myTextProgress);
         text.setText(message);
 
 

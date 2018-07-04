@@ -18,7 +18,7 @@ import com.google.gson.reflect.TypeToken;
 /**
  * Created by Manuel on 11/30/2015.
  */
-public class VolleyErrorHelper {
+class VolleyErrorHelper {
     /**
      * Returns appropriate message which is to be displayed to the user
      * against the specified error object.
@@ -85,7 +85,7 @@ public class VolleyErrorHelper {
                                 }.getType());
 
                         if (result != null)
-                            if (!result.data.equals(""))
+                            if (!result.data.isEmpty())
                                 return result.data;
 
 

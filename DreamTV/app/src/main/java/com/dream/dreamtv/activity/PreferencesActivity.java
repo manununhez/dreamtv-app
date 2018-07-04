@@ -30,14 +30,11 @@ import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.CheckableTextView;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
+import com.dream.dreamtv.utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -48,8 +45,7 @@ public class PreferencesActivity extends Activity {
     private Activity mActivity;
 
     private ListView mListView;
-        private LinearLayout llVideosSettings;
-        private LinearLayout llBodyLanguages;
+    private LinearLayout llBodyLanguages;
     private TextView tvSubtitleValue;
     private TextView tvAudioValue;
     private TextView tvTitle;
@@ -65,8 +61,6 @@ public class PreferencesActivity extends Activity {
     private CheckableTextView btnAudio;
     private String selectedSubtitleLanguageCode;
     private String selectedAudioLanguageCode;
-    private RadioGroup rgInterfaceLanguage;
-    private RadioButton rbNot;
     private RadioButton rbYes;
     private RadioButton rbEnglish;
     private RadioButton rbPolish;
@@ -87,34 +81,34 @@ public class PreferencesActivity extends Activity {
         mActivity = PreferencesActivity.this;
 
         // Get the widgets reference from XML layout
-        mListView = (ListView) findViewById(R.id.lv);
+        mListView = findViewById(R.id.lv);
 
-        llVideosSettings = (LinearLayout) findViewById(R.id.llVideosSettings);
-        llBodyLanguages = (LinearLayout) findViewById(R.id.llBodyLanguages);
+        LinearLayout llVideosSettings = findViewById(R.id.llVideosSettings);
+        llBodyLanguages = findViewById(R.id.llBodyLanguages);
 
-        rbEnglish = (RadioButton) findViewById(R.id.rbEnglish);
-        rbPolish = (RadioButton) findViewById(R.id.rbPolish);
-        rbAdvanced = (RadioButton) findViewById(R.id.rbAdvanced);
-        rbBeginner = (RadioButton) findViewById(R.id.rbBeginner);
+        rbEnglish = findViewById(R.id.rbEnglish);
+        rbPolish = findViewById(R.id.rbPolish);
+        rbAdvanced = findViewById(R.id.rbAdvanced);
+        rbBeginner = findViewById(R.id.rbBeginner);
 
 
-        rgInterfaceLanguage = (RadioGroup) findViewById(R.id.rgInterfaceLanguage);
+        RadioGroup rgInterfaceLanguage = findViewById(R.id.rgInterfaceLanguage);
 
-        tvTitle = (TextView) findViewById(R.id.tvTitle);
-        tvTestingModeTitle = (TextView) findViewById(R.id.tvTestingModeTitle);
+        tvTitle = findViewById(R.id.tvTitle);
+        tvTestingModeTitle = findViewById(R.id.tvTestingModeTitle);
 
-        tvTextLanguageTitle = (TextView) findViewById(R.id.tvTextLanguageTitle);
-        tvAudioLabel = (TextView) findViewById(R.id.tvAudioLabel);
-        tvSubtitleLabel = (TextView) findViewById(R.id.tvSubtitleLabel);
-        tvReasonDialogInterfaceTitle = (TextView) findViewById(R.id.tvReasonDialogInterfaceTitle);
-        tvVideoLanguagesTitle = (TextView) findViewById(R.id.tvVideoLanguagesTitle);
-        tvSubtitleValue = (TextView) findViewById(R.id.tvSubtitleValue);
-        tvAudioValue = (TextView) findViewById(R.id.tvAudioValue);
+        tvTextLanguageTitle = findViewById(R.id.tvTextLanguageTitle);
+        tvAudioLabel = findViewById(R.id.tvAudioLabel);
+        tvSubtitleLabel = findViewById(R.id.tvSubtitleLabel);
+        tvReasonDialogInterfaceTitle = findViewById(R.id.tvReasonDialogInterfaceTitle);
+        tvVideoLanguagesTitle = findViewById(R.id.tvVideoLanguagesTitle);
+        tvSubtitleValue = findViewById(R.id.tvSubtitleValue);
+        tvAudioValue = findViewById(R.id.tvAudioValue);
 
-        btnSubtitle = (CheckableTextView) findViewById(R.id.btnSubtitle);
-        btnAudio = (CheckableTextView) findViewById(R.id.btnAudio);
+        btnSubtitle = findViewById(R.id.btnSubtitle);
+        btnAudio = findViewById(R.id.btnAudio);
 
-        btnSave = (Button) findViewById(R.id.btnSave);
+        btnSave = findViewById(R.id.btnSave);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
@@ -139,7 +133,7 @@ public class PreferencesActivity extends Activity {
             @Override
             public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
                 if(isChecked)
-                    tvVideoLanguagesTitle.setText("Subtitle languages");
+                    tvVideoLanguagesTitle.setText(R.string.text_subtitle_languages);
             }
         });
 
@@ -147,7 +141,7 @@ public class PreferencesActivity extends Activity {
             @Override
             public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
                 if(isChecked)
-                tvVideoLanguagesTitle.setText("Audio languages");
+                tvVideoLanguagesTitle.setText(R.string.text_audio_languages);
 
             }
         });
@@ -223,14 +217,14 @@ public class PreferencesActivity extends Activity {
 //    }
 
     private void testingModeSettings() {
-        rbYes = (RadioButton) findViewById(R.id.rbYes);
-        rbNot = (RadioButton) findViewById(R.id.rbNot);
+        rbYes = findViewById(R.id.rbYes);
+        RadioButton rbNot = findViewById(R.id.rbNot);
 
         String mode = ((DreamTVApp) getApplication()).getTestingMode();
 
-        if (mode == null || mode.equals("N"))
+        if (mode == null || mode.equals(getString(R.string.text_no_option)))
             rbNot.setChecked(true);
-        else if (mode.equals("Y"))
+        else if (mode.equals(getString(R.string.text_yes_option)))
             rbYes.setChecked(true);
 
     }
@@ -243,14 +237,8 @@ public class PreferencesActivity extends Activity {
         languages.put("en", getString(R.string.language_english));
         languages.put("es", getString(R.string.language_spanish));
         languages.put("ar", getString(R.string.language_arabic));
-//        languages.put("hi", "Hindi");
-//        languages.put("ru", "Russian");
-//        languages.put("bn", "Bengali");
-//        languages.put("pt", "Portuguese");
         languages.put("fr", getString(R.string.language_french));
         languages.put("pl", getString(R.string.language_polish));
-
-//        Map<String, String> orderedMap = MapUtil.sortByValue(languages);
 
 
         keyList = new ArrayList<String>(languages.values());
@@ -337,9 +325,9 @@ public class PreferencesActivity extends Activity {
 
                 //Save testing mode
                 if (rbYes.isChecked())
-                    dreamTVApp.setTestingMode("Y");
+                    dreamTVApp.setTestingMode(getString(R.string.text_yes_option));
                 else
-                    dreamTVApp.setTestingMode("N");
+                    dreamTVApp.setTestingMode(getString(R.string.text_no_option));
 
                 Intent returnIntent = new Intent();
                 setResult(Activity.RESULT_OK, returnIntent);
@@ -416,18 +404,18 @@ public class PreferencesActivity extends Activity {
     private void checkTemporaryUserData(boolean isSubtitleButtonSelected) {
         mListView.clearChoices();
 
-        if (selectedSubtitleLanguageCode == null || selectedSubtitleLanguageCode.equals(""))
+        if (selectedSubtitleLanguageCode == null || selectedSubtitleLanguageCode.isEmpty())
             tvSubtitleValue.setText("--");
         else
             tvSubtitleValue.setText(keyList.get(keyListCode.indexOf(selectedSubtitleLanguageCode)));
 
-        if (selectedAudioLanguageCode == null || selectedAudioLanguageCode.equals(""))
+        if (selectedAudioLanguageCode == null || selectedAudioLanguageCode.isEmpty())
             tvAudioValue.setText("--");
         else
             tvAudioValue.setText(keyList.get(keyListCode.indexOf(selectedAudioLanguageCode)));
 
         String code = isSubtitleButtonSelected ? selectedSubtitleLanguageCode : selectedAudioLanguageCode;
-        if (code != null && !code.equals(""))
+        if (code != null && !code.isEmpty())
             mListView.setItemChecked(keyListCode.indexOf(code), true);
     }
 
@@ -443,7 +431,7 @@ public class PreferencesActivity extends Activity {
 
                 languagesList.languages.put(Constants.NONE_OPTIONS_CODE, getString(R.string.all_languages)); //null option in the list
 
-                Map<String, String> orderedMap = MapUtil.sortByValue(languagesList.languages);
+                Map<String, String> orderedMap = Utils.MapUtil.sortByValue(languagesList.languages);
 
                 keyList = new ArrayList<>(orderedMap.values());
                 keyListCode = new ArrayList<>(orderedMap.keySet());
@@ -469,24 +457,7 @@ public class PreferencesActivity extends Activity {
 
     }
 
-    public static class MapUtil {
-        public static <K, V extends Comparable<? super V>> Map<K, V>
-        sortByValue(Map<K, V> map) {
-            List<Map.Entry<K, V>> list =
-                    new LinkedList<Map.Entry<K, V>>(map.entrySet());
-            Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
-                public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
-                    return (o1.getValue()).compareTo(o2.getValue());
-                }
-            });
 
-            Map<K, V> result = new LinkedHashMap<K, V>();
-            for (Map.Entry<K, V> entry : list) {
-                result.put(entry.getKey(), entry.getValue());
-            }
-            return result;
-        }
-    }
 
     @Override
     public void onBackPressed() {

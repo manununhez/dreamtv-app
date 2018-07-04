@@ -2,6 +2,7 @@ package com.dream.dreamtv.adapter;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.support.annotation.NonNull;
 import android.text.Html;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -10,10 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.beans.Subtitle;
-import com.dream.dreamtv.beans.User;
 import com.dream.dreamtv.utils.Constants;
 
 import java.util.List;
@@ -26,8 +25,8 @@ import java.util.concurrent.TimeUnit;
 public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
     private final Context context;
     private final List<Subtitle> values;
-    private Integer currentSubtitlePosition;
-    private String userInterfaceMode;
+    private final Integer currentSubtitlePosition;
+    private final String userInterfaceMode;
 
     public MySubtitleAdapter(Context context, List<Subtitle> values, int currentSubtitlePosition, String userInterfaceMode) {
         super(context, -1, values);
@@ -37,13 +36,14 @@ public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
         this.userInterfaceMode = userInterfaceMode;
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.subtitle_layout, parent, false);
-        TextView tvText = (TextView) rowView.findViewById(R.id.tvText);
-        TextView tvTime = (TextView) rowView.findViewById(R.id.tvTime);
+        TextView tvText = rowView.findViewById(R.id.tvText);
+        TextView tvTime = rowView.findViewById(R.id.tvTime);
 
         if (position == (currentSubtitlePosition - 1)) {
             tvText.setBackgroundColor(context.getResources().getColor(R.color.blue, null));
@@ -61,20 +61,17 @@ public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
 
         if (userInterfaceMode.equals(Constants.ADVANCED_INTERFACE_MODE)) { //Advanced MODE
             tvTime.setText(videoCurrentReadVeloc(values.get(position).text, (values.get(position).end - values.get(position).start)));
-//            tvTime.setText(videoCurrentTimeFormat(values.get(position).start) + " - "
-//                    + videoCurrentTimeFormat(values.get(position).end));
+
         }
         return rowView;
     }
 
-    private String videoCurrentTimeFormat(long millis) {
-        String hms = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
-                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
-
-        return hms;
-    }
-
     private String videoCurrentReadVeloc(String text, long millis){
-        return text.length()/ (millis/1000) + " char/seg";
+        if(millis > 1000)
+            return text.length()/ (millis/1000) + " char/seg";
+        else
+            return "0 char/seg";
+
+
     }
 }

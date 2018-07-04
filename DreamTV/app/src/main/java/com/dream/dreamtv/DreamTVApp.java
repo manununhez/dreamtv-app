@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class DreamTVApp extends Application {
 
-    public static final String TAG = "com.dream.dreamtv";
+    private static final String TAG = "com.dream.dreamtv";
     private Gson gson;
 
     @Override
@@ -51,6 +51,14 @@ public class DreamTVApp extends Application {
         SharedPreferenceUtils.save(this, getString(R.string.url_base_preferences), url);
     }
 
+//    public void setUserAccount(String account) {
+//        SharedPreferenceUtils.save(this, getString(R.string.user_account_preferences), account);
+//    }
+//
+//    public String getUserAccount() {
+//        return SharedPreferenceUtils.getValue(this, getString(R.string.user_account_preferences));
+//    }
+
     public User getUser() {
         //todo control cuando viene null
 
@@ -60,12 +68,12 @@ public class DreamTVApp extends Application {
 
     public void setUser(User user) {
         //todo controlar si es que viene token null, entonces no deberia actualizarse ese campo
-        if (user.token != null && !user.token.equals("")) {
+        if (user.token != null && !user.token.isEmpty()) {
             DreamTVApp.Logger.d("(SetUser) Actualizacion de Token");
             SharedPreferenceUtils.save(this, this.getString(R.string.dreamTVApp_token), user.token);
         }
 
-//        if(user.interface_mode == null || user.interface_mode.equals(""))
+//        if(user.interface_mode == null || user.interface_mode.isEmpty())
 //            user.interface_mode = Constants.BEGINNER_INTERFACE_MODE; //default mode
 
         String userString = gson.toJson(user);

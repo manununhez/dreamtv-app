@@ -59,8 +59,8 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
     private boolean showContinueDialogOnlyOnce = true;
     private int isPlayPauseAction = PAUSE;
-    private static int PLAY = 0;
-    private static int PAUSE = 1;
+    private static final int PLAY = 0;
+    private static final int PAUSE = 1;
     private final static int POSITION_OFFSET = 30000;//30 secs
 
     /**
@@ -70,11 +70,11 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playback_videos);
-        tvSubtitle = (TextView) findViewById(R.id.tvSubtitle);
-        tvTime = (TextView) findViewById(R.id.tvTime);
-        rlVideoPlayerInfo = (RelativeLayout) findViewById(R.id.rlVideoPlayerInfo);
+        tvSubtitle = findViewById(R.id.tvSubtitle);
+        tvTime = findViewById(R.id.tvTime);
+        rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
 
-        mSelectedVideo = (Video) getIntent().getParcelableExtra(Constants.VIDEO);
+        mSelectedVideo = getIntent().getParcelableExtra(Constants.VIDEO);
 
         subtitleHandlerSyncConfig();
         loadViews();
@@ -83,7 +83,7 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
 
 
     private void loadViews() {
-        mVideoView = (VideoView) findViewById(R.id.videoView);
+        mVideoView = findViewById(R.id.videoView);
         mVideoView.setFocusable(false);
         mVideoView.setFocusableInTouchMode(false);
 
@@ -123,6 +123,21 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
                         }
 
                         return false;
+                    }
+                });
+
+                mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mediaPlayer) {
+                        Utils.getAlertDialog(PlaybackVideoActivity.this, getString(R.string.alert_title_video_terminated),
+                                getString(R.string.alert_msg_video_terminated), getString(R.string.btn_ok),
+                            new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialog) {
+                                    finish();
+                                }
+                            }).show();
+//                        Toast.makeText(PlaybackVideoActivity.this, "VIDEO COMPLETED!", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -224,17 +239,16 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_LEFT");
-                // Do something...
+                DreamTVApp.Logger.d("KEYCODE_DPAD_LEFT");
+
                 mVideoView.seekTo(mVideoView.getCurrentPosition() - POSITION_OFFSET);
                 Toast.makeText(this, "- " + (POSITION_OFFSET / 1000) + " secs", Toast.LENGTH_SHORT).show();
 //                Toast.makeText(this, "Left", Toast.LENGTH_SHORT).show();
                 return true;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_RIGHT");
-                // Do something...
-                mVideoView.seekTo(mVideoView.getCurrentPosition() + POSITION_OFFSET);
+                DreamTVApp.Logger.d("KEYCODE_DPAD_RIGHT");
 
+                mVideoView.seekTo(mVideoView.getCurrentPosition() + POSITION_OFFSET);
                 Toast.makeText(this, "+ " + (POSITION_OFFSET / 1000) + " secs", Toast.LENGTH_SHORT).show();
 
                 return true;
@@ -320,19 +334,15 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     private void pauseVideo() {
         isPlayPauseAction = PAUSE;
 
+        String currentTime = mSelectedVideo.getTimeFormat(mVideoView.getCurrentPosition());
+        String videoDuration = mSelectedVideo.getTimeFormat(mSelectedVideo.getVideoDurationInMs());
 
-        tvTime.setText(videoCurrentTimeFormat(mVideoView.getCurrentPosition()) + "/" + videoCurrentTimeFormat(mSelectedVideo.duration * 1000));
+        tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
         rlVideoPlayerInfo.setVisibility(View.VISIBLE);
         mVideoView.pause();
         stopSyncSubtitle();
     }
 
-    private String videoCurrentTimeFormat(long millis) {
-        String hms = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
-                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
-
-        return hms;
-    }
 
     private void controlReasonDialogPopUp(long subtitlePosition) {
         Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);

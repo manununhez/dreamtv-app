@@ -48,8 +48,6 @@ import com.dream.dreamtv.fragment.ReasonsDialogFragment;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.Utils;
 
-import java.util.concurrent.TimeUnit;
-
 import fr.bmartel.youtubetv.YoutubeTvView;
 import fr.bmartel.youtubetv.listener.IPlayerListener;
 import fr.bmartel.youtubetv.model.VideoInfo;
@@ -61,10 +59,12 @@ import fr.bmartel.youtubetv.model.VideoState;
  * @author Bertrand Martel
  */
 public class PlaybackVideoYoutubeActivity extends Activity implements
-        ReasonsDialogFragment.OnDialogClosedListener {
+        ReasonsDialogFragment.OnDialogClosedListener, IPlayerListener {
 
+    private final static int POSITION_OFFSET = 30;//30 secs
+    private static final int PLAY = 0;
+    private static final int PAUSE = 1;
     private RelativeLayout rlVideoPlayerInfo;
-
     private YoutubeTvView mYoutubeView;
     private TextView tvSubtitle;
     private TextView tvTime;
@@ -77,9 +77,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     private UserTask selectedUserTask;
     private boolean showContinueDialogOnlyOnce = true;
     private int isPlayPauseAction = PAUSE;
-    private final static int POSITION_OFFSET = 30;//30 secs
-    private static int PLAY = 0;
-    private static int PAUSE = 1;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,55 +84,58 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         setContentView(R.layout.activity_playback_videos_youtube);
 
         chronometer = new Chronometer(this); // initiate a chronometer
-        tvTime = (TextView) findViewById(R.id.tvTime);
-        tvSubtitle = (TextView) findViewById(R.id.tvSubtitle); // initiate a chronometer
-        rlVideoPlayerInfo = (RelativeLayout) findViewById(R.id.rlVideoPlayerInfo);
+        tvTime = findViewById(R.id.tvTime);
+        tvSubtitle = findViewById(R.id.tvSubtitle); // initiate a chronometer
+        rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
 
 
         Bundle bundle = getArgumentos();
-        mYoutubeView = (YoutubeTvView) findViewById(R.id.video_1);
+        mYoutubeView = findViewById(R.id.video_1);
         mYoutubeView.updateView(bundle);
         mYoutubeView.playVideo(bundle.getString("videoId", ""));
+        mYoutubeView.addPlayerListener(this);
 
-        mYoutubeView.addPlayerListener(new IPlayerListener() {
-            @Override
-            public void onPlayerReady(final VideoInfo videoInfo) {
-            }
+    }
 
-            @Override
-            public void onPlayerStateChange(final VideoState state,
-                                            final long position,
-                                            final float speed,
-                                            final float duration,
-                                            final VideoInfo videoInfo) {
-
-                if (state.toString().equals(Constants.STATE_PLAY)) {
-                    DreamTVApp.Logger.d("State : " + Constants.STATE_PLAY);
-
-                    playVideoOnPlayerStateChange(position);
-                } else if (state.toString().equals(Constants.STATE_PAUSED)) {
-                    DreamTVApp.Logger.d("State : " + Constants.STATE_PAUSED);
-                    pauseVideo(position);
-
-                    if (selectedUserTask != null)
-                        controlReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp, selectedUserTask);
-                    else
-                        controlReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp);
-
-                }
-
-                if (position == mSelectedVideo.duration) {//at this moment we are in the end of the video
-                    DreamTVApp.Logger.d("State : STOPPED");
-                    stopPlayback();
-                    stopSyncSubtitle();
-                }
-
-            }
-        });
-
-
+    //Called when player is ready.
+    @Override
+    public void onPlayerReady(VideoInfo videoInfo) {
         subtitleHandlerSyncConfig();
         playVideoMode();
+    }
+
+    @Override
+    public void onPlayerStateChange(VideoState state, long position, float speed, float duration, VideoInfo videoInfo) {
+        if (state.toString().equals(Constants.STATE_PLAY)) {
+            DreamTVApp.Logger.d("State : " + Constants.STATE_PLAY);
+
+            playVideoOnPlayerStateChange(position);
+        } else if (state.toString().equals(Constants.STATE_PAUSED)) {
+            DreamTVApp.Logger.d("State : " + Constants.STATE_PAUSED);
+            pauseVideo(position);
+
+            if (selectedUserTask != null)
+                controlReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp, selectedUserTask);
+            else
+                controlReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp);
+
+        }
+
+
+        if (state.toString().equals(Constants.STATE_ENDED)) {//at this moment we are in the end of the video. Duration in ms
+            DreamTVApp.Logger.d("State : ENDED");
+            stopPlayback();
+            stopSyncSubtitle();
+            Utils.getAlertDialog(PlaybackVideoYoutubeActivity.this, getString(R.string.alert_title_video_terminated),
+                    getString(R.string.alert_msg_video_terminated), getString(R.string.btn_ok),
+                    new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialog) {
+                            finish();
+                        }
+                    }).show();
+//            Toast.makeText(PlaybackVideoYoutubeActivity.this, "VIDEO COMPLETED!", Toast.LENGTH_SHORT).show();
+        }
 
     }
 
@@ -144,13 +144,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         mSelectedVideo = getIntent().getParcelableExtra(Constants.VIDEO);
         Bundle args = new Bundle();
         args.putString("videoId", mSelectedVideo.getVideoYoutubeId());
-//        args.putBoolean("debug", false);
-//        args.putBoolean("closedCaptions", false);
-//        args.putBoolean("showRelatedVideos", false);
-        if (mSelectedVideo.task_state != Constants.CONTINUE_WATCHING_CATEGORY)
-            args.putBoolean("autoplay", true);
-        else
-            args.putBoolean("autoplay", false);
+        args.putBoolean("autoplay", false);
 
         return args;
     }
@@ -178,17 +172,13 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_LEFT");
-                // Do something...
+                DreamTVApp.Logger.d("KEYCODE_DPAD_LEFT");
                 mYoutubeView.moveBackward(POSITION_OFFSET);
                 Toast.makeText(this, "- " + POSITION_OFFSET + " secs", Toast.LENGTH_SHORT).show();
-//                Toast.makeText(this, "Left", Toast.LENGTH_SHORT).show();
                 return true;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                Log.d(this.getClass().getName(), "KEYCODE_DPAD_RIGHT");
-                // Do something...
+                DreamTVApp.Logger.d("KEYCODE_DPAD_RIGHT");
                 mYoutubeView.moveForward(POSITION_OFFSET);
-
                 Toast.makeText(this, "+ " + POSITION_OFFSET + " secs", Toast.LENGTH_SHORT).show();
 
                 return true;
@@ -216,7 +206,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                     } else { //Play
                         playVideoMode();
                     }
-                    Log.d(this.getClass().getName(), "KEYCODE_DPAD_CENTER - dispatchKeyEvent");
+                    DreamTVApp.Logger.d("KEYCODE_DPAD_CENTER - dispatchKeyEvent");
                     return true;
                 }
             default:
@@ -276,13 +266,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     }
 
 
-    private String videoCurrentTimeFormat(long millis) {
-        String hms = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
-                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
-
-        return hms;
-    }
-
     private void subtitleHandlerSyncConfig() {
         handler = new Handler();
         myRunnable = new Runnable() {
@@ -294,7 +277,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                         timeStoppedTemp = chronometer.getBase();
                         elapsedRealtimeTemp = SystemClock.elapsedRealtime();
 
-//                        DreamTVApp.Logger.d("CurrentTime: " + (elapsedRealtimeTemp - timeStoppedTemp));
                         selectedUserTask = mSelectedVideo.getUserTask(elapsedRealtimeTemp - timeStoppedTemp);
                         if (selectedUserTask != null)  //pause the video and show the popup
                             mYoutubeView.pause();
@@ -319,12 +301,14 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
     private void playVideoOnPlayerStateChange(long position) {
         rlVideoPlayerInfo.setVisibility(View.GONE);
-//        DreamTVApp.Logger.d("Position: " + (SystemClock.elapsedRealtime() - position));
         startSyncSubtitle(SystemClock.elapsedRealtime() - position);
     }
 
     private void pauseVideo(long position) {
-        tvTime.setText(videoCurrentTimeFormat(position) + "/" + videoCurrentTimeFormat(mSelectedVideo.duration * 1000));
+        String currentTime = mSelectedVideo.getTimeFormat(position);
+        String videoDuration = mSelectedVideo.getTimeFormat(mSelectedVideo.getVideoDurationInMs());
+
+        tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
 
         rlVideoPlayerInfo.setVisibility(View.VISIBLE);
         stopSyncSubtitle();
@@ -402,7 +386,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         if (selectedSubtitle != null) //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
         {
             if (selectedSubtitle.position != subtitleOld.position) { //a different subtitle from the original was selected
-                if(selectedSubtitle.position - 2 >= 0) { //avoid index out of range
+                if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
                     subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
                     if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000) //1000ms de diff
                         mYoutubeView.seekTo((subtitleOneBeforeNew.end - 1000) / 1000); //damos mas tiempo, para leer subtitulos anterioires
@@ -421,5 +405,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
 
     }
+
 
 }

@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 
 /**
  * Created by manuel on 9/5/17.
@@ -18,16 +16,14 @@ public class PermissionUtil {
     * Check if version is marshmallow and above.
     * Used in deciding to ask runtime permission
     * */
-    public static boolean shouldAskPermission() {
+    private static boolean shouldAskPermission() {
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M);
     }
 
     public static boolean shouldAskPermission(Context context, String permission) {
         if (shouldAskPermission()) {
             int permissionResult = ActivityCompat.checkSelfPermission(context, permission);
-            if (permissionResult != PackageManager.PERMISSION_GRANTED) {
-                return true;
-            }
+            return permissionResult != PackageManager.PERMISSION_GRANTED;
         }
         return false;
     }
@@ -77,7 +73,7 @@ public class PermissionUtil {
         * 4.  Above M, if the permission is disabled by device policy or the user checked "Never ask again"
         *     check box on previous request permission, onPermissionDisabled() would be called.
         * */
-    public interface PermissionAskListener {
+    interface PermissionAskListener {
         /*
                 * Callback to ask permission
                 * */

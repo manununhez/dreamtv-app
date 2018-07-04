@@ -77,8 +77,6 @@ public class VideoDetailsFragment extends DetailsFragment {
     private DisplayMetrics mMetrics;
     private DetailsOverviewRow rowPresenter;
 
-    private static String LAST_VERSION = "last";
-
     private static final int ACTION_PLAY_VIDEO = 1;
     private static final int ACTION_ADD_MY_LIST = 3;
     private static final int ACTION_REMOVE_MY_LIST = 4;
@@ -90,7 +88,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
         prepareBackgroundManager();
 
-        mSelectedVideo = (Video) getActivity().getIntent()
+        mSelectedVideo = getActivity().getIntent()
                 .getParcelableExtra(Constants.VIDEO);
         if (mSelectedVideo != null) {
             setupAdapter();
@@ -116,7 +114,7 @@ public class VideoDetailsFragment extends DetailsFragment {
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
     }
 
-    protected void updateBackground(String uri) {
+    private void updateBackground(String uri) {
         Glide.with(getActivity())
                 .load(uri)
                 .centerCrop()
@@ -351,13 +349,14 @@ public class VideoDetailsFragment extends DetailsFragment {
 
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put("video_id", video.id);
+        String LAST_VERSION = "last";
         urlParams.put("version", LAST_VERSION);
         urlParams.put("language_code", (user.sub_language != null &&
                 !user.sub_language.equals(Constants.NONE_OPTIONS_CODE)) ?
                 user.sub_language : video.subtitle_language);
 
         //Testing mode true
-        if (mode != null && mode.equals("Y"))
+        if (mode != null && mode.equals(getString(R.string.text_yes_option)))
             switch (video.id) {
                 case "tNE5imiv27uA":
                     urlParams.put("version_number", "4");
@@ -373,6 +372,9 @@ public class VideoDetailsFragment extends DetailsFragment {
                     break;
                 case "8ULN8kSqfMkk":
                     urlParams.put("version_number", "8");
+                    break;
+                case "MNMcyyZBTLUc":
+                    urlParams.put("version_number", "14");
                     break;
             }
 

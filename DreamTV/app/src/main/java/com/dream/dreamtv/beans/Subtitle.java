@@ -8,12 +8,12 @@ import android.os.Parcelable;
  */
 
 public class Subtitle implements Parcelable {
-    public int start;
-    public String text;
-    public int end;
-    public int position;
+    public final int start;
+    public final String text;
+    public final int end;
+    public final int position;
 
-    protected Subtitle(Parcel in) {
+    private Subtitle(Parcel in) {
         start = in.readInt();
         text = in.readString();
         end = in.readInt();

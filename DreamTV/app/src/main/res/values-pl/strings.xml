@@ -6,21 +6,19 @@
     <string name="video_error_media_load_timeout">Ładowanie multimediów zostało przekroczone</string>
     <string name="video_error_server_inaccessible">Serwer mediów nie był dostępny</string>
     <string name="video_error_unknown_error">Nie udało się wczytać filmu</string>
-    <string name="error_fragment_message">Wystąpił błąd</string>
     <string name="error_subtitle_not_found">Niestety, nie można znaleźć napisów dla tego filmu</string>
-    <string name="dismiss_error">Oddalić</string>
 
     <!--ERROR NETWORK MESSAGES-->
     <string name="timeout_server_error">Coś nie wyszło, spróbuj ponownie</string>
     <string name="no_network_error">Nie ma połączenia z Internetem</string>
     <string name="defaultErrorMessage">Coś się nie powiodło</string>
     <string name="generic_server_down">Nie ma połączenia z Internetem</string>
-    <string name="implement_search">Przeszukaj aplikację</string>
 
     <!--SHAREDPREFERENCES-->
     <string name="dreamTVApp_token">tedapp_token</string>
     <string name="user_preferences">user_preferences</string>
     <string name="url_base_preferences">url_base_preferences</string>
+    <!--<string name="user_account_preferences">user_account_preferences</string>-->
     <string name="reasons_preferences">reasons_preferences</string>
     <string name="testing_mode_preferences">testing_mode_preferences</string>
     <string name="languages_preferences">languages_preferences</string>
@@ -29,13 +27,11 @@
     <!--titles-->
     <string name="title_audio">Dźwięk: </string>
     <string name="title_subtitle">Napisy: </string>
-    <string name="title_user_statistics">Statystyki</string>
     <string name="title_video_settings">Ustawienia filmu</string>
     <string name="title_text_language_settings">Język aplikacji</string>
     <string name="title_reason_dialog_interface_settings">Interfejs</string>
     <string name="title_testing_mode_settings">Tryb testowy</string>
     <string name="title_video_languages_settings">Języki wideo</string>
-    <string name="title_video_languages_type_settings">Wybierz języki:</string>
     <string name="title_reasons_dialog">Co tu jest nie tak?</string>
     <string name="title_reasons_dialog_2">Ktoś znalazł tu błąd. Co myślisz?</string>
     <string name="title_reasons_dialog_3">Wy wybraliście to:</string>
@@ -55,6 +51,7 @@
     <string name="rb_option_text_advanced">Zaawansowany</string>
     <string name="rb_option_text_beginner">Prosty</string>
     <string name="hint_voice_google_input">Nagraj wiadomość</string>
+    <string name="title_current_time_video">%1$s / %2$s</string>
 
     <!--buttons-->
     <string name="btn_subtitle">Napisy</string>
@@ -75,18 +72,17 @@
     <string name="title_continue_from_saved_point">Jesteś w %1$s min. Film jest %2$s min. Czy chcesz:</string>
 
     <!--loadingDialog-->
-    <string name="title_loading_buffering">Buforowanie...</string>
-    <string name="title_loading_saving_data">Zapisywanie danych użytkownika...</string>
-    <string name="title_loading_retrieve_subtitle">Pobieranie napisów...</string>
-    <string name="title_loading_retrieve_languages">Pobieranie języków...</string>
-    <string name="title_loading_retrieve_user_tasks">Odzyskiwanie zadań użytkowników...</string>
-    <string name="title_loading_retrieve_user_data">Pobieranie danych użytkownika...</string>
-    <string name="title_loading_retrieve_tasks">Pobieranie zadań...</string>
-    <string name="title_loading_saving_reasons">Zapisywanie...</string>
-    <string name="title_loading_retrieve_options">Synchronizacja opcji...</string>
-    <string name="title_loading_verifying_list">Weryfikacja czy obecny film znajduje się na mojej liście...</string>
-    <string name="title_loading_adding_videos_list">Dodawanie filmu do mojej listy...</string>
-    <string name="title_loading_removing_videos_list">Usuwanie filmu z mojej listy...</string>
+    <string name="title_loading_buffering">Buforowanie…</string>
+    <string name="title_loading_saving_data">Zapisywanie danych użytkownika…</string>
+    <string name="title_loading_retrieve_subtitle">Pobieranie napisów…</string>
+    <string name="title_loading_retrieve_languages">Pobieranie języków…</string>
+    <string name="title_loading_retrieve_user_tasks">Odzyskiwanie zadań użytkowników…</string>
+    <string name="title_loading_retrieve_tasks">Pobieranie zadań…</string>
+    <string name="title_loading_saving_reasons">Zapisywanie…</string>
+    <string name="title_loading_retrieve_options">Synchronizacja opcji…</string>
+    <string name="title_loading_verifying_list">Weryfikacja czy obecny film znajduje się na mojej liście…</string>
+    <string name="title_loading_adding_videos_list">Dodawanie filmu do mojej listy…</string>
+    <string name="title_loading_removing_videos_list">Usuwanie filmu z mojej listy…</string>
 
     <!--Languages-->
     <string name="all_languages">Wszystkie języki</string>
@@ -96,5 +92,14 @@
     <string name="language_arabic">Arabski</string>
     <string name="language_french">Francuski</string>
     <string name="language_polish">Polski</string>
+    <string name="time_format">%02d:%02d</string>
+    <string name="text_yes_option">Y</string>
+    <string name="text_no_option">N</string>
+    <string name="text_subtitle_languages">Języki napisów</string>
+    <string name="text_audio_languages">Języki audio</string>
+    <string name="alert_title_video_terminated">Zakończony!</string>
+    <string name="alert_msg_video_terminated">Dzięki za obejrzenie filmu. Wróć do wyboru wideo.</string>
+    <string name="alert_title_permission_not_granted">Przepraszam za niedogodności!</string>
+    <string name="alert_msg_permission_not_granted">Aby zarejestrować użytkownika tej aplikacji, należy uzyskać dostęp do kont urządzenia. Podaj niezbędne uprawnienia dostępu.</string>
 
 </resources>

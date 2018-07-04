@@ -8,15 +8,15 @@ import android.os.Parcelable;
  */
 
 public class Language implements Parcelable{
-    public String code;
-    public String name;
-    public boolean published;
-    public String dir;
-    public String subtitles_uri;
-    public String resource_uri;
+    private final String code;
+    private final String name;
+    private final boolean published;
+    private final String dir;
+    private final String subtitles_uri;
+    private final String resource_uri;
 
 
-    protected Language(Parcel in) {
+    private Language(Parcel in) {
         code = in.readString();
         name = in.readString();
         published = in.readByte() != 0;

@@ -9,11 +9,13 @@ public class Constants {
     public static final String LANGUAGE_POLISH = "pl";
 
     public final static String STATE_PLAY = "PLAYING";
+    public final static String STATE_BUFFERING = "BUFFERING";
+    public final static String STATE_ENDED = "ENDED";
     public final static String STATE_PAUSED = "PAUSED";
 
-    public static String NONE_OPTIONS_CODE = "NN";
-    public static String BEGINNER_INTERFACE_MODE = "beginner";
-    public static String ADVANCED_INTERFACE_MODE = "advanced";
+    public static final String NONE_OPTIONS_CODE = "NN";
+    public static final String BEGINNER_INTERFACE_MODE = "beginner";
+    public static final String ADVANCED_INTERFACE_MODE = "advanced";
 
     public static final String SHARED_ELEMENT_NAME = "hero";
     public static final String VIDEO = "Video";
@@ -37,7 +39,7 @@ public class Constants {
         PAUSE("pause"),
         FORWARD("forward"),
         REWIND("rewind");
-        public String value;
+        final String value;
 
         Actions(String value) {
             this.value = value;

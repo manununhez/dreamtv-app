@@ -11,19 +11,19 @@ import java.util.List;
 
 public class SubtitleJson extends JsonRequestBaseBean implements Parcelable {
     public int version_number;
-    public String version;
-    public String sub_format;
+    private String version;
+    private String sub_format;
     public List<Subtitle> subtitles;
 
     //request
-    public String video_id;
-    public String language_code;
+    private String video_id;
+    private String language_code;
 
     public SubtitleJson() {
     }
 
 
-    protected SubtitleJson(Parcel in) {
+    SubtitleJson(Parcel in) {
         version_number = in.readInt();
         version = in.readString();
         sub_format = in.readString();

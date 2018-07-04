@@ -3,8 +3,6 @@ package com.dream.dreamtv.beans;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.List;
-
 /**
  * Created by manuel on 7/20/17.
  */
@@ -20,7 +18,7 @@ public class UserTask extends JsonRequestBaseBean implements Parcelable {
     public UserTask() {
     }
 
-    protected UserTask(Parcel in) {
+    private UserTask(Parcel in) {
         task_id = in.readInt();
         subtitle_position = in.readInt();
         subtitle_version = in.readString();

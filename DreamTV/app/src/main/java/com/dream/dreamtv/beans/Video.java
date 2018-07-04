@@ -9,6 +9,7 @@ import com.dream.dreamtv.DreamTVApp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by manuel on 6/12/17.
@@ -23,16 +24,16 @@ public class Video implements Parcelable {
     public String description;
     public int duration;
     public String thumbnail;
-    public String created;
+    private String created;
     public String team;
     public String project;
     public String video_url;
-    public List<String> all_urls;
-    public List<Language> languages;
-    public String activity_uri;
-    public String urls_uri;
-    public String subtitle_languages_uri;
-    public String resource_uri;
+    private List<String> all_urls;
+    private List<Language> languages;
+    private String activity_uri;
+    private String urls_uri;
+    private String subtitle_languages_uri;
+    private String resource_uri;
 
     //Para almacenar datos de la tarea
     public String subtitle_language;
@@ -47,7 +48,7 @@ public class Video implements Parcelable {
     }
 
 
-    protected Video(Parcel in) {
+    private Video(Parcel in) {
         id = in.readString();
         video_type = in.readString();
         primary_audio_language_code = in.readString();
@@ -159,6 +160,17 @@ public class Video implements Parcelable {
 
         }
         return null;
+    }
+
+    public String getTimeFormat(long millis) {
+        String hms = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
+
+        return hms;
+    }
+
+    public long getVideoDurationInMs(){
+        return this.duration * 1000;
     }
 
 

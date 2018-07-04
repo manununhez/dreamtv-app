@@ -38,7 +38,6 @@ import com.dream.dreamtv.R;
 import com.dream.dreamtv.adapter.MySubtitleAdapter;
 import com.dream.dreamtv.beans.JsonResponseBaseBean;
 import com.dream.dreamtv.beans.Reason;
-import com.dream.dreamtv.beans.ReasonList;
 import com.dream.dreamtv.beans.Subtitle;
 import com.dream.dreamtv.beans.SubtitleJson;
 import com.dream.dreamtv.beans.User;
@@ -66,11 +65,10 @@ public class ReasonsDialogFragment extends DialogFragment {
     private LinearLayout llButtonsOptions2;
     private RadioGroup rgReasons;
     private List<Reason> reasonList;
-    private List<Integer> selectedReasons = new ArrayList<>();
+    private final List<Integer> selectedReasons = new ArrayList<>();
     private ImageButton btnRecord;
     private Button btnOk;
     private Button btnSave;
-    private Button btnCancel;
     private TextView voiceInput;
     private TextView tvTitle;
     private Dialog viewRoot;
@@ -78,7 +76,6 @@ public class ReasonsDialogFragment extends DialogFragment {
     private SubtitleJson subtitle;
     private ScrollView scrollViewAdvanced;
     private ScrollView scrollViewBeginner;
-    private ListView mListView;
     private Subtitle selectedSubtitle;
     private int subtitleOriginalPosition;
     private int currentSubtitlePosition;
@@ -155,18 +152,18 @@ public class ReasonsDialogFragment extends DialogFragment {
 //        TextView tvCurrentSubtitle = (TextView) viewRoot.findViewById(R.id.tvCurrentSubtitle);
 //        TextView tvPreviousSubtitle = (TextView) viewRoot.findViewById(R.id.tvPreviousSubtitle);
 //        TextView tvNextSubtitle = (TextView) viewRoot.findViewById(R.id.tvNextSubtitle);
-        llButtonsOptions1 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions1);
-        llButtonsOptions2 = (LinearLayout) viewRoot.findViewById(R.id.llButtonsOptions2);
-        tvTitle = (TextView) viewRoot.findViewById(R.id.tvTitle);
-        btnCancel = (Button) viewRoot.findViewById(R.id.btnCancel);
-        btnSave = (Button) viewRoot.findViewById(R.id.btnSave);
-        btnOk = (Button) viewRoot.findViewById(R.id.btnOk);
+        llButtonsOptions1 = viewRoot.findViewById(R.id.llButtonsOptions1);
+        llButtonsOptions2 = viewRoot.findViewById(R.id.llButtonsOptions2);
+        tvTitle = viewRoot.findViewById(R.id.tvTitle);
+        Button btnCancel = viewRoot.findViewById(R.id.btnCancel);
+        btnSave = viewRoot.findViewById(R.id.btnSave);
+        btnOk = viewRoot.findViewById(R.id.btnOk);
 
-        scrollViewAdvanced = (ScrollView) viewRoot.findViewById(R.id.scrollViewAdvanced);
-        scrollViewBeginner = (ScrollView) viewRoot.findViewById(R.id.scrollViewBeginner);
+        scrollViewAdvanced = viewRoot.findViewById(R.id.scrollViewAdvanced);
+        scrollViewBeginner = viewRoot.findViewById(R.id.scrollViewBeginner);
 
-        llReasons = (LinearLayout) viewRoot.findViewById(R.id.llReasons);
-        rgReasons = (RadioGroup) viewRoot.findViewById(R.id.rgReasons);
+        llReasons = viewRoot.findViewById(R.id.llReasons);
+        rgReasons = viewRoot.findViewById(R.id.rgReasons);
 
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -218,7 +215,7 @@ public class ReasonsDialogFragment extends DialogFragment {
 
     private void settingUpSubtitleNavigation(final int subtPosition) {
 
-        mListView = (ListView) viewRoot.findViewById(R.id.lv);
+        ListView mListView = viewRoot.findViewById(R.id.lv);
 
         // Initialize a new ArrayAdapter
 //        ArrayAdapter adapter = new ArrayAdapter<>(
@@ -444,9 +441,9 @@ public class ReasonsDialogFragment extends DialogFragment {
     }
 
     private void audioRecordSettings() {
-        llComments = (LinearLayout) viewRoot.findViewById(R.id.llComments);
-        btnRecord = (ImageButton) viewRoot.findViewById(R.id.btnRecord);
-        voiceInput = (TextView) viewRoot.findViewById(R.id.voiceInput);
+        llComments = viewRoot.findViewById(R.id.llComments);
+        btnRecord = viewRoot.findViewById(R.id.btnRecord);
+        voiceInput = viewRoot.findViewById(R.id.voiceInput);
 
         btnRecord.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -459,7 +456,7 @@ public class ReasonsDialogFragment extends DialogFragment {
 //            @Override
 //            public void onFocusChange(View view, boolean b) {
 //                if (b) {
-////                    if (voiceInput.getText().equals("")) {
+////                    if (voiceInput.getText().isEmpty()) {
 //                    voiceInput.setHint("Click here to send comments");
 ////                    }
 //                } else {
@@ -571,8 +568,8 @@ public class ReasonsDialogFragment extends DialogFragment {
 
             LayoutInflater inflater = LayoutInflater.from(getActivity());
             View inflatedLayout = inflater.inflate(R.layout.reasons_button_layout, null);
-            ToggleButton toggleButton = (ToggleButton) inflatedLayout.findViewById(R.id.toogleButton);
-            final CheckBox chkBox = (CheckBox) inflatedLayout.findViewById(R.id.chkBox);
+            ToggleButton toggleButton = inflatedLayout.findViewById(R.id.toogleButton);
+            final CheckBox chkBox = inflatedLayout.findViewById(R.id.chkBox);
 //            containerDestacado.addView(inflatedLayout);
 
 //            final ToggleButton toggleButton = new ToggleButton(getActivity());

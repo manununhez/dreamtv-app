@@ -15,19 +15,17 @@ import com.dream.dreamtv.utils.JsonUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.google.gson.reflect.TypeToken;
 
-import org.greenrobot.eventbus.EventBus;
-
 
 /**
  * Created by gbogarin on 29/11/2015.
  */
 public abstract class ResponseListener implements Listener<String>, ErrorListener, RequestQueue.RequestFinishedListener {
-    private Context context;
-    protected LoadingDialog loadingDialog;
-    protected View customLoading;
-    protected boolean showErrorMessage = false;
+    private final Context context;
+    private LoadingDialog loadingDialog;
+    private View customLoading;
+    private boolean showErrorMessage = false;
 
-    public ResponseListener(Context context) {
+    private ResponseListener(Context context) {
         this.context = context.getApplicationContext();
     }
 
@@ -38,7 +36,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
             customLoading.setVisibility(View.VISIBLE);
     }
 
-    public ResponseListener(Context context, boolean displayLoading, String loadingMessage) {
+    private ResponseListener(Context context, boolean displayLoading, String loadingMessage) {
         this(context);
         if (displayLoading) {
             loadingDialog = new LoadingDialog(context, loadingMessage);
@@ -65,7 +63,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
 
         String errorMessage = VolleyErrorHelper.getMessage(error, context);
         DreamTVApp.Logger.e(errorMessage);
-        if (errorMessage != null && !errorMessage.equals("")) {
+        if (errorMessage != null && !errorMessage.isEmpty()) {
             Toast.makeText(context.getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
         }
 
@@ -88,7 +86,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
         };
         final JsonResponseBaseBean jsonResponse =
                 JsonUtils.getJsonResponse(response, typeToken, false);
-//
+
         if (jsonResponse.success != null) {
             if (jsonResponse.success) {
                 processResponse(response);
@@ -109,7 +107,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
         }
     }
 
-    public abstract void processResponse(String response);
+    protected abstract void processResponse(String response);
 
     public void processError(VolleyError error) {
     }

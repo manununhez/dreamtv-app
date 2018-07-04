@@ -6,7 +6,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.widget.Checkable;
-import android.widget.TextView;
 
 public class CheckableTextView extends android.support.v7.widget.AppCompatTextView implements Checkable {
 
@@ -33,8 +32,7 @@ public class CheckableTextView extends android.support.v7.widget.AppCompatTextVi
         setClickable(true);
     }
 
-    /**********************/
-    /**   Handle clicks  **/
+    /*   Handle clicks  **/
     /**********************/
 
     @Override
@@ -44,8 +42,8 @@ public class CheckableTextView extends android.support.v7.widget.AppCompatTextVi
     }
 
 
-    /**************************/
-    /**      Checkable       **/
+    /*************************/
+    /*      Checkable       **/
     /**************************/
 
     public void toggle() {
@@ -90,7 +88,7 @@ public class CheckableTextView extends android.support.v7.widget.AppCompatTextVi
      * Interface definition for a callback to be invoked when the checked state
      * of a compound button changed.
      */
-    public static interface OnCheckedChangeListener {
+    public interface OnCheckedChangeListener {
         /**
          * Called when the checked state of a compound button has changed.
          *
@@ -100,8 +98,8 @@ public class CheckableTextView extends android.support.v7.widget.AppCompatTextVi
         void onCheckedChanged(CheckableTextView view, boolean isChecked);
     }
 
-    /**************************/
-    /**   Drawable States    **/
+    /*************************/
+    /*   Drawable States    **/
     /**************************/
 
     @Override
@@ -125,8 +123,8 @@ public class CheckableTextView extends android.support.v7.widget.AppCompatTextVi
         }
     }
 
-    /**************************/
-    /**   State persistency  **/
+    /*************************/
+    /*   State persistency  **/
     /**************************/
 
     static class SavedState extends BaseSavedState {

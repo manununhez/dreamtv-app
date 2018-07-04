@@ -1,6 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rlProgressBar"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <ProgressBar
@@ -16,7 +15,6 @@
         android:layout_centerHorizontal="true"
         android:background="@android:color/transparent"
         android:gravity="center_horizontal"
-        android:text="asdasdsasd"
         android:layout_marginTop="60dp"
         android:layout_below="@+id/myProgress"
         android:textColor="@color/white"

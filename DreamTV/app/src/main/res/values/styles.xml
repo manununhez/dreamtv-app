@@ -1,31 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="@style/Theme.Leanback" />
-
-
-    <style name="Theme.Example.LeanbackDialog" parent="Theme.Leanback.GuidedStep">
-        <item name="guidedActionsBackground">@color/app_guidedstep_dialog_actions_background</item>
-    </style>
-
-    <style name="Theme.Example.LeanbackDetails" parent="Theme.Leanback.Details">
-        <item name="android:colorPrimary">@color/detail_view_actionbar_background</item>
-    </style>
 
     <!-- A default card style. Used in cards example. -->
-    <style name="DefaultCardImageStyle" parent="Widget.Leanback.ImageCardView.ImageStyle">
-        <item name="android:layout_width">@dimen/default_image_card_width</item>
-        <item name="android:layout_height">@dimen/default_image_card_height</item>
-    </style>
-
-    <style name="DefaultCardStyle" parent="Widget.Leanback.ImageCardViewStyle">
-        <item name="cardBackground">@null</item>
-    </style>
-
-    <style name="DefaultCardTheme" parent="Theme.Leanback">
-        <item name="imageCardViewStyle">@style/DefaultCardStyle</item>
-        <item name="imageCardViewImageStyle">@style/DefaultCardImageStyle</item>
-    </style>
 
     <!--DeliveryMode buttons-->
     <style name="FocusableGreenButton">
@@ -56,10 +33,6 @@
         <item name="colorControlNormal">@color/white</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
     <!--<style name="DeliveryModeButton.Left">-->
     <!--<item name="android:background">@drawable/selector_1</item>-->
     <!--</style>-->

@@ -1,6 +1,5 @@
 package com.dream.dreamtv.beans;
 
-import java.util.List;
 import java.util.Map;
 
 /**

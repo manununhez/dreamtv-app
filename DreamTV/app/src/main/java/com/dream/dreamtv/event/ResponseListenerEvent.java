@@ -3,10 +3,9 @@ package com.dream.dreamtv.event;
 /**
  * Created by manuel on 9/17/16.
  */
-public class ResponseListenerEvent {
-    public final String message;
+class ResponseListenerEvent {
 
     public ResponseListenerEvent(String  message) {
-        this.message =  message;
+        String message1 = message;
     }
 }
