@@ -11,7 +11,7 @@ import android.support.v4.app.ActivityCompat;
  * Created by manuel on 9/5/17.
  */
 
-public class PermissionUtil {
+class PermissionUtil {
     /*
     * Check if version is marshmallow and above.
     * Used in deciding to ask runtime permission
@@ -20,7 +20,7 @@ public class PermissionUtil {
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M);
     }
 
-    public static boolean shouldAskPermission(Context context, String permission) {
+    private static boolean shouldAskPermission(Context context, String permission) {
         if (shouldAskPermission()) {
             int permissionResult = ActivityCompat.checkSelfPermission(context, permission);
             return permissionResult != PackageManager.PERMISSION_GRANTED;

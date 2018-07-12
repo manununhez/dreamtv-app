@@ -22,7 +22,6 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -39,8 +38,6 @@ import com.dream.dreamtv.fragment.ReasonsDialogFragment;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.dream.dreamtv.utils.Utils;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment

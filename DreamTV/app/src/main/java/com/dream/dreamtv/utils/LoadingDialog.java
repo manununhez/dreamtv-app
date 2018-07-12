@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import com.dream.dreamtv.R;
 
+import java.util.Objects;
+
 /**
  * Created by gbogarin on 30/11/2015.
  */
@@ -34,7 +36,7 @@ public class LoadingDialog extends Dialog {
 
 
 //        ProgressBar progressBar = new ProgressBar(getContext());
-        getWindow().setBackgroundDrawable(new ColorDrawable(0));
+        Objects.requireNonNull(getWindow()).setBackgroundDrawable(new ColorDrawable(0));
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(view);
         setCancelable(true);

@@ -241,8 +241,8 @@ public class PreferencesActivity extends Activity {
         languages.put("pl", getString(R.string.language_polish));
 
 
-        keyList = new ArrayList<String>(languages.values());
-        keyListCode = new ArrayList<String>(languages.keySet());
+        keyList = new ArrayList<>(languages.values());
+        keyListCode = new ArrayList<>(languages.keySet());
 
         settingListLanguage(keyList);
     }
@@ -351,7 +351,7 @@ public class PreferencesActivity extends Activity {
             }
         };
 
-        ConnectionManager.post(this, ConnectionManager.Urls.USER_UPDATE, null, jsonRequest, responseListener, this);
+        ConnectionManager.put(this, ConnectionManager.Urls.USERS, null, jsonRequest, responseListener, this);
 
     }
 

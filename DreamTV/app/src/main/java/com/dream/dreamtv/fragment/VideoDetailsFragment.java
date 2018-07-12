@@ -18,7 +18,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v17.leanback.app.BackgroundManager;
-import android.support.v17.leanback.app.DetailsFragment;
+import android.support.v17.leanback.app.DetailsSupportFragment;
 import android.support.v17.leanback.widget.Action;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.ClassPresenterSelector;
@@ -58,13 +58,14 @@ import com.google.gson.reflect.TypeToken;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 
 /*
- * LeanbackDetailsFragment extends DetailsFragment, a Wrapper fragment for leanback details screens.
+ * LeanbackDetailsFragment extends DetailsSupportFragment, a Wrapper fragment for leanback details screens.
  * It shows a detailed view of video and its meta plus related videos.
  */
-public class VideoDetailsFragment extends DetailsFragment {
+public class VideoDetailsFragment extends DetailsSupportFragment {
     private static final String TAG = "VideoDetailsFragment";
 
     private Video mSelectedVideo;
@@ -107,7 +108,7 @@ public class VideoDetailsFragment extends DetailsFragment {
     }
 
     private void prepareBackgroundManager() {
-        mBackgroundManager = BackgroundManager.getInstance(getActivity());
+        mBackgroundManager = BackgroundManager.getInstance(Objects.requireNonNull(getActivity()));
         mBackgroundManager.attach(getActivity().getWindow());
         mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
         mMetrics = new DisplayMetrics();
@@ -138,7 +139,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 //        Log.d(TAG, "doInBackground: " + mSelectedVideo.toString());
         rowPresenter = new DetailsOverviewRow(mSelectedVideo);
         rowPresenter.setImageDrawable(getResources().getDrawable(R.drawable.default_background));
-        int width = Utils.convertDpToPixel(getActivity().getApplicationContext(), Constants.DETAIL_THUMB_WIDTH);
+        int width = Utils.convertDpToPixel(Objects.requireNonNull(getActivity()).getApplicationContext(), Constants.DETAIL_THUMB_WIDTH);
         int height = Utils.convertDpToPixel(getActivity().getApplicationContext(), Constants.DETAIL_THUMB_HEIGHT);
 
         Glide.with(getActivity())
@@ -269,7 +270,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
                 }
 
-                ((VideoDetailsActivity) getActivity()).updateScreenAfterChanges = true;
+                ((VideoDetailsActivity) Objects.requireNonNull(getActivity())).updateScreenAfterChanges = true;
             }
 
             @Override
@@ -285,16 +286,18 @@ public class VideoDetailsFragment extends DetailsFragment {
             }
         };
 
-        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_VIDEOS_CREATE, null, jsonRequest, responseListener, this);
+        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_VIDEOS, null, jsonRequest, responseListener, this);
 
     }
 
     private void removeVideoFromMyList() {
-        Task task = new Task();
-        task.video_id = mSelectedVideo.id;
+//        Task task = new Task();
+//        task.video_id = mSelectedVideo.id;
 
+        Map<String, String> urlParams = new HashMap<>();
+        urlParams.put("video_id", mSelectedVideo.id);
 
-        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), task);
+//        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), task);
 
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_removing_videos_list)) {
 
@@ -311,7 +314,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
                 }
 
-                ((VideoDetailsActivity) getActivity()).updateScreenAfterChanges = true;
+                ((VideoDetailsActivity) Objects.requireNonNull(getActivity())).updateScreenAfterChanges = true;
 
 
             }
@@ -329,7 +332,7 @@ public class VideoDetailsFragment extends DetailsFragment {
             }
         };
 
-        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_VIDEOS_DELETE, null, jsonRequest, responseListener, this);
+        ConnectionManager.delete(getActivity(), ConnectionManager.Urls.USER_VIDEOS, urlParams, responseListener, this);
 
     }
 
@@ -448,6 +451,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put("task_id", String.valueOf(mSelectedVideo.task_id));
+        urlParams.put("type", Constants.TASKS_USER);
 
 //        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), task);
 
@@ -481,7 +485,7 @@ public class VideoDetailsFragment extends DetailsFragment {
             }
         };
 
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS_MY_TASKS, urlParams, responseListener, this);
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS, urlParams, responseListener, this);
 
     }
 
@@ -491,6 +495,7 @@ public class VideoDetailsFragment extends DetailsFragment {
 
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put("task_id", String.valueOf(mSelectedVideo.task_id));
+        urlParams.put("type", Constants.TASKS_OTHER_USERS);
 
 //        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), task);
 
@@ -526,7 +531,7 @@ public class VideoDetailsFragment extends DetailsFragment {
             }
         };
 
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS_OTHER_USER_TASKS, urlParams, responseListener, this);
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS, urlParams, responseListener, this);
 
     }
 

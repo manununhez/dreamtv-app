@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -370,7 +371,7 @@ public class ReasonsDialogFragment extends DialogFragment {
         //Interface mode settings
         User user = ((DreamTVApp) getActivity().getApplication()).getUser();
         if (user.interface_mode.equals(Constants.BEGINNER_INTERFACE_MODE)) { //We add the selected radio button
-            List<Integer> tempList = new ArrayList<Integer>();
+            List<Integer> tempList = new ArrayList<>();
             tempList.add(rgReasons.getCheckedRadioButtonId());
             userTask.reasonList = tempList.toString();
         } else //we add the selected checkbox ADVANCED
@@ -403,7 +404,7 @@ public class ReasonsDialogFragment extends DialogFragment {
             }
         };
 
-        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_TASKS_SAVE, null, jsonRequest, responseListener, this);
+        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_TASKS, null, jsonRequest, responseListener, this);
 
     }
 
@@ -411,7 +412,7 @@ public class ReasonsDialogFragment extends DialogFragment {
     public void onResume() {
 //        int width = getResources().getDimensionPixelSize(R.dimen.popup_width);
 //        int height = getResources().getDimensionPixelSize(R.dimen.popup_height);
-        getDialog().getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        Objects.requireNonNull(getDialog().getWindow()).setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 //        getDialog().getWindow().setLayout(width, height);
 
         getDialog().setOnKeyListener(new DialogInterface.OnKeyListener() {

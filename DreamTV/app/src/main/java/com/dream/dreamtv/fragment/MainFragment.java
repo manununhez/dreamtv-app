@@ -14,28 +14,15 @@
 
 package com.dream.dreamtv.fragment;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import android.Manifest;
-import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.v17.leanback.app.BackgroundManager;
-import android.support.v17.leanback.app.BrowseFragment;
+import android.support.v17.leanback.app.BrowseSupportFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.HeaderItem;
 import android.support.v17.leanback.widget.ImageCardView;
@@ -62,43 +49,45 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.activity.MainActivity;
-import com.dream.dreamtv.activity.VideoDetailsActivity;
-import com.dream.dreamtv.activity.SeeAllActivity;
 import com.dream.dreamtv.activity.PreferencesActivity;
+import com.dream.dreamtv.activity.SeeAllActivity;
+import com.dream.dreamtv.activity.VideoDetailsActivity;
 import com.dream.dreamtv.adapter.VideoCardPresenter;
 import com.dream.dreamtv.beans.JsonResponseBaseBean;
+import com.dream.dreamtv.beans.Task;
 import com.dream.dreamtv.beans.TaskList;
 import com.dream.dreamtv.beans.User;
-import com.dream.dreamtv.beans.Task;
 import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.conn.ConnectionManager;
 import com.dream.dreamtv.conn.ResponseListener;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
-import com.dream.dreamtv.utils.PermissionUtil;
-import com.dream.dreamtv.utils.SharedPreferenceUtils;
-import com.dream.dreamtv.utils.Utils;
 import com.google.android.gms.common.AccountPicker;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class MainFragment extends BrowseFragment {
+
+public class MainFragment extends BrowseSupportFragment {
     private static final String TAG = "MainFragment";
     private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
-
+    private static final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 1456;
+    private static final int PREFERENCES_SETTINGS_RESULT_CODE = 1256;
+    private static final int VIDEO_DETAILS_RESULT_CODE = 1257;
+    private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;
     private Timer mBackgroundTimer;
     private URI mBackgroundURI;
     private BackgroundManager mBackgroundManager;
-    private final Handler mHandler = new Handler();
-
-    private static final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 1456;
-    private static final int PREFERENCES_SETTINGS_RESULT_CODE = 1256;
-    private static final int VIDEO_DETAILS_RESULT_CODE = 1257;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -113,56 +102,6 @@ public class MainFragment extends BrowseFragment {
         userRegistration();
         setupEventListeners();
 
-//        // Here, thisActivity is the current activity
-////        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-////        if (ContextCompat.checkSelfPermission(getActivity(),
-////                Manifest.permission.GET_ACCOUNTS)
-////                != PackageManager.PERMISSION_GRANTED) {
-//
-//        if (PermissionUtil.shouldAskPermission(getActivity(), Manifest.permission.GET_ACCOUNTS)) {
-///*
-//            * If permission denied previously
-//            * */
-//            if (shouldShowRequestPermissionRationale(Manifest.permission.GET_ACCOUNTS)) {
-//                //listener.onPermissionPreviouslyDenied();
-//                //show a dialog explaining permission and then request permission
-//                //Toast.makeText(getActivity(), "Get accounts permission disabled and app will not work. Please proceed and give permission to access to accounts", Toast.LENGTH_SHORT).show();
-//                requestPermissions(new String[]{Manifest.permission.GET_ACCOUNTS},
-//                        MY_PERMISSIONS_REQUEST_GET_ACCOUNTS
-//                );
-//            } else {
-//                /*
-//                * Permission denied or first time requested
-//                * */
-//                if (SharedPreferenceUtils.isFirstTimeAskingPermission(getActivity(), Manifest.permission.GET_ACCOUNTS)) {
-//                    SharedPreferenceUtils.firstTimeAskingPermission(getActivity(), Manifest.permission.GET_ACCOUNTS, false);
-//                    //listener.onNeedPermission();
-//                    requestPermissions(new String[]{Manifest.permission.GET_ACCOUNTS},
-//                            MY_PERMISSIONS_REQUEST_GET_ACCOUNTS
-//                    );
-//                } else {
-//                    /*
-//                    * Handle the feature without permission or ask user to manually allow permission
-//                    * */
-//                    //listener.onPermissionDisabled();
-//                    Utils.getAlertDialog(getContext(), getString(R.string.alert_title_permission_not_granted),getString(R.string.alert_msg_permission_not_granted), getString(R.string.btn_ok),
-//                            new DialogInterface.OnCancelListener() {
-//                                @Override
-//                                public void onCancel(DialogInterface dialog) {
-//                                    ((MainActivity)getContext()).finish();
-//                                }
-//                            }).show();
-////                    Toast.makeText(getActivity(), "Permission Disabled.", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        } else {
-//            //listener.onPermissionGranted();
-//            userRegistration();
-//        }
-
-
-//        getVideos();
-
 
     }
 
@@ -172,11 +111,11 @@ public class MainFragment extends BrowseFragment {
         if (user == null) //first time the app is initiated. The user has to select an account
             pickUserAccount();
         else //the user has already has an account. Proceed to get the videos
-            getUserTasks(); //for the mainscreen, only the first page
+            getTasks(); //for the mainscreen, only the first page
 
     }
 
-    private void createUserAccount(String accountName, String accountType){
+    private void createUserAccount(String accountName, String accountType) {
         User user = new User();
         user.name = accountName;
         user.type = accountType;
@@ -200,7 +139,7 @@ public class MainFragment extends BrowseFragment {
                 ((DreamTVApp) getActivity().getApplication()).setUser(user);
 
 
-                getUserTasks(); //for the mainscreen, only the first page
+                getTasks(); //for the mainscreen, only the first page
             }
 
             @Override
@@ -220,38 +159,17 @@ public class MainFragment extends BrowseFragment {
             }
         };
 
-        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_CREATE, null, jsonRequest, responseListener, this);
+        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USERS, null, jsonRequest, responseListener, this);
 
     }
 
-//    private Account getAccountManager() {
-////        ArrayList<String> accountsInfo = new ArrayList<String>();
-//        AccountManager manager = AccountManager.get(getActivity());
-//        AccountManager accountManager = (AccountManager) getActivity().getSystemService(Context.ACCOUNT_SERVICE);
-//
-//        Account[] accounts = manager.getAccountsByType(null);
-//
-//
-//        for (Account account : accounts) {
-//            String name = account.name;
-//            String type = account.type;
-//
-//            if (type.equals("com.google"))
-//                return account;
-//        }
-//
-//        return accounts[0]; //we assume that account[0] is the primary users account
-//
-//    }
 
-
-    public void pickUserAccount() {
+    private void pickUserAccount() {
         /*This will list all available accounts on device without any filtering*/
         Intent intent = AccountPicker.newChooseAccountIntent(null, null,
                 null, false, null, null, null, null);
         startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
     }
-
 
 
     @Override
@@ -268,9 +186,16 @@ public class MainFragment extends BrowseFragment {
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
     }
 
-    private void getUserTasks() {
+    private void getTasks() {
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put("page", "1");
+
+        //testing mode
+        String mode = ((DreamTVApp) getActivity().getApplication()).getTestingMode();
+        if (mode == null || mode.equals(getString(R.string.text_no_option)))
+            urlParams.put("type", Constants.TASKS_ALL);
+         else if (mode.equals(getString(R.string.text_yes_option)))
+            urlParams.put("type", Constants.TASKS_TEST);
 
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_user_tasks)) {
 
@@ -303,12 +228,7 @@ public class MainFragment extends BrowseFragment {
         };
 
 
-        //testing mode
-        String mode = ((DreamTVApp) getActivity().getApplication()).getTestingMode();
-        if (mode == null || mode.equals(getString(R.string.text_no_option)))
-            ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS, urlParams, responseListener, this);
-        else if (mode.equals(getString(R.string.text_yes_option)))
-            ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS_TESTS, urlParams, responseListener, this);
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.TASKS, urlParams, responseListener, this);
 
     }
 
@@ -316,6 +236,7 @@ public class MainFragment extends BrowseFragment {
     private void getUserFinishedTasks(String pagina) {
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put("page", pagina);
+        urlParams.put("type", Constants.TASKS_FINISHED);
 
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_user_tasks)) {
 
@@ -348,7 +269,7 @@ public class MainFragment extends BrowseFragment {
             }
         };
 
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS_FINISHED, urlParams, responseListener, this);
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.TASKS, urlParams, responseListener, this);
 
     }
 
@@ -418,8 +339,7 @@ public class MainFragment extends BrowseFragment {
                 Video lastVideoSeeMore = new Video();
                 lastVideoSeeMore.title = getString(R.string.title_see_more_videos_category);
                 lastVideoSeeMore.description = "";
-                String URL_THUMBNAIL_ICON = "https://image.flaticon.com/icons/png/128/181/181532.png";
-                lastVideoSeeMore.thumbnail = URL_THUMBNAIL_ICON;
+                lastVideoSeeMore.thumbnail = "https://image.flaticon.com/icons/png/128/181/181532.png";
                 listRowAdapter.add(lastVideoSeeMore);
             }
 
@@ -446,7 +366,7 @@ public class MainFragment extends BrowseFragment {
     }
 
     private void prepareBackgroundManager() {
-        mBackgroundManager = BackgroundManager.getInstance(getActivity());
+        mBackgroundManager = BackgroundManager.getInstance(Objects.requireNonNull(getActivity()));
         mBackgroundManager.attach(getActivity().getWindow());
         mDefaultBackground = getResources().getDrawable(R.drawable.default_background);
         mMetrics = new DisplayMetrics();
@@ -508,6 +428,31 @@ public class MainFragment extends BrowseFragment {
         mBackgroundTimer.schedule(new UpdateBackgroundTask(), Constants.BACKGROUND_UPDATE_DELAY);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE || requestCode == VIDEO_DETAILS_RESULT_CODE) { //After PreferencesSettings or after add videos to userlist (in videoDetailsActivity)
+                //Clear the screen
+                setSelectedPosition(0);
+                setupVideosList();
+                //Load new video listSystem.out.println
+                getTasks();
+            } else if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
+                // Receiving a result from the AccountPicker
+                createUserAccount(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME),
+                        data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
+//                    DreamTVApp.Logger.d(data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
+//                DreamTVApp.Logger.d(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
+
+            }
+        } /*else if (resultCode == Activity.RESULT_CANCELED) {
+            Toast.makeText(getActivity(), "Pick an account", Toast.LENGTH_LONG).show();
+        }*/
+
+    }
+
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
@@ -522,7 +467,7 @@ public class MainFragment extends BrowseFragment {
                     Intent intent = new Intent(getActivity(), SeeAllActivity.class);
 
                     Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            getActivity(),
+                            Objects.requireNonNull(getActivity()),
                             ((ImageCardView) itemViewHolder.view).getMainImageView(),
                             Constants.SHARED_ELEMENT_NAME).toBundle();
                     getActivity().startActivity(intent, bundle);
@@ -533,7 +478,7 @@ public class MainFragment extends BrowseFragment {
                     intent.putExtra(Constants.VIDEO, video);
 
                     Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            getActivity(),
+                            Objects.requireNonNull(getActivity()),
                             ((ImageCardView) itemViewHolder.view).getMainImageView(),
                             Constants.SHARED_ELEMENT_NAME).toBundle();
                     startActivityForResult(intent, VIDEO_DETAILS_RESULT_CODE, bundle);
@@ -541,7 +486,7 @@ public class MainFragment extends BrowseFragment {
                 }
             } else if (item instanceof String) {
 
-                if (((String) item).contains(getActivity().getApplicationContext().getString(R.string.title_video_settings))) {
+                if (((String) item).contains(Objects.requireNonNull(getActivity()).getApplicationContext().getString(R.string.title_video_settings))) {
                     Intent intent = new Intent(getActivity(), PreferencesActivity.class);
                     startActivityForResult(intent, PREFERENCES_SETTINGS_RESULT_CODE);
                 } else if (((String) item).contains(getActivity().getApplicationContext().getString(R.string.title_contributions_category))) {
@@ -611,65 +556,5 @@ public class MainFragment extends BrowseFragment {
         @Override
         public void onUnbindViewHolder(ViewHolder viewHolder) {
         }
-    }
-
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode,
-//                                           @NonNull String permissions[], @NonNull int[] grantResults) {
-//        switch (requestCode) {
-//            case MY_PERMISSIONS_REQUEST_GET_ACCOUNTS: {
-//                // If request is cancelled, the result arrays are empty.
-//                if (grantResults.length > 0
-//                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//
-//                    // permission was granted, yay! Do the
-//                    // contacts-related task you need to do.
-//
-//                    userRegistration();
-//
-//                } else {
-//                    Utils.getAlertDialog(getContext(), getString(R.string.alert_title_permission_not_granted),getString(R.string.alert_msg_permission_not_granted), getString(R.string.btn_ok),
-//                            new DialogInterface.OnCancelListener() {
-//                                @Override
-//                                public void onCancel(DialogInterface dialog) {
-//                                    ((MainActivity)getContext()).finish();
-//                                }
-//                            }).show();
-//                    // permission denied, boo! Disable the
-//                    // functionality that depends on this permission.
-//                }
-//
-//            }
-//
-//            // other 'case' lines to check for other
-//            // permissions this app might request
-//        }
-//    }
-
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE || requestCode == VIDEO_DETAILS_RESULT_CODE) { //After PreferencesSettings or after add videos to userlist (in videoDetailsActivity)
-                //Clear the screen
-                setSelectedPosition(0);
-                setupVideosList();
-                //Load new video listSystem.out.println
-                getUserTasks();
-            } else if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
-                // Receiving a result from the AccountPicker
-                createUserAccount(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME),
-                        data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
-//                    DreamTVApp.Logger.d(data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
-//                DreamTVApp.Logger.d(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
-
-            }
-        } /*else if (resultCode == Activity.RESULT_CANCELED) {
-            Toast.makeText(getActivity(), "Pick an account", Toast.LENGTH_LONG).show();
-        }*/
-
     }
 }

@@ -16,7 +16,7 @@ package com.dream.dreamtv.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v17.leanback.app.VerticalGridFragment;
+import android.support.v17.leanback.app.VerticalGridSupportFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
 import android.support.v17.leanback.widget.FocusHighlight;
 import android.support.v17.leanback.widget.ImageCardView;
@@ -47,11 +47,12 @@ import com.google.gson.Gson;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
- * An example how to use leanback's {@link VerticalGridFragment}.
+ * An example how to use leanback's {@link VerticalGridSupportFragment}.
  */
-public class SeeAllFragment extends VerticalGridFragment {
+public class SeeAllFragment extends VerticalGridSupportFragment {
 
     private static final int COLUMNS = 4;
     private static final int ZOOM_FACTOR = FocusHighlight.ZOOM_FACTOR_MEDIUM;
@@ -89,6 +90,15 @@ public class SeeAllFragment extends VerticalGridFragment {
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put("page", String.valueOf(pagina));
 
+
+        //testing mode
+        String mode = ((DreamTVApp) getActivity().getApplication()).getTestingMode();
+        if (mode == null || mode.equals(getString(R.string.text_no_option)))
+            urlParams.put("type", Constants.TASKS_ALL);
+        else if (mode.equals(getString(R.string.text_yes_option)))
+            urlParams.put("type", Constants.TASKS_TEST);
+
+
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_user_tasks)) {
 
             @Override
@@ -123,12 +133,13 @@ public class SeeAllFragment extends VerticalGridFragment {
             }
         };
 
-        //testing mode
-        String mode = ((DreamTVApp) getActivity().getApplication()).getTestingMode();
-        if (mode == null || mode.equals(getString(R.string.text_no_option)))
-            ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS, urlParams, responseListener, this);
-        else if (mode.equals(getString(R.string.text_yes_option)))
-            ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS_TESTS, urlParams, responseListener, this);
+
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.TASKS, urlParams, responseListener, this);
+
+//        if (mode == null || mode.equals(getString(R.string.text_no_option)))
+//            ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS, urlParams, responseListener, this);
+//        else if (mode.equals(getString(R.string.text_yes_option)))
+//            ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS_TESTS, urlParams, responseListener, this);
 
 
     }
@@ -158,14 +169,14 @@ public class SeeAllFragment extends VerticalGridFragment {
                 intent.putExtra(Constants.VIDEO, video);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        getActivity(),
+                        Objects.requireNonNull(getActivity()),
                         ((ImageCardView) itemViewHolder.view).getMainImageView(),
                         Constants.SHARED_ELEMENT_NAME).toBundle();
                 getActivity().startActivity(intent, bundle);
 
             } else if (item instanceof String) {
 
-                if (((String) item).contains(getActivity().getApplicationContext().getString(R.string.title_video_settings))) {
+                if (((String) item).contains(Objects.requireNonNull(getActivity()).getApplicationContext().getString(R.string.title_video_settings))) {
                     Intent intent = new Intent(getActivity(), PreferencesActivity.class);
                     startActivity(intent);
                 } else {

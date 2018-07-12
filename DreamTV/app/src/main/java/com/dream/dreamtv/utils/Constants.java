@@ -20,6 +20,12 @@ public class Constants {
     public static final String SHARED_ELEMENT_NAME = "hero";
     public static final String VIDEO = "Video";
 
+    public static final String TASKS_ALL = "all";
+    public static final String TASKS_FINISHED = "finished";
+    public static final String TASKS_TEST = "test";
+    public static final String TASKS_USER = "user";
+    public static final String TASKS_OTHER_USERS = "others";
+
     public static final int BACKGROUND_UPDATE_DELAY = 300;
     public static final int GRID_ITEM_WIDTH = 200;
     public static final int GRID_ITEM_HEIGHT = 200;

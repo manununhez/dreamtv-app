@@ -16,7 +16,7 @@ import com.dream.dreamtv.beans.Subtitle;
 import com.dream.dreamtv.utils.Constants;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 
 /**
  * Created by manuel on 9/11/17.
@@ -27,6 +27,11 @@ public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
     private final List<Subtitle> values;
     private final Integer currentSubtitlePosition;
     private final String userInterfaceMode;
+
+    static class ViewHolder {
+        TextView tvText;
+        TextView tvTime;
+    }
 
     public MySubtitleAdapter(Context context, List<Subtitle> values, int currentSubtitlePosition, String userInterfaceMode) {
         super(context, -1, values);
@@ -39,35 +44,46 @@ public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
     @NonNull
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context
+
+        ViewHolder holder;
+        LayoutInflater mInflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rowView = inflater.inflate(R.layout.subtitle_layout, parent, false);
-        TextView tvText = rowView.findViewById(R.id.tvText);
-        TextView tvTime = rowView.findViewById(R.id.tvTime);
+
+        if (convertView == null) {
+            convertView = Objects.requireNonNull(mInflater).inflate(R.layout.subtitle_layout, null);
+            holder = new ViewHolder();
+            holder.tvText = convertView.findViewById(R.id.tvText);
+            holder.tvTime = convertView.findViewById(R.id.tvTime);
+            convertView.setTag(holder);
+        }
+        else {
+            holder = (ViewHolder) convertView.getTag();
+        }
+
 
         if (position == (currentSubtitlePosition - 1)) {
-            tvText.setBackgroundColor(context.getResources().getColor(R.color.blue, null));
-            tvText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, context.getResources().getDisplayMetrics()));
-            tvText.setTypeface(tvText.getTypeface(), Typeface.NORMAL);
+            holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.blue, null));
+            holder.tvText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, context.getResources().getDisplayMetrics()));
+            holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.NORMAL);
         } else {
 //            android:textSize="14sp"
 //            android:textStyle="italic"
-            tvText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 8, context.getResources().getDisplayMetrics()));
-            tvText.setTypeface(tvText.getTypeface(), Typeface.ITALIC);
-            tvText.setBackgroundColor(context.getResources().getColor(R.color.black_opaque, null));
+            holder.tvText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 8, context.getResources().getDisplayMetrics()));
+            holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
+            holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.black_opaque, null));
         }
 
-        tvText.setText(Html.fromHtml(values.get(position).text));
+        holder.tvText.setText(Html.fromHtml(values.get(position).text));
 
         if (userInterfaceMode.equals(Constants.ADVANCED_INTERFACE_MODE)) { //Advanced MODE
-            tvTime.setText(videoCurrentReadVeloc(values.get(position).text, (values.get(position).end - values.get(position).start)));
+            holder.tvTime.setText(videoCurrentReadVeloc(values.get(position).text, (values.get(position).end - values.get(position).start)));
 
         }
-        return rowView;
+        return convertView;
     }
 
     private String videoCurrentReadVeloc(String text, long millis){
-        if(millis > 1000)
+        if(millis > 1000) //to avoid division by zero
             return text.length()/ (millis/1000) + " char/seg";
         else
             return "0 char/seg";
