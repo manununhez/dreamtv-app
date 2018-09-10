@@ -87,7 +87,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
         final JsonResponseBaseBean jsonResponse =
                 JsonUtils.getJsonResponse(response, typeToken, false);
 
-        if (jsonResponse.success != null) {
+        if (jsonResponse!= null && jsonResponse.success != null) {
             if (jsonResponse.success) {
                 processResponse(response);
             } else {

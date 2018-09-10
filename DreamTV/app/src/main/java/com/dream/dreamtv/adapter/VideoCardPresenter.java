@@ -21,6 +21,9 @@ import android.util.Log;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.beans.Video;
 
@@ -78,10 +81,17 @@ public class VideoCardPresenter extends Presenter {
         cardView.setContentText(video.description);
         cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
         if (video.thumbnail != null) {
+
+            RequestOptions options = new RequestOptions()
+                    .centerCrop()
+                    .placeholder(mDefaultCardImage)
+                    .error(mDefaultCardImage)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .priority(Priority.HIGH);
+
             Glide.with(viewHolder.view.getContext())
                     .load(video.thumbnail)
-                    .centerCrop()
-                    .error(mDefaultCardImage)
+                    .apply(options)
                     .into(cardView.getMainImageView());
         }
     }

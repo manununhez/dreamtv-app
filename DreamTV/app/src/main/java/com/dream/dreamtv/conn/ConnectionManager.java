@@ -16,7 +16,7 @@ import java.util.Map;
 public class ConnectionManager {
 //    public static final String URL_BASE = "http://192.168.1.109:8000/api/";     // Dpto Produccion
 //    public static final String URL_BASE = "http://172.23.192.2:8000/api/";     // Facu Produccion
-    private static final String URL_BASE = "http://www.dreamproject.pjwstk.edu.pl:8000/api/";     // Facu Produccion
+    private static final String URL_BASE = "http://www.dreamproject.pjwstk.edu.pl/api/";     // Facu Produccion
 
     public static int MAX_RETRIES = 3;
     private static final int TIMEOUT_MS = 60000; //60 segundos

@@ -21,6 +21,7 @@ public class Constants {
     public static final String VIDEO = "Video";
 
     public static final String TASKS_ALL = "all";
+    public static final String TASKS_CONTINUE = "continue";
     public static final String TASKS_FINISHED = "finished";
     public static final String TASKS_TEST = "test";
     public static final String TASKS_USER = "user";

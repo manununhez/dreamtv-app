@@ -17,6 +17,8 @@ package com.dream.dreamtv.fragment;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v17.leanback.app.BackgroundManager;
 import android.support.v17.leanback.app.DetailsSupportFragment;
 import android.support.v17.leanback.widget.Action;
@@ -31,9 +33,11 @@ import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.activity.PlaybackVideoActivity;
@@ -116,14 +120,19 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void updateBackground(String uri) {
-        Glide.with(getActivity())
-                .load(uri)
+        RequestOptions options = new RequestOptions()
                 .centerCrop()
-                .error(mDefaultBackground)
-                .into(new SimpleTarget<GlideDrawable>(mMetrics.widthPixels, mMetrics.heightPixels) {
+                .placeholder(R.drawable.default_background)
+                .error(R.drawable.default_background)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .priority(Priority.HIGH);
+
+        Glide.with(Objects.requireNonNull(getActivity()))
+                .load(uri)
+                .apply(options)
+                .into(new SimpleTarget<Drawable>(mMetrics.widthPixels, mMetrics.heightPixels) {
                     @Override
-                    public void onResourceReady(GlideDrawable resource,
-                                                GlideAnimation<? super GlideDrawable> glideAnimation) {
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
                         mBackgroundManager.setDrawable(resource);
                     }
                 });
@@ -142,19 +151,23 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         int width = Utils.convertDpToPixel(Objects.requireNonNull(getActivity()).getApplicationContext(), Constants.DETAIL_THUMB_WIDTH);
         int height = Utils.convertDpToPixel(getActivity().getApplicationContext(), Constants.DETAIL_THUMB_HEIGHT);
 
+        RequestOptions options = new RequestOptions()
+                .centerCrop()
+                .placeholder(R.drawable.default_background)
+                .error(R.drawable.default_background)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .priority(Priority.HIGH);
+
         Glide.with(getActivity())
                 .load(mSelectedVideo.thumbnail)
-                .centerCrop()
-                .error(R.drawable.default_background)
-                .into(new SimpleTarget<GlideDrawable>(width, height) {
+                .apply(options)
+                .into(new SimpleTarget<Drawable>(width, height) {
                     @Override
-                    public void onResourceReady(GlideDrawable resource,
-                                                GlideAnimation<? super GlideDrawable>
-                                                        glideAnimation) {
-//                        Log.d(TAG, "details overview card image url ready: " + resource);
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
                         rowPresenter.setImageDrawable(resource);
                         mAdapter.notifyArrayItemRangeChanged(0, mAdapter.size());
                     }
+
                 });
 
         Action actionPlay = new Action(ACTION_PLAY_VIDEO, getResources().getString(
