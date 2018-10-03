@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * Created by manuel on 6/12/17.
  */
 
-public class Video implements Parcelable {
+public class Video extends JsonRequestBaseBean implements Parcelable {
     public String id;
     public String video_type;
     public String primary_audio_language_code;
@@ -43,6 +43,8 @@ public class Video implements Parcelable {
 
     //Para almacenar los subtitlos e ir propagando entre pantallas
     public SubtitleJson subtitle_json; //para ir propagando el subtitulo entre pantallas
+
+    public String video_id;
 
     public Video() {
     }

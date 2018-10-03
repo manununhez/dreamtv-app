@@ -122,7 +122,6 @@ public class ReasonsDialogFragment extends DialogFragment {
     }
 
 
-    @SuppressWarnings("deprecation")
     @Override
     public void onAttach(Activity context) {
         super.onAttach(context);

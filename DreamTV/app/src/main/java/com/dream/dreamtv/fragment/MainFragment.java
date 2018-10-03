@@ -53,6 +53,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.activity.MainActivity;
 import com.dream.dreamtv.activity.PreferencesActivity;
 import com.dream.dreamtv.activity.SeeAllActivity;
 import com.dream.dreamtv.activity.VideoDetailsActivity;
@@ -213,7 +214,7 @@ public class MainFragment extends BrowseSupportFragment {
                 if (taskList.data.size() > 0)
                     loadVideos(taskList, Constants.CHECK_NEW_TASKS_CATEGORY);
 
-                getUserFinishedTasks("1");
+                getUserToContinueTasks("1");
             }
 
             @Override
@@ -237,7 +238,7 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
 
-    private void getUserFinishedTasks(String pagina) {
+    private void getUserToContinueTasks(String pagina) {
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put("page", pagina);
         urlParams.put("type", Constants.TASKS_CONTINUE);
@@ -444,7 +445,10 @@ public class MainFragment extends BrowseSupportFragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE || requestCode == VIDEO_DETAILS_RESULT_CODE) { //After PreferencesSettings or after add videos to userlist (in videoDetailsActivity)
+            if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE) { //After PreferencesSettings or after add videos to userlist (in videoDetailsActivity)
+                ((MainActivity)Objects.requireNonNull(getActivity())).recreate();
+
+            } else if (requestCode == VIDEO_DETAILS_RESULT_CODE) { //After PreferencesSettings or after add videos to userlist (in videoDetailsActivity)
                 //Clear the screen
                 setSelectedPosition(0);
                 setupVideosList();
@@ -497,7 +501,7 @@ public class MainFragment extends BrowseSupportFragment {
                 }
             } else if (item instanceof String) {
 
-                if (((String) item).contains(Objects.requireNonNull(getActivity()).getApplicationContext().getString(R.string.title_video_settings))) {
+                if (((String) item).contains(Objects.requireNonNull(getActivity()).getString(R.string.title_video_settings))) {
                     Intent intent = new Intent(getActivity(), PreferencesActivity.class);
                     startActivityForResult(intent, PREFERENCES_SETTINGS_RESULT_CODE);
                 } else if (((String) item).contains(getActivity().getApplicationContext().getString(R.string.title_contributions_category))) {

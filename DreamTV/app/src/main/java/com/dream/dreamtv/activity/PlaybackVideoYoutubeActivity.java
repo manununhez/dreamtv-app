@@ -26,6 +26,7 @@ package com.dream.dreamtv.activity;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,6 +46,7 @@ import com.dream.dreamtv.beans.UserTask;
 import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.fragment.ReasonsDialogFragment;
 import com.dream.dreamtv.utils.Constants;
+import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.Utils;
 
 import fr.bmartel.youtubetv.YoutubeTvView;
@@ -94,6 +96,11 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         mYoutubeView.playVideo(bundle.getString("videoId", ""));
         mYoutubeView.addPlayerListener(this);
 
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 
     //Called when player is ready.

@@ -22,6 +22,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.LocaleHelper;
 
 

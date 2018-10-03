@@ -216,6 +216,13 @@ public class PreferencesActivity extends Activity {
 //        etBaseURL.setText(((DreamTVApp) getApplication()).getBaseURL());
 //    }
 
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleHelper.onAttach(base));
+    }
+
+
     private void testingModeSettings() {
         rbYes = findViewById(R.id.rbYes);
         RadioButton rbNot = findViewById(R.id.rbNot);
@@ -265,10 +272,6 @@ public class PreferencesActivity extends Activity {
                 rbAdvanced.setChecked(true);
     }
 
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(LocaleHelper.onAttach(base));
-    }
 
     private void updateViews(String languageCode) {
         Context context = LocaleHelper.setLocale(this, languageCode);

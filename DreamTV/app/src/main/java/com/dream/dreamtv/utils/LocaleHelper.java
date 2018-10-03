@@ -59,16 +59,20 @@ public class LocaleHelper {
 		editor.apply();
 	}
 
-	@TargetApi(Build.VERSION_CODES.N)
 	private static Context updateResources(Context context, String language) {
 		Locale locale = new Locale(language);
 		Locale.setDefault(locale);
 
-		Configuration configuration = context.getResources().getConfiguration();
-		configuration.setLocale(locale);
-		configuration.setLayoutDirection(locale);
-
-		return context.createConfigurationContext(configuration);
+		Resources res = context.getResources();
+		Configuration config = new Configuration(res.getConfiguration());
+		if (Build.VERSION.SDK_INT >= 17) {
+			config.setLocale(locale);
+			context = context.createConfigurationContext(config);
+		} else {
+			config.locale = locale;
+			res.updateConfiguration(config, res.getDisplayMetrics());
+		}
+		return context;
 	}
 
 	@SuppressWarnings("deprecation")

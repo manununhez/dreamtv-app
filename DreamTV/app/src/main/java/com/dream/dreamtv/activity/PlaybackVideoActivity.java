@@ -17,6 +17,7 @@ package com.dream.dreamtv.activity;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ import com.dream.dreamtv.beans.Video;
 import com.dream.dreamtv.fragment.ReasonsDialogFragment;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.LoadingDialog;
+import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.Utils;
 
 /**
@@ -78,6 +80,10 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
 
     }
 
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleHelper.onAttach(base));
+    }
 
     private void loadViews() {
         mVideoView = findViewById(R.id.videoView);
@@ -116,6 +122,11 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
                         }
                         if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
                             DreamTVApp.Logger.d("OnPreparedListener - MEDIA_INFO_BUFFERING_END");
+                            loadingDialog.dismiss();
+                        }
+
+                        if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
+                            DreamTVApp.Logger.d("OnPreparedListener - MEDIA_INFO_VIDEO_RENDERING_START");
                             loadingDialog.dismiss();
                         }
 

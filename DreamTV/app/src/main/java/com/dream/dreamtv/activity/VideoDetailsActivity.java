@@ -15,11 +15,13 @@
 package com.dream.dreamtv.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.utils.LocaleHelper;
 
 
 /*
@@ -48,5 +50,10 @@ public class VideoDetailsActivity extends FragmentActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 }

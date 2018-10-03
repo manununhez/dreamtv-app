@@ -262,11 +262,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void addVideoToMyList() {
-        Task task = new Task();
-        task.video_id = mSelectedVideo.id;
+        Video video = new Video();
+        video.primary_audio_language_code = mSelectedVideo.primary_audio_language_code;
+        video.original_language = mSelectedVideo.original_language;
+        video.video_id = mSelectedVideo.id;
 
 
-        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), task);
+        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), video);
 
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_adding_videos_list)) {
 
