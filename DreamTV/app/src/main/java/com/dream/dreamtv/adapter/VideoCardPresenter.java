@@ -77,7 +77,8 @@ public class VideoCardPresenter extends Presenter {
         ImageCardView cardView = (ImageCardView) viewHolder.view;
 
         Log.d(TAG, "onBindViewHolder");
-        cardView.setTitleText(video.title);
+        String videoTypeTitle = video.video_type != null ? ("[" + video.video_type.toLowerCase() + "] ") : "";
+        cardView.setTitleText(videoTypeTitle.concat(video.title));
         cardView.setContentText(video.description);
         cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
         if (video.thumbnail != null) {

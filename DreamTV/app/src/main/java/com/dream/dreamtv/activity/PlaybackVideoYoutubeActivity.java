@@ -62,7 +62,7 @@ import fr.bmartel.youtubetv.model.VideoState;
 public class PlaybackVideoYoutubeActivity extends Activity implements
         ReasonsDialogFragment.OnDialogClosedListener, IPlayerListener {
 
-    private final static int POSITION_OFFSET = 30;//30 secs
+    private static final int POSITION_OFFSET = 30;//30 secs
     private static final int PLAY = 0;
     private static final int PAUSE = 1;
     private RelativeLayout rlVideoPlayerInfo;
@@ -77,6 +77,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     private Long timeStoppedTemp;
     private UserTask selectedUserTask;
     private boolean showContinueDialogOnlyOnce = true;
+    private int lastSelectedUserTaskShown = -1;
     private int isPlayPauseAction = PAUSE;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -151,7 +152,11 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         Bundle args = new Bundle();
         args.putString("videoId", mSelectedVideo.getVideoYoutubeId());
         args.putBoolean("autoplay", false);
-
+        args.putBoolean("showRelatedVideos", false);
+        args.putBoolean("showVideoInfo", false);
+        args.putBoolean("videoAnnotation", false);
+        args.putBoolean("debug", false);
+        args.putBoolean("closedCaptions", false);
         return args;
     }
 
@@ -284,8 +289,12 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                         elapsedRealtimeTemp = SystemClock.elapsedRealtime();
 
                         selectedUserTask = mSelectedVideo.getUserTask(elapsedRealtimeTemp - timeStoppedTemp);
-                        if (selectedUserTask != null)  //pause the video and show the popup
-                            mYoutubeView.pause();
+
+                        if (selectedUserTask != null)
+                            if (lastSelectedUserTaskShown != selectedUserTask.subtitle_position) {  //pause the video and show the popup
+                                mYoutubeView.pause();
+                                lastSelectedUserTaskShown = selectedUserTask.subtitle_position;
+                            }
 
                         controlShowSubtitle(elapsedRealtimeTemp - timeStoppedTemp);
 

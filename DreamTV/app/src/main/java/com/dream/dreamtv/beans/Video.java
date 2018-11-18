@@ -141,9 +141,9 @@ public class Video extends JsonRequestBaseBean implements Parcelable {
                 for (UserTask userTask : this.userTaskList) {
                     if (userTask.subtitle_position == subtitle.position) {
                         //after we find the position, we delete that option from the list. This allow us to show only once the respective reason as a popup
-                        List<UserTask> arrayList = new ArrayList<>(Arrays.asList(this.userTaskList));
-                        arrayList.remove(userTask);
-                        this.userTaskList = arrayList.toArray(new UserTask[arrayList.size()]);
+//                        List<UserTask> arrayList = new ArrayList<>(Arrays.asList(this.userTaskList));
+//                        arrayList.remove(userTask);
+//                        this.userTaskList = arrayList.toArray(new UserTask[arrayList.size()]);
                         return userTask;
                     }
                 }

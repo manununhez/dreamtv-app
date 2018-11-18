@@ -68,6 +68,7 @@ import com.dream.dreamtv.conn.ResponseListener;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.google.android.gms.common.AccountPicker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -94,10 +95,16 @@ public class MainFragment extends BrowseSupportFragment {
     private URI mBackgroundURI;
     private BackgroundManager mBackgroundManager;
 
+    FirebaseAnalytics mFirebaseAnalytics;
+
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         Log.i(TAG, "onCreate");
         super.onActivityCreated(savedInstanceState);
+
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(Objects.requireNonNull(getActivity()));
 
         prepareBackgroundManager();
 
@@ -397,7 +404,7 @@ public class MainFragment extends BrowseSupportFragment {
 
             @Override
             public void onClick(View view) {
-                Toast.makeText(getActivity(), "Implement Search()", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getString(R.string.title_search), Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -504,6 +511,13 @@ public class MainFragment extends BrowseSupportFragment {
                 if (((String) item).contains(Objects.requireNonNull(getActivity()).getString(R.string.title_video_settings))) {
                     Intent intent = new Intent(getActivity(), PreferencesActivity.class);
                     startActivityForResult(intent, PREFERENCES_SETTINGS_RESULT_CODE);
+
+                    //Analytics Report Event
+                    Bundle bundle = new Bundle();
+                    bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, Objects.requireNonNull(getActivity()).getString(R.string.title_video_settings));
+                    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
+                    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+
                 } else if (((String) item).contains(getActivity().getApplicationContext().getString(R.string.title_contributions_category))) {
                     Toast.makeText(getActivity(), "Go to contributions", Toast.LENGTH_SHORT).show();
                 } else {

@@ -46,6 +46,9 @@ import com.dream.dreamtv.utils.Utils;
  */
 public class PlaybackVideoActivity extends Activity implements ReasonsDialogFragment.OnDialogClosedListener {
 
+    private static final int PLAY = 0;
+    private static final int PAUSE = 1;
+    private static final int POSITION_OFFSET = 30000;//30 secs in ms
     private VideoView mVideoView;
     private Video mSelectedVideo;
     private TextView tvSubtitle;
@@ -58,9 +61,8 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
     private boolean showContinueDialogOnlyOnce = true;
     private int isPlayPauseAction = PAUSE;
-    private static final int PLAY = 0;
-    private static final int PAUSE = 1;
-    private final static int POSITION_OFFSET = 30000;//30 secs
+    private int lastSelectedUserTaskShown = -1;
+
 
     /**
      * Called when the activity is first created.
@@ -139,12 +141,12 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
                     public void onCompletion(MediaPlayer mediaPlayer) {
                         Utils.getAlertDialog(PlaybackVideoActivity.this, getString(R.string.alert_title_video_terminated),
                                 getString(R.string.alert_msg_video_terminated), getString(R.string.btn_ok),
-                            new DialogInterface.OnCancelListener() {
-                                @Override
-                                public void onCancel(DialogInterface dialog) {
-                                    finish();
-                                }
-                            }).show();
+                                new DialogInterface.OnCancelListener() {
+                                    @Override
+                                    public void onCancel(DialogInterface dialog) {
+                                        finish();
+                                    }
+                                }).show();
 //                        Toast.makeText(PlaybackVideoActivity.this, "VIDEO COMPLETED!", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -206,9 +208,12 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
                             return;
 
                         selectedUserTask = mSelectedVideo.getUserTask(mVideoView.getCurrentPosition());
-                        if (selectedUserTask != null) { //pause the video and show the popup
-                            pauseAction();
-                        }
+
+                        if (selectedUserTask != null)
+                            if (lastSelectedUserTaskShown != selectedUserTask.subtitle_position) {  //pause the video and show the popup
+                                pauseAction();
+                                lastSelectedUserTaskShown = selectedUserTask.subtitle_position;
+                            }
 
                         controlShowSubtitle(mVideoView.getCurrentPosition());
                     }
@@ -417,7 +422,7 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         if (selectedSubtitle != null) { //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
 
             if (selectedSubtitle.position != subtitle.position) { //a different subtitle from the original was selected
-                if(selectedSubtitle.position - 2 >= 0) { //avoid index out of range
+                if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
                     subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
                     if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000)
                         mVideoView.seekTo(subtitleOneBeforeNew.end - 1000);
