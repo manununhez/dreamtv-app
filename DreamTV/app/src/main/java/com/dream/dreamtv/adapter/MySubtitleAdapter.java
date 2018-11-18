@@ -84,9 +84,9 @@ public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
 
     private String videoCurrentReadVeloc(String text, long millis){
         if(millis > 1000) //to avoid division by zero
-            return text.length()/ (millis/1000) + " char/seg";
+            return text.length()/ (millis/1000) + " chars/s";
         else
-            return "0 char/seg";
+            return "0 chars/s";
 
 
     }
