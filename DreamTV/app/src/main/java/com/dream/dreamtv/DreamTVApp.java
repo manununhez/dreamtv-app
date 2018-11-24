@@ -2,12 +2,11 @@ package com.dream.dreamtv;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.util.Log;
 
-import com.dream.dreamtv.beans.Reason;
-import com.dream.dreamtv.beans.ReasonList;
-import com.dream.dreamtv.beans.User;
+import com.dream.dreamtv.model.Reason;
+import com.dream.dreamtv.model.ReasonList;
+import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;

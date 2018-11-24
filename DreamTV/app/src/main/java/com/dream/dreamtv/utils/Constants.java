@@ -8,11 +8,6 @@ public class Constants {
     public static final String LANGUAGE_ENGLISH = "en";
     public static final String LANGUAGE_POLISH = "pl";
 
-    public final static String STATE_PLAY = "PLAYING";
-    public final static String STATE_BUFFERING = "BUFFERING";
-    public final static String STATE_ENDED = "ENDED";
-    public final static String STATE_PAUSED = "PAUSED";
-
     public static final String NONE_OPTIONS_CODE = "NN";
     public static final String BEGINNER_INTERFACE_MODE = "beginner";
     public static final String ADVANCED_INTERFACE_MODE = "advanced";

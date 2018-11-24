@@ -3,8 +3,8 @@ package com.dream.dreamtv.utils;
 import android.content.Context;
 
 import com.dream.dreamtv.DreamTVApp;
-import com.dream.dreamtv.beans.JsonRequestBaseBean;
-import com.dream.dreamtv.beans.JsonResponseBaseBean;
+import com.dream.dreamtv.model.JsonRequestBaseBean;
+import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;

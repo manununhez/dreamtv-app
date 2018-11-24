@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/cardsFragment"
-        android:name="com.dream.dreamtv.fragment.SeeAllFragment"
+        android:name="com.dream.dreamtv.ui.SeeAllFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </RelativeLayout>
