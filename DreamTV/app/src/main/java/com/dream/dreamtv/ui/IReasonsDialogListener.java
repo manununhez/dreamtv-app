@@ -1,6 +1,5 @@
 package com.dream.dreamtv.ui;
 
-import com.dream.dreamtv.model.Subtitle;
 import com.dream.dreamtv.model.UserTask;
 
 public interface IReasonsDialogListener {

@@ -10,7 +10,6 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -29,6 +28,7 @@ import com.dream.dreamtv.utils.CheckableTextView;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.dream.dreamtv.utils.LocaleHelper;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
@@ -42,7 +42,6 @@ public class PreferencesActivity extends Activity {
     private static final String ABR_ARABIC = "ar";
     private static final String ABR_FRENCH = "fr";
     private static final String ABR_POLISH = "pl";
-    private Context mContext;
     private Activity mActivity;
     private ListView mListView;
     private LinearLayout llBodyLanguages;
@@ -68,16 +67,17 @@ public class PreferencesActivity extends Activity {
     private RadioButton rbAdvanced;
     private RadioButton rbBeginner;
     private Button btnSave;
-    private EditText etBaseURL;
     private ArrayAdapter<String> lvLanguagesAdapter;
+    private FirebaseAnalytics mFirebaseAnalytics;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
 
-        // Get the application context
-        mContext = getApplicationContext();
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         // Get the activity
         mActivity = PreferencesActivity.this;
@@ -213,6 +213,8 @@ public class PreferencesActivity extends Activity {
         testingModeSettings();
         initializeLanguagesList();
         setupListView();
+
+
     }
 
 
@@ -334,9 +336,13 @@ public class PreferencesActivity extends Activity {
 
                 Intent returnIntent = new Intent();
                 setResult(Activity.RESULT_OK, returnIntent);
-                Toast.makeText(mContext, getString(R.string.title_confirmation_user_saved_data), Toast.LENGTH_SHORT).show();
+                Toast.makeText(PreferencesActivity.this, getString(R.string.title_confirmation_user_saved_data), Toast.LENGTH_SHORT).show();
+
+                firebaseAnalyticsReportEvent(user);
+
 
                 finish();
+
             }
 
             @Override
@@ -356,6 +362,23 @@ public class PreferencesActivity extends Activity {
 
         ConnectionManager.put(this, ConnectionManager.Urls.USERS, null, jsonRequest, responseListener, this);
 
+    }
+
+    private void firebaseAnalyticsReportEvent(User user) {
+        String mode = ((DreamTVApp) getApplication()).getTestingMode();
+        Bundle bundle = new Bundle();
+
+        if (mode == null || mode.equals(getString(R.string.text_no_option)))
+            bundle.putString("testing_mode", "no");
+        else if (mode.equals(getString(R.string.text_yes_option)))
+            bundle.putString("testing_mode", "yes");
+
+        //User Settings Saved - Analytics Report Event
+        bundle.putString("sub_language", user.sub_language);
+        bundle.putString("audio_language", user.audio_language);
+        bundle.putString("interface_mode", user.interface_mode);
+        bundle.putString("interface_language", user.interface_language);
+        mFirebaseAnalytics.logEvent("pressed_save_settings_btn", bundle);
     }
 
 

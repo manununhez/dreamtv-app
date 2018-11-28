@@ -421,8 +421,6 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     }
 
 
-
-
     @Override
     public  void showReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
         Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);

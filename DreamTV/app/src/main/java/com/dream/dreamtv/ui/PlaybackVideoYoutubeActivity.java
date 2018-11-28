@@ -98,11 +98,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
 
         setupVideoPlayer();
-
-
     }
-
-
 
     @Override
     protected void attachBaseContext(Context base) {

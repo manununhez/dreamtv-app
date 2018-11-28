@@ -51,6 +51,7 @@ import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.presenter.DetailsDescriptionPresenter;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -95,6 +96,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private DisplayMetrics mMetrics;
     private DetailsOverviewRow rowPresenter;
     private FullWidthDetailsOverviewSharedElementHelper mHelper;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -102,6 +104,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         super.onCreate(savedInstanceState);
 
         prepareBackgroundManager();
+
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
 
         mSelectedVideo = getActivity().getIntent()
                 .getParcelableExtra(Constants.VIDEO);
@@ -265,7 +270,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void addVideoToMyList() {
-        Video video = new Video();
+        final Video video = new Video();
         video.primary_audio_language_code = mSelectedVideo.primary_audio_language_code;
         video.original_language = mSelectedVideo.original_language;
         video.video_id = mSelectedVideo.id;
@@ -286,6 +291,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 adapter.set(ACTION_REMOVE_MY_LIST, new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_from_my_list)));
 
                 ((VideoDetailsActivity) Objects.requireNonNull(getActivity())).updateScreenAfterChanges = true;
+
+                //Analytics Report Event
+                Bundle bundle = new Bundle();
+                bundle.putString("video_id", video.video_id);
+                bundle.putString("primary_audio_language", video.primary_audio_language_code);
+                bundle.putString("original_language", video.original_language);
+                mFirebaseAnalytics.logEvent("pressed_add_video_my_list_btn", bundle);
             }
 
             @Override
@@ -323,7 +335,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                 ((VideoDetailsActivity) Objects.requireNonNull(getActivity())).updateScreenAfterChanges = true;
 
-
+                //Analytics Report Event
+                Bundle bundle = new Bundle();
+                bundle.putString("video_id", mSelectedVideo.id);
+                mFirebaseAnalytics.logEvent("pressed_remove_video_my_list_btn", bundle);
             }
 
             @Override
@@ -436,6 +451,15 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         intent.putExtra(Constants.VIDEO, mSelectedVideo);
         startActivity(intent);
+
+        //Analytics Report Event
+        Bundle bundle = new Bundle();
+        bundle.putString("video_id", mSelectedVideo.id);
+        bundle.putString("primary_audio_language", mSelectedVideo.primary_audio_language_code);
+        bundle.putString("original_language", mSelectedVideo.original_language);
+        bundle.putString("project", mSelectedVideo.project);
+        bundle.putLong("duration", mSelectedVideo.getVideoDurationInMs());
+        mFirebaseAnalytics.logEvent("pressed_play_video_btn", bundle);
     }
 
 
@@ -456,7 +480,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 };
                 JsonResponseBaseBean<UserTask[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
                 mSelectedVideo.userTaskList = jsonResponse.data;
-//                mSelectedVideo.userTaskList = gson.fromJson(response, UserTask[].class);
 
                 goToPlayVideo();
 
