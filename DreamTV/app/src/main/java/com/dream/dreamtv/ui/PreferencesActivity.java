@@ -36,12 +36,12 @@ import java.util.List;
 
 public class PreferencesActivity extends Activity {
 
-    public static final String ABR_CHINESE = "zh";
-    public static final String ABR_ENGLISH = "en";
-    public static final String ABR_SPANISH = "es";
-    public static final String ABR_ARABIC = "ar";
-    public static final String ABR_FRENCH = "fr";
-    public static final String ABR_POLISH = "pl";
+    private static final String ABR_CHINESE = "zh";
+    private static final String ABR_ENGLISH = "en";
+    private static final String ABR_SPANISH = "es";
+    private static final String ABR_ARABIC = "ar";
+    private static final String ABR_FRENCH = "fr";
+    private static final String ABR_POLISH = "pl";
     private Context mContext;
     private Activity mActivity;
     private ListView mListView;
@@ -121,7 +121,6 @@ public class PreferencesActivity extends Activity {
                 if (b) {
                     btnAudio.setChecked(false);
                     btnSubtitle.setChecked(true);
-                    //llBodyLanguages.setVisibility(View.VISIBLE);
                     updateListItemChecked(true);
                 }
             }
@@ -133,9 +132,8 @@ public class PreferencesActivity extends Activity {
                 if (isChecked) {
                     tvVideoLanguagesTitle.setText(R.string.text_subtitle_languages);
 
-
                     int position = lvLanguagesAdapter.getPosition(getString(R.string.all_languages));
-                    Toast.makeText(mContext, "Subtitle Position = " + position, Toast.LENGTH_SHORT).show();
+
                     if (position >= 0) {
                         lvLanguagesAdapter.remove(getString(R.string.all_languages));
                         lvLanguagesAdapter.notifyDataSetChanged();
@@ -152,7 +150,6 @@ public class PreferencesActivity extends Activity {
                     tvVideoLanguagesTitle.setText(R.string.text_audio_languages);
 
                     int position = lvLanguagesAdapter.getPosition(getString(R.string.all_languages));
-                    Toast.makeText(mContext, "Audio Position = " + position, Toast.LENGTH_SHORT).show();
 
                     if (position < 0) {
                         lvLanguagesAdapter.add(getString(R.string.all_languages));
@@ -169,7 +166,6 @@ public class PreferencesActivity extends Activity {
                 if (b) {
                     btnSubtitle.setChecked(false);
                     btnAudio.setChecked(true);
-                    //llBodyLanguages.setVisibility(View.VISIBLE);
                     updateListItemChecked(false);
                 }
             }
@@ -215,7 +211,6 @@ public class PreferencesActivity extends Activity {
         interfaceLanguageSettings();
         interfaceModeSettings();
         testingModeSettings();
-//        getLanguages();
         initializeLanguagesList();
         setupListView();
     }
@@ -241,19 +236,6 @@ public class PreferencesActivity extends Activity {
     }
 
     private void initializeLanguagesList() { //based on the 10 most spoken languages http://www.foxnewspoint.com/top-10-most-spoken-language-in-the-world-2017/
-//        HashMap<String, String> languages = new HashMap<>();
-//
-//        languages.put(ABR_CHINESE, getString(R.string.language_chinese));
-//        languages.put(ABR_ENGLISH, getString(R.string.language_english));
-//        languages.put(ABR_SPANISH, getString(R.string.language_spanish));
-//        languages.put(ABR_ARABIC, getString(R.string.language_arabic));
-//        languages.put(ABR_FRENCH, getString(R.string.language_french));
-//        languages.put(ABR_POLISH, getString(R.string.language_polish));
-//        languages.put(Constants.NONE_OPTIONS_CODE, getString(R.string.all_languages)); //Always as the first item of the list
-//
-//
-//        languagesKeyList = new ArrayList<>(languages.values());
-//        languagesKeyListCode = new ArrayList<>(languages.keySet());
 
         languagesKeyList = new ArrayList<String>();
         languagesKeyListCode = new ArrayList<>();
@@ -276,7 +258,6 @@ public class PreferencesActivity extends Activity {
 
 
         keyListForAdapter = new ArrayList<>(languagesKeyList); //list to modifying in adapter, without affecting the languages list
-        //keyListForAdapter.remove(languagesKeyList.indexOf(getString(R.string.all_languages))); //initialy,
 
     }
 
@@ -458,43 +439,6 @@ public class PreferencesActivity extends Activity {
                 LocaleHelper.setLocale(this, user.interface_language);
             }
     }
-
-//    private void getLanguages() {
-//        ResponseListener responseListener = new ResponseListener(this, true, true,
-//                getString(R.string.title_loading_retrieve_languages)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                Gson gson = new Gson();
-//                Languages languagesList = gson.fromJson(response, Languages.class);
-//
-//                languagesList.languages.put(Constants.NONE_OPTIONS_CODE, getString(R.string.all_languages)); //null option in the list
-//
-//                Map<String, String> orderedMap = Utils.MapUtil.sortByValue(languagesList.languages);
-//
-//                languagesKeyList = new ArrayList<>(orderedMap.values());
-//                languagesKeyListCode = new ArrayList<>(orderedMap.keySet());
-//
-//                setupListView(languagesKeyList);
-//
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                DreamTVApp.Logger.d(error.getMessage());
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                DreamTVApp.Logger.d(jsonResponse.toString());
-//            }
-//        };
-//
-//        ConnectionManager.get(this, ConnectionManager.Urls.LANGUAGES, null, responseListener, this);
-//
-//    }
 
 
 }

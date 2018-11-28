@@ -66,6 +66,7 @@ public class ReasonsDialogFragment extends DialogFragment {
     private static final String TASK_STATE = "taskState";
     private static final String USER_TASK = "userTask";
     private static final int REQ_CODE_SPEECH_INPUT = 100;
+    public static final String SPEECH_NOT_SUPPORTED = "speech_not_supported";
     private final List<Integer> selectedReasons = new ArrayList<>();
     private LinearLayout llComments;
     private LinearLayout llReasons;
@@ -120,16 +121,6 @@ public class ReasonsDialogFragment extends DialogFragment {
         return f;
     }
 
-//    @Override
-//    public void onAttach(Activity context) {
-//        super.onAttach(context);
-//        if (context instanceof OnDialogClosedListener) {
-//            mCallback = (OnDialogClosedListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnDialogClosedListener");
-//        }
-//    }
 
     @Override
     public void onAttach(Context context) {
@@ -408,7 +399,7 @@ public class ReasonsDialogFragment extends DialogFragment {
             startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
         } catch (ActivityNotFoundException a) {
             Toast.makeText(getActivity(),
-                    "speech_not_supported",
+                    SPEECH_NOT_SUPPORTED,
                     Toast.LENGTH_SHORT).show();
         }
     }
@@ -494,7 +485,6 @@ public class ReasonsDialogFragment extends DialogFragment {
             View inflatedLayout = inflater.inflate(R.layout.reasons_button_layout, null);
             ToggleButton toggleButton = inflatedLayout.findViewById(R.id.toogleButton);
             final CheckBox chkBox = inflatedLayout.findViewById(R.id.chkBox);
-//            containerDestacado.addView(inflatedLayout);
 
             toggleButton.setBackgroundResource(R.color.gray);
             toggleButton.setTextColor(ContextCompat.getColor(getActivity(), R.color.white));
@@ -513,7 +503,6 @@ public class ReasonsDialogFragment extends DialogFragment {
                 @Override
                 public void onClick(View view) {
                     if (((ToggleButton) view).isChecked()) { //si no esta chequeado y se hace check
-                        //((RadioGroup) view.getParent()).check(view.getId());
                         if (!selectedReasons.contains(view.getId())) {
                             selectedReasons.add(view.getId());
                             chkBox.setChecked(true);

@@ -17,12 +17,11 @@ package com.dream.dreamtv.ui;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v17.leanback.app.BackgroundManager;
 import android.support.v17.leanback.app.BrowseSupportFragment;
 import android.support.v17.leanback.widget.ArrayObjectAdapter;
@@ -44,8 +43,6 @@ import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -75,16 +72,17 @@ import java.util.TimerTask;
 
 
 public class MainFragment extends BrowseSupportFragment {
-    public static final String PARAM_TYPE = "type";
-    public static final String PARAM_PAGE = "page";
-    public static final String SEE_MORE_VIDEOS_ICON_URL = "https://image.flaticon.com/icons/png/128/181/181532.png";
-    public static final String FIRST_PAGE = "1";
+    private static final String PARAM_TYPE = "type";
+    private static final String PARAM_PAGE = "page";
+    private static final String SEE_MORE_VIDEOS_ICON_URL = "https://image.flaticon.com/icons/png/128/181/181532.png";
+    private static final String FIRST_PAGE = "1";
     private static final String TAG = "MainFragment";
+    private static final String EMPTY_ITEM = "Some item";
     private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
     private static final int PREFERENCES_SETTINGS_RESULT_CODE = 1256;
     private static final int VIDEO_DETAILS_RESULT_CODE = 1257;
     private final Handler mHandler = new Handler();
-    FirebaseAnalytics mFirebaseAnalytics;
+    private FirebaseAnalytics mFirebaseAnalytics;
     private ArrayObjectAdapter mRowsAdapter;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;
@@ -199,7 +197,8 @@ public class MainFragment extends BrowseSupportFragment {
         else if (mode.equals(getString(R.string.text_yes_option)))
             urlParams.put(PARAM_TYPE, Constants.TASKS_TEST);
 
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_user_tasks)) {
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
+                getString(R.string.title_loading_retrieve_user_tasks)) {
 
             @Override
             public void processResponse(String response) {
@@ -218,14 +217,12 @@ public class MainFragment extends BrowseSupportFragment {
             public void processError(VolleyError error) {
                 super.processError(error);
                 DreamTVApp.Logger.d(error.getMessage());
-//                setFootersOptions(); //the settings section is displayed anyway
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
                 DreamTVApp.Logger.d(jsonResponse.toString());
-//                setFootersOptions(); //the settings section is displayed anyway
             }
         };
 
@@ -240,7 +237,8 @@ public class MainFragment extends BrowseSupportFragment {
         urlParams.put(PARAM_PAGE, pagina);
         urlParams.put(PARAM_TYPE, Constants.TASKS_CONTINUE);
 
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_user_tasks)) {
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
+                getString(R.string.title_loading_retrieve_user_tasks)) {
 
             @Override
             public void processResponse(String response) {
@@ -260,14 +258,12 @@ public class MainFragment extends BrowseSupportFragment {
             public void processError(VolleyError error) {
                 super.processError(error);
                 DreamTVApp.Logger.d(error.getMessage());
-//                setFootersOptions(); //the settings section is displayed anyway
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
                 DreamTVApp.Logger.d(jsonResponse.toString());
-//                setFootersOptions(); //the settings section is displayed anyway
             }
         };
 
@@ -279,7 +275,8 @@ public class MainFragment extends BrowseSupportFragment {
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put(PARAM_PAGE, pagina);
 
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_user_tasks)) {
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
+                getString(R.string.title_loading_retrieve_user_tasks)) {
 
             @Override
             public void processResponse(String response) {
@@ -399,29 +396,24 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
 
-    private void updateBackground(String uri) {
-        int width = mMetrics.widthPixels;
-        int height = mMetrics.heightPixels;
 
+    private void updateBackground(String uri) {
         RequestOptions options = new RequestOptions()
                 .centerCrop()
-                .placeholder(mDefaultBackground)
-                .error(mDefaultBackground)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .priority(Priority.HIGH);
+                .error(mDefaultBackground);
 
-        Glide.with(Objects.requireNonNull(getActivity()))
+        Glide.with(this)
+                .asBitmap()
                 .load(uri)
                 .apply(options)
-                .into(new SimpleTarget<Drawable>(width, height) {
+                .into(new SimpleTarget<Bitmap>(mMetrics.widthPixels, mMetrics.heightPixels) {
                     @Override
-                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                        mBackgroundManager.setDrawable(resource);
-
+                    public void onResourceReady(
+                            Bitmap resource,
+                            Transition<? super Bitmap> transition) {
+                        mBackgroundManager.setBitmap(resource);
                     }
-
                 });
-        mBackgroundTimer.cancel();
     }
 
     private void startBackgroundTimer() {
@@ -437,10 +429,10 @@ public class MainFragment extends BrowseSupportFragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE) { //After PreferencesSettings or after add videos to userlist (in videoDetailsActivity)
+            if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE) { //After PreferencesSettings reload the screen
                 ((MainActivity) Objects.requireNonNull(getActivity())).recreate();
 
-            } else if (requestCode == VIDEO_DETAILS_RESULT_CODE) { //After PreferencesSettings or after add videos to userlist (in videoDetailsActivity)
+            } else if (requestCode == VIDEO_DETAILS_RESULT_CODE) { //After add videos to userlist (in videoDetailsActivity) reload the screen
                 //Clear the screen
                 setSelectedPosition(0);
                 setupVideosList();
@@ -498,14 +490,12 @@ public class MainFragment extends BrowseSupportFragment {
                     bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "button");
                     mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
 
-                } else if (((String) item).contains(getActivity().getApplicationContext().getString(R.string.title_contributions_category))) {
-                    Toast.makeText(getActivity(), "Go to contributions", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT)
                             .show();
                 }
             } else {
-                Toast.makeText(getActivity(), "Some item", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();
             }
         }
     }

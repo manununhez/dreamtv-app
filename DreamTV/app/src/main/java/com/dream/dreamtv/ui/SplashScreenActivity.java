@@ -27,12 +27,11 @@ public class SplashScreenActivity extends AppCompatActivity {
             try {
                 Thread.sleep(3 * 1000);
             } catch (Exception e) {
-                DreamTVApp.Logger.e("ocurrio un error");
+                DreamTVApp.Logger.e("An error occurred");
             }
 
             Intent intent = new Intent(SplashScreenActivity.this, MainActivity.class);
             intent.setAction(Intent.ACTION_VIEW);
-//            intent.putExtra("tryLogin", true);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             SplashScreenActivity.this.startActivity(intent);

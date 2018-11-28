@@ -55,7 +55,8 @@ import fr.bmartel.youtubetv.model.VideoState;
 
 
 public class PlaybackVideoYoutubeActivity extends Activity implements
-        ReasonsDialogFragment.OnDialogClosedListener, IPlayerListener {
+        ReasonsDialogFragment.OnDialogClosedListener, IPlayerListener, IPlayBackVideoListener,
+        IReasonsDialogListener, ISubtitlePlayBackListener {
 
     private static final String YOUTUBE_VIDEO_ID = "videoId";
     private static final String YOUTUBE_AUTOPLAY = "autoplay";
@@ -96,25 +97,16 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         tvSubtitle = findViewById(R.id.tvSubtitle); // initiate a chronometer
         rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
 
+        setupVideoPlayer();
 
-        Bundle bundle = getArgumentos();
-        mYoutubeView = findViewById(R.id.video_1);
-        mYoutubeView.updateView(bundle);
-        mYoutubeView.playVideo(bundle.getString(YOUTUBE_VIDEO_ID, ""));
-        mYoutubeView.addPlayerListener(this);
 
     }
+
+
 
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(LocaleHelper.onAttach(base));
-    }
-
-    //Called when player is ready.
-    @Override
-    public void onPlayerReady(VideoInfo videoInfo) {
-        subtitleHandlerSyncConfig();
-        playVideoMode();
     }
 
     @Override
@@ -122,22 +114,21 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         if (state.toString().equals(STATE_PLAY)) {
             DreamTVApp.Logger.d("State : " + STATE_PLAY);
 
-            playVideoOnPlayerStateChange(position);
+            //start sync subtitles
+            rlVideoPlayerInfo.setVisibility(View.GONE);
+            startSyncSubtitle(SystemClock.elapsedRealtime() - position);
+
         } else if (state.toString().equals(STATE_PAUSED)) {
             DreamTVApp.Logger.d("State : " + STATE_PAUSED);
             pauseVideo(position);
 
-            if (selectedUserTask != null)
-                controlReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp, selectedUserTask);
-            else
-                controlReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp);
-
+            controlReasonDialogPopUp();
         }
 
 
         if (state.toString().equals(STATE_ENDED)) {//at this moment we are in the end of the video. Duration in ms
             DreamTVApp.Logger.d("State : ENDED");
-            stopPlayback();
+            stopVideo();
             stopSyncSubtitle();
             Utils.getAlertDialog(PlaybackVideoYoutubeActivity.this, getString(R.string.alert_title_video_terminated),
                     getString(R.string.alert_msg_video_terminated), getString(R.string.btn_ok),
@@ -147,29 +138,22 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                             finish();
                         }
                     }).show();
-//            Toast.makeText(PlaybackVideoYoutubeActivity.this, "VIDEO COMPLETED!", Toast.LENGTH_SHORT).show();
         }
 
     }
 
 
-    private Bundle getArgumentos() {
-        mSelectedVideo = getIntent().getParcelableExtra(Constants.VIDEO);
-        Bundle args = new Bundle();
-        args.putString(YOUTUBE_VIDEO_ID, mSelectedVideo.getVideoYoutubeId());
-        args.putBoolean(YOUTUBE_AUTOPLAY, false);
-        args.putBoolean(YOUTUBE_SHOW_RELATED_VIDEOS, false);
-        args.putBoolean(YOUTUBE_SHOW_VIDEO_INFO, false);
-        args.putBoolean(YOUTUBE_VIDEO_ANNOTATION, false);
-        args.putBoolean(YOUTUBE_DEBUG, false);
-        args.putBoolean(YOUTUBE_CLOSED_CAPTIONS, false);
-        return args;
+    //Called when player is ready.
+    @Override
+    public void onPlayerReady(VideoInfo videoInfo) {
+        subtitleHandlerSyncConfig();
+        playVideoMode();
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        mYoutubeView.stopVideo();
+        stopVideo();
         mYoutubeView.closePlayer();
         finish();
     }
@@ -178,9 +162,22 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mYoutubeView.stopVideo();
+        stopVideo();
         mYoutubeView.closePlayer();
         finish();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mYoutubeView.isPlaying()) {
+            if (!requestVisibleBehind(true)) {
+                // Try to play behind launcher, but if it fails, stop playback.
+                stopVideo();
+            }
+        } else {
+            requestVisibleBehind(false);
+        }
     }
 
 
@@ -231,7 +228,67 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         }
     }
 
-    private void playVideoMode() {
+
+
+    @Override
+    public void onVisibleBehindCanceled() {
+        super.onVisibleBehindCanceled();
+    }
+
+    @Override
+    public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
+
+        Subtitle subtitleOld = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
+        Subtitle subtitleOneBeforeNew;
+
+        if (selectedSubtitle != null) //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
+        {
+            if (selectedSubtitle.position != subtitleOld.position) { //a different subtitle from the original was selected
+                if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
+                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
+                    if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000) //1000ms de diff
+                        mYoutubeView.seekTo((subtitleOneBeforeNew.end - 1000) / 1000); //damos mas tiempo, para leer subtitulos anterioires
+                    else
+                        mYoutubeView.seekTo(subtitleOneBeforeNew.end / 1000);
+                } else {
+                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(0); //we go to the first subtitle
+                    mYoutubeView.seekTo((subtitleOneBeforeNew.start - 1000) / 1000); //inicio del primer sub
+                }
+
+            }
+        }
+
+        playVideo(null);
+
+
+    }
+
+
+    @Override
+    public  void setupVideoPlayer(){
+        Bundle bundle = getArgumentos();
+        mYoutubeView = findViewById(R.id.video_1);
+        mYoutubeView.updateView(bundle);
+        mYoutubeView.playVideo(bundle.getString(YOUTUBE_VIDEO_ID, ""));
+        mYoutubeView.addPlayerListener(this);
+    }
+
+    private Bundle getArgumentos() {
+        mSelectedVideo = getIntent().getParcelableExtra(Constants.VIDEO);
+        Bundle args = new Bundle();
+        args.putString(YOUTUBE_VIDEO_ID, mSelectedVideo.getVideoYoutubeId());
+        args.putBoolean(YOUTUBE_AUTOPLAY, false);
+        args.putBoolean(YOUTUBE_SHOW_RELATED_VIDEOS, false);
+        args.putBoolean(YOUTUBE_SHOW_VIDEO_INFO, false);
+        args.putBoolean(YOUTUBE_VIDEO_ANNOTATION, false);
+        args.putBoolean(YOUTUBE_DEBUG, false);
+        args.putBoolean(YOUTUBE_CLOSED_CAPTIONS, false);
+        return args;
+    }
+
+
+    @Override
+    public  void playVideoMode() {
         if (mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
             final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
             if (subtitle != null) { //Si por alguna razon no se cuenta con subtitulo (algun fallo en el servicio al traer el requerido subt)
@@ -264,26 +321,38 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     }
 
 
+
     @Override
-    public void onPause() {
-        super.onPause();
-        if (mYoutubeView.isPlaying()) {
-            if (!requestVisibleBehind(true)) {
-                // Try to play behind launcher, but if it fails, stop playback.
-                stopPlayback();
-            }
-        } else {
-            requestVisibleBehind(false);
+    public  void playVideo(Integer seekToSecs) {
+        isPlayPauseAction = PLAY;
+
+        if (seekToSecs != null)
+            mYoutubeView.seekTo(seekToSecs);
+
+        mYoutubeView.start();
+    }
+
+
+    @Override
+    public  void pauseVideo(Long position) {
+        String currentTime = mSelectedVideo.getTimeFormat(position);
+        String videoDuration = mSelectedVideo.getTimeFormat(mSelectedVideo.getVideoDurationInMs());
+
+        tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
+
+        rlVideoPlayerInfo.setVisibility(View.VISIBLE);
+        stopSyncSubtitle();
+    }
+
+    @Override
+    public void stopVideo() {
+        if (mYoutubeView != null) {
+            mYoutubeView.stopVideo();
         }
     }
 
     @Override
-    public void onVisibleBehindCanceled() {
-        super.onVisibleBehindCanceled();
-    }
-
-
-    private void subtitleHandlerSyncConfig() {
+    public  void subtitleHandlerSyncConfig() {
         handler = new Handler();
         myRunnable = new Runnable() {
             @Override
@@ -302,7 +371,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                                 lastSelectedUserTaskShown = selectedUserTask.subtitle_position;
                             }
 
-                        controlShowSubtitle(elapsedRealtimeTemp - timeStoppedTemp);
+                        showSubtitle(elapsedRealtimeTemp - timeStoppedTemp);
 
                     }
                 });
@@ -311,54 +380,22 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         };
     }
 
-    private void playVideo(Integer seekToSecs) {
-        isPlayPauseAction = PLAY;
-
-        if (seekToSecs != null)
-            mYoutubeView.seekTo(seekToSecs);
-
-        mYoutubeView.start();
-    }
-
-    private void playVideoOnPlayerStateChange(long position) {
-        rlVideoPlayerInfo.setVisibility(View.GONE);
-        startSyncSubtitle(SystemClock.elapsedRealtime() - position);
-    }
-
-    private void pauseVideo(long position) {
-        String currentTime = mSelectedVideo.getTimeFormat(position);
-        String videoDuration = mSelectedVideo.getTimeFormat(mSelectedVideo.getVideoDurationInMs());
-
-        tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
-
-        rlVideoPlayerInfo.setVisibility(View.VISIBLE);
-        stopSyncSubtitle();
-    }
-
-    private void startSyncSubtitle(long base) {
+    @Override
+    public void startSyncSubtitle(Long base) {
         chronometer.setBase(base);
         chronometer.start();
         handler.post(myRunnable);
+
     }
 
-    private void stopSyncSubtitle() {
+    @Override
+    public  void stopSyncSubtitle() {
         chronometer.stop();
         handler.removeCallbacksAndMessages(null);
     }
 
-    private void controlReasonDialogPopUp(long subtitlePosition) {
-        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
-        if (subtitle != null) //only shows the popup when exist an subtitle
-            showReasonsScreen(subtitle);
-    }
-
-    private void controlReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
-        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
-        if (subtitle != null) //only shows the popup when exist an subtitle
-            showReasonsScreen(subtitle, userTask);
-    }
-
-    private void controlShowSubtitle(long subtitleTimePosition) {
+    @Override
+    public  void showSubtitle(long subtitleTimePosition) {
         Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitleTimePosition);
         if (subtitle == null)
             tvSubtitle.setVisibility(View.GONE);
@@ -368,64 +405,45 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         }
     }
 
-    private void showReasonsScreen(Subtitle subtitle) {
-        if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
-            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
-                    subtitle.position, mSelectedVideo.task_id);
-            if (!isFinishing()) {
-                FragmentManager fm = getFragmentManager();
-                FragmentTransaction transaction = fm.beginTransaction();
-                reasonsDialogFragment.show(transaction, "Sample Fragment");
+    @Override
+    public  void showReasonDialogPopUp(long subtitlePosition) {
+        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
+        if (subtitle != null) { //only shows the popup when exist an subtitle
+            if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+                ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
+                        subtitle.position, mSelectedVideo.task_id);
+                if (!isFinishing()) {
+                    FragmentManager fm = getFragmentManager();
+                    FragmentTransaction transaction = fm.beginTransaction();
+                    reasonsDialogFragment.show(transaction, "Sample Fragment");
+                }
             }
-        }
-    }
-
-    private void showReasonsScreen(Subtitle subtitle, UserTask userTask) {
-        if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
-            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
-                    subtitle.position, mSelectedVideo.task_id, userTask, mSelectedVideo.task_state);
-            if (!isFinishing()) {
-                FragmentManager fm = getFragmentManager();
-                FragmentTransaction transaction = fm.beginTransaction();
-                reasonsDialogFragment.show(transaction, "Sample Fragment");
-            }
-        }
-    }
-
-    private void stopPlayback() {
-        if (mYoutubeView != null) {
-            mYoutubeView.stopVideo();
         }
     }
 
     @Override
-    public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
-
-        Subtitle subtitleOld = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
-        Subtitle subtitleOneBeforeNew;
-
-        if (selectedSubtitle != null) //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
-        {
-            if (selectedSubtitle.position != subtitleOld.position) { //a different subtitle from the original was selected
-                if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
-                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
-                    if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000) //1000ms de diff
-                        mYoutubeView.seekTo((subtitleOneBeforeNew.end - 1000) / 1000); //damos mas tiempo, para leer subtitulos anterioires
-                    else
-                        mYoutubeView.seekTo(subtitleOneBeforeNew.end / 1000);
-                } else {
-                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(0); //we go to the first subtitle
-                    mYoutubeView.seekTo((subtitleOneBeforeNew.start - 1000) / 1000); //inicio del primer sub
+    public  void showReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
+        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
+        if (subtitle != null) { //only shows the popup when exist an subtitle
+            if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+                ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
+                        subtitle.position, mSelectedVideo.task_id, userTask, mSelectedVideo.task_state);
+                if (!isFinishing()) {
+                    FragmentManager fm = getFragmentManager();
+                    FragmentTransaction transaction = fm.beginTransaction();
+                    reasonsDialogFragment.show(transaction, "Sample Fragment");
                 }
-
             }
         }
-
-        isPlayPauseAction = PLAY;
-        mYoutubeView.start();
-
-
     }
 
+
+    @Override
+    public  void controlReasonDialogPopUp() {
+        if (selectedUserTask != null)
+            showReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp, selectedUserTask);
+        else
+            showReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp);
+    }
 
 }

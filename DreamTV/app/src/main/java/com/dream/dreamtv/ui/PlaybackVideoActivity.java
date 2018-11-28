@@ -43,7 +43,8 @@ import com.dream.dreamtv.utils.Utils;
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
  */
-public class PlaybackVideoActivity extends Activity implements ReasonsDialogFragment.OnDialogClosedListener {
+public class PlaybackVideoActivity extends Activity implements ReasonsDialogFragment.OnDialogClosedListener,
+        IPlayBackVideoListener, IReasonsDialogListener, ISubtitlePlayBackListener {
 
     private static final int PLAY = 0;
     private static final int PAUSE = 1;
@@ -77,7 +78,8 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         mSelectedVideo = getIntent().getParcelableExtra(Constants.VIDEO);
 
         subtitleHandlerSyncConfig();
-        loadViews();
+        setupVideoPlayer();
+        playVideoMode();
 
     }
 
@@ -86,7 +88,120 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 
-    private void loadViews() {
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mVideoView.suspend();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
+        super.onBackPressed();
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mVideoView.isPlaying()) {
+            if (!requestVisibleBehind(true)) {
+                // Try to play behind launcher, but if it fails, stop playback.
+                stopVideo();
+            }
+        } else {
+            requestVisibleBehind(false);
+        }
+    }
+
+
+    @Override
+    public void onVisibleBehindCanceled() {
+        super.onVisibleBehindCanceled();
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                DreamTVApp.Logger.d("KEYCODE_DPAD_LEFT");
+
+                mVideoView.seekTo(mVideoView.getCurrentPosition() - POSITION_OFFSET);
+                Toast.makeText(this, "- " + (POSITION_OFFSET / 1000) + " secs", Toast.LENGTH_SHORT).show();
+
+                return true;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                DreamTVApp.Logger.d("KEYCODE_DPAD_RIGHT");
+
+                mVideoView.seekTo(mVideoView.getCurrentPosition() + POSITION_OFFSET);
+                Toast.makeText(this, "+ " + (POSITION_OFFSET / 1000) + " secs", Toast.LENGTH_SHORT).show();
+
+                return true;
+
+            default:
+                return super.onKeyUp(keyCode, event);
+        }
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+
+        int action = event.getAction();
+        int keyCode = event.getKeyCode();
+
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                if (action == KeyEvent.ACTION_UP) {
+                    if (isPlayPauseAction == PLAY) { //Pause
+
+                        pauseVideo(null);
+
+                        controlReasonDialogPopUp();
+
+
+                    } else { //Play
+                        playVideoMode();
+
+                    }
+                    return true;
+                }
+            default:
+                return super.dispatchKeyEvent(event);
+        }
+    }
+
+
+
+    @Override
+    public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
+        Subtitle subtitle = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
+        Subtitle subtitleOneBeforeNew;
+        if (selectedSubtitle != null) { //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
+
+            if (selectedSubtitle.position != subtitle.position) { //a different subtitle from the original was selected
+                if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
+                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
+                    if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000)
+                        mVideoView.seekTo(subtitleOneBeforeNew.end - 1000);
+                    else
+                        mVideoView.seekTo(subtitleOneBeforeNew.end);
+                } else {
+                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(0); //nos vamos al primer subtitulo
+                    mVideoView.seekTo(subtitleOneBeforeNew.start - 1000); //inicio del primer sub
+                }
+
+            }
+        }
+
+        playVideo(null);
+    }
+
+    @Override
+    public  void setupVideoPlayer() {
         mVideoView = findViewById(R.id.videoView);
         mVideoView.setFocusable(false);
         mVideoView.setFocusableInTouchMode(false);
@@ -105,7 +220,7 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
                 } else {
                     msg = getString(R.string.video_error_unknown_error);
                 }
-                mVideoView.stopPlayback();
+                stopVideo();
                 return false;
             }
         });
@@ -156,151 +271,10 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         loadingDialog = new LoadingDialog(PlaybackVideoActivity.this, getString(R.string.title_loading_buffering));
         loadingDialog.setCanceledOnTouchOutside(false);
         loadingDialog.show();
-
-        playVideoMode();
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mVideoView.suspend();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
-        }
-        super.onBackPressed();
-    }
-
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mVideoView.isPlaying()) {
-            if (!requestVisibleBehind(true)) {
-                // Try to play behind launcher, but if it fails, stop playback.
-                stopPlayback();
-            }
-        } else {
-            requestVisibleBehind(false);
-        }
-    }
-
-
-    @Override
-    public void onVisibleBehindCanceled() {
-        super.onVisibleBehindCanceled();
-    }
-
-
-    private void subtitleHandlerSyncConfig() {
-        handler = new Handler();
-        myRunnable = new Runnable() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!handlerRunning)
-                            return;
-
-                        selectedUserTask = mSelectedVideo.getUserTask(mVideoView.getCurrentPosition());
-
-                        if (selectedUserTask != null)
-                            if (lastSelectedUserTaskShown != selectedUserTask.subtitle_position) {  //pause the video and show the popup
-                                pauseAction();
-                                lastSelectedUserTaskShown = selectedUserTask.subtitle_position;
-                            }
-
-                        controlShowSubtitle(mVideoView.getCurrentPosition());
-                    }
-                });
-
-                if (handlerRunning)
-                    handler.postDelayed(myRunnable, 100);
-            }
-        };
-    }
-
-    private void pauseAction() {
-        pauseVideo();
-
-        if (selectedUserTask != null)
-            controlReasonDialogPopUp(mVideoView.getCurrentPosition(), selectedUserTask);
-        else
-            controlReasonDialogPopUp(mVideoView.getCurrentPosition());
-    }
-
-    private void startSyncSubtitle() {
-        handlerRunning = true;
-        handler.post(myRunnable);
-    }
-
-    private void stopSyncSubtitle() {
-        handlerRunning = false;
-
-        handler.removeCallbacks(null);
-        handler.removeCallbacksAndMessages(null);
-    }
-
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                DreamTVApp.Logger.d("KEYCODE_DPAD_LEFT");
-
-                mVideoView.seekTo(mVideoView.getCurrentPosition() - POSITION_OFFSET);
-                Toast.makeText(this, "- " + (POSITION_OFFSET / 1000) + " secs", Toast.LENGTH_SHORT).show();
-
-                return true;
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                DreamTVApp.Logger.d("KEYCODE_DPAD_RIGHT");
-
-                mVideoView.seekTo(mVideoView.getCurrentPosition() + POSITION_OFFSET);
-                Toast.makeText(this, "+ " + (POSITION_OFFSET / 1000) + " secs", Toast.LENGTH_SHORT).show();
-
-                return true;
-
-            default:
-                return super.onKeyUp(keyCode, event);
-        }
-    }
-
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-
-        int action = event.getAction();
-        int keyCode = event.getKeyCode();
-
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-                if (action == KeyEvent.ACTION_UP) {
-                    if (isPlayPauseAction == PLAY) { //Pause
-
-                        pauseVideo();
-
-                        if (selectedUserTask != null)
-                            controlReasonDialogPopUp(mVideoView.getCurrentPosition(), selectedUserTask);
-                        else
-                            controlReasonDialogPopUp(mVideoView.getCurrentPosition());
-
-                    } else { //Play
-                        playVideoMode();
-
-                    }
-                    return true;
-                }
-            default:
-                return super.dispatchKeyEvent(event);
-        }
-    }
-
-
-    private void playVideoMode() {
+    public  void playVideoMode() {
         if (mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
             final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
             if (subtitle != null) { //Si por alguna razon no se cuenta con subtitulo (algun fallo en el servicio al traer el requerido subt)
@@ -332,18 +306,20 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         }
     }
 
-    private void playVideo(Integer seekToPosition) {
+    @Override
+    public  void playVideo(Integer seekToPosition) {
         isPlayPauseAction = PLAY;
 
         if (seekToPosition != null)
             mVideoView.seekTo(seekToPosition);
 
         rlVideoPlayerInfo.setVisibility(View.GONE);
-        startSyncSubtitle();
+        startSyncSubtitle(null);
         mVideoView.start();
     }
 
-    private void pauseVideo() {
+    @Override
+    public  void pauseVideo(Long position) {
         isPlayPauseAction = PAUSE;
 
         String currentTime = mSelectedVideo.getTimeFormat(mVideoView.getCurrentPosition());
@@ -355,20 +331,66 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         stopSyncSubtitle();
     }
 
-
-    private void controlReasonDialogPopUp(long subtitlePosition) {
-        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
-        if (subtitle != null) //only shows the popup when exist an subtitle
-            showReasonsScreen(subtitle);
+    @Override
+    public  void stopVideo() {
+        if (mVideoView != null) {
+            mVideoView.stopPlayback();
+        }
     }
 
-    private void controlReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
-        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
-        if (subtitle != null) //only shows the popup when exist an subtitle
-            showReasonsScreen(subtitle, userTask);
+
+
+
+    @Override
+    public  void subtitleHandlerSyncConfig() {
+        handler = new Handler();
+        myRunnable = new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!handlerRunning)
+                            return;
+
+                        selectedUserTask = mSelectedVideo.getUserTask(mVideoView.getCurrentPosition());
+
+                        if (selectedUserTask != null)
+                            if (lastSelectedUserTaskShown != selectedUserTask.subtitle_position) {  //pause the video and show the popup
+                                pauseVideo(null);
+
+                                controlReasonDialogPopUp();
+
+                                lastSelectedUserTaskShown = selectedUserTask.subtitle_position;
+                            }
+
+                        showSubtitle(mVideoView.getCurrentPosition());
+                    }
+                });
+
+                if (handlerRunning)
+                    handler.postDelayed(myRunnable, 100);
+            }
+        };
     }
 
-    private void controlShowSubtitle(long subtitleTimePosition) {
+    @Override
+    public void startSyncSubtitle(Long base) {
+        handlerRunning = true;
+        handler.post(myRunnable);
+    }
+
+    @Override
+    public void stopSyncSubtitle() {
+        handlerRunning = false;
+
+        handler.removeCallbacks(null);
+        handler.removeCallbacksAndMessages(null);
+    }
+
+
+    @Override
+    public  void showSubtitle(long subtitleTimePosition) {
         Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitleTimePosition);
         if (subtitle == null)
             tvSubtitle.setVisibility(View.GONE);
@@ -379,64 +401,53 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
 
     }
 
-    private void showReasonsScreen(Subtitle subtitle) {
-        loadingDialog.dismiss(); //in case the loading is still visible
+    @Override
+    public  void showReasonDialogPopUp(long subtitlePosition) {
+        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
+        if (subtitle != null) { //only shows the popup when exist an subtitle
 
-        if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
-            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
-                    subtitle.position, mSelectedVideo.task_id);
-            if (!isFinishing()) {
-                FragmentManager fm = getFragmentManager();
-                FragmentTransaction transaction = fm.beginTransaction();
-                reasonsDialogFragment.show(transaction, "Sample Fragment");
-            }
-        }
-    }
+            loadingDialog.dismiss(); //in case the loading is still visible
 
-    private void showReasonsScreen(Subtitle subtitle, UserTask userTask) {
-        loadingDialog.dismiss(); //in case the loading is still visible
-
-        if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
-            ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
-                    subtitle.position, mSelectedVideo.task_id, userTask, mSelectedVideo.task_state);
-            if (!isFinishing()) {
-                FragmentManager fm = getFragmentManager();
-                FragmentTransaction transaction = fm.beginTransaction();
-                reasonsDialogFragment.show(transaction, "Sample Fragment");
+            if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+                ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
+                        subtitle.position, mSelectedVideo.task_id);
+                if (!isFinishing()) {
+                    FragmentManager fm = getFragmentManager();
+                    FragmentTransaction transaction = fm.beginTransaction();
+                    reasonsDialogFragment.show(transaction, "Sample Fragment");
+                }
             }
         }
     }
 
 
-    private void stopPlayback() {
-        if (mVideoView != null) {
-            mVideoView.stopPlayback();
+
+
+    @Override
+    public  void showReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
+        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
+        if (subtitle != null) { //only shows the popup when exist an subtitle
+            loadingDialog.dismiss(); //in case the loading is still visible
+
+            if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+                ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
+                        subtitle.position, mSelectedVideo.task_id, userTask, mSelectedVideo.task_state);
+                if (!isFinishing()) {
+                    FragmentManager fm = getFragmentManager();
+                    FragmentTransaction transaction = fm.beginTransaction();
+                    reasonsDialogFragment.show(transaction, "Sample Fragment");
+                }
+            }
         }
     }
 
     @Override
-    public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
-        Subtitle subtitle = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
-        Subtitle subtitleOneBeforeNew;
-        if (selectedSubtitle != null) { //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
+    public  void controlReasonDialogPopUp() {
+        if (selectedUserTask != null)
+            showReasonDialogPopUp(mVideoView.getCurrentPosition(), selectedUserTask);
+        else
+            showReasonDialogPopUp(mVideoView.getCurrentPosition());
 
-            if (selectedSubtitle.position != subtitle.position) { //a different subtitle from the original was selected
-                if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
-                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
-                    if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000)
-                        mVideoView.seekTo(subtitleOneBeforeNew.end - 1000);
-                    else
-                        mVideoView.seekTo(subtitleOneBeforeNew.end);
-                } else {
-                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(0); //nos vamos al primer subtitulo
-                    mVideoView.seekTo(subtitleOneBeforeNew.start - 1000); //inicio del primer sub
-                }
-
-            }
-        }
-
-        playVideo(null);
     }
-
 
 }

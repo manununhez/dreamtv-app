@@ -54,6 +54,8 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
 
     private static final int COLUMNS = 4;
     private static final int ZOOM_FACTOR = FocusHighlight.ZOOM_FACTOR_MEDIUM;
+    private static final String EMPTY_ITEM = "Some item";
+
     public static final String PARAM_PAGE = "page";
     public static final String PARAM_TYPE = "type";
 
@@ -75,7 +77,7 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
 
             @Override
             public void onClick(View view) {
-                Toast.makeText(getActivity(), "Search()", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getString(R.string.title_search), Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -122,14 +124,12 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
             public void processError(VolleyError error) {
                 super.processError(error);
                 DreamTVApp.Logger.d(error.getMessage());
-//                loadVideos(null); //the settings section is displayed anyway
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
                 DreamTVApp.Logger.d(jsonResponse.toString());
-//                loadVideos(null); //the settings section is displayed anyway
             }
         };
 
@@ -179,7 +179,7 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
                             .show();
                 }
             } else {
-                Toast.makeText(getActivity(), "Some item", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();
             }
         }
     }

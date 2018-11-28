@@ -17,4 +17,7 @@
     <dimen name="popup_width_dialog">300dp</dimen>
     <dimen name="popup_width">400dp</dimen>
     <dimen name="popup_height">350dp</dimen>
+    <dimen name="grid_item_width">100dp</dimen>
+    <dimen name="grid_item_height">100dp</dimen>
+
 </resources>
