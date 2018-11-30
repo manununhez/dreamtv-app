@@ -322,8 +322,8 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     public  void pauseVideo(Long position) {
         isPlayPauseAction = PAUSE;
 
-        String currentTime = mSelectedVideo.getTimeFormat(mVideoView.getCurrentPosition());
-        String videoDuration = mSelectedVideo.getTimeFormat(mSelectedVideo.getVideoDurationInMs());
+        String currentTime = mSelectedVideo.getTimeFormat(this, mVideoView.getCurrentPosition());
+        String videoDuration = mSelectedVideo.getTimeFormat(this, mSelectedVideo.getVideoDurationInMs());
 
         tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
         rlVideoPlayerInfo.setVisibility(View.VISIBLE);

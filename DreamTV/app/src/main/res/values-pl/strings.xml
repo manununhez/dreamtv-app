@@ -52,6 +52,7 @@
     <string name="rb_option_text_beginner">Prosty</string>
     <string name="hint_voice_google_input">Nagraj wiadomość</string>
     <string name="title_current_time_video">%1$s / %2$s</string>
+    <string name="title_video_details">%1$s | AUDIO: %2$s | SUBT: %3$s | Duration: %4$d min.</string>
     <string name="title_search">Szukaj…</string>
 
     <!--buttons-->

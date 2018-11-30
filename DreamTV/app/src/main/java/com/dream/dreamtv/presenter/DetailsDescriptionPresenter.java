@@ -16,6 +16,7 @@ package com.dream.dreamtv.presenter;
 
 import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter;
 
+import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Video;
 
 
@@ -27,11 +28,14 @@ public class DetailsDescriptionPresenter extends AbstractDetailsDescriptionPrese
 
         if (video != null) {
             viewHolder.getTitle().setText(video.title);
-            viewHolder.getSubtitle().setText(video.project + " | AUDIO: " +
-                    video.primary_audio_language_code + " | SUBT: " +
-                    video.subtitle_language + " | Duration:" +
-                    (video.duration / 60) + " min.");
+            viewHolder.getSubtitle().setText(viewHolder.view.getContext().getString(R.string.title_video_details, video.project,
+                    video.primary_audio_language_code, video.subtitle_language, (video.duration / 60)));
             viewHolder.getBody().setText(video.description);
         }
     }
 }
+//
+//video.project + " | AUDIO: " +
+//        video.primary_audio_language_code + " | SUBT: " +
+//        video.subtitle_language + " | Duration:" +
+//        (video.duration / 60) + " min."

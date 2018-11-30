@@ -331,8 +331,8 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
     @Override
     public  void pauseVideo(Long position) {
-        String currentTime = mSelectedVideo.getTimeFormat(position);
-        String videoDuration = mSelectedVideo.getTimeFormat(mSelectedVideo.getVideoDurationInMs());
+        String currentTime = mSelectedVideo.getTimeFormat(this, position);
+        String videoDuration = mSelectedVideo.getTimeFormat(this, mSelectedVideo.getVideoDurationInMs());
 
         tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
 

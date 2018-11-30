@@ -1,20 +1,30 @@
 package com.dream.dreamtv.model;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.dream.dreamtv.DreamTVApp;
+import com.dream.dreamtv.R;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.TimeUnit.*;
 
 /**
  * Created by manuel on 6/12/17.
  */
 
 public class Video extends JsonRequestBaseBean implements Parcelable {
+    private static final String YOUTUBE_COM = "youtube.com";
+    private static final String HTTP = "http";
+    private static final String HTTPS = "https";
+    private static final String YOUTUBE = "youtube";
+    public static final String QUERY_PARAMETER = "v";
     public String id;
     public String video_type;
     public String primary_audio_language_code;
@@ -91,8 +101,8 @@ public class Video extends JsonRequestBaseBean implements Parcelable {
         String url;
         if (this.all_urls == null)
             url = video_url;
-        else if (this.all_urls.get(0).contains("youtube"))
-            url = this.all_urls.get(0).replace("http", "https");
+        else if (this.all_urls.get(0).contains(YOUTUBE))
+            url = this.all_urls.get(0).replace(HTTP, HTTPS);
         else
             url = this.all_urls.get(0);
 
@@ -102,9 +112,9 @@ public class Video extends JsonRequestBaseBean implements Parcelable {
 
     public boolean isFromYoutube() {
         if (this.all_urls != null)
-            return this.all_urls.get(0).contains("youtube.com");
+            return this.all_urls.get(0).contains(YOUTUBE_COM);
         else
-            return this.video_url.contains("youtube.com");
+            return this.video_url.contains(YOUTUBE_COM);
     }
 
     public String getVideoYoutubeId() {
@@ -114,7 +124,7 @@ public class Video extends JsonRequestBaseBean implements Parcelable {
         else
             newUrl = Uri.parse(this.video_url);
 
-        return newUrl.getQueryParameter("v");
+        return newUrl.getQueryParameter(QUERY_PARAMETER);
     }
 
 
@@ -163,11 +173,9 @@ public class Video extends JsonRequestBaseBean implements Parcelable {
         return null;
     }
 
-    public String getTimeFormat(long millis) {
-        String hms = String.format("%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
-                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
-
-        return hms;
+    public String getTimeFormat(Context context,  long millis) {
+        return String.format(context.getString(R.string.time_format), MILLISECONDS.toMinutes(millis) % HOURS.toMinutes(1),
+                MILLISECONDS.toSeconds(millis) % MINUTES.toSeconds(1));
     }
 
     public long getVideoDurationInMs(){
