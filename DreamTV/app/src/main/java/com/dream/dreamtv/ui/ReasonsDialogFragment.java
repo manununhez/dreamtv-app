@@ -77,6 +77,7 @@ public class ReasonsDialogFragment extends DialogFragment {
     private ImageButton btnRecord;
     private Button btnOk;
     private Button btnSave;
+    private Button btnCancel;
     private TextView voiceInput;
     private TextView tvTitle;
     private Dialog viewRoot;
@@ -153,7 +154,7 @@ public class ReasonsDialogFragment extends DialogFragment {
         llButtonsOptions1 = viewRoot.findViewById(R.id.llButtonsOptions1);
         llButtonsOptions2 = viewRoot.findViewById(R.id.llButtonsOptions2);
         tvTitle = viewRoot.findViewById(R.id.tvTitle);
-        Button btnCancel = viewRoot.findViewById(R.id.btnCancel);
+        btnCancel = viewRoot.findViewById(R.id.btnCancel);
         btnSave = viewRoot.findViewById(R.id.btnSave);
         btnOk = viewRoot.findViewById(R.id.btnOk);
 
@@ -163,6 +164,25 @@ public class ReasonsDialogFragment extends DialogFragment {
         llReasons = viewRoot.findViewById(R.id.llReasons);
         rgReasons = viewRoot.findViewById(R.id.rgReasons);
 
+        setupEventsListener();
+        setupSubtitleNavigation(subtitleOriginalPosition);
+        setupAudioRecord();
+
+        //The cached reasons are verified
+//        ReasonList reasonL = ((DreamTVApp) getActivity().getApplication()).getReasons();
+//        if (reasonL == null)
+        getReasons();
+//        else {
+//            reasonList = reasonL.data;
+//            setupReasons();
+//        }
+
+        currentSubtitlePosition = subtitleOriginalPosition; //We save the original subtitleOriginalPosition
+
+        return viewRoot;
+    }
+
+    private void setupEventsListener() {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -185,24 +205,9 @@ public class ReasonsDialogFragment extends DialogFragment {
             }
         });
 
-        settingUpSubtitleNavigation(subtitleOriginalPosition);
-        audioRecordSettings();
-
-        //The cached reasons are verified
-//        ReasonList reasonL = ((DreamTVApp) getActivity().getApplication()).getReasons();
-//        if (reasonL == null)
-        getReasons();
-//        else {
-//            reasonList = reasonL.data;
-//            setupReasons();
-//        }
-
-        currentSubtitlePosition = subtitleOriginalPosition; //We save the original subtitleOriginalPosition
-
-        return viewRoot;
     }
 
-    private void settingUpSubtitleNavigation(final int subtPosition) {
+    private void setupSubtitleNavigation(final int subtPosition) {
 
         ListView mListView = viewRoot.findViewById(R.id.lv);
 
@@ -227,7 +232,7 @@ public class ReasonsDialogFragment extends DialogFragment {
                 DreamTVApp.Logger.d("CPRNewPosition: " + (i + 1));
                 currentSubtitlePosition = i + 1;
 
-                settingUpSubtitleNavigation(i + 1);
+                setupSubtitleNavigation(i + 1);
 
             }
         });
@@ -371,7 +376,7 @@ public class ReasonsDialogFragment extends DialogFragment {
         super.onResume();
     }
 
-    private void audioRecordSettings() {
+    private void setupAudioRecord() {
         llComments = viewRoot.findViewById(R.id.llComments);
         btnRecord = viewRoot.findViewById(R.id.btnRecord);
         voiceInput = viewRoot.findViewById(R.id.voiceInput);
@@ -497,6 +502,7 @@ public class ReasonsDialogFragment extends DialogFragment {
             toggleButton.setLayoutParams(layoutParams);
             toggleButton.setFocusable(true);
             toggleButton.setFocusableInTouchMode(true);
+            toggleButton.setAllCaps(true);
             toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_1));
 
             toggleButton.setOnClickListener(new View.OnClickListener() {
@@ -544,6 +550,7 @@ public class ReasonsDialogFragment extends DialogFragment {
 
             RadioButton radioButton = new RadioButton(getActivity());
             radioButton.setText(reason.name);
+            radioButton.setAllCaps(true);
             radioButton.setId(reason.id);
             radioButton.setGravity(Gravity.CENTER);
             radioButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_1));

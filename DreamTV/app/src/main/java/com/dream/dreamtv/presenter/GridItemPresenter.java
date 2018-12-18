@@ -26,7 +26,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.ui.MainFragment;
 
 public class GridItemPresenter extends Presenter {
 

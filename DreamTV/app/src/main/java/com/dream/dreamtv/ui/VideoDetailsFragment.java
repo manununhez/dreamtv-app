@@ -294,10 +294,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                 //Analytics Report Event
                 Bundle bundle = new Bundle();
-                bundle.putString("video_id", video.video_id);
-                bundle.putString("primary_audio_language", video.primary_audio_language_code);
-                bundle.putString("original_language", video.original_language);
-                mFirebaseAnalytics.logEvent("pressed_add_video_my_list_btn", bundle);
+                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, video.video_id);
+                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, video.primary_audio_language_code);
+                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, video.original_language);
+                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN, bundle);
             }
 
             @Override
@@ -337,8 +337,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                 //Analytics Report Event
                 Bundle bundle = new Bundle();
-                bundle.putString("video_id", mSelectedVideo.id);
-                mFirebaseAnalytics.logEvent("pressed_remove_video_my_list_btn", bundle);
+                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.id);
+                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN, bundle);
             }
 
             @Override
@@ -454,12 +454,12 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         //Analytics Report Event
         Bundle bundle = new Bundle();
-        bundle.putString("video_id", mSelectedVideo.id);
-        bundle.putString("primary_audio_language", mSelectedVideo.primary_audio_language_code);
-        bundle.putString("original_language", mSelectedVideo.original_language);
-        bundle.putString("project", mSelectedVideo.project);
-        bundle.putLong("duration", mSelectedVideo.getVideoDurationInMs());
-        mFirebaseAnalytics.logEvent("pressed_play_video_btn", bundle);
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_PROJECT_NAME, mSelectedVideo.project);
+        bundle.putLong(Constants.FIREBASE_KEY_VIDEO_DURATION, mSelectedVideo.getVideoDurationInMs());
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN, bundle);
     }
 
 

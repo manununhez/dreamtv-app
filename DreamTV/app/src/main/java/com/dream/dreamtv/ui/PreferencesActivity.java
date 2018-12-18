@@ -69,7 +69,8 @@ public class PreferencesActivity extends Activity {
     private Button btnSave;
     private ArrayAdapter<String> lvLanguagesAdapter;
     private FirebaseAnalytics mFirebaseAnalytics;
-
+    private LinearLayout llVideosSettings;
+    private RadioGroup rgInterfaceLanguage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,8 +86,11 @@ public class PreferencesActivity extends Activity {
         // Get the widgets reference from XML layout
         mListView = findViewById(R.id.lv);
 
-        LinearLayout llVideosSettings = findViewById(R.id.llVideosSettings);
+        llVideosSettings = findViewById(R.id.llVideosSettings);
         llBodyLanguages = findViewById(R.id.llBodyLanguages);
+
+        rgInterfaceLanguage = findViewById(R.id.rgInterfaceLanguage);
+
 
         rbEnglish = findViewById(R.id.rbEnglish);
         rbPolish = findViewById(R.id.rbPolish);
@@ -94,11 +98,8 @@ public class PreferencesActivity extends Activity {
         rbBeginner = findViewById(R.id.rbBeginner);
 
 
-        RadioGroup rgInterfaceLanguage = findViewById(R.id.rgInterfaceLanguage);
-
         tvTitle = findViewById(R.id.tvTitle);
         tvTestingModeTitle = findViewById(R.id.tvTestingModeTitle);
-
         tvTextLanguageTitle = findViewById(R.id.tvTextLanguageTitle);
         tvAudioLabel = findViewById(R.id.tvAudioLabel);
         tvSubtitleLabel = findViewById(R.id.tvSubtitleLabel);
@@ -109,12 +110,22 @@ public class PreferencesActivity extends Activity {
 
         btnSubtitle = findViewById(R.id.btnSubtitle);
         btnAudio = findViewById(R.id.btnAudio);
-
         btnSave = findViewById(R.id.btnSave);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
+        setupEventsListener();
 
+        interfaceLanguageSettings();
+        interfaceModeSettings();
+        testingModeSettings();
+        initializeLanguagesList();
+        setupListView();
+
+
+    }
+
+    private void setupEventsListener() {
         btnSubtitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
@@ -207,14 +218,6 @@ public class PreferencesActivity extends Activity {
                 saveUSerPreferences();
             }
         });
-
-        interfaceLanguageSettings();
-        interfaceModeSettings();
-        testingModeSettings();
-        initializeLanguagesList();
-        setupListView();
-
-
     }
 
 
@@ -369,16 +372,16 @@ public class PreferencesActivity extends Activity {
         Bundle bundle = new Bundle();
 
         if (mode == null || mode.equals(getString(R.string.text_no_option)))
-            bundle.putString("testing_mode", "no");
+            bundle.putString(Constants.FIREBASE_KEY_TESTING_MODE, Constants.FIREBASE_NO_OPTION);
         else if (mode.equals(getString(R.string.text_yes_option)))
-            bundle.putString("testing_mode", "yes");
+            bundle.putString(Constants.FIREBASE_KEY_TESTING_MODE, Constants.FIREBASE_YES_OPTION);
 
         //User Settings Saved - Analytics Report Event
-        bundle.putString("sub_language", user.sub_language);
-        bundle.putString("audio_language", user.audio_language);
-        bundle.putString("interface_mode", user.interface_mode);
-        bundle.putString("interface_language", user.interface_language);
-        mFirebaseAnalytics.logEvent("pressed_save_settings_btn", bundle);
+        bundle.putString(Constants.FIREBASE_KEY_SUB_LANGUAGE, user.sub_language);
+        bundle.putString(Constants.FIREBASE_KEY_AUDIO_LANGUAGE, user.audio_language);
+        bundle.putString(Constants.FIREBASE_KEY_INTERFACE_MODE, user.interface_mode);
+        bundle.putString(Constants.FIREBASE_KEY_INTERFACE_LANGUAGE, user.interface_language);
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN, bundle);
     }
 
 

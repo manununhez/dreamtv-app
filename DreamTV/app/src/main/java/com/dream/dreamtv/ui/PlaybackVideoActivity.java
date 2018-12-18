@@ -39,6 +39,7 @@ import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.Utils;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
@@ -62,7 +63,7 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     private boolean showContinueDialogOnlyOnce = true;
     private int isPlayPauseAction = PAUSE;
     private int lastSelectedUserTaskShown = -1;
-
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     /**
      * Called when the activity is first created.
@@ -76,6 +77,9 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
 
         mSelectedVideo = getIntent().getParcelableExtra(Constants.VIDEO);
+
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         subtitleHandlerSyncConfig();
         setupVideoPlayer();
@@ -125,20 +129,34 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        Bundle bundle = new Bundle();
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 DreamTVApp.Logger.d("KEYCODE_DPAD_LEFT");
 
                 mVideoView.seekTo(mVideoView.getCurrentPosition() - POSITION_OFFSET);
-                Toast.makeText(this, "- " + (POSITION_OFFSET / 1000) + " secs", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.title_video_backward, (POSITION_OFFSET / 1000)),
+                        Toast.LENGTH_SHORT).show();
 
+                //Analytics Report Event
+                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO, bundle);
                 return true;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 DreamTVApp.Logger.d("KEYCODE_DPAD_RIGHT");
 
                 mVideoView.seekTo(mVideoView.getCurrentPosition() + POSITION_OFFSET);
-                Toast.makeText(this, "+ " + (POSITION_OFFSET / 1000) + " secs", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.title_video_forward, (POSITION_OFFSET / 1000)),
+                        Toast.LENGTH_SHORT).show();
+
+                //Analytics Report Event
+                 bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO, bundle);
 
                 return true;
 
@@ -159,9 +177,7 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
                     if (isPlayPauseAction == PLAY) { //Pause
 
                         pauseVideo(null);
-
                         controlReasonDialogPopUp();
-
 
                     } else { //Play
                         playVideoMode();
@@ -176,32 +192,9 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
 
 
 
-    @Override
-    public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
-        Subtitle subtitle = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
-        Subtitle subtitleOneBeforeNew;
-        if (selectedSubtitle != null) { //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
-
-            if (selectedSubtitle.position != subtitle.position) { //a different subtitle from the original was selected
-                if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
-                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
-                    if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000)
-                        mVideoView.seekTo(subtitleOneBeforeNew.end - 1000);
-                    else
-                        mVideoView.seekTo(subtitleOneBeforeNew.end);
-                } else {
-                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(0); //nos vamos al primer subtitulo
-                    mVideoView.seekTo(subtitleOneBeforeNew.start - 1000); //inicio del primer sub
-                }
-
-            }
-        }
-
-        playVideo(null);
-    }
 
     @Override
-    public  void setupVideoPlayer() {
+    public void setupVideoPlayer() {
         mVideoView = findViewById(R.id.videoView);
         mVideoView.setFocusable(false);
         mVideoView.setFocusableInTouchMode(false);
@@ -261,7 +254,6 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
                                         finish();
                                     }
                                 }).show();
-//                        Toast.makeText(PlaybackVideoActivity.this, "VIDEO COMPLETED!", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -274,7 +266,7 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     }
 
     @Override
-    public  void playVideoMode() {
+    public void playVideoMode() {
         if (mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
             final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
             if (subtitle != null) { //Si por alguna razon no se cuenta con subtitulo (algun fallo en el servicio al traer el requerido subt)
@@ -283,12 +275,24 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 playVideo(subtitle.end);
+                                //Analytics Report Event
+                                Bundle bundle = new Bundle();
+                                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+                                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+                                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+                                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO, bundle);
                             }
                         }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 playVideo(null);
                                 dialog.dismiss();
+                                //Analytics Report Event
+                                Bundle bundle = new Bundle();
+                                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+                                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+                                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+                                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO, bundle);
                             }
                         }, new DialogInterface.OnCancelListener() {
                             @Override
@@ -307,7 +311,7 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     }
 
     @Override
-    public  void playVideo(Integer seekToPosition) {
+    public void playVideo(Integer seekToPosition) {
         isPlayPauseAction = PLAY;
 
         if (seekToPosition != null)
@@ -316,10 +320,17 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         rlVideoPlayerInfo.setVisibility(View.GONE);
         startSyncSubtitle(null);
         mVideoView.start();
+
+        //Analytics Report Event
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY, bundle);
     }
 
     @Override
-    public  void pauseVideo(Long position) {
+    public void pauseVideo(Long position) {
         isPlayPauseAction = PAUSE;
 
         String currentTime = mSelectedVideo.getTimeFormat(this, mVideoView.getCurrentPosition());
@@ -329,20 +340,31 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
         rlVideoPlayerInfo.setVisibility(View.VISIBLE);
         mVideoView.pause();
         stopSyncSubtitle();
+
+        //Analytics Report Event
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSED, bundle);
     }
 
     @Override
-    public  void stopVideo() {
+    public void stopVideo() {
         if (mVideoView != null) {
             mVideoView.stopPlayback();
+            //Analytics Report Event
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+            bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+            mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_STOP_VIDEO, bundle);
+
         }
     }
 
-
-
-
     @Override
-    public  void subtitleHandlerSyncConfig() {
+    public void subtitleHandlerSyncConfig() {
         handler = new Handler();
         myRunnable = new Runnable() {
             @Override
@@ -390,7 +412,7 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
 
 
     @Override
-    public  void showSubtitle(long subtitleTimePosition) {
+    public void showSubtitle(long subtitleTimePosition) {
         Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitleTimePosition);
         if (subtitle == null)
             tvSubtitle.setVisibility(View.GONE);
@@ -402,7 +424,7 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     }
 
     @Override
-    public  void showReasonDialogPopUp(long subtitlePosition) {
+    public void showReasonDialogPopUp(long subtitlePosition) {
         Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) { //only shows the popup when exist an subtitle
 
@@ -422,7 +444,7 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
 
 
     @Override
-    public  void showReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
+    public void showReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
         Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) { //only shows the popup when exist an subtitle
             loadingDialog.dismiss(); //in case the loading is still visible
@@ -440,12 +462,51 @@ public class PlaybackVideoActivity extends Activity implements ReasonsDialogFrag
     }
 
     @Override
-    public  void controlReasonDialogPopUp() {
+    public void controlReasonDialogPopUp() {
         if (selectedUserTask != null)
             showReasonDialogPopUp(mVideoView.getCurrentPosition(), selectedUserTask);
         else
             showReasonDialogPopUp(mVideoView.getCurrentPosition());
 
+
+        //Analytics Report Event
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_REASONS, bundle);
+
+    }
+
+    @Override
+    public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
+        Subtitle subtitle = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
+        Subtitle subtitleOneBeforeNew;
+        if (selectedSubtitle != null) { //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
+
+            if (selectedSubtitle.position != subtitle.position) { //a different subtitle from the original was selected
+                if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
+                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
+                    if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000)
+                        mVideoView.seekTo(subtitleOneBeforeNew.end - 1000);
+                    else
+                        mVideoView.seekTo(subtitleOneBeforeNew.end);
+                } else {
+                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(0); //nos vamos al primer subtitulo
+                    mVideoView.seekTo(subtitleOneBeforeNew.start - 1000); //inicio del primer sub
+                }
+
+            }
+        }
+
+        //Analytics Report Event
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_REASONS, bundle);
+
+        playVideo(null);
     }
 
 }

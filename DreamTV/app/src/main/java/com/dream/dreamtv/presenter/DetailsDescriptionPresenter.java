@@ -34,8 +34,3 @@ public class DetailsDescriptionPresenter extends AbstractDetailsDescriptionPrese
         }
     }
 }
-//
-//video.project + " | AUDIO: " +
-//        video.primary_audio_language_code + " | SUBT: " +
-//        video.subtitle_language + " | Duration:" +
-//        (video.duration / 60) + " min."

@@ -47,6 +47,7 @@ import com.dream.dreamtv.model.Video;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.Utils;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import fr.bmartel.youtubetv.YoutubeTvView;
 import fr.bmartel.youtubetv.listener.IPlayerListener;
@@ -86,6 +87,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     private boolean showContinueDialogOnlyOnce = true;
     private int lastSelectedUserTaskShown = -1;
     private int isPlayPauseAction = PAUSE;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,6 +99,9 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         tvSubtitle = findViewById(R.id.tvSubtitle); // initiate a chronometer
         rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
 
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
         setupVideoPlayer();
     }
 
@@ -104,6 +109,37 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(LocaleHelper.onAttach(base));
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopVideo();
+        mYoutubeView.closePlayer();
+        finish();
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        stopVideo();
+        mYoutubeView.closePlayer();
+        finish();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mYoutubeView.isPlaying()) {
+            if (!requestVisibleBehind(true)) {
+                // Try to play behind launcher, but if it fails, stop playback.
+                stopVideo();
+            }
+        } else {
+            requestVisibleBehind(false);
+        }
+    }
+
 
     @Override
     public void onPlayerStateChange(VideoState state, long position, float speed, float duration, VideoInfo videoInfo) {
@@ -146,51 +182,35 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         playVideoMode();
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        stopVideo();
-        mYoutubeView.closePlayer();
-        finish();
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        stopVideo();
-        mYoutubeView.closePlayer();
-        finish();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mYoutubeView.isPlaying()) {
-            if (!requestVisibleBehind(true)) {
-                // Try to play behind launcher, but if it fails, stop playback.
-                stopVideo();
-            }
-        } else {
-            requestVisibleBehind(false);
-        }
-    }
-
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        Bundle bundle = new Bundle();
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 DreamTVApp.Logger.d("KEYCODE_DPAD_LEFT");
                 mYoutubeView.moveBackward(POSITION_OFFSET);
-                Toast.makeText(this, "- " + POSITION_OFFSET + " secs", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,  getString(R.string.title_video_backward, POSITION_OFFSET),
+                        Toast.LENGTH_SHORT).show();
+
+                //Analytics Report Event
+                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO, bundle);
                 return true;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 DreamTVApp.Logger.d("KEYCODE_DPAD_RIGHT");
                 mYoutubeView.moveForward(POSITION_OFFSET);
-                Toast.makeText(this, "+ " + POSITION_OFFSET + " secs", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,  getString(R.string.title_video_forward, POSITION_OFFSET),
+                        Toast.LENGTH_SHORT).show();
 
+                //Analytics Report Event
+                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO, bundle);
                 return true;
 
             default:
@@ -231,34 +251,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         super.onVisibleBehindCanceled();
     }
 
-    @Override
-    public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
-
-        Subtitle subtitleOld = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
-        Subtitle subtitleOneBeforeNew;
-
-        if (selectedSubtitle != null) //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
-        {
-            if (selectedSubtitle.position != subtitleOld.position) { //a different subtitle from the original was selected
-                if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
-                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
-                    if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000) //1000ms de diff
-                        mYoutubeView.seekTo((subtitleOneBeforeNew.end - 1000) / 1000); //damos mas tiempo, para leer subtitulos anterioires
-                    else
-                        mYoutubeView.seekTo(subtitleOneBeforeNew.end / 1000);
-                } else {
-                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(0); //we go to the first subtitle
-                    mYoutubeView.seekTo((subtitleOneBeforeNew.start - 1000) / 1000); //inicio del primer sub
-                }
-
-            }
-        }
-
-        playVideo(null);
-
-
-    }
-
 
     @Override
     public  void setupVideoPlayer(){
@@ -293,12 +285,24 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 playVideo(subtitle.end / 1000);
+                                //Analytics Report Event
+                                Bundle bundle = new Bundle();
+                                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+                                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+                                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+                                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO, bundle);
                             }
                         }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 playVideo(null);
                                 dialog.dismiss();
+                                //Analytics Report Event
+                                Bundle bundle = new Bundle();
+                                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+                                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+                                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+                                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO, bundle);
                             }
                         }, new DialogInterface.OnCancelListener() {
                             @Override
@@ -326,6 +330,13 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
             mYoutubeView.seekTo(seekToSecs);
 
         mYoutubeView.start();
+
+        //Analytics Report Event
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY, bundle);
     }
 
 
@@ -338,12 +349,25 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
         rlVideoPlayerInfo.setVisibility(View.VISIBLE);
         stopSyncSubtitle();
+
+        //Analytics Report Event
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSED, bundle);
     }
 
     @Override
     public void stopVideo() {
         if (mYoutubeView != null) {
             mYoutubeView.stopVideo();
+            //Analytics Report Event
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+            bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+            mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_STOP_VIDEO, bundle);
         }
     }
 
@@ -440,6 +464,46 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
             showReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp, selectedUserTask);
         else
             showReasonDialogPopUp(elapsedRealtimeTemp - timeStoppedTemp);
+
+        //Analytics Report Event
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_REASONS, bundle);
     }
 
+    @Override
+    public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
+
+        Subtitle subtitleOld = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
+        Subtitle subtitleOneBeforeNew;
+
+        if (selectedSubtitle != null) //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
+        {
+            if (selectedSubtitle.position != subtitleOld.position) { //a different subtitle from the original was selected
+                if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
+                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
+                    if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000) //1000ms de diff
+                        mYoutubeView.seekTo((subtitleOneBeforeNew.end - 1000) / 1000); //damos mas tiempo, para leer subtitulos anterioires
+                    else
+                        mYoutubeView.seekTo(subtitleOneBeforeNew.end / 1000);
+                } else {
+                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(0); //we go to the first subtitle
+                    mYoutubeView.seekTo((subtitleOneBeforeNew.start - 1000) / 1000); //inicio del primer sub
+                }
+
+            }
+        }
+
+        //Analytics Report Event
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_REASONS, bundle);
+
+        playVideo(null);
+
+    }
 }

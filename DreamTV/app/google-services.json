@@ -1,27 +1,35 @@
 {
   "project_info": {
-    "project_number": "66348797791",
-    "firebase_url": "https://dreamtv-209012.firebaseio.com",
-    "project_id": "dreamtv-209012",
-    "storage_bucket": "dreamtv-209012.appspot.com"
+    "project_number": "153785724429",
+    "firebase_url": "https://dreamtv-6dedf.firebaseio.com",
+    "project_id": "dreamtv-6dedf",
+    "storage_bucket": "dreamtv-6dedf.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:66348797791:android:30011c5c7cee73bb",
+        "mobilesdk_app_id": "1:153785724429:android:30011c5c7cee73bb",
         "android_client_info": {
           "package_name": "com.dream.dreamtv"
         }
       },
       "oauth_client": [
         {
-          "client_id": "66348797791-5kbp0fm0c3g7pa9mnpt8lcaiuf75de5k.apps.googleusercontent.com",
+          "client_id": "153785724429-porm67kunv031i1ncjapol0jkjbmsiba.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dream.dreamtv",
+            "certificate_hash": "ebe5bc3a40e2901499dcaf016b110cc70f29991b"
+          }
+        },
+        {
+          "client_id": "153785724429-okva3u1obfim3fb4mlm53sdjitkq2l01.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCC7xdwV-0Gi1GX7l0UxbAob0rk_xSSCn4"
+          "current_key": "AIzaSyCr9s6D8LpPDaFlL6LxIiTvXjxxz05KNwk"
         }
       ],
       "services": {
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "153785724429-okva3u1obfim3fb4mlm53sdjitkq2l01.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
