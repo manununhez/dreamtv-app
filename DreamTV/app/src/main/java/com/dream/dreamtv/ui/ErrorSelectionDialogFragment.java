@@ -58,7 +58,7 @@ import java.util.Objects;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ReasonsDialogFragment extends DialogFragment {
+public class ErrorSelectionDialogFragment extends DialogFragment {
 
     private static final String SUBTITLE_JSON = "SubtitleJson";
     private static final String SUBTITLE_ORIGINAL_POSITION = "subtitleOriginalPosition";
@@ -92,12 +92,12 @@ public class ReasonsDialogFragment extends DialogFragment {
     private int taskState;
     private OnDialogClosedListener mCallback;
 
-    public ReasonsDialogFragment() {
+    public ErrorSelectionDialogFragment() {
         // Required empty public constructor
     }
 
-    public static ReasonsDialogFragment newInstance(SubtitleJson subtitle, int subtitlePosition, int idTask) {
-        ReasonsDialogFragment f = new ReasonsDialogFragment();
+    public static ErrorSelectionDialogFragment newInstance(SubtitleJson subtitle, int subtitlePosition, int idTask) {
+        ErrorSelectionDialogFragment f = new ErrorSelectionDialogFragment();
 
         // Supply num input as an argument.
         Bundle args = new Bundle();
@@ -108,8 +108,8 @@ public class ReasonsDialogFragment extends DialogFragment {
         return f;
     }
 
-    public static ReasonsDialogFragment newInstance(SubtitleJson subtitle, int subtitlePosition, int idTask, UserTask userTask, int taskState) {
-        ReasonsDialogFragment f = new ReasonsDialogFragment();
+    public static ErrorSelectionDialogFragment newInstance(SubtitleJson subtitle, int subtitlePosition, int idTask, UserTask userTask, int taskState) {
+        ErrorSelectionDialogFragment f = new ErrorSelectionDialogFragment();
 
         // Supply num input as an argument.
         Bundle args = new Bundle();

@@ -25,7 +25,7 @@ public class DreamTVApp extends Application {
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(LocaleHelper.onAttach(base, Constants.LANGUAGE_ENGLISH));
+        super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 
 //    @Override
@@ -80,11 +80,10 @@ public class DreamTVApp extends Application {
             SharedPreferenceUtils.save(this, this.getString(R.string.dreamTVApp_token), user.token);
         }
 
-//        if(user.interface_mode == null || user.interface_mode.isEmpty())
-//            user.interface_mode = Constants.BEGINNER_INTERFACE_MODE; //default mode
 
         String userString = gson.toJson(user);
         SharedPreferenceUtils.save(this, getString(R.string.user_preferences), userString);
+
     }
 
     public String getTestingMode() {

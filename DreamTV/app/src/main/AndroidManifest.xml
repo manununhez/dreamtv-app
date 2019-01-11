@@ -52,7 +52,7 @@
             android:name=".ui.PlaybackVideoYoutubeActivity"
             android:label="@string/app_name" />
         <activity
-            android:name=".ui.PreferencesActivity"
+            android:name=".ui.SettingsActivity"
             android:windowSoftInputMode="adjustResize" />
     </application>
 

@@ -59,8 +59,8 @@ import com.dream.dreamtv.presenter.GridItemPresenter;
 import com.dream.dreamtv.presenter.VideoCardPresenter;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
+import com.dream.dreamtv.utils.LocaleHelper;
 import com.google.android.gms.common.AccountPicker;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -135,8 +135,16 @@ public class MainFragment extends BrowseSupportFragment {
 
                 ((DreamTVApp) getActivity().getApplication()).setUser(user);
 
+                //To update the screen with the selected interface language
+                if(!LocaleHelper.getLanguage(getActivity()).equals(user.interface_language)) {
+                    LocaleHelper.setLocale(getActivity(), user.interface_language);
+                    ((MainActivity) getActivity()).recreate(); //Recreate activity
+                    Log.d(TAG,"Different language. Updating screen.");
+                }else{
+                    Log.d(TAG,"Same language. Not updating screen.");
+                    getTasks();
 
-                getTasks(); //for the mainscreen, only the first page
+                }
             }
 
             @Override
@@ -478,7 +486,7 @@ public class MainFragment extends BrowseSupportFragment {
             } else if (item instanceof String) {
 
                 if (((String) item).contains(Objects.requireNonNull(getActivity()).getString(R.string.title_video_settings))) {
-                    Intent intent = new Intent(getActivity(), PreferencesActivity.class);
+                    Intent intent = new Intent(getActivity(), SettingsActivity.class);
                     startActivityForResult(intent, PREFERENCES_SETTINGS_RESULT_CODE);
 
                 } else {

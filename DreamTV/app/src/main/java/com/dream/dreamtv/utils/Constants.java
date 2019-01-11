@@ -30,10 +30,8 @@ public class Constants {
 
 
 //    FIREBASE LOG EVENTS
-
-    public static final String FIREBASE_NO_OPTION = "no";
-    public static final String FIREBASE_YES_OPTION = "yes";
 //    KEYS
+    public static final String FIREBASE_KEY_SUBTITLE_NAVEGATION = "subtitle_navigation";
     public static final String FIREBASE_KEY_TESTING_MODE = "testing_mode";
     public static final String FIREBASE_KEY_SUB_LANGUAGE = "sub_language";
     public static final String FIREBASE_KEY_AUDIO_LANGUAGE = "audio_language";
@@ -54,8 +52,8 @@ public class Constants {
     public static final String FIREBASE_LOG_EVENT_PRESSED_STOP_VIDEO = "pressed_playback_video_stop_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO = "pressed_continue_video_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO = "pressed_restart_video_btn";
-    public static final String FIREBASE_LOG_EVENT_PRESSED_SHOW_REASONS = "pressed_show_reasons_btn";
-    public static final String FIREBASE_LOG_EVENT_PRESSED_DISMISS_REASONS = "pressed_dismiss_reasons_btn";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS = "pressed_show_errors_btn";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS = "pressed_dismiss_errors_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO = "pressed_playback_video_bwd_btn";//backward
     public static final String FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO = "pressed_playback_video_fwd_btn"; //forward
 

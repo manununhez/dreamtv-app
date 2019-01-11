@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:layout_centerInParent="true"
     android:gravity="center"
-    tools:context="com.dream.dreamtv.ui.ReasonsDialogFragment">
+    tools:context="com.dream.dreamtv.ui.ErrorSelectionDialogFragment">
 
 
     <LinearLayout

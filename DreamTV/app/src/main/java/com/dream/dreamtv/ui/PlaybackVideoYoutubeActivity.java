@@ -56,7 +56,7 @@ import fr.bmartel.youtubetv.model.VideoState;
 
 
 public class PlaybackVideoYoutubeActivity extends Activity implements
-        ReasonsDialogFragment.OnDialogClosedListener, IPlayerListener, IPlayBackVideoListener,
+        ErrorSelectionDialogFragment.OnDialogClosedListener, IPlayerListener, IPlayBackVideoListener,
         IReasonsDialogListener, ISubtitlePlayBackListener {
 
     private static final String YOUTUBE_VIDEO_ID = "videoId";
@@ -430,12 +430,12 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) { //only shows the popup when exist an subtitle
             if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
-                ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
+                ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(mSelectedVideo.subtitle_json,
                         subtitle.position, mSelectedVideo.task_id);
                 if (!isFinishing()) {
                     FragmentManager fm = getFragmentManager();
                     FragmentTransaction transaction = fm.beginTransaction();
-                    reasonsDialogFragment.show(transaction, "Sample Fragment");
+                    errorSelectionDialogFragment.show(transaction, "Sample Fragment");
                 }
             }
         }
@@ -446,12 +446,12 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) { //only shows the popup when exist an subtitle
             if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
-                ReasonsDialogFragment reasonsDialogFragment = ReasonsDialogFragment.newInstance(mSelectedVideo.subtitle_json,
+                ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(mSelectedVideo.subtitle_json,
                         subtitle.position, mSelectedVideo.task_id, userTask, mSelectedVideo.task_state);
                 if (!isFinishing()) {
                     FragmentManager fm = getFragmentManager();
                     FragmentTransaction transaction = fm.beginTransaction();
-                    reasonsDialogFragment.show(transaction, "Sample Fragment");
+                    errorSelectionDialogFragment.show(transaction, "Sample Fragment");
                 }
             }
         }
@@ -470,7 +470,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
         bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
         bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
-        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_REASONS, bundle);
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS, bundle);
     }
 
     @Override
@@ -494,14 +494,26 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                 }
 
             }
+            //Analytics Report Event
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+            bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+            bundle.putBoolean(Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
+            mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS, bundle);
+
+        } else {
+
+            //Analytics Report Event
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
+            bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
+            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+            bundle.putBoolean(Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
+            mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS, bundle);
+
         }
 
-        //Analytics Report Event
-        Bundle bundle = new Bundle();
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
-        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
-        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
-        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_REASONS, bundle);
 
         playVideo(null);
 

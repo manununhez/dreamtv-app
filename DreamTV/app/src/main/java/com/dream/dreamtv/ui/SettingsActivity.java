@@ -33,8 +33,9 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class PreferencesActivity extends Activity {
+public class SettingsActivity extends Activity {
 
     private static final String ABR_CHINESE = "zh";
     private static final String ABR_ENGLISH = "en";
@@ -51,7 +52,7 @@ public class PreferencesActivity extends Activity {
     private TextView tvTestingModeTitle;
     private TextView tvTextLanguageTitle;
     private TextView tvReasonDialogInterfaceTitle;
-    private TextView tvVideoLanguagesTitle;
+//    private TextView tvVideoLanguagesTitle;
     private TextView tvAudioLabel;
     private TextView tvSubtitleLabel;
     private List<String> keyListForAdapter;
@@ -62,6 +63,7 @@ public class PreferencesActivity extends Activity {
     private String selectedSubtitleLanguageCode;
     private String selectedAudioLanguageCode;
     private RadioButton rbYes;
+    private RadioButton rbNot;
     private RadioButton rbEnglish;
     private RadioButton rbPolish;
     private RadioButton rbAdvanced;
@@ -75,13 +77,13 @@ public class PreferencesActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_preferences);
+        setContentView(R.layout.activity_settings);
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         // Get the activity
-        mActivity = PreferencesActivity.this;
+        mActivity = SettingsActivity.this;
 
         // Get the widgets reference from XML layout
         mListView = findViewById(R.id.lv);
@@ -104,7 +106,7 @@ public class PreferencesActivity extends Activity {
         tvAudioLabel = findViewById(R.id.tvAudioLabel);
         tvSubtitleLabel = findViewById(R.id.tvSubtitleLabel);
         tvReasonDialogInterfaceTitle = findViewById(R.id.tvReasonDialogInterfaceTitle);
-        tvVideoLanguagesTitle = findViewById(R.id.tvVideoLanguagesTitle);
+//        tvVideoLanguagesTitle = findViewById(R.id.tvVideoLanguagesTitle);
         tvSubtitleValue = findViewById(R.id.tvSubtitleValue);
         tvAudioValue = findViewById(R.id.tvAudioValue);
 
@@ -114,7 +116,6 @@ public class PreferencesActivity extends Activity {
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
-        setupEventsListener();
 
         interfaceLanguageSettings();
         interfaceModeSettings();
@@ -122,6 +123,7 @@ public class PreferencesActivity extends Activity {
         initializeLanguagesList();
         setupListView();
 
+        setupEventsListener();
 
     }
 
@@ -141,7 +143,7 @@ public class PreferencesActivity extends Activity {
             @Override
             public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
                 if (isChecked) {
-                    tvVideoLanguagesTitle.setText(R.string.text_subtitle_languages);
+//                    tvVideoLanguagesTitle.setText(R.string.text_subtitle_languages);
 
                     int position = lvLanguagesAdapter.getPosition(getString(R.string.all_languages));
 
@@ -158,7 +160,7 @@ public class PreferencesActivity extends Activity {
             @Override
             public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
                 if (isChecked) {
-                    tvVideoLanguagesTitle.setText(R.string.text_audio_languages);
+//                    tvVideoLanguagesTitle.setText(R.string.text_audio_languages);
 
                     int position = lvLanguagesAdapter.getPosition(getString(R.string.all_languages));
 
@@ -229,7 +231,7 @@ public class PreferencesActivity extends Activity {
 
     private void testingModeSettings() {
         rbYes = findViewById(R.id.rbYes);
-        RadioButton rbNot = findViewById(R.id.rbNot);
+        rbNot = findViewById(R.id.rbNot);
 
         String mode = ((DreamTVApp) getApplication()).getTestingMode();
 
@@ -287,22 +289,25 @@ public class PreferencesActivity extends Activity {
 
     private void updateViews(String languageCode) {
         Context context = LocaleHelper.setLocale(this, languageCode);
-        Resources resources = context.getResources();
-        tvTitle.setText(resources.getString(R.string.title_video_settings));
-        tvTestingModeTitle.setText(resources.getString(R.string.title_testing_mode_settings));
-        rbPolish.setText(resources.getString(R.string.rb_option_text_polish));
-        tvTextLanguageTitle.setText(resources.getString(R.string.title_text_language_settings));
-        rbEnglish.setText(resources.getString(R.string.rb_option_text_english));
-        tvReasonDialogInterfaceTitle.setText(resources.getString(R.string.title_reason_dialog_interface_settings));
-        rbAdvanced.setText(resources.getString(R.string.rb_option_text_advanced));
-        rbBeginner.setText(resources.getString(R.string.rb_option_text_beginner));
-        tvVideoLanguagesTitle.setText(resources.getString(R.string.title_video_languages_settings));
-        btnSubtitle.setText(resources.getString(R.string.btn_subtitle));
-        btnAudio.setText(resources.getString(R.string.btn_audio));
-        btnSave.setText(resources.getString(R.string.btn_save_settings));
-        tvAudioLabel.setText(resources.getString(R.string.title_audio));
-        tvSubtitleLabel.setText(resources.getString(R.string.title_subtitle));
-        initializeLanguagesList();
+//        recreate();
+//        Resources resources = context.getResources();
+//        tvTitle.setText(resources.getString(R.string.title_video_settings));
+//        tvTestingModeTitle.setText(resources.getString(R.string.title_testing_mode_settings));
+//        tvTextLanguageTitle.setText(resources.getString(R.string.title_text_language_settings));
+//        rbPolish.setText(resources.getString(R.string.rb_option_text_polish));
+//        rbEnglish.setText(resources.getString(R.string.rb_option_text_english));
+//        rbAdvanced.setText(resources.getString(R.string.rb_option_text_advanced));
+//        rbBeginner.setText(resources.getString(R.string.rb_option_text_beginner));
+//        rbYes.setText(resources.getString(R.string.rb_option_text_yes));
+//        rbNot.setText(resources.getString(R.string.rb_option_text_not));
+//        tvReasonDialogInterfaceTitle.setText(resources.getString(R.string.title_reason_dialog_interface_settings));
+//        tvVideoLanguagesTitle.setText(resources.getString(R.string.title_video_languages_settings));
+//        btnSubtitle.setText(resources.getString(R.string.btn_subtitle));
+//        btnAudio.setText(resources.getString(R.string.btn_audio));
+//        btnSave.setText(resources.getString(R.string.btn_save_settings));
+//        tvAudioLabel.setText(resources.getString(R.string.title_audio));
+//        tvSubtitleLabel.setText(resources.getString(R.string.title_subtitle));
+//        initializeLanguagesList();
     }
 
     private void saveUSerPreferences() {
@@ -339,7 +344,7 @@ public class PreferencesActivity extends Activity {
 
                 Intent returnIntent = new Intent();
                 setResult(Activity.RESULT_OK, returnIntent);
-                Toast.makeText(PreferencesActivity.this, getString(R.string.title_confirmation_user_saved_data), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SettingsActivity.this, getString(R.string.title_confirmation_user_saved_data), Toast.LENGTH_SHORT).show();
 
                 firebaseAnalyticsReportEvent(user);
 
@@ -351,14 +356,14 @@ public class PreferencesActivity extends Activity {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                Toast.makeText(PreferencesActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SettingsActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                 DreamTVApp.Logger.d(error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                Toast.makeText(PreferencesActivity.this, jsonResponse.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SettingsActivity.this, jsonResponse.toString(), Toast.LENGTH_SHORT).show();
                 DreamTVApp.Logger.d(jsonResponse.toString());
             }
         };
@@ -372,9 +377,9 @@ public class PreferencesActivity extends Activity {
         Bundle bundle = new Bundle();
 
         if (mode == null || mode.equals(getString(R.string.text_no_option)))
-            bundle.putString(Constants.FIREBASE_KEY_TESTING_MODE, Constants.FIREBASE_NO_OPTION);
+            bundle.putBoolean(Constants.FIREBASE_KEY_TESTING_MODE, false);
         else if (mode.equals(getString(R.string.text_yes_option)))
-            bundle.putString(Constants.FIREBASE_KEY_TESTING_MODE, Constants.FIREBASE_YES_OPTION);
+            bundle.putBoolean(Constants.FIREBASE_KEY_TESTING_MODE, true);
 
         //User Settings Saved - Analytics Report Event
         bundle.putString(Constants.FIREBASE_KEY_SUB_LANGUAGE, user.sub_language);

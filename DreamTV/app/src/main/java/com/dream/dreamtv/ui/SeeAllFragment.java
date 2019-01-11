@@ -172,7 +172,7 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
             } else if (item instanceof String) {
 
                 if (((String) item).contains(Objects.requireNonNull(getActivity()).getApplicationContext().getString(R.string.title_video_settings))) {
-                    Intent intent = new Intent(getActivity(), PreferencesActivity.class);
+                    Intent intent = new Intent(getActivity(), SettingsActivity.class);
                     startActivity(intent);
                 } else {
                     Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT)
