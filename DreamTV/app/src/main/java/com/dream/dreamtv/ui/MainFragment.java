@@ -294,6 +294,7 @@ public class MainFragment extends BrowseSupportFragment {
                     loadVideos(taskList, Constants.MY_LIST_CATEGORY);
 
                 setFootersOptions();
+
             }
 
             @Override

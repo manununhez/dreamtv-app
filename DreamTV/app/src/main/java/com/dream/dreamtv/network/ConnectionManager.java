@@ -34,7 +34,9 @@ public class ConnectionManager {
 
         LANGUAGES("languages"),
 
-        SUBTITLE("subtitle");
+        SUBTITLE("subtitle"),
+
+        VIDEOTESTS("videotests");
 
 
         final String value;

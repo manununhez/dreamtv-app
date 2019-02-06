@@ -42,10 +42,12 @@ import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.SubtitleJson;
+import com.dream.dreamtv.model.TaskList;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.UserVideo;
 import com.dream.dreamtv.model.Video;
+import com.dream.dreamtv.model.VideoTests;
 import com.dream.dreamtv.network.ConnectionManager;
 import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.presenter.DetailsDescriptionPresenter;
@@ -55,6 +57,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -174,7 +177,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void onActionClicked(Action action) {
                 if (action.getId() == ACTION_PLAY_VIDEO) {
-                    getSubtitleJson(mSelectedVideo);
+                    prepareSubtitle(mSelectedVideo);
 
                 } else if (action.getId() == ACTION_ADD_MY_LIST) {
                     addVideoToMyList();
@@ -191,6 +194,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         mAdapter = new ArrayObjectAdapter(mPresenterSelector);
         setAdapter(mAdapter);
     }
+
+
 
     private void setupDetailsOverviewRow() {
         rowPresenter = new DetailsOverviewRow(mSelectedVideo);
@@ -358,40 +363,95 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     }
 
-
-    private void getSubtitleJson(final Video video) {
-        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+    private void prepareSubtitle(Video mSelectedVideo) {
         String mode = ((DreamTVApp) getActivity().getApplication()).getTestingMode();
+
+        //Testing mode true
+        if (mode != null && mode.equals(getString(R.string.text_yes_option)))
+            getVideoTests(mSelectedVideo);
+        else
+            getSubtitleJson(mSelectedVideo, 0);
+
+
+    }
+
+    private void getVideoTests(final Video mSelectedVideo) {
+
+        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
+                getString(R.string.title_loading_retrieve_user_tasks)) {
+
+            @Override
+            public void processResponse(String response) {
+                Gson gson = new Gson();
+                DreamTVApp.Logger.d(response);
+                VideoTests[] videoTests = gson.fromJson(response, VideoTests[].class);
+                DreamTVApp.Logger.d(Arrays.toString(videoTests));
+
+                int videoTestIndex = 0;
+                for(int i =0; i < videoTests.length; i++){
+                    if(videoTests[i].video_id.equals(mSelectedVideo.id)){
+                        videoTestIndex = i;
+                        break;
+                    }
+                }
+
+                getSubtitleJson(mSelectedVideo, videoTests[videoTestIndex].version);
+
+
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+                DreamTVApp.Logger.d(error.getMessage());
+            }
+
+            @Override
+            public void processError(JsonResponseBaseBean jsonResponse) {
+                super.processError(jsonResponse);
+                DreamTVApp.Logger.d(jsonResponse.toString());
+            }
+        };
+
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.VIDEOTESTS, null, responseListener, this);
+    }
+
+
+
+    private void getSubtitleJson(final Video video, int version) {
+        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
 
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put(PARAM_VIDEO_ID, video.id);
-        urlParams.put(PARAM_VERSION, PARAM_LAST);
         urlParams.put(PARAM_LANGUAGE_CODE, (user.sub_language != null &&
                 !user.sub_language.equals(Constants.NONE_OPTIONS_CODE)) ?
                 user.sub_language : video.subtitle_language);
 
+        if(version > 0)  //if version == 0, no need to pass version parameter, For default is fetched last subtitle versions
+            urlParams.put(PARAM_VERSION, String.valueOf(version));
+
         //Testing mode true
-        if (mode != null && mode.equals(getString(R.string.text_yes_option)))
-            switch (video.id) {
-                case TESTING_VIDEO_ID_1:
-                    urlParams.put(PARAM_VERSION_NUMBER, TESTING_VIDEO_VERSION_NUMBER_1);
-                    break;
-                case TESTING_VIDEO_ID_2:
-                    urlParams.put(PARAM_VERSION_NUMBER, TESTING_VIDEO_VERSION_NUMBER_2);
-                    break;
-                case TESTING_VIDEO_ID_3:
-                    urlParams.put(PARAM_VERSION_NUMBER, TESTING_VIDEO_VERSION_NUMBER_3);
-                    break;
-                case TESTING_VIDEO_ID_4:
-                    urlParams.put(PARAM_VERSION_NUMBER, TESTING_VIDEO_VERSION_NUMBER_4);
-                    break;
-                case TESTING_VIDEO_ID_5:
-                    urlParams.put(PARAM_VERSION_NUMBER, TESTING_VIDEO_VERSION_NUMBER_5);
-                    break;
-                case TESTING_VIDEO_ID_6:
-                    urlParams.put(PARAM_VERSION_NUMBER, TESTING_VIDEO_VERSION_NUMBER_6);
-                    break;
-            }
+//        if (mode != null && mode.equals(getString(R.string.text_yes_option)))
+//            switch (video.id) {
+//                case TESTING_VIDEO_ID_1:
+//                    urlParams.put(PARAM_VERSION, TESTING_VIDEO_VERSION_NUMBER_1);
+//                    break;
+//                case TESTING_VIDEO_ID_2:
+//                    urlParams.put(PARAM_VERSION, TESTING_VIDEO_VERSION_NUMBER_2);
+//                    break;
+//                case TESTING_VIDEO_ID_3:
+//                    urlParams.put(PARAM_VERSION, TESTING_VIDEO_VERSION_NUMBER_3);
+//                    break;
+//                case TESTING_VIDEO_ID_4:
+//                    urlParams.put(PARAM_VERSION, TESTING_VIDEO_VERSION_NUMBER_4);
+//                    break;
+//                case TESTING_VIDEO_ID_5:
+//                    urlParams.put(PARAM_VERSION, TESTING_VIDEO_VERSION_NUMBER_5);
+//                    break;
+//                case TESTING_VIDEO_ID_6:
+//                    urlParams.put(PARAM_VERSION, TESTING_VIDEO_VERSION_NUMBER_6);
+//                    break;
+//            }
 
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
                 getString(R.string.title_loading_retrieve_subtitle)) {
