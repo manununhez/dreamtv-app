@@ -26,7 +26,7 @@ public class ConnectionManager {
         REASONS("reasons"),
 
         USER_VIDEOS("users/videos"),
-        USER_VIDEOS_INFO("users/videos/info"),
+        USER_VIDEO_DETAILS("users/video"),
 
         USER_TASKS("users/task"),
 
@@ -34,7 +34,7 @@ public class ConnectionManager {
 
         LANGUAGES("languages"),
 
-        SUBTITLE("subtitle/info");
+        SUBTITLE("subtitle");
 
 
         final String value;

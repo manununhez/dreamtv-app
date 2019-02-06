@@ -265,7 +265,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             }
         };
 
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_VIDEOS_INFO, urlParams, responseListener, this);
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_VIDEO_DETAILS, urlParams, responseListener, this);
 
     }
 
