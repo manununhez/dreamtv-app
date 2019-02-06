@@ -226,21 +226,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <com.dream.dreamtv.utils.CheckableTextView
-                        android:id="@+id/btnSubtitle"
-                        style="@style/FocusableGreenButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:enabled="false"
-                        android:focusable="true"
-                        android:focusableInTouchMode="true"
-                        android:gravity="center"
-                        android:padding="15dp"
-                        android:text="@string/btn_subtitle"
-                        android:textAllCaps="true"
-                        android:textColor="@color/white"
-                        android:textSize="15sp" />
+
 
                     <com.dream.dreamtv.utils.CheckableTextView
                         android:id="@+id/btnAudio"
@@ -256,6 +242,22 @@
                         android:gravity="center"
                         android:padding="15dp"
                         android:text="@string/btn_audio"
+                        android:textAllCaps="true"
+                        android:textColor="@color/white"
+                        android:textSize="15sp" />
+
+                    <com.dream.dreamtv.utils.CheckableTextView
+                        android:id="@+id/btnSubtitle"
+                        style="@style/FocusableGreenButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:enabled="false"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:gravity="center"
+                        android:padding="15dp"
+                        android:text="@string/btn_subtitle"
                         android:textAllCaps="true"
                         android:textColor="@color/white"
                         android:textSize="15sp" />

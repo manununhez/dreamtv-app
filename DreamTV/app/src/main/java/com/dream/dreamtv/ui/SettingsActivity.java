@@ -433,9 +433,9 @@ public class SettingsActivity extends Activity {
             selectedSubtitleLanguageCode = user.sub_language;
             selectedAudioLanguageCode = user.audio_language;
 
-            btnSubtitle.setChecked(true); //initiliaze checked
-            btnAudio.setChecked(false); //initiliaze checked
-            updateListItemChecked(true);
+            btnSubtitle.setChecked(false); //initiliaze unchecked
+            btnAudio.setChecked(true); //initiliaze checked
+            updateListItemChecked(false);
         }
     }
 
