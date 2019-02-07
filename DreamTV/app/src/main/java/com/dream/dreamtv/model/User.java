@@ -4,7 +4,8 @@ package com.dream.dreamtv.model;
  * Created by manuel on 7/8/17.
  */
 
-public class User extends JsonRequestBaseBean{
+public class User {
+    public String token;
     public String username;
     public String uri;
     public String name;

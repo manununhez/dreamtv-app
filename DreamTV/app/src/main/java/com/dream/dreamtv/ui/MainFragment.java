@@ -352,7 +352,7 @@ public class MainFragment extends BrowseSupportFragment {
             }
 
             for (Task task : taskResponse.data) {
-                listRowAdapter.add(task.getVideo(state));
+                listRowAdapter.add(new Video(task, state));
             }
 
             if (state == Constants.CHECK_NEW_TASKS_CATEGORY) { //Only in the Check_New_Tasks we add the SeeAll options. In others categories is not necessary

@@ -5,13 +5,10 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.*;
 
@@ -19,7 +16,7 @@ import static java.util.concurrent.TimeUnit.*;
  * Created by manuel on 6/12/17.
  */
 
-public class Video extends JsonRequestBaseBean implements Parcelable {
+public class Video implements Parcelable {
     private static final String YOUTUBE_COM = "youtube.com";
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
@@ -44,18 +41,35 @@ public class Video extends JsonRequestBaseBean implements Parcelable {
     private String subtitle_languages_uri;
     private String resource_uri;
 
-    //Para almacenar datos de la tarea
+    //To keep tracking of the track
     public String subtitle_language;
     public int task_id;
     public int task_state; //indicates if the task have or have not done yet. If it the task comes from the category "See Again", task_state == 1, else task_state == 0
     public UserTask[] userTaskList; //all user tasks saved
 
-    //Para almacenar los subtitlos e ir propagando entre pantallas
-    public SubtitleJson subtitle_json; //para ir propagando el subtitulo entre pantallas
+    //To keep subtitle data between screens
+    public SubtitleResponse subtitle_json;
 
     public String video_id;
 
     public Video() {
+    }
+
+    public Video(Task task, int taskState){
+        this.id = task.video_id;
+        this.video_type = task.type;
+        this.primary_audio_language_code = task.primary_audio_language_code;
+        this.original_language = task.original_language;
+        this.title = task.title;
+        this.description = task.description;
+        this.duration = task.duration;
+        this.thumbnail = task.thumbnail;
+        this.team = task.team;
+        this.project = task.project;
+        this.video_url = task.video_url;
+        this.subtitle_language =  task.language;
+        this.task_id =  task.task_id;
+        this.task_state = taskState;
     }
 
 
@@ -82,7 +96,7 @@ public class Video extends JsonRequestBaseBean implements Parcelable {
         task_id = in.readInt();
         task_state = in.readInt();
         userTaskList = in.createTypedArray(UserTask.CREATOR);
-        subtitle_json = in.readParcelable(SubtitleJson.class.getClassLoader());
+        subtitle_json = in.readParcelable(SubtitleResponse.class.getClassLoader());
     }
 
     public static final Creator<Video> CREATOR = new Creator<Video>() {

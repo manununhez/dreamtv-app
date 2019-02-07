@@ -41,8 +41,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
-import com.dream.dreamtv.model.SubtitleJson;
-import com.dream.dreamtv.model.TaskResponse;
+import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.UserVideo;
@@ -403,7 +402,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             }
         };
 
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.VIDEOTESTS, null, responseListener, this);
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.VIDEO_TESTS, null, responseListener, this);
     }
 
 
@@ -428,9 +427,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             public void processResponse(String response) {
                 Log.d(TAG, response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<SubtitleJson>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<SubtitleResponse>>() {
                 };
-                JsonResponseBaseBean<SubtitleJson> jsonResponse = JsonUtils.getJsonResponse(response, type);
+                JsonResponseBaseBean<SubtitleResponse> jsonResponse = JsonUtils.getJsonResponse(response, type);
 
                 mSelectedVideo.subtitle_json = jsonResponse.data;
 

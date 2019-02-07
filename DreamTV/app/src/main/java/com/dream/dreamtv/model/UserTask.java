@@ -7,7 +7,7 @@ import android.os.Parcelable;
  * Created by manuel on 7/20/17.
  */
 
-public class UserTask extends JsonRequestBaseBean implements Parcelable {
+public class UserTask implements Parcelable {
     public int task_id;
     public int subtitle_position;
     public String subtitle_version;

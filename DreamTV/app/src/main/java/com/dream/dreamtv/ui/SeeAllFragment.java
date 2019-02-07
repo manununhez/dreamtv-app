@@ -125,7 +125,7 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
                     currentPage = -1;
 
                 for (Task task : taskResponse.data) {
-                    mAdapter.add(task.getVideo(Constants.CHECK_NEW_TASKS_CATEGORY)); //SeeAllFragments only appears in Check New Tasks Category
+                    mAdapter.add(new Video(task, Constants.CHECK_NEW_TASKS_CATEGORY)); //SeeAllFragments only appears in Check New Tasks Category
                 }
             }
 

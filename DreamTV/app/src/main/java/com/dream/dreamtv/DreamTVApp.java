@@ -4,11 +4,9 @@ import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
-import com.dream.dreamtv.model.Reason;
-import com.dream.dreamtv.model.ReasonList;
+
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.utils.LocaleHelper;
-import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.Gson;
 

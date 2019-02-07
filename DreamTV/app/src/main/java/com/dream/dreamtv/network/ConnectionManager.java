@@ -39,7 +39,7 @@ public class ConnectionManager {
 
         SUBTITLE("subtitle"),
 
-        VIDEOTESTS("videotests");
+        VIDEO_TESTS("videotests");
 
 
         final String value;

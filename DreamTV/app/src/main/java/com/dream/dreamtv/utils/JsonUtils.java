@@ -3,10 +3,8 @@ package com.dream.dreamtv.utils;
 import android.content.Context;
 import android.util.Log;
 
-import com.dream.dreamtv.DreamTVApp;
-import com.dream.dreamtv.model.JsonRequestBaseBean;
+
 import com.dream.dreamtv.model.JsonResponseBaseBean;
-import com.dream.dreamtv.ui.SplashScreenActivity;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -26,11 +24,11 @@ public class JsonUtils {
      * Genera un String con estructura JSON a partir de los parámetros dados.
      *
      * @param context  Context para acceder a SharedPreferences
-     * @param jsonBean La clase a ser serializada, debe ser o extender {@link JsonRequestBaseBean}
+     * @param jsonBean La clase a ser serializada
      * @param <T>      La clase bean
      * @return Un String con estructura JSON
      */
-    public static <T extends JsonRequestBaseBean> String getJsonRequest(
+    public static <T> String getJsonRequest(
             Context context, T jsonBean) {
 
         Gson gson = new Gson();

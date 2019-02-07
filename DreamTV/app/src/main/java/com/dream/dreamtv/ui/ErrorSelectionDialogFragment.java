@@ -36,10 +36,10 @@ import android.widget.ToggleButton;
 import com.android.volley.VolleyError;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.model.ErrorReason;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
-import com.dream.dreamtv.model.Reason;
 import com.dream.dreamtv.model.Subtitle;
-import com.dream.dreamtv.model.SubtitleJson;
+import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.network.ConnectionManager;
@@ -61,7 +61,7 @@ import java.util.Objects;
 public class ErrorSelectionDialogFragment extends DialogFragment {
     private static final String TAG = ErrorSelectionDialogFragment.class.getSimpleName();
 
-    private static final String SUBTITLE_JSON = "SubtitleJson";
+    private static final String SUBTITLE_JSON = "SubtitleResponse";
     private static final String SUBTITLE_ORIGINAL_POSITION = "subtitleOriginalPosition";
     private static final String ID_TASK = "idTask";
     private static final String TASK_STATE = "taskState";
@@ -74,7 +74,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private LinearLayout llButtonsOptions1;
     private LinearLayout llButtonsOptions2;
     private RadioGroup rgReasons;
-    private List<Reason> reasonList;
+    private List<ErrorReason> errorReasonList;
     private ImageButton btnRecord;
     private Button btnOk;
     private Button btnSave;
@@ -83,7 +83,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private TextView tvTitle;
     private Dialog viewRoot;
     private UserTask userTask;
-    private SubtitleJson subtitle;
+    private SubtitleResponse subtitle;
     private ScrollView scrollViewAdvanced;
     private ScrollView scrollViewBeginner;
     private Subtitle selectedSubtitle;
@@ -97,7 +97,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         // Required empty public constructor
     }
 
-    public static ErrorSelectionDialogFragment newInstance(SubtitleJson subtitle, int subtitlePosition, int idTask) {
+    public static ErrorSelectionDialogFragment newInstance(SubtitleResponse subtitle, int subtitlePosition, int idTask) {
         ErrorSelectionDialogFragment f = new ErrorSelectionDialogFragment();
 
         // Supply num input as an argument.
@@ -109,7 +109,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         return f;
     }
 
-    public static ErrorSelectionDialogFragment newInstance(SubtitleJson subtitle, int subtitlePosition, int idTask, UserTask userTask, int taskState) {
+    public static ErrorSelectionDialogFragment newInstance(SubtitleResponse subtitle, int subtitlePosition, int idTask, UserTask userTask, int taskState) {
         ErrorSelectionDialogFragment f = new ErrorSelectionDialogFragment();
 
         // Supply num input as an argument.
@@ -174,7 +174,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 //        if (reasonL == null)
         getReasons();
 //        else {
-//            reasonList = reasonL.data;
+//            errorReasonList = reasonL.data;
 //            setupReasons();
 //        }
 
@@ -439,12 +439,12 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                 Gson gson = new Gson();
                 Log.d(TAG,response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<List<Reason>>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<List<ErrorReason>>>() {
                 };
-                JsonResponseBaseBean<List<Reason>> jsonResponse = JsonUtils.getJsonResponse(response, type);
+                JsonResponseBaseBean<List<ErrorReason>> jsonResponse = JsonUtils.getJsonResponse(response, type);
 
-                reasonList = jsonResponse.data;
-                Log.d(TAG,reasonList.toString());
+                errorReasonList = jsonResponse.data;
+                Log.d(TAG, errorReasonList.toString());
 
                 //Interface mode settings
                 User user = ((DreamTVApp) getActivity().getApplication()).getUser();
@@ -480,8 +480,8 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         scrollViewBeginner.setVisibility(View.GONE);
 
         llReasons.removeAllViews();
-        for (int i = 0; i < reasonList.size(); i++) {
-            Reason reason = reasonList.get(i);
+        for (int i = 0; i < errorReasonList.size(); i++) {
+            ErrorReason errorReason = errorReasonList.get(i);
 
             int dpsToogle = 25;
             final float scale = getActivity().getResources().getDisplayMetrics().density;
@@ -496,10 +496,10 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             toggleButton.setTextColor(ContextCompat.getColor(getActivity(), R.color.white));
             RadioGroup.LayoutParams layoutParams = new RadioGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, pixels);
             layoutParams.setMargins(0, 0, 0, 15);
-            toggleButton.setId(reason.id);
-            toggleButton.setTextOn(reason.name);
-            toggleButton.setTextOff(reason.name);
-            toggleButton.setText(reason.name);
+            toggleButton.setId(errorReason.id);
+            toggleButton.setTextOn(errorReason.name);
+            toggleButton.setTextOff(errorReason.name);
+            toggleButton.setText(errorReason.name);
             toggleButton.setLayoutParams(layoutParams);
             toggleButton.setFocusable(true);
             toggleButton.setFocusableInTouchMode(true);
@@ -542,17 +542,17 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             }
         });
 
-        for (int i = 0; i < reasonList.size(); i++) {
-            Reason reason = reasonList.get(i);
+        for (int i = 0; i < errorReasonList.size(); i++) {
+            ErrorReason errorReason = errorReasonList.get(i);
 
             int dpsToogle = 25;
             final float scale = getActivity().getResources().getDisplayMetrics().density;
             int pixels = (int) (dpsToogle * scale + 0.5f);
 
             RadioButton radioButton = new RadioButton(getActivity());
-            radioButton.setText(reason.name);
+            radioButton.setText(errorReason.name);
             radioButton.setAllCaps(true);
-            radioButton.setId(reason.id);
+            radioButton.setId(errorReason.id);
             radioButton.setGravity(Gravity.CENTER);
             radioButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_1));
 
