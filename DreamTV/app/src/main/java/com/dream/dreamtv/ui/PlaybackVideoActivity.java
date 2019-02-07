@@ -23,6 +23,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -46,6 +47,8 @@ import com.google.firebase.analytics.FirebaseAnalytics;
  */
 public class PlaybackVideoActivity extends Activity implements ErrorSelectionDialogFragment.OnDialogClosedListener,
         IPlayBackVideoListener, IReasonsDialogListener, ISubtitlePlayBackListener {
+
+    private static final String TAG = PlaybackVideoActivity.class.getSimpleName();
 
     private static final int PLAY = 0;
     private static final int PAUSE = 1;
@@ -133,7 +136,7 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                DreamTVApp.Logger.d("KEYCODE_DPAD_LEFT");
+                Log.d(TAG,"KEYCODE_DPAD_LEFT");
 
                 mVideoView.seekTo(mVideoView.getCurrentPosition() - POSITION_OFFSET);
                 Toast.makeText(this, getString(R.string.title_video_backward, (POSITION_OFFSET / 1000)),
@@ -146,7 +149,7 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
                 mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO, bundle);
                 return true;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                DreamTVApp.Logger.d("KEYCODE_DPAD_RIGHT");
+                Log.d(TAG,"KEYCODE_DPAD_RIGHT");
 
                 mVideoView.seekTo(mVideoView.getCurrentPosition() + POSITION_OFFSET);
                 Toast.makeText(this, getString(R.string.title_video_forward, (POSITION_OFFSET / 1000)),
@@ -227,15 +230,15 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
                     public boolean onInfo(MediaPlayer mp, int what, int extra) {
                         if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
 
-                            DreamTVApp.Logger.d("OnPreparedListener - MEDIA_INFO_BUFFERING_START");
+                            Log.d(TAG,"OnPreparedListener - MEDIA_INFO_BUFFERING_START");
                         }
                         if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
-                            DreamTVApp.Logger.d("OnPreparedListener - MEDIA_INFO_BUFFERING_END");
+                            Log.d(TAG,"OnPreparedListener - MEDIA_INFO_BUFFERING_END");
                             loadingDialog.dismiss();
                         }
 
                         if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
-                            DreamTVApp.Logger.d("OnPreparedListener - MEDIA_INFO_VIDEO_RENDERING_START");
+                            Log.d(TAG,"OnPreparedListener - MEDIA_INFO_VIDEO_RENDERING_START");
                             loadingDialog.dismiss();
                         }
 

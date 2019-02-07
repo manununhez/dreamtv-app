@@ -106,7 +106,6 @@ public class Video extends JsonRequestBaseBean implements Parcelable {
         else
             url = this.all_urls.get(0);
 
-        DreamTVApp.Logger.d("VideoUrl -> " + url);
         return url;
     }
 

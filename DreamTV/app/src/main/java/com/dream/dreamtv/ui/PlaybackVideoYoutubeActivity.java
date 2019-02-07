@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.text.Html;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Chronometer;
@@ -58,6 +59,8 @@ import fr.bmartel.youtubetv.model.VideoState;
 public class PlaybackVideoYoutubeActivity extends Activity implements
         ErrorSelectionDialogFragment.OnDialogClosedListener, IPlayerListener, IPlayBackVideoListener,
         IReasonsDialogListener, ISubtitlePlayBackListener {
+
+    private static final String TAG = PlaybackVideoYoutubeActivity.class.getSimpleName();
 
     private static final String YOUTUBE_VIDEO_ID = "videoId";
     private static final String YOUTUBE_AUTOPLAY = "autoplay";
@@ -144,14 +147,14 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     @Override
     public void onPlayerStateChange(VideoState state, long position, float speed, float duration, VideoInfo videoInfo) {
         if (state.toString().equals(STATE_PLAY)) {
-            DreamTVApp.Logger.d("State : " + STATE_PLAY);
+            Log.d(TAG,"State : " + STATE_PLAY);
 
             //start sync subtitles
             rlVideoPlayerInfo.setVisibility(View.GONE);
             startSyncSubtitle(SystemClock.elapsedRealtime() - position);
 
         } else if (state.toString().equals(STATE_PAUSED)) {
-            DreamTVApp.Logger.d("State : " + STATE_PAUSED);
+            Log.d(TAG,"State : " + STATE_PAUSED);
             pauseVideo(position);
 
             controlReasonDialogPopUp();
@@ -159,7 +162,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
 
         if (state.toString().equals(STATE_ENDED)) {//at this moment we are in the end of the video. Duration in ms
-            DreamTVApp.Logger.d("State : ENDED");
+            Log.d(TAG,"State : ENDED");
             stopVideo();
             stopSyncSubtitle();
             Utils.getAlertDialog(PlaybackVideoYoutubeActivity.this, getString(R.string.alert_title_video_terminated),
@@ -189,7 +192,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                DreamTVApp.Logger.d("KEYCODE_DPAD_LEFT");
+                Log.d(TAG,"KEYCODE_DPAD_LEFT");
                 mYoutubeView.moveBackward(POSITION_OFFSET);
                 Toast.makeText(this,  getString(R.string.title_video_backward, POSITION_OFFSET),
                         Toast.LENGTH_SHORT).show();
@@ -201,7 +204,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                 mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO, bundle);
                 return true;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                DreamTVApp.Logger.d("KEYCODE_DPAD_RIGHT");
+                Log.d(TAG,"KEYCODE_DPAD_RIGHT");
                 mYoutubeView.moveForward(POSITION_OFFSET);
                 Toast.makeText(this,  getString(R.string.title_video_forward, POSITION_OFFSET),
                         Toast.LENGTH_SHORT).show();
@@ -236,7 +239,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                     } else { //Play
                         playVideoMode();
                     }
-                    DreamTVApp.Logger.d("KEYCODE_DPAD_CENTER - dispatchKeyEvent");
+                    Log.d(TAG,"KEYCODE_DPAD_CENTER - dispatchKeyEvent");
                     return true;
                 }
             default:

@@ -79,18 +79,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private static final String PARAM_VERSION_NUMBER = "version_number";
     private static final String PARAM_TASK_ID = "task_id";
     private static final String PARAM_TYPE = "type";
-    private static final String TESTING_VIDEO_ID_1 = "tNE5imiv27uA";
-    private static final String TESTING_VIDEO_ID_2 = "DJlZ5QYcHSQB";
-    private static final String TESTING_VIDEO_ID_3 = "eC0ZoBNXwcwA";
-    private static final String TESTING_VIDEO_ID_4 = "cYjdKCNfh989";
-    private static final String TESTING_VIDEO_ID_5 = "8ULN8kSqfMkk";
-    private static final String TESTING_VIDEO_ID_6 = "MNMcyyZBTLUc";
-    private static final String TESTING_VIDEO_VERSION_NUMBER_1 = "4";
-    private static final String TESTING_VIDEO_VERSION_NUMBER_2 = "6";
-    private static final String TESTING_VIDEO_VERSION_NUMBER_3 = "11";
-    private static final String TESTING_VIDEO_VERSION_NUMBER_4 = "14";
-    private static final String TESTING_VIDEO_VERSION_NUMBER_5 = "8";
-    private static final String TESTING_VIDEO_VERSION_NUMBER_6 = "14";
     private Video mSelectedVideo;
     private ArrayObjectAdapter mAdapter;
     private ClassPresenterSelector mPresenterSelector;
@@ -242,7 +230,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processResponse(String response) {
                 Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
+                Log.d(TAG, response);
                 TypeToken type = new TypeToken<JsonResponseBaseBean<UserVideo[]>>() {
                 };
                 JsonResponseBaseBean<UserVideo[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
@@ -260,13 +248,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG, error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG, jsonResponse.toString());
             }
         };
 
@@ -287,8 +275,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
             @Override
             public void processResponse(String response) {
-                Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
+                Log.d(TAG, response);
 
 
                 SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
@@ -308,13 +295,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG, error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG, jsonResponse.toString());
             }
         };
 
@@ -331,8 +318,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
             @Override
             public void processResponse(String response) {
-                Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
+                Log.d(TAG, response);
 
                 SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
                 adapter.clear(ACTION_REMOVE_MY_LIST);
@@ -349,13 +335,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG, error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG, jsonResponse.toString());
             }
         };
 
@@ -382,15 +368,14 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
             @Override
             public void processResponse(String response) {
-                Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
+                Log.d(TAG, response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<VideoTests[]>>() {
                 };
                 JsonResponseBaseBean<VideoTests[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
 
                 VideoTests[] videoTests = jsonResponse.data;
-                DreamTVApp.Logger.d(Arrays.toString(videoTests));
+                Log.d(TAG, Arrays.toString(videoTests));
 
                 int videoTestIndex = 0;
                 for(int i =0; i < videoTests.length; i++){
@@ -408,13 +393,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG, error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG, jsonResponse.toString());
             }
         };
 
@@ -435,35 +420,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         if(version > 0)  //if version == 0, no need to pass version parameter, For default is fetched last subtitle versions
             urlParams.put(PARAM_VERSION, String.valueOf(version));
 
-        //Testing mode true
-//        if (mode != null && mode.equals(getString(R.string.text_yes_option)))
-//            switch (video.id) {
-//                case TESTING_VIDEO_ID_1:
-//                    urlParams.put(PARAM_VERSION, TESTING_VIDEO_VERSION_NUMBER_1);
-//                    break;
-//                case TESTING_VIDEO_ID_2:
-//                    urlParams.put(PARAM_VERSION, TESTING_VIDEO_VERSION_NUMBER_2);
-//                    break;
-//                case TESTING_VIDEO_ID_3:
-//                    urlParams.put(PARAM_VERSION, TESTING_VIDEO_VERSION_NUMBER_3);
-//                    break;
-//                case TESTING_VIDEO_ID_4:
-//                    urlParams.put(PARAM_VERSION, TESTING_VIDEO_VERSION_NUMBER_4);
-//                    break;
-//                case TESTING_VIDEO_ID_5:
-//                    urlParams.put(PARAM_VERSION, TESTING_VIDEO_VERSION_NUMBER_5);
-//                    break;
-//                case TESTING_VIDEO_ID_6:
-//                    urlParams.put(PARAM_VERSION, TESTING_VIDEO_VERSION_NUMBER_6);
-//                    break;
-//            }
 
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
                 getString(R.string.title_loading_retrieve_subtitle)) {
 
             @Override
             public void processResponse(String response) {
-                DreamTVApp.Logger.d(response);
+                Log.d(TAG, response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<SubtitleJson>>() {
                 };
@@ -472,7 +435,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 mSelectedVideo.subtitle_json = jsonResponse.data;
 
                 if (mSelectedVideo.subtitle_json != null && mSelectedVideo.subtitle_json.subtitles != null) { //Si se encontraron los subtitulos, vamos a la pantalla de reproduccion
-                    DreamTVApp.Logger.d(jsonResponse.data.toString());
+                    Log.d(TAG, jsonResponse.data.toString());
                     //verify the type of task. We get the data from users tasks
                     if (mSelectedVideo.task_state == Constants.CHECK_NEW_TASKS_CATEGORY) {
                         getOtherTasksForThisVideo();
@@ -490,13 +453,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG,error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG,jsonResponse.toString());
             }
         };
 
@@ -540,7 +503,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processResponse(String response) {
 //                Gson gson = new Gson();
-                DreamTVApp.Logger.d("Tasks -> Mine: " + response);
+                Log.d(TAG,"Tasks -> Mine: " + response);
                 TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask[]>>() {
                 };
                 JsonResponseBaseBean<UserTask[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
@@ -554,13 +517,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG,error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG,jsonResponse.toString());
             }
         };
 
@@ -591,13 +554,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG,error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG,jsonResponse.toString());
             }
         };
 

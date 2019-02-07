@@ -59,6 +59,7 @@ import java.util.Objects;
  * A simple {@link Fragment} subclass.
  */
 public class ErrorSelectionDialogFragment extends DialogFragment {
+    private static final String TAG = ErrorSelectionDialogFragment.class.getSimpleName();
 
     private static final String SUBTITLE_JSON = "SubtitleJson";
     private static final String SUBTITLE_ORIGINAL_POSITION = "subtitleOriginalPosition";
@@ -228,8 +229,8 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 selectedSubtitle = (Subtitle) adapterView.getItemAtPosition(i);
-                DreamTVApp.Logger.d("CPRCurrentPosition: " + currentSubtitlePosition);
-                DreamTVApp.Logger.d("CPRNewPosition: " + (i + 1));
+                Log.d(TAG,"CPRCurrentPosition: " + currentSubtitlePosition);
+                Log.d(TAG,"CPRNewPosition: " + (i + 1));
                 currentSubtitlePosition = i + 1;
 
                 setupSubtitleNavigation(i + 1);
@@ -256,7 +257,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     }
 
     private void repopulateFormWithUserTaskData() {
-        DreamTVApp.Logger.d("repopulateFormWithUserTaskData()");
+        Log.d(TAG,"repopulateFormWithUserTaskData()");
         voiceInput.setText(userTask.comments); //repopulate comments
 
         List<String> strArray = Arrays.asList(userTask.reason_id.substring(userTask.reason_id.indexOf("[") + 1, userTask.reason_id.indexOf("]")).split(", "));
@@ -323,7 +324,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             @Override
             public void processResponse(String response) {
                 Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
+                Log.d(TAG,response);
 
                 dismiss();
 
@@ -332,13 +333,13 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG,error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG,jsonResponse.toString());
             }
         };
 
@@ -436,14 +437,14 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             @Override
             public void processResponse(String response) {
                 Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
+                Log.d(TAG,response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<List<Reason>>>() {
                 };
                 JsonResponseBaseBean<List<Reason>> jsonResponse = JsonUtils.getJsonResponse(response, type);
 
                 reasonList = jsonResponse.data;
-                DreamTVApp.Logger.d(reasonList.toString());
+                Log.d(TAG,reasonList.toString());
 
                 //Interface mode settings
                 User user = ((DreamTVApp) getActivity().getApplication()).getUser();
@@ -459,13 +460,13 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG,error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG,jsonResponse.toString());
             }
         };
 

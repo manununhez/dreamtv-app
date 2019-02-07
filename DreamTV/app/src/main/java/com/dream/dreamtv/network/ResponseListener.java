@@ -1,6 +1,7 @@
 package com.dream.dreamtv.network;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -20,6 +21,8 @@ import com.google.gson.reflect.TypeToken;
  * Created by gbogarin on 29/11/2015.
  */
 public abstract class ResponseListener implements Listener<String>, ErrorListener, RequestQueue.RequestFinishedListener {
+    private static final String TAG = ResponseListener.class.getSimpleName();
+
     private final Context context;
     private LoadingDialog loadingDialog;
     private View customLoading;
@@ -53,7 +56,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        DreamTVApp.Logger.d("Respuesta: " + error.getMessage());
+        Log.d(TAG,"Respuesta: " + error.getMessage());
         if (loadingDialog != null) {
             loadingDialog.dismiss();
         }
@@ -62,7 +65,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
             customLoading.setVisibility(View.GONE);
 
         String errorMessage = VolleyErrorHelper.getMessage(error, context);
-        DreamTVApp.Logger.e(errorMessage);
+        Log.d(TAG,errorMessage);
         if (errorMessage != null && !errorMessage.isEmpty()) {
             Toast.makeText(context.getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
         }
@@ -80,7 +83,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
         if (customLoading != null)
             customLoading.setVisibility(View.GONE);
 
-        DreamTVApp.Logger.d("Respuesta: " + response);
+        Log.d(TAG,"Respuesta: " + response);
 //
         TypeToken typeToken = new TypeToken<JsonResponseBaseBean>() {
         };

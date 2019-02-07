@@ -3,6 +3,7 @@ package com.dream.dreamtv.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Window;
 
 import com.dream.dreamtv.DreamTVApp;
@@ -10,6 +11,7 @@ import com.dream.dreamtv.R;
 
 
 public class SplashScreenActivity extends AppCompatActivity {
+    private static final String TAG = SplashScreenActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +29,7 @@ public class SplashScreenActivity extends AppCompatActivity {
             try {
                 Thread.sleep(3 * 1000);
             } catch (Exception e) {
-                DreamTVApp.Logger.e("An error occurred");
+                Log.d(TAG, "An error occurred");
             }
 
             Intent intent = new Intent(SplashScreenActivity.this, MainActivity.class);

@@ -27,6 +27,7 @@ import android.support.v17.leanback.widget.Row;
 import android.support.v17.leanback.widget.RowPresenter;
 import android.support.v17.leanback.widget.VerticalGridPresenter;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -53,6 +54,7 @@ import java.util.Objects;
  * An example how to use leanback's {@link VerticalGridSupportFragment}.
  */
 public class SeeAllFragment extends VerticalGridSupportFragment {
+    private static final String TAG = SeeAllFragment.class.getSimpleName();
 
     private static final int COLUMNS = 4;
     private static final int ZOOM_FACTOR = FocusHighlight.ZOOM_FACTOR_MEDIUM;
@@ -108,14 +110,14 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
             @Override
             public void processResponse(String response) {
                 Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
+                Log.d(TAG,response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
                 };
                 JsonResponseBaseBean<TaskResponse> jsonResponse = JsonUtils.getJsonResponse(response, type);
                 TaskResponse taskResponse = jsonResponse.data;
 
-                DreamTVApp.Logger.d(taskResponse.toString());
+                Log.d(TAG,taskResponse.toString());
 
                 if (taskResponse.current_page < taskResponse.last_page) //Pagination
                     currentPage++;
@@ -130,13 +132,13 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG,error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG,jsonResponse.toString());
             }
         };
 
@@ -166,7 +168,7 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
 
             if (item instanceof Video) {
                 Video video = (Video) item;
-                DreamTVApp.Logger.d("Item: " + item.toString());
+                Log.d(TAG,"Item: " + item.toString());
                 Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
                 intent.putExtra(Constants.VIDEO, video);
 

@@ -72,11 +72,12 @@ import java.util.TimerTask;
 
 
 public class MainFragment extends BrowseSupportFragment {
+    private static final String TAG = MainFragment.class.getSimpleName();
+
     private static final String PARAM_TYPE = "type";
     private static final String PARAM_PAGE = "page";
     private static final String SEE_MORE_VIDEOS_ICON_URL = "https://image.flaticon.com/icons/png/128/181/181532.png";
     private static final String FIRST_PAGE = "1";
-    private static final String TAG = "MainFragment";
     private static final String EMPTY_ITEM = "Some item";
     private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
     private static final int PREFERENCES_SETTINGS_RESULT_CODE = 1256;
@@ -150,7 +151,7 @@ public class MainFragment extends BrowseSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG,error.getMessage());
                 setFootersOptions(); //the settings section is displayed anyway
 
             }
@@ -158,7 +159,7 @@ public class MainFragment extends BrowseSupportFragment {
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG,jsonResponse.toString());
                 setFootersOptions(); //the settings section is displayed anyway
 
             }
@@ -208,14 +209,14 @@ public class MainFragment extends BrowseSupportFragment {
             @Override
             public void processResponse(String response) {
                 Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
+                Log.d(TAG,response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
                 };
                 JsonResponseBaseBean<TaskResponse> jsonResponse = JsonUtils.getJsonResponse(response, type);
                 TaskResponse taskResponse = jsonResponse.data;
 
-                DreamTVApp.Logger.d(taskResponse.toString());
+                Log.d(TAG,taskResponse.toString());
 
                 if (taskResponse.data.size() > 0)
                     loadVideos(taskResponse, Constants.CHECK_NEW_TASKS_CATEGORY);
@@ -226,13 +227,13 @@ public class MainFragment extends BrowseSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG,error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG,jsonResponse.toString());
             }
         };
 
@@ -253,13 +254,13 @@ public class MainFragment extends BrowseSupportFragment {
             @Override
             public void processResponse(String response) {
                 Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
+                Log.d(TAG,response);
                 TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
                 };
                 JsonResponseBaseBean<TaskResponse> jsonResponse = JsonUtils.getJsonResponse(response, type);
                 TaskResponse taskResponse = jsonResponse.data;
 
-                DreamTVApp.Logger.d(taskResponse.toString());
+                Log.d(TAG,taskResponse.toString());
 
                 if (taskResponse.data.size() > 0)
                     loadVideos(taskResponse, Constants.CONTINUE_WATCHING_CATEGORY);
@@ -271,13 +272,13 @@ public class MainFragment extends BrowseSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG,error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG,jsonResponse.toString());
             }
         };
 
@@ -295,14 +296,14 @@ public class MainFragment extends BrowseSupportFragment {
             @Override
             public void processResponse(String response) {
                 Gson gson = new Gson();
-                DreamTVApp.Logger.d(response);
+                Log.d(TAG,response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
                 };
                 JsonResponseBaseBean<TaskResponse> jsonResponse = JsonUtils.getJsonResponse(response, type);
                 TaskResponse taskResponse = jsonResponse.data;
 
-                DreamTVApp.Logger.d(taskResponse.toString());
+                Log.d(TAG,taskResponse.toString());
 
                 if (taskResponse.data.size() > 0)
                     loadVideos(taskResponse, Constants.MY_LIST_CATEGORY);
@@ -314,14 +315,14 @@ public class MainFragment extends BrowseSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG,error.getMessage());
                 setFootersOptions(); //the settings section is displayed anyway
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG,jsonResponse.toString());
                 setFootersOptions(); //the settings section is displayed anyway
             }
         };
@@ -487,7 +488,7 @@ public class MainFragment extends BrowseSupportFragment {
                     getActivity().startActivity(intent, bundle);
                 } else {
                     Video video = (Video) item;
-                    DreamTVApp.Logger.d("Item: " + item.toString());
+                    Log.d(TAG,"Item: " + item.toString());
                     Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
                     intent.putExtra(Constants.VIDEO, video);
 

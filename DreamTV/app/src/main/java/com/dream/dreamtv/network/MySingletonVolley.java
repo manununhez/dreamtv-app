@@ -55,7 +55,6 @@ public class MySingletonVolley {
 
     public void cancelPendingRequests(Object tag) {
         if (mRequestQueue != null) {
-            DreamTVApp.Logger.d("Se finaliza el request para: " + tag.toString());
             mRequestQueue.cancelAll(tag);
         }
     }

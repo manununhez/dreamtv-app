@@ -1,10 +1,12 @@
 package com.dream.dreamtv.utils;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.model.JsonRequestBaseBean;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
+import com.dream.dreamtv.ui.SplashScreenActivity;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -15,6 +17,7 @@ import com.google.gson.reflect.TypeToken;
  * Clase para trabajar con JSON
  */
 public class JsonUtils {
+    private static final String TAG = JsonUtils.class.getSimpleName();
 
     private JsonUtils() {
     }
@@ -32,7 +35,7 @@ public class JsonUtils {
 
         Gson gson = new Gson();
         String jsonRequest = gson.toJson(jsonBean);
-        DreamTVApp.Logger.d("JsonRequest generado: " + jsonRequest);
+        Log.d(TAG,"JsonRequest generado: " + jsonRequest);
 
         return jsonRequest;
     }
@@ -52,11 +55,11 @@ public class JsonUtils {
         try {
             jsonObject = gson.fromJson(jsonResponse, typeToken.getType());
         } catch (JsonSyntaxException e) {
-            DreamTVApp.Logger.e("No se pudo serializar el json: " + e.getMessage());
+            Log.d(TAG,"No se pudo serializar el json: " + e.getMessage());
             jsonObject = new JsonResponseBaseBean();
             jsonObject.success = false;
         }
-        DreamTVApp.Logger.d("JsonResponse generado: " + jsonObject.toString());
+        Log.d(TAG,"JsonResponse generado: " + jsonObject.toString());
 
         return jsonObject;
     }
@@ -77,13 +80,13 @@ public class JsonUtils {
         try {
             jsonObject = gson.fromJson(jsonResponse, typeToken.getType());
         } catch (JsonSyntaxException e) {
-            DreamTVApp.Logger.e("No se pudo serializar el json: " + e.getMessage());
+            Log.d(TAG,"No se pudo serializar el json: " + e.getMessage());
             jsonObject = new JsonResponseBaseBean();
             jsonObject.success = false;
         }
 
         if (logResponse)
-            DreamTVApp.Logger.d("JsonResponse generado: " + jsonObject.toString());
+            Log.d(TAG,"JsonResponse generado: " + jsonObject.toString());
 
         return jsonObject;
     }

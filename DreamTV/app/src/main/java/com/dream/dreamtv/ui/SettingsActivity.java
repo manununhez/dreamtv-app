@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class SettingsActivity extends Activity {
+    private static final String TAG = SettingsActivity.class.getSimpleName();
 
     private static final String ABR_CHINESE = "zh";
     private static final String ABR_ENGLISH = "en";
@@ -326,7 +328,7 @@ public class SettingsActivity extends Activity {
 
             @Override
             public void processResponse(String response) {
-                DreamTVApp.Logger.d(response);
+                Log.d(TAG,response);
                 TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
                 };
                 JsonResponseBaseBean<User> jsonResponse = JsonUtils.getJsonResponse(response, type);
@@ -357,14 +359,14 @@ public class SettingsActivity extends Activity {
             public void processError(VolleyError error) {
                 super.processError(error);
                 Toast.makeText(SettingsActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-                DreamTVApp.Logger.d(error.getMessage());
+                Log.d(TAG,error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
                 Toast.makeText(SettingsActivity.this, jsonResponse.toString(), Toast.LENGTH_SHORT).show();
-                DreamTVApp.Logger.d(jsonResponse.toString());
+                Log.d(TAG,jsonResponse.toString());
             }
         };
 

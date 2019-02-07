@@ -2,6 +2,7 @@ package com.dream.dreamtv.network;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request.Method;
@@ -14,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ConnectionManager {
+    private static final String TAG = ConnectionManager.class.getSimpleName();
+
     private static final String URL_BASE = "http://www.dreamproject.pjwstk.edu.pl/api/";     // Facu Produccion
 
     public static int MAX_RETRIES = 3;
@@ -97,7 +100,7 @@ public class ConnectionManager {
 //        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
         String uri = URL_BASE + url.value + "/" + urlParamsString;
 
-        DreamTVApp.Logger.d("Url: " + uri);
+        Log.d(TAG,"Url: " + uri);
 
         MySingletonVolley volley = MySingletonVolley.getInstance(context);
 
@@ -113,7 +116,7 @@ public class ConnectionManager {
                 Map<String, String> map = new HashMap<>();
 //                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
                 String string = SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
-                DreamTVApp.Logger.d("TOKEN: " + string);
+                Log.d(TAG,"TOKEN: " + string);
                 map.put("Authorization", string);
                 return map;
             }
@@ -159,7 +162,7 @@ public class ConnectionManager {
         if (action != null)
             uri += "/" + action.value;
 
-        DreamTVApp.Logger.d("Url: " + uri);
+        Log.d(TAG,"Url: " + uri);
 
         MySingletonVolley volley = MySingletonVolley.getInstance(context);
 
@@ -179,7 +182,7 @@ public class ConnectionManager {
                 Map<String, String> map = new HashMap<>();
 //                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
                 String string = SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
-                DreamTVApp.Logger.d("TOKEN: " + string);
+                Log.d(TAG,"TOKEN: " + string);
                 map.put("Authorization", string);
                 return map;
             }
@@ -223,7 +226,7 @@ public class ConnectionManager {
         if (action != null)
             uri += "/" + action.value;
 
-        DreamTVApp.Logger.d("Url: " + uri);
+        Log.d(TAG,"Url: " + uri);
 
         MySingletonVolley volley = MySingletonVolley.getInstance(context);
 
@@ -243,7 +246,7 @@ public class ConnectionManager {
                 Map<String, String> map = new HashMap<>();
 //                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
                 String string = SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
-                DreamTVApp.Logger.d("TOKEN: " + string);
+                Log.d(TAG,"TOKEN: " + string);
                 map.put("Authorization", string);
                 return map;
             }
@@ -300,7 +303,7 @@ public class ConnectionManager {
 //        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
         String uri = URL_BASE + url.value + "/" + urlParamsString;
 
-        DreamTVApp.Logger.d("Url: " + uri);
+        Log.d(TAG,"Url: " + uri);
 
         MySingletonVolley volley = MySingletonVolley.getInstance(context);
 
@@ -316,7 +319,7 @@ public class ConnectionManager {
                 Map<String, String> map = new HashMap<>();
 //                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
                 String string = SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
-                DreamTVApp.Logger.d("TOKEN: " + string);
+                Log.d(TAG,"TOKEN: " + string);
                 map.put("Authorization", string);
                 return map;
             }
