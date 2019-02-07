@@ -50,7 +50,7 @@ import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.model.TaskList;
+import com.dream.dreamtv.model.TaskResponse;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.Video;
 import com.dream.dreamtv.network.ConnectionManager;
@@ -209,11 +209,16 @@ public class MainFragment extends BrowseSupportFragment {
             public void processResponse(String response) {
                 Gson gson = new Gson();
                 DreamTVApp.Logger.d(response);
-                TaskList taskList = gson.fromJson(response, TaskList.class);
-                DreamTVApp.Logger.d(taskList.toString());
 
-                if (taskList.data.size() > 0)
-                    loadVideos(taskList, Constants.CHECK_NEW_TASKS_CATEGORY);
+                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
+                };
+                JsonResponseBaseBean<TaskResponse> jsonResponse = JsonUtils.getJsonResponse(response, type);
+                TaskResponse taskResponse = jsonResponse.data;
+
+                DreamTVApp.Logger.d(taskResponse.toString());
+
+                if (taskResponse.data.size() > 0)
+                    loadVideos(taskResponse, Constants.CHECK_NEW_TASKS_CATEGORY);
 
                 getUserToContinueTasks(FIRST_PAGE);
             }
@@ -249,11 +254,15 @@ public class MainFragment extends BrowseSupportFragment {
             public void processResponse(String response) {
                 Gson gson = new Gson();
                 DreamTVApp.Logger.d(response);
-                TaskList taskList = gson.fromJson(response, TaskList.class);
-                DreamTVApp.Logger.d(taskList.toString());
+                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
+                };
+                JsonResponseBaseBean<TaskResponse> jsonResponse = JsonUtils.getJsonResponse(response, type);
+                TaskResponse taskResponse = jsonResponse.data;
 
-                if (taskList.data.size() > 0)
-                    loadVideos(taskList, Constants.CONTINUE_WATCHING_CATEGORY);
+                DreamTVApp.Logger.d(taskResponse.toString());
+
+                if (taskResponse.data.size() > 0)
+                    loadVideos(taskResponse, Constants.CONTINUE_WATCHING_CATEGORY);
 
                 getUserVideosList(FIRST_PAGE);
 
@@ -287,11 +296,16 @@ public class MainFragment extends BrowseSupportFragment {
             public void processResponse(String response) {
                 Gson gson = new Gson();
                 DreamTVApp.Logger.d(response);
-                TaskList taskList = gson.fromJson(response, TaskList.class);
-                DreamTVApp.Logger.d(taskList.toString());
 
-                if (taskList.data.size() > 0)
-                    loadVideos(taskList, Constants.MY_LIST_CATEGORY);
+                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
+                };
+                JsonResponseBaseBean<TaskResponse> jsonResponse = JsonUtils.getJsonResponse(response, type);
+                TaskResponse taskResponse = jsonResponse.data;
+
+                DreamTVApp.Logger.d(taskResponse.toString());
+
+                if (taskResponse.data.size() > 0)
+                    loadVideos(taskResponse, Constants.MY_LIST_CATEGORY);
 
                 setFootersOptions();
 
@@ -316,9 +330,9 @@ public class MainFragment extends BrowseSupportFragment {
 
     }
 
-    private void loadVideos(TaskList taskList, int taskState) {
+    private void loadVideos(TaskResponse taskResponse, int taskState) {
 
-        if (taskList != null) {
+        if (taskResponse != null) {
             VideoCardPresenter videoCardPresenter = new VideoCardPresenter();
 
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(videoCardPresenter);
@@ -336,7 +350,7 @@ public class MainFragment extends BrowseSupportFragment {
                 state = Constants.CHECK_NEW_TASKS_CATEGORY;
             }
 
-            for (Task task : taskList.data) {
+            for (Task task : taskResponse.data) {
                 listRowAdapter.add(task.getVideo(state));
             }
 

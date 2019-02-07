@@ -35,13 +35,15 @@ import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.presenter.VideoCardPresenter;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
-import com.dream.dreamtv.model.TaskList;
+import com.dream.dreamtv.model.TaskResponse;
 import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.Video;
 import com.dream.dreamtv.network.ConnectionManager;
 import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.utils.Constants;
+import com.dream.dreamtv.utils.JsonUtils;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -107,15 +109,20 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
             public void processResponse(String response) {
                 Gson gson = new Gson();
                 DreamTVApp.Logger.d(response);
-                TaskList taskList = gson.fromJson(response, TaskList.class);
-                DreamTVApp.Logger.d(taskList.toString());
 
-                if (taskList.current_page < taskList.last_page) //Pagination
+                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
+                };
+                JsonResponseBaseBean<TaskResponse> jsonResponse = JsonUtils.getJsonResponse(response, type);
+                TaskResponse taskResponse = jsonResponse.data;
+
+                DreamTVApp.Logger.d(taskResponse.toString());
+
+                if (taskResponse.current_page < taskResponse.last_page) //Pagination
                     currentPage++;
                 else
                     currentPage = -1;
 
-                for (Task task : taskList.data) {
+                for (Task task : taskResponse.data) {
                     mAdapter.add(task.getVideo(Constants.CHECK_NEW_TASKS_CATEGORY)); //SeeAllFragments only appears in Check New Tasks Category
                 }
             }

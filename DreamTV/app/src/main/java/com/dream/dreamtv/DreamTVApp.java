@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class DreamTVApp extends Application {
 
-    private static final String TAG = "com.dream.dreamtv";
+    private static final String TAG = DreamTVApp.class.getSimpleName();
     private Gson gson;
 
     @Override
@@ -28,12 +28,6 @@ public class DreamTVApp extends Application {
         super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 
-//    @Override
-//    public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
-//        LocaleHelper.setLocale(this, Constants.LANGUAGE_ENGLISH);
-//
-//    }
 
     @Override
     public void onCreate() {
@@ -41,30 +35,6 @@ public class DreamTVApp extends Application {
         gson = new Gson();
 
     }
-
-    public String getBaseURL() {
-
-        String defaultURL = "http://172.23.192.2:8000/api/";
-
-        String urlBaseString = SharedPreferenceUtils.getValue(this, getString(R.string.url_base_preferences));
-
-        if (urlBaseString == null)
-            return defaultURL;
-        else
-            return urlBaseString;
-    }
-
-    public void setBaseURL(String url) {
-        SharedPreferenceUtils.save(this, getString(R.string.url_base_preferences), url);
-    }
-
-//    public void setUserAccount(String account) {
-//        SharedPreferenceUtils.save(this, getString(R.string.user_account_preferences), account);
-//    }
-//
-//    public String getUserAccount() {
-//        return SharedPreferenceUtils.getValue(this, getString(R.string.user_account_preferences));
-//    }
 
     public User getUser() {
         //todo control cuando viene null
@@ -76,7 +46,7 @@ public class DreamTVApp extends Application {
     public void setUser(User user) {
         //todo controlar si es que viene token null, entonces no deberia actualizarse ese campo
         if (user.token != null && !user.token.isEmpty()) {
-            DreamTVApp.Logger.d("(SetUser) Actualizacion de Token");
+            Log.d(TAG,"(SetUser) Actualizacion de Token");
             SharedPreferenceUtils.save(this, this.getString(R.string.dreamTVApp_token), user.token);
         }
 
@@ -92,60 +62,6 @@ public class DreamTVApp extends Application {
 
     public void setTestingMode(String mode) {
         SharedPreferenceUtils.save(this, getString(R.string.testing_mode_preferences), mode);
-    }
-
-    public void setReasons(List<Reason> reasons) {
-        String userString = gson.toJson(reasons);
-        SharedPreferenceUtils.save(this, getString(R.string.reasons_preferences), userString);
-    }
-
-    public void setLanguages(String languages) {
-        SharedPreferenceUtils.save(this, getString(R.string.languages_preferences), languages);
-    }
-
-    public String getLanguages() {
-        return SharedPreferenceUtils.getValue(this, getString(R.string.languages_preferences));
-    }
-
-    public void setUserVideoList() {
-
-    }
-
-    public ReasonList getReasons() {
-        String reasonString = SharedPreferenceUtils.getValue(this, getString(R.string.reasons_preferences));
-        ReasonList reasonList = gson.fromJson(reasonString, ReasonList.class);
-        return reasonList;
-    }
-
-    public static class Logger {
-        public static void i(String message) {
-            if (message == null) {
-                message = "Sin mensaje";
-            }
-            Log.i(TAG, message);
-        }
-
-        public static void w(String message) {
-            if (message == null) {
-                message = "Sin mensaje";
-            }
-            Log.w(TAG, message);
-        }
-
-        public static void e(String message) {
-            if (message == null) {
-                message = "Sin mensaje";
-            }
-            Log.e(TAG, message);
-        }
-
-        public static void d(String message) {
-            if (message == null) {
-                message = "Sin mensaje";
-            }
-            Log.d(TAG, message);
-        }
-
     }
 
 }

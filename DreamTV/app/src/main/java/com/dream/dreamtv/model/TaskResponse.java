@@ -6,7 +6,7 @@ import java.util.List;
  * Created by manuel on 6/12/17.
  */
 
-public class TaskList {
+public class TaskResponse {
     public int current_page;
     public List<Task> data;
     public int from;

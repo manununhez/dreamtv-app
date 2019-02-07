@@ -42,7 +42,7 @@ import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.SubtitleJson;
-import com.dream.dreamtv.model.TaskList;
+import com.dream.dreamtv.model.TaskResponse;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.UserVideo;
@@ -384,7 +384,12 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             public void processResponse(String response) {
                 Gson gson = new Gson();
                 DreamTVApp.Logger.d(response);
-                VideoTests[] videoTests = gson.fromJson(response, VideoTests[].class);
+
+                TypeToken type = new TypeToken<JsonResponseBaseBean<VideoTests[]>>() {
+                };
+                JsonResponseBaseBean<VideoTests[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
+
+                VideoTests[] videoTests = jsonResponse.data;
                 DreamTVApp.Logger.d(Arrays.toString(videoTests));
 
                 int videoTestIndex = 0;
