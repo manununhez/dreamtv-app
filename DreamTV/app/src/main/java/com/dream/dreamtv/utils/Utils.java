@@ -34,6 +34,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.concurrent.TimeUnit.HOURS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+
 /**
  * A collection of utility methods, all static.
  */
@@ -82,5 +86,10 @@ public class Utils {
         return dialog;
     }
 
+
+    public static String getTimeFormat(Context context,  long millis) {
+        return String.format(context.getString(R.string.time_format), MILLISECONDS.toMinutes(millis) % HOURS.toMinutes(1),
+                MILLISECONDS.toSeconds(millis) % MINUTES.toSeconds(1));
+    }
 
 }

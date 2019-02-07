@@ -52,6 +52,7 @@ import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.TaskResponse;
 import com.dream.dreamtv.model.User;
+import com.dream.dreamtv.model.UserData;
 import com.dream.dreamtv.model.Video;
 import com.dream.dreamtv.network.ConnectionManager;
 import com.dream.dreamtv.network.ResponseListener;
@@ -338,24 +339,24 @@ public class MainFragment extends BrowseSupportFragment {
 
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(videoCardPresenter);
 
-            int state;
+            int category;
             HeaderItem header;
             if (taskState == Constants.MY_LIST_CATEGORY) {
                 header = new HeaderItem(getString(R.string.title_my_list_category));
-                state = Constants.MY_LIST_CATEGORY;
+                category = Constants.MY_LIST_CATEGORY;
             } else if (taskState == Constants.CONTINUE_WATCHING_CATEGORY) {
                 header = new HeaderItem(getString(R.string.title_continue_watching_category));
-                state = Constants.CONTINUE_WATCHING_CATEGORY;
+                category = Constants.CONTINUE_WATCHING_CATEGORY;
             } else {
                 header = new HeaderItem(getString(R.string.title_check_new_tasks_category));
-                state = Constants.CHECK_NEW_TASKS_CATEGORY;
+                category = Constants.CHECK_NEW_TASKS_CATEGORY;
             }
 
             for (Task task : taskResponse.data) {
-                listRowAdapter.add(new Video(task, state));
+                listRowAdapter.add(new Video(task));
             }
 
-            if (state == Constants.CHECK_NEW_TASKS_CATEGORY) { //Only in the Check_New_Tasks we add the SeeAll options. In others categories is not necessary
+            if (category == Constants.CHECK_NEW_TASKS_CATEGORY) { //Only in the Check_New_Tasks we add the SeeAll options. In others categories is not necessary
                 Video lastVideoSeeMore = new Video();
                 lastVideoSeeMore.title = getString(R.string.title_see_more_videos_category);
                 lastVideoSeeMore.description = "";
@@ -488,9 +489,23 @@ public class MainFragment extends BrowseSupportFragment {
                     getActivity().startActivity(intent, bundle);
                 } else {
                     Video video = (Video) item;
+                    String categoryName = listRow.getHeaderItem().getName();
+                    int category;
+
+                    if (categoryName.equals(getString(R.string.title_my_list_category))) {
+                        category = Constants.MY_LIST_CATEGORY;
+                    } else if (categoryName.equals(getString(R.string.title_continue_watching_category))) {
+                        category = Constants.CONTINUE_WATCHING_CATEGORY;
+                    } else {
+                        category = Constants.CHECK_NEW_TASKS_CATEGORY;
+                    }
+
+                    UserData userData = new UserData();
+                    userData.mSelectedVideo = video;
+                    userData.category = category;
                     Log.d(TAG,"Item: " + item.toString());
                     Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
-                    intent.putExtra(Constants.VIDEO, video);
+                    intent.putExtra(Constants.USER_DATA, userData);
 
                     Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
                             Objects.requireNonNull(getActivity()),

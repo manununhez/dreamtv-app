@@ -13,7 +13,7 @@ public class Constants {
     public static final String ADVANCED_INTERFACE_MODE = "advanced";
 
     public static final String SHARED_ELEMENT_NAME = "hero";
-    public static final String VIDEO = "Video";
+    public static final String USER_DATA = "UserData";
 
     public static final String TASKS_ALL = "all";
     public static final String TASKS_CONTINUE = "continue";

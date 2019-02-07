@@ -34,6 +34,7 @@ import android.widget.Toast;
 import com.android.volley.VolleyError;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.model.UserData;
 import com.dream.dreamtv.presenter.VideoCardPresenter;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.TaskResponse;
@@ -125,7 +126,7 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
                     currentPage = -1;
 
                 for (Task task : taskResponse.data) {
-                    mAdapter.add(new Video(task, Constants.CHECK_NEW_TASKS_CATEGORY)); //SeeAllFragments only appears in Check New Tasks Category
+                    mAdapter.add(new Video(task)); //SeeAllFragments only appears in Check New Tasks Category
                 }
             }
 
@@ -168,9 +169,13 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
 
             if (item instanceof Video) {
                 Video video = (Video) item;
+
+                UserData userData = new UserData();
+                userData.mSelectedVideo = video;
+                userData.category = Constants.CHECK_NEW_TASKS_CATEGORY;
                 Log.d(TAG,"Item: " + item.toString());
                 Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
-                intent.putExtra(Constants.VIDEO, video);
+                intent.putExtra(Constants.USER_DATA, userData);
 
                 Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
                         Objects.requireNonNull(getActivity()),

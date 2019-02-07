@@ -43,6 +43,7 @@ import android.widget.Toast;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Subtitle;
+import com.dream.dreamtv.model.UserData;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.Video;
 import com.dream.dreamtv.utils.Constants;
@@ -83,7 +84,8 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     private Handler handler;
     private Chronometer chronometer;
     private Runnable myRunnable;
-    private Video mSelectedVideo;
+    //private Video mSelectedVideo;
+    private UserData userData;
     private Long elapsedRealtimeTemp;
     private Long timeStoppedTemp;
     private UserTask selectedUserTask;
@@ -198,9 +200,9 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                         Toast.LENGTH_SHORT).show();
 
                 //Analytics Report Event
-                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
-                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
-                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
+                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
+                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
                 mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO, bundle);
                 return true;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
@@ -210,9 +212,9 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                         Toast.LENGTH_SHORT).show();
 
                 //Analytics Report Event
-                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
-                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
-                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
+                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
+                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
                 mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO, bundle);
                 return true;
 
@@ -265,9 +267,9 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     }
 
     private Bundle getArgumentos() {
-        mSelectedVideo = getIntent().getParcelableExtra(Constants.VIDEO);
+        userData = getIntent().getParcelableExtra(Constants.USER_DATA);
         Bundle args = new Bundle();
-        args.putString(YOUTUBE_VIDEO_ID, mSelectedVideo.getVideoYoutubeId());
+        args.putString(YOUTUBE_VIDEO_ID, userData.mSelectedVideo.getVideoYoutubeId());
         args.putBoolean(YOUTUBE_AUTOPLAY, false);
         args.putBoolean(YOUTUBE_SHOW_RELATED_VIDEOS, false);
         args.putBoolean(YOUTUBE_SHOW_VIDEO_INFO, false);
@@ -280,19 +282,19 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
     @Override
     public  void playVideoMode() {
-        if (mSelectedVideo.task_state == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
-            final Subtitle subtitle = mSelectedVideo.getLastSubtitlePositionTime();
+        if (userData.category == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
+            final Subtitle subtitle = userData.getLastSubtitlePositionTime();
             if (subtitle != null) { //Si por alguna razon no se cuenta con subtitulo (algun fallo en el servicio al traer el requerido subt)
-                Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(mSelectedVideo.duration / 60)),
+                Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(userData.mSelectedVideo.duration / 60)),
                         getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 playVideo(subtitle.end / 1000);
                                 //Analytics Report Event
                                 Bundle bundle = new Bundle();
-                                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
-                                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
-                                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+                                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
+                                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
+                                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
                                 mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO, bundle);
                             }
                         }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
@@ -302,9 +304,9 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                                 dialog.dismiss();
                                 //Analytics Report Event
                                 Bundle bundle = new Bundle();
-                                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
-                                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
-                                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+                                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
+                                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
+                                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
                                 mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO, bundle);
                             }
                         }, new DialogInterface.OnCancelListener() {
@@ -336,17 +338,17 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
         //Analytics Report Event
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
-        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
-        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
         mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY, bundle);
     }
 
 
     @Override
     public  void pauseVideo(Long position) {
-        String currentTime = mSelectedVideo.getTimeFormat(this, position);
-        String videoDuration = mSelectedVideo.getTimeFormat(this, mSelectedVideo.getVideoDurationInMs());
+        String currentTime = Utils.getTimeFormat(this, position);
+        String videoDuration = Utils.getTimeFormat(this, userData.mSelectedVideo.getVideoDurationInMs());
 
         tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
 
@@ -355,9 +357,9 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
         //Analytics Report Event
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
-        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
-        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
         mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSED, bundle);
     }
 
@@ -367,9 +369,9 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
             mYoutubeView.stopVideo();
             //Analytics Report Event
             Bundle bundle = new Bundle();
-            bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
-            bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
-            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+            bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
+            bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
+            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
             mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_STOP_VIDEO, bundle);
         }
     }
@@ -386,7 +388,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                         timeStoppedTemp = chronometer.getBase();
                         elapsedRealtimeTemp = SystemClock.elapsedRealtime();
 
-                        selectedUserTask = mSelectedVideo.getUserTask(elapsedRealtimeTemp - timeStoppedTemp);
+                        selectedUserTask = userData.getUserTask(elapsedRealtimeTemp - timeStoppedTemp);
 
                         if (selectedUserTask != null)
                             if (lastSelectedUserTaskShown != selectedUserTask.subtitle_position) {  //pause the video and show the popup
@@ -419,7 +421,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
     @Override
     public  void showSubtitle(long subtitleTimePosition) {
-        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitleTimePosition);
+        Subtitle subtitle = userData.getSyncSubtitleText(subtitleTimePosition);
         if (subtitle == null)
             tvSubtitle.setVisibility(View.GONE);
         else {
@@ -430,11 +432,11 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
     @Override
     public  void showReasonDialogPopUp(long subtitlePosition) {
-        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
+        Subtitle subtitle = userData.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) { //only shows the popup when exist an subtitle
-            if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
-                ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(mSelectedVideo.subtitle_json,
-                        subtitle.position, mSelectedVideo.task_id);
+            if (userData.category != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+                ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(userData.subtitle_json,
+                        subtitle.position, userData.mSelectedVideo.task_id);
                 if (!isFinishing()) {
                     FragmentManager fm = getFragmentManager();
                     FragmentTransaction transaction = fm.beginTransaction();
@@ -446,11 +448,11 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
     @Override
     public  void showReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
-        Subtitle subtitle = mSelectedVideo.getSyncSubtitleText(subtitlePosition);
+        Subtitle subtitle = userData.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) { //only shows the popup when exist an subtitle
-            if (mSelectedVideo.task_state != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
-                ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(mSelectedVideo.subtitle_json,
-                        subtitle.position, mSelectedVideo.task_id, userTask, mSelectedVideo.task_state);
+            if (userData.category != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+                ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(userData.subtitle_json,
+                        subtitle.position, userData.mSelectedVideo.task_id, userTask, userData.category);
                 if (!isFinishing()) {
                     FragmentManager fm = getFragmentManager();
                     FragmentTransaction transaction = fm.beginTransaction();
@@ -470,38 +472,38 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
         //Analytics Report Event
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
-        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
-        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
         mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS, bundle);
     }
 
     @Override
     public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
 
-        Subtitle subtitleOld = mSelectedVideo.subtitle_json.subtitles.get(subtitleOriginalPosition);
+        Subtitle subtitleOld = userData.subtitle_json.subtitles.get(subtitleOriginalPosition);
         Subtitle subtitleOneBeforeNew;
 
         if (selectedSubtitle != null) //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
         {
             if (selectedSubtitle.position != subtitleOld.position) { //a different subtitle from the original was selected
                 if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
-                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
+                    subtitleOneBeforeNew = userData.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
                     if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000) //1000ms de diff
                         mYoutubeView.seekTo((subtitleOneBeforeNew.end - 1000) / 1000); //damos mas tiempo, para leer subtitulos anterioires
                     else
                         mYoutubeView.seekTo(subtitleOneBeforeNew.end / 1000);
                 } else {
-                    subtitleOneBeforeNew = mSelectedVideo.subtitle_json.subtitles.get(0); //we go to the first subtitle
+                    subtitleOneBeforeNew = userData.subtitle_json.subtitles.get(0); //we go to the first subtitle
                     mYoutubeView.seekTo((subtitleOneBeforeNew.start - 1000) / 1000); //inicio del primer sub
                 }
 
             }
             //Analytics Report Event
             Bundle bundle = new Bundle();
-            bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
-            bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
-            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+            bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
+            bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
+            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
             bundle.putBoolean(Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
             mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS, bundle);
 
@@ -509,9 +511,9 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
             //Analytics Report Event
             Bundle bundle = new Bundle();
-            bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedVideo.video_id);
-            bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedVideo.primary_audio_language_code);
-            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, mSelectedVideo.original_language);
+            bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
+            bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
+            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
             bundle.putBoolean(Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
             mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS, bundle);
 

@@ -22,6 +22,7 @@ public class Video implements Parcelable {
     private static final String HTTPS = "https";
     private static final String YOUTUBE = "youtube";
     public static final String QUERY_PARAMETER = "v";
+
     public String id;
     public String video_type;
     public String primary_audio_language_code;
@@ -41,21 +42,19 @@ public class Video implements Parcelable {
     private String subtitle_languages_uri;
     private String resource_uri;
 
-    //To keep tracking of the track
+    //To use video as a parameter in UserVideos
+    public String video_id;
+
+    //To keep tracking of the task
     public String subtitle_language;
     public int task_id;
-    public int task_state; //indicates if the task have or have not done yet. If it the task comes from the category "See Again", task_state == 1, else task_state == 0
-    public UserTask[] userTaskList; //all user tasks saved
 
-    //To keep subtitle data between screens
-    public SubtitleResponse subtitle_json;
 
-    public String video_id;
 
     public Video() {
     }
 
-    public Video(Task task, int taskState){
+    public Video(Task task){
         this.id = task.video_id;
         this.video_type = task.type;
         this.primary_audio_language_code = task.primary_audio_language_code;
@@ -69,7 +68,6 @@ public class Video implements Parcelable {
         this.video_url = task.video_url;
         this.subtitle_language =  task.language;
         this.task_id =  task.task_id;
-        this.task_state = taskState;
     }
 
 
@@ -94,9 +92,6 @@ public class Video implements Parcelable {
         resource_uri = in.readString();
         subtitle_language = in.readString();
         task_id = in.readInt();
-        task_state = in.readInt();
-        userTaskList = in.createTypedArray(UserTask.CREATOR);
-        subtitle_json = in.readParcelable(SubtitleResponse.class.getClassLoader());
     }
 
     public static final Creator<Video> CREATOR = new Creator<Video>() {
@@ -123,7 +118,7 @@ public class Video implements Parcelable {
         return url;
     }
 
-    public boolean isFromYoutube() {
+    public boolean isUrlFromYoutube() {
         if (this.all_urls != null)
             return this.all_urls.get(0).contains(YOUTUBE_COM);
         else
@@ -141,55 +136,7 @@ public class Video implements Parcelable {
     }
 
 
-    public Subtitle getSyncSubtitleText(long l) {
-        List<Subtitle> subtitleList = this.subtitle_json.subtitles;
-        Subtitle subtitle = null;
-        for (Subtitle subtitleTemp : subtitleList) {
-            if (l >= subtitleTemp.start && l <= subtitleTemp.end) { //esta adentro del ciclo
-                subtitle = subtitleTemp;
-                break;
-            } else if (l < subtitleTemp.start)
-                break;
 
-        }
-
-        return subtitle;
-    }
-
-    public UserTask getUserTask(long l) {
-        Subtitle subtitle = getSyncSubtitleText(l);
-        if (subtitle != null) { //if subtitle == null, there is not subtitle in the time selected
-            if (this.userTaskList != null && this.userTaskList.length > 0)
-                for (UserTask userTask : this.userTaskList) {
-                    if (userTask.subtitle_position == subtitle.position) {
-                        //after we find the position, we delete that option from the list. This allow us to show only once the respective reason as a popup
-//                        List<UserTask> arrayList = new ArrayList<>(Arrays.asList(this.userTaskList));
-//                        arrayList.remove(userTask);
-//                        this.userTaskList = arrayList.toArray(new UserTask[arrayList.size()]);
-                        return userTask;
-                    }
-                }
-        }
-
-        return null;
-    }
-
-    public Subtitle getLastSubtitlePositionTime() {
-        if (this.userTaskList != null && this.userTaskList.length > 0) {
-            UserTask lastUserTask = this.userTaskList[userTaskList.length - 1];
-            List<Subtitle> subtitleList = this.subtitle_json.subtitles;
-            for (Subtitle subtitle : subtitleList)
-                if (subtitle.position == lastUserTask.subtitle_position)
-                    return subtitle;
-
-        }
-        return null;
-    }
-
-    public String getTimeFormat(Context context,  long millis) {
-        return String.format(context.getString(R.string.time_format), MILLISECONDS.toMinutes(millis) % HOURS.toMinutes(1),
-                MILLISECONDS.toSeconds(millis) % MINUTES.toSeconds(1));
-    }
 
     public long getVideoDurationInMs(){
         return this.duration * 1000;
@@ -223,9 +170,6 @@ public class Video implements Parcelable {
         parcel.writeString(resource_uri);
         parcel.writeString(subtitle_language);
         parcel.writeInt(task_id);
-        parcel.writeInt(task_state);
-        parcel.writeTypedArray(userTaskList, i);
-        parcel.writeParcelable(subtitle_json, i);
     }
 
     @Override
@@ -251,9 +195,6 @@ public class Video implements Parcelable {
                 ", resource_uri='" + resource_uri + '\'' +
                 ", subtitle_language='" + subtitle_language + '\'' +
                 ", task_id=" + task_id +
-                ", task_state=" + task_state +
-                ", userTaskList=" + Arrays.toString(userTaskList) +
-                ", subtitle_json=" + subtitle_json +
                 '}';
     }
 }
