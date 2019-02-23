@@ -3,7 +3,6 @@ package com.dream.dreamtv.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -34,7 +33,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class SettingsActivity extends Activity {
     private static final String TAG = SettingsActivity.class.getSimpleName();
@@ -50,13 +48,6 @@ public class SettingsActivity extends Activity {
     private LinearLayout llBodyLanguages;
     private TextView tvSubtitleValue;
     private TextView tvAudioValue;
-    private TextView tvTitle;
-    private TextView tvTestingModeTitle;
-    private TextView tvTextLanguageTitle;
-    private TextView tvReasonDialogInterfaceTitle;
-//    private TextView tvVideoLanguagesTitle;
-    private TextView tvAudioLabel;
-    private TextView tvSubtitleLabel;
     private List<String> keyListForAdapter;
     private List<String> languagesKeyList;
     private List<String> languagesKeyListCode;
@@ -65,7 +56,6 @@ public class SettingsActivity extends Activity {
     private String selectedSubtitleLanguageCode;
     private String selectedAudioLanguageCode;
     private RadioButton rbYes;
-    private RadioButton rbNot;
     private RadioButton rbEnglish;
     private RadioButton rbPolish;
     private RadioButton rbAdvanced;
@@ -102,13 +92,6 @@ public class SettingsActivity extends Activity {
         rbBeginner = findViewById(R.id.rbBeginner);
 
 
-        tvTitle = findViewById(R.id.tvTitle);
-        tvTestingModeTitle = findViewById(R.id.tvTestingModeTitle);
-        tvTextLanguageTitle = findViewById(R.id.tvTextLanguageTitle);
-        tvAudioLabel = findViewById(R.id.tvAudioLabel);
-        tvSubtitleLabel = findViewById(R.id.tvSubtitleLabel);
-        tvReasonDialogInterfaceTitle = findViewById(R.id.tvReasonDialogInterfaceTitle);
-//        tvVideoLanguagesTitle = findViewById(R.id.tvVideoLanguagesTitle);
         tvSubtitleValue = findViewById(R.id.tvSubtitleValue);
         tvAudioValue = findViewById(R.id.tvAudioValue);
 
@@ -233,7 +216,7 @@ public class SettingsActivity extends Activity {
 
     private void testingModeSettings() {
         rbYes = findViewById(R.id.rbYes);
-        rbNot = findViewById(R.id.rbNot);
+        RadioButton rbNot = findViewById(R.id.rbNot);
 
         String mode = ((DreamTVApp) getApplication()).getTestingMode();
 

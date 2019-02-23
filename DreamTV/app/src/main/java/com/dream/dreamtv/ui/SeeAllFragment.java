@@ -99,7 +99,7 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
 
 
         //testing mode
-        String mode = ((DreamTVApp) getActivity().getApplication()).getTestingMode();
+        String mode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getTestingMode();
         if (mode == null || mode.equals(getString(R.string.text_no_option)))
             urlParams.put(PARAM_TYPE, Constants.TASKS_ALL);
         else if (mode.equals(getString(R.string.text_yes_option)))

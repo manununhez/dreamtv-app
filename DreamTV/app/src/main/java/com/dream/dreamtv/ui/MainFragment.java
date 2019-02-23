@@ -14,6 +14,7 @@
 
 package com.dream.dreamtv.ui;
 
+import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Intent;
@@ -61,7 +62,6 @@ import com.dream.dreamtv.presenter.VideoCardPresenter;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.dream.dreamtv.utils.LocaleHelper;
-import com.google.android.gms.common.AccountPicker;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -140,7 +140,7 @@ public class MainFragment extends BrowseSupportFragment {
                 //To update the screen with the selected interface language
                 if(!LocaleHelper.getLanguage(getActivity()).equals(user.interface_language)) {
                     LocaleHelper.setLocale(getActivity(), user.interface_language);
-                    ((MainActivity) getActivity()).recreate(); //Recreate activity
+                    getActivity().recreate(); //Recreate activity
                     Log.d(TAG,"Different language. Updating screen.");
                 }else{
                     Log.d(TAG,"Same language. Not updating screen.");
@@ -152,7 +152,7 @@ public class MainFragment extends BrowseSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                Log.d(TAG,error.getMessage());
+                Log.d(TAG, error.getMessage());
                 setFootersOptions(); //the settings section is displayed anyway
 
             }
@@ -173,8 +173,16 @@ public class MainFragment extends BrowseSupportFragment {
 
     private void pickUserAccount() {
         /*This will list all available accounts on device without any filtering*/
-        Intent intent = AccountPicker.newChooseAccountIntent(null, null,
-                null, false, null, null, null, null);
+
+//        Intent intent = AccountPicker.newChooseAccountIntent(null, null,
+//                null, false, null, null, null, null);
+
+
+        Intent intent = AccountManager.newChooseAccountIntent( null,
+                null, null, null, null, null, null);
+
+        Account[] accounts = AccountManager.get(getActivity()).getAccounts();
+
         startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
     }
 
@@ -452,7 +460,7 @@ public class MainFragment extends BrowseSupportFragment {
 
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE) { //After PreferencesSettings reload the screen
-                ((MainActivity) Objects.requireNonNull(getActivity())).recreate();
+                Objects.requireNonNull(getActivity()).recreate();
 
             } else if (requestCode == VIDEO_DETAILS_RESULT_CODE) { //After add videos to userlist (in videoDetailsActivity) reload the screen
                 //Clear the screen

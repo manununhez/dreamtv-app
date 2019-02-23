@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v17.leanback.app.BackgroundManager;
 import android.support.v17.leanback.app.DetailsSupportFragment;
 import android.support.v17.leanback.widget.Action;
@@ -81,12 +82,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private static final String PARAM_TYPE = "type";
     private UserData userData;
     private ArrayObjectAdapter mAdapter;
-    private ClassPresenterSelector mPresenterSelector;
     private BackgroundManager mBackgroundManager;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;
     private DetailsOverviewRow rowPresenter;
-    private FullWidthDetailsOverviewSharedElementHelper mHelper;
     private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
@@ -97,7 +96,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         prepareBackgroundManager();
 
         // Obtain the FirebaseAnalytics instance.
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(Objects.requireNonNull(getActivity()));
 
         userData = getActivity().getIntent()
                 .getParcelableExtra(Constants.USER_DATA);
@@ -136,7 +135,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 .into(new SimpleTarget<Bitmap>(mMetrics.widthPixels, mMetrics.heightPixels) {
                     @Override
                     public void onResourceReady(
-                            Bitmap resource,
+                            @NonNull Bitmap resource,
                             Transition<? super Bitmap> transition) {
                         mBackgroundManager.setBitmap(resource);
                     }
@@ -150,11 +149,11 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
 
         detailsPresenter.setBackgroundColor(
-                ContextCompat.getColor(getActivity(), R.color.selected_background));
+                ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.selected_background));
         detailsPresenter.setInitialState(FullWidthDetailsOverviewRowPresenter.STATE_HALF);
 
         // Hook up transition element.
-        mHelper = new FullWidthDetailsOverviewSharedElementHelper();
+        FullWidthDetailsOverviewSharedElementHelper mHelper = new FullWidthDetailsOverviewSharedElementHelper();
         mHelper.setSharedElementEnterTransition(getActivity(),
                 Constants.SHARED_ELEMENT_NAME);
         detailsPresenter.setListener(mHelper);
@@ -177,7 +176,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             }
         });
 
-        mPresenterSelector = new ClassPresenterSelector();
+        ClassPresenterSelector mPresenterSelector = new ClassPresenterSelector();
         mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
         mAdapter = new ArrayObjectAdapter(mPresenterSelector);
         setAdapter(mAdapter);
@@ -200,9 +199,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(
-                            Bitmap resource,
+                            @NonNull Bitmap resource,
                             Transition<? super Bitmap> transition) {
-                        rowPresenter.setImageBitmap(getActivity(), resource);
+                        rowPresenter.setImageBitmap(Objects.requireNonNull(getActivity()), resource);
                         startEntranceTransition();
                     }
                 });
@@ -350,7 +349,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void prepareSubtitle(Video mSelectedVideo) {
-        String mode = ((DreamTVApp) getActivity().getApplication()).getTestingMode();
+        String mode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getTestingMode();
 
         //Testing mode true
         if (mode != null && mode.equals(getString(R.string.text_yes_option)))
@@ -409,7 +408,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
 
     private void getSubtitleJson(final Video video, int version) {
-        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+        User user = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getUser();
 
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put(PARAM_VIDEO_ID, video.id);

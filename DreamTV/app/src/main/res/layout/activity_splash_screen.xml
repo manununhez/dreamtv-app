@@ -28,6 +28,7 @@
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
             android:scaleType="center"
+            android:contentDescription="@string/app_name"
             android:src="@drawable/logo_dream_tv"/>
 
     </RelativeLayout>

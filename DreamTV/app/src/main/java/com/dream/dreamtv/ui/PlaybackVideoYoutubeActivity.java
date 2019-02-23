@@ -40,12 +40,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Subtitle;
 import com.dream.dreamtv.model.UserData;
 import com.dream.dreamtv.model.UserTask;
-import com.dream.dreamtv.model.Video;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.Utils;

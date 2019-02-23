@@ -7,7 +7,6 @@ import android.util.Log;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request.Method;
 import com.android.volley.toolbox.StringRequest;
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 
@@ -79,7 +78,7 @@ public class ConnectionManager {
             @NonNull Urls url, final Map<String, String> urlParams,
             ResponseListener listener, Object tag) {
 
-        String urlParamsString = "";
+        StringBuilder urlParamsString = new StringBuilder();
         if (urlParams != null && urlParams.entrySet().size() >= 1) {
             int i = 0;
             for (Map.Entry<String, String> entry : urlParams.entrySet()) {
@@ -88,9 +87,9 @@ public class ConnectionManager {
                 String value = entry.getValue();
 
                 if (i == 0)
-                    urlParamsString = "?" + key + "=" + value;
+                    urlParamsString = new StringBuilder("?" + key + "=" + value);
                 else
-                    urlParamsString += "&" + key + "=" + value;
+                    urlParamsString.append("&").append(key).append("=").append(value);
 
                 i++;
 
@@ -282,7 +281,7 @@ public class ConnectionManager {
             @NonNull Urls url, final Map<String, String> urlParams,
             ResponseListener listener, Object tag) {
 
-        String urlParamsString = "";
+        StringBuilder urlParamsString = new StringBuilder();
         if (urlParams != null && urlParams.entrySet().size() >= 1) {
             int i = 0;
             for (Map.Entry<String, String> entry : urlParams.entrySet()) {
@@ -291,9 +290,9 @@ public class ConnectionManager {
                 String value = entry.getValue();
 
                 if (i == 0)
-                    urlParamsString = "?" + key + "=" + value;
+                    urlParamsString = new StringBuilder("?" + key + "=" + value);
                 else
-                    urlParamsString += "&" + key + "=" + value;
+                    urlParamsString.append("&").append(key).append("=").append(value);
 
                 i++;
 

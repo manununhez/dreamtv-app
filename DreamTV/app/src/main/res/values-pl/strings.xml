@@ -105,5 +105,6 @@
     <string name="alert_msg_video_terminated">Dzięki za obejrzenie filmu. Wróć do wyboru wideo.</string>
     <string name="alert_title_permission_not_granted">Przepraszam za niedogodności!</string>
     <string name="alert_msg_permission_not_granted">Aby zarejestrować użytkownika tej aplikacji, należy uzyskać dostęp do kont urządzenia. Podaj niezbędne uprawnienia dostępu.</string>
+    <string name="text_pause">PAUSE</string>
 
 </resources>

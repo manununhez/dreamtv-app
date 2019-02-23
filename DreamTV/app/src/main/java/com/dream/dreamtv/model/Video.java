@@ -1,16 +1,10 @@
 package com.dream.dreamtv.model;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.dream.dreamtv.R;
-
-import java.util.Arrays;
 import java.util.List;
-
-import static java.util.concurrent.TimeUnit.*;
 
 /**
  * Created by manuel on 6/12/17.

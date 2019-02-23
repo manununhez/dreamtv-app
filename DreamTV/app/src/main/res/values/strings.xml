@@ -107,6 +107,7 @@
     <string name="alert_msg_video_terminated">Thanks for watching the video. Go back to Video Selection.</string>
     <string name="alert_title_permission_not_granted">Sorry for the inconveniences!</string>
     <string name="alert_msg_permission_not_granted">To register the user of this app it is necessary to access to the device\'s accounts. Please give the necessary access permission.</string>
+    <string name="text_pause">PAUSE</string>
 
 
 </resources>

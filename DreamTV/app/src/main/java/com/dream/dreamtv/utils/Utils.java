@@ -16,23 +16,10 @@ package com.dream.dreamtv.utils;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Point;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ContextThemeWrapper;
-import android.view.Display;
-import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.dream.dreamtv.R;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;

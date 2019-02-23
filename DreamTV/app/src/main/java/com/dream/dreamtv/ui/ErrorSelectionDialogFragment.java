@@ -67,7 +67,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private static final String TASK_STATE = "taskState";
     private static final String USER_TASK = "userTask";
     private static final int REQ_CODE_SPEECH_INPUT = 100;
-    public static final String SPEECH_NOT_SUPPORTED = "speech_not_supported";
+    private static final String SPEECH_NOT_SUPPORTED = "speech_not_supported";
     private final List<Integer> selectedReasons = new ArrayList<>();
     private LinearLayout llComments;
     private LinearLayout llReasons;
@@ -515,7 +515,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                             chkBox.setChecked(true);
                         }
                     } else { //estaba chequeado, pero se desactiva el mismo boton. Ahi se reinicia el selectedFeedbackReason
-                        selectedReasons.remove(selectedReasons.indexOf(view.getId()));
+                        selectedReasons.remove(view.getId());
                         chkBox.setChecked(false);
                     }
                 }

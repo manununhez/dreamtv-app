@@ -10,7 +10,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.dream.dreamtv.utils.LoadingDialog;

@@ -1,6 +1,5 @@
 package com.dream.dreamtv.utils;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -65,13 +64,8 @@ public class LocaleHelper {
 
 		Resources res = context.getResources();
 		Configuration config = new Configuration(res.getConfiguration());
-		if (Build.VERSION.SDK_INT >= 17) {
-			config.setLocale(locale);
-			context = context.createConfigurationContext(config);
-		} else {
-			config.locale = locale;
-			res.updateConfiguration(config, res.getDisplayMetrics());
-		}
+		config.setLocale(locale);
+		context = context.createConfigurationContext(config);
 		return context;
 	}
 

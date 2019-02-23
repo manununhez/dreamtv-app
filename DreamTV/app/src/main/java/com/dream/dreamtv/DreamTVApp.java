@@ -10,8 +10,6 @@ import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.Gson;
 
-import java.util.List;
-
 
 /**
  * Created by manunez on 13/10/2015.

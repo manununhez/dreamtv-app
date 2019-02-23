@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Window;
 
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 
 
