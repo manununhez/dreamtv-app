@@ -31,14 +31,13 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.5dp"
-                android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
                 android:background="@color/white" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:orientation="vertical">
 
                 <TextView
@@ -73,87 +72,124 @@
                 </RadioGroup>
             </LinearLayout>
 
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginBottom="5dp"
-                android:layout_marginTop="25dp"
+                android:layout_marginTop="10dp"
                 android:background="@color/white" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:weightSum="1">
 
-                <TextView
-                    android:id="@+id/tvReasonDialogInterfaceTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_reason_dialog_interface_settings"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <RadioGroup
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
+                    android:layout_weight="0.5"
                     android:orientation="vertical">
 
-                    <RadioButton
-                        android:id="@+id/rbAdvanced"
-                        android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/tvReasonDialogInterfaceTitle"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/rb_option_text_advanced"
-                        android:textColor="@color/white" />
+                        android:text="@string/title_reason_dialog_interface_settings"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
 
-                    <RadioButton
-                        android:id="@+id/rbBeginner"
+                    <RadioGroup
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/rb_option_text_beginner"
-                        android:textColor="@color/white" />
-                </RadioGroup>
+                        android:layout_marginTop="5dp"
+                        android:orientation="vertical">
+
+                        <RadioButton
+                            android:id="@+id/rbAdvanced"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/rb_option_text_advanced"
+                            android:textColor="@color/white" />
+
+                        <RadioButton
+                            android:id="@+id/rbBeginner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/rb_option_text_beginner"
+                            android:textColor="@color/white" />
+                    </RadioGroup>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_weight="0.5"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvTestingModeTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_testing_mode_settings"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <RadioGroup
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:orientation="vertical">
+
+                        <RadioButton
+                            android:id="@+id/rbYes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/rb_option_text_yes"
+                            android:textColor="@color/white" />
+
+                        <RadioButton
+                            android:id="@+id/rbNot"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/rb_option_text_not"
+                            android:textColor="@color/white" />
+                    </RadioGroup>
+                </LinearLayout>
+
+                <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="1dp"-->
+                <!--android:layout_marginTop="25dp"-->
+                <!--android:layout_marginBottom="5dp"-->
+                <!--android:background="@color/white" />-->
+
+
+
+
             </LinearLayout>
 
-            <!--<LinearLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginTop="10dp"-->
-            <!--android:orientation="vertical">-->
-
-            <!--&lt;!&ndash;<TextView&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:text="Base URL"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:textColor="@color/white"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:textSize="20sp"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:textStyle="bold" />&ndash;&gt;-->
-
-            <!--&lt;!&ndash;<EditText&ndash;&gt;-->
-            <!--&lt;!&ndash;android:id="@+id/etBaseURL"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:imeOptions="actionDone"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:textColor="@color/white" />&ndash;&gt;-->
-            <!--</LinearLayout>-->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginBottom="5dp"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="10dp"
                 android:background="@color/white" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tvTestingModeTitle"
+                    android:id="@+id/tvShareModeTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/title_testing_mode_settings"
+                    android:text="@string/title_share_mode_settings"
                     android:textColor="@color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -165,14 +201,14 @@
                     android:orientation="vertical">
 
                     <RadioButton
-                        android:id="@+id/rbYes"
+                        android:id="@+id/rbShareYes"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/rb_option_text_yes"
                         android:textColor="@color/white" />
 
                     <RadioButton
-                        android:id="@+id/rbNot"
+                        android:id="@+id/rbShareNot"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/rb_option_text_not"
@@ -181,14 +217,15 @@
             </LinearLayout>
 
 
+
         </LinearLayout>
 
         <View
             android:layout_width="0.5dp"
             android:layout_height="match_parent"
-            android:layout_marginEnd="15dp"
             android:layout_marginStart="15dp"
             android:layout_marginTop="7dp"
+            android:layout_marginEnd="15dp"
             android:background="@color/white" />
 
         <LinearLayout
@@ -201,8 +238,8 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.5dp"
-                android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
                 android:background="@color/white" />
 
             <TextView
@@ -225,7 +262,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
-
 
 
                     <com.dream.dreamtv.utils.CheckableTextView
@@ -252,6 +288,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
+                        android:layout_marginStart="10dp"
                         android:enabled="false"
                         android:focusable="true"
                         android:focusableInTouchMode="true"
@@ -323,20 +360,19 @@
             <LinearLayout
                 android:id="@+id/llBodyLanguages"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
+                android:layout_height="wrap_content"
                 android:animateLayoutChanges="true"
-                android:orientation="horizontal"
-                android:weightSum="1">
+                android:gravity="center"
+                android:orientation="horizontal">
 
-                    <ListView
-                        android:id="@+id/lv"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:choiceMode="singleChoice"
-                        android:focusable="true"
-                        android:focusableInTouchMode="true" />
+                <ListView
+                    android:id="@+id/lv"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:choiceMode="singleChoice"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true" />
 
             </LinearLayout>
         </LinearLayout>

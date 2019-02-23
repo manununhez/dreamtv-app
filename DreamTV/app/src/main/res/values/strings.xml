@@ -22,6 +22,7 @@
     <!--<string name="user_account_preferences">user_account_preferences</string>-->
     <string name="reasons_preferences">reasons_preferences</string>
     <string name="testing_mode_preferences">testing_mode_preferences</string>
+    <string name="sharing_mode_preferences">sharing_mode_preferences</string>
     <string name="languages_preferences">languages_preferences</string>
 
 
@@ -33,6 +34,7 @@
     <string name="title_text_language_settings">Application language</string>
     <string name="title_reason_dialog_interface_settings">Interface</string>
     <string name="title_testing_mode_settings">Testing mode</string>
+    <string name="title_share_mode_settings">Verify mistakes found by others</string>
     <string name="title_video_languages_settings">Video languages</string>
     <string name="title_reasons_dialog">What is wrong here?</string>
     <string name="title_reasons_dialog_2">Someone found a mistake here. What do you think?</string>

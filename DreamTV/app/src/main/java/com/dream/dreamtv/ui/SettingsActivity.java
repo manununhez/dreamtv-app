@@ -56,6 +56,7 @@ public class SettingsActivity extends Activity {
     private String selectedSubtitleLanguageCode;
     private String selectedAudioLanguageCode;
     private RadioButton rbYes;
+    private RadioButton rbShareYes;
     private RadioButton rbEnglish;
     private RadioButton rbPolish;
     private RadioButton rbAdvanced;
@@ -85,7 +86,6 @@ public class SettingsActivity extends Activity {
 
         rgInterfaceLanguage = findViewById(R.id.rgInterfaceLanguage);
 
-
         rbEnglish = findViewById(R.id.rbEnglish);
         rbPolish = findViewById(R.id.rbPolish);
         rbAdvanced = findViewById(R.id.rbAdvanced);
@@ -105,12 +105,14 @@ public class SettingsActivity extends Activity {
         interfaceLanguageSettings();
         interfaceModeSettings();
         testingModeSettings();
+        shareModeSettings();
         initializeLanguagesList();
         setupListView();
 
         setupEventsListener();
 
     }
+
 
     private void setupEventsListener() {
         btnSubtitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -227,6 +229,19 @@ public class SettingsActivity extends Activity {
 
     }
 
+
+    private void shareModeSettings() {
+        rbShareYes = findViewById(R.id.rbShareYes);
+        RadioButton rbShareNot = findViewById(R.id.rbShareNot);
+
+        String mode = ((DreamTVApp) getApplication()).getSharingMode();
+
+        if (mode == null || mode.equals(getString(R.string.text_no_option)))
+            rbShareNot.setChecked(true);
+        else if (mode.equals(getString(R.string.text_yes_option)))
+            rbShareYes.setChecked(true);
+    }
+
     private void initializeLanguagesList() { //based on the 10 most spoken languages http://www.foxnewspoint.com/top-10-most-spoken-language-in-the-world-2017/
 
         languagesKeyList = new ArrayList<String>();
@@ -273,26 +288,7 @@ public class SettingsActivity extends Activity {
 
 
     private void updateViews(String languageCode) {
-        Context context = LocaleHelper.setLocale(this, languageCode);
-//        recreate();
-//        Resources resources = context.getResources();
-//        tvTitle.setText(resources.getString(R.string.title_video_settings));
-//        tvTestingModeTitle.setText(resources.getString(R.string.title_testing_mode_settings));
-//        tvTextLanguageTitle.setText(resources.getString(R.string.title_text_language_settings));
-//        rbPolish.setText(resources.getString(R.string.rb_option_text_polish));
-//        rbEnglish.setText(resources.getString(R.string.rb_option_text_english));
-//        rbAdvanced.setText(resources.getString(R.string.rb_option_text_advanced));
-//        rbBeginner.setText(resources.getString(R.string.rb_option_text_beginner));
-//        rbYes.setText(resources.getString(R.string.rb_option_text_yes));
-//        rbNot.setText(resources.getString(R.string.rb_option_text_not));
-//        tvReasonDialogInterfaceTitle.setText(resources.getString(R.string.title_reason_dialog_interface_settings));
-//        tvVideoLanguagesTitle.setText(resources.getString(R.string.title_video_languages_settings));
-//        btnSubtitle.setText(resources.getString(R.string.btn_subtitle));
-//        btnAudio.setText(resources.getString(R.string.btn_audio));
-//        btnSave.setText(resources.getString(R.string.btn_save_settings));
-//        tvAudioLabel.setText(resources.getString(R.string.title_audio));
-//        tvSubtitleLabel.setText(resources.getString(R.string.title_subtitle));
-//        initializeLanguagesList();
+        LocaleHelper.setLocale(this, languageCode);
     }
 
     private void saveUSerPreferences() {
@@ -311,7 +307,7 @@ public class SettingsActivity extends Activity {
 
             @Override
             public void processResponse(String response) {
-                Log.d(TAG,response);
+                Log.d(TAG, response);
                 TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
                 };
                 JsonResponseBaseBean<User> jsonResponse = JsonUtils.getJsonResponse(response, type);
@@ -326,6 +322,14 @@ public class SettingsActivity extends Activity {
                     dreamTVApp.setTestingMode(getString(R.string.text_yes_option));
                 else
                     dreamTVApp.setTestingMode(getString(R.string.text_no_option));
+
+
+                //Save sharing mode
+                if (rbShareYes.isChecked())
+                    dreamTVApp.setSharingMode(getString(R.string.text_yes_option));
+                else
+                    dreamTVApp.setSharingMode(getString(R.string.text_no_option));
+
 
                 Intent returnIntent = new Intent();
                 setResult(Activity.RESULT_OK, returnIntent);
@@ -342,14 +346,14 @@ public class SettingsActivity extends Activity {
             public void processError(VolleyError error) {
                 super.processError(error);
                 Toast.makeText(SettingsActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.d(TAG,error.getMessage());
+                Log.d(TAG, error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
                 Toast.makeText(SettingsActivity.this, jsonResponse.toString(), Toast.LENGTH_SHORT).show();
-                Log.d(TAG,jsonResponse.toString());
+                Log.d(TAG, jsonResponse.toString());
             }
         };
 
@@ -455,6 +459,5 @@ public class SettingsActivity extends Activity {
                 LocaleHelper.setLocale(this, user.interface_language);
             }
     }
-
 
 }

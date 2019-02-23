@@ -21,6 +21,7 @@
     <!--<string name="user_account_preferences">user_account_preferences</string>-->
     <string name="reasons_preferences">reasons_preferences</string>
     <string name="testing_mode_preferences">testing_mode_preferences</string>
+    <string name="sharing_mode_preferences">sharing_mode_preferences</string>
     <string name="languages_preferences">languages_preferences</string>
 
 
@@ -31,6 +32,7 @@
     <string name="title_text_language_settings">Język aplikacji</string>
     <string name="title_reason_dialog_interface_settings">Interfejs</string>
     <string name="title_testing_mode_settings">Tryb testowy</string>
+    <string name="title_share_mode_settings">Sprawdź błędy znalezione przez innych</string>
     <string name="title_video_languages_settings">Języki wideo</string>
     <string name="title_reasons_dialog">Co tu jest nie tak?</string>
     <string name="title_reasons_dialog_2">Ktoś znalazł tu błąd. Co myślisz?</string>

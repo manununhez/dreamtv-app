@@ -60,4 +60,13 @@ public class DreamTVApp extends Application {
         SharedPreferenceUtils.save(this, getString(R.string.testing_mode_preferences), mode);
     }
 
+
+    public String getSharingMode() {
+        return SharedPreferenceUtils.getValue(this, getString(R.string.sharing_mode_preferences));
+    }
+
+    public void setSharingMode(String mode) {
+        SharedPreferenceUtils.save(this, getString(R.string.sharing_mode_preferences), mode);
+    }
+
 }

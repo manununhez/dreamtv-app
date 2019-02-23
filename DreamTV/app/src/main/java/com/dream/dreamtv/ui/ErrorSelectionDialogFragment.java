@@ -515,7 +515,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                             chkBox.setChecked(true);
                         }
                     } else { //estaba chequeado, pero se desactiva el mismo boton. Ahi se reinicia el selectedFeedbackReason
-                        selectedReasons.remove(view.getId());
+                        selectedReasons.remove(selectedReasons.indexOf(view.getId()));
                         chkBox.setChecked(false);
                     }
                 }

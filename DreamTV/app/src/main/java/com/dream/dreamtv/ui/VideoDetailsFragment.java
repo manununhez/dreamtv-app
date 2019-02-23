@@ -183,7 +183,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
 
-
     private void setupDetailsOverviewRow() {
         rowPresenter = new DetailsOverviewRow(userData.mSelectedVideo);
 
@@ -377,8 +376,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 Log.d(TAG, Arrays.toString(videoTests));
 
                 int videoTestIndex = 0;
-                for(int i =0; i < videoTests.length; i++){
-                    if(videoTests[i].video_id.equals(selectedVideo.id)){
+                for (int i = 0; i < videoTests.length; i++) {
+                    if (videoTests[i].video_id.equals(selectedVideo.id)) {
                         videoTestIndex = i;
                         break;
                     }
@@ -406,9 +405,12 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
 
-
     private void getSubtitleJson(final Video video, int version) {
         User user = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getUser();
+
+        //sharing mode
+        final String sharingMode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getSharingMode();
+
 
         Map<String, String> urlParams = new HashMap<>();
         urlParams.put(PARAM_VIDEO_ID, video.id);
@@ -416,7 +418,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 !user.sub_language.equals(Constants.NONE_OPTIONS_CODE)) ?
                 user.sub_language : userData.mSelectedVideo.subtitle_language);
 
-        if(version > 0)  //if version == 0, no need to pass version parameter, For default is fetched last subtitle versions
+        if (version > 0)  //if version == 0, no need to pass version parameter, For default is fetched last subtitle versions
             urlParams.put(PARAM_VERSION, String.valueOf(version));
 
 
@@ -437,7 +439,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                     Log.d(TAG, jsonResponse.data.toString());
                     //verify the type of task. We get the data from users tasks
                     if (userData.category == Constants.CHECK_NEW_TASKS_CATEGORY) {
-                        getOtherTasksForThisVideo();
+                        if (sharingMode == null || sharingMode.equals(getString(R.string.text_no_option)))
+                            goToPlayVideo();
+                        else if (sharingMode.equals(getString(R.string.text_yes_option)))
+                            getOtherTasksForThisVideo();
                     } else if ((userData.category == Constants.CONTINUE_WATCHING_CATEGORY)) {
                         getMyTaskForThisVideo();
                     } else {
@@ -452,13 +457,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                Log.d(TAG,error.getMessage());
+                Log.d(TAG, error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                Log.d(TAG,jsonResponse.toString());
+                Log.d(TAG, jsonResponse.toString());
             }
         };
 
@@ -502,7 +507,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processResponse(String response) {
 //                Gson gson = new Gson();
-                Log.d(TAG,"Tasks -> Mine: " + response);
+                Log.d(TAG, "Tasks -> Mine: " + response);
                 TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask[]>>() {
                 };
                 JsonResponseBaseBean<UserTask[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
@@ -516,13 +521,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                Log.d(TAG,error.getMessage());
+                Log.d(TAG, error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                Log.d(TAG,jsonResponse.toString());
+                Log.d(TAG, jsonResponse.toString());
             }
         };
 
@@ -553,13 +558,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void processError(VolleyError error) {
                 super.processError(error);
-                Log.d(TAG,error.getMessage());
+                Log.d(TAG, error.getMessage());
             }
 
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-                Log.d(TAG,jsonResponse.toString());
+                Log.d(TAG, jsonResponse.toString());
             }
         };
 
