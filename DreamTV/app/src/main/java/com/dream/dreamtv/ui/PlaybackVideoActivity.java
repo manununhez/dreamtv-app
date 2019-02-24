@@ -48,7 +48,10 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
         IPlayBackVideoListener, IReasonsDialogListener, ISubtitlePlayBackListener {
 
     private static final String TAG = PlaybackVideoActivity.class.getSimpleName();
-
+    private static final int DELAY_IN_MS = 100;
+    private static final int AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION = 2;
+    private static final int ONE_SEC_IN_MS = 1000;
+    private static final int SECS_IN_ONE_MIN = 60;
     private static final int PLAY = 0;
     private static final int PAUSE = 1;
     private static final int POSITION_OFFSET = 30000;//30 secs in ms
@@ -139,7 +142,7 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
                 Log.d(TAG,"KEYCODE_DPAD_LEFT");
 
                 mVideoView.seekTo(mVideoView.getCurrentPosition() - POSITION_OFFSET);
-                Toast.makeText(this, getString(R.string.title_video_backward, (POSITION_OFFSET / 1000)),
+                Toast.makeText(this, getString(R.string.title_video_backward, (POSITION_OFFSET / ONE_SEC_IN_MS)),
                         Toast.LENGTH_SHORT).show();
 
                 //Analytics Report Event
@@ -152,7 +155,7 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
                 Log.d(TAG,"KEYCODE_DPAD_RIGHT");
 
                 mVideoView.seekTo(mVideoView.getCurrentPosition() + POSITION_OFFSET);
-                Toast.makeText(this, getString(R.string.title_video_forward, (POSITION_OFFSET / 1000)),
+                Toast.makeText(this, getString(R.string.title_video_forward, (POSITION_OFFSET / ONE_SEC_IN_MS)),
                         Toast.LENGTH_SHORT).show();
 
                 //Analytics Report Event
@@ -273,7 +276,7 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
         if (userData.category == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
             final Subtitle subtitle = userData.getLastSubtitlePositionTime();
             if (subtitle != null) { //Si por alguna razon no se cuenta con subtitulo (algun fallo en el servicio al traer el requerido subt)
-                Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / 1000 / 60), String.valueOf(userData.mSelectedVideo.duration / 60)),
+                Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / ONE_SEC_IN_MS / SECS_IN_ONE_MIN), String.valueOf(userData.mSelectedVideo.duration / SECS_IN_ONE_MIN)),
                         getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -394,7 +397,7 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
                 });
 
                 if (handlerRunning)
-                    handler.postDelayed(myRunnable, 100);
+                    handler.postDelayed(myRunnable, DELAY_IN_MS);
             }
         };
     }
@@ -489,15 +492,15 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
                                         //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
 
             if (selectedSubtitle.position != subtitle.position) { //a different subtitle from the original was selected
-                if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
-                    subtitleOneBeforeNew = userData.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
-                    if (selectedSubtitle.start - subtitleOneBeforeNew.end < 1000)
-                        mVideoView.seekTo(subtitleOneBeforeNew.end - 1000);
+                if (selectedSubtitle.position - AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION >= 0) { //avoid index out of range
+                    subtitleOneBeforeNew = userData.subtitle_json.subtitles.get(selectedSubtitle.position - AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION); //We go to the end of one subtitle before the previous of the selected subtitle
+                    if (selectedSubtitle.start - subtitleOneBeforeNew.end < ONE_SEC_IN_MS)
+                        mVideoView.seekTo(subtitleOneBeforeNew.end - ONE_SEC_IN_MS);
                     else
                         mVideoView.seekTo(subtitleOneBeforeNew.end);
                 } else {
                     subtitleOneBeforeNew = userData.subtitle_json.subtitles.get(0); //nos vamos al primer subtitulo
-                    mVideoView.seekTo(subtitleOneBeforeNew.start - 1000); //inicio del primer sub
+                    mVideoView.seekTo(subtitleOneBeforeNew.start - ONE_SEC_IN_MS); //inicio del primer sub
                 }
 
             }
