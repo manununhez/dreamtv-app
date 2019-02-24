@@ -482,8 +482,8 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         Subtitle subtitleOld = userData.subtitle_json.subtitles.get(subtitleOriginalPosition);
         Subtitle subtitleOneBeforeNew;
 
-        if (selectedSubtitle != null) //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
-        {
+        if (selectedSubtitle != null){ // A subtitle from the subtitle navigation was pressed. The video is moving forward or backward
+                                        //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
             if (selectedSubtitle.position != subtitleOld.position) { //a different subtitle from the original was selected
                 if (selectedSubtitle.position - 2 >= 0) { //avoid index out of range
                     subtitleOneBeforeNew = userData.subtitle_json.subtitles.get(selectedSubtitle.position - 2); //We go to the end of one subtitle before the previous of the selected subtitle
@@ -505,7 +505,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
             bundle.putBoolean(Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
             mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS, bundle);
 
-        } else {
+        } else { // None subtitle from the subtitle navigation was pressed. The video continues as it was.
 
             //Analytics Report Event
             Bundle bundle = new Bundle();

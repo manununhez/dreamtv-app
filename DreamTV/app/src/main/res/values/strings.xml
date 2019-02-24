@@ -69,7 +69,7 @@
     <string name="btn_cancel">Cancel</string>
     <string name="btn_ok">OK</string>
     <string name="btn_start_recording">Click the mic to record your comment</string>
-    <string name="btn_continue_watching">Continue</string>
+    <string name="btn_continue_watching">Continue from the last selected error</string>
     <string name="btn_no_from_beggining">Restart the talk</string>
     <string name="btn_play_video">Play video</string>
     <string name="btn_add_to_my_list">+ Add to my list</string>

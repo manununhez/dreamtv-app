@@ -67,7 +67,7 @@
     <string name="btn_cancel">Anuluj</string>
     <string name="btn_ok">OK</string>
     <string name="btn_start_recording">Kliknij na mikrofon żeby nagrać wiadomość</string>
-    <string name="btn_continue_watching">Kontynuować</string>
+    <string name="btn_continue_watching">Kontynuuj od ostatnio wybranego błędu</string>
     <string name="btn_no_from_beggining">Zacząć od nowa</string>
     <string name="btn_play_video">Odtwórz film</string>
     <string name="btn_add_to_my_list">+ Dodaj do moich filmów</string>
