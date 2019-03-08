@@ -16,7 +16,7 @@
     <string name="generic_server_down">There is no Internet connection</string>
 
     <!--SHAREDPREFERENCES-->
-    <string name="dreamTVApp_token">tedapp_token</string>
+    <string name="dreamTVApp_token">dreamTVApp_token</string>
     <string name="user_preferences">user_preferences</string>
     <string name="url_base_preferences">url_base_preferences</string>
     <!--<string name="user_account_preferences">user_account_preferences</string>-->

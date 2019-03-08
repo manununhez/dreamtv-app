@@ -49,6 +49,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.model.ErrorReason;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.TaskResponse;
@@ -66,6 +67,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
@@ -319,6 +321,9 @@ public class MainFragment extends BrowseSupportFragment {
 
                 setFootersOptions();
 
+
+                getReasons();
+
             }
 
             @Override
@@ -337,6 +342,42 @@ public class MainFragment extends BrowseSupportFragment {
         };
 
         ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_VIDEOS, urlParams, responseListener, this);
+
+    }
+
+    private void getReasons() {
+        ResponseListener responseListener = new ResponseListener(getActivity(), false, true, getString(R.string.title_loading_retrieve_options)) {
+
+            @Override
+            public void processResponse(String response) {
+                Gson gson = new Gson();
+                Log.d(TAG,response);
+
+                TypeToken type = new TypeToken<JsonResponseBaseBean<List<ErrorReason>>>() {
+                };
+                JsonResponseBaseBean<List<ErrorReason>> jsonResponse = JsonUtils.getJsonResponse(response, type);
+
+                ((DreamTVApp) getActivity().getApplication()).setReasons(jsonResponse.data);
+
+                Log.d(TAG, jsonResponse.data.toString());
+
+
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+                Log.d(TAG,error.getMessage());
+            }
+
+            @Override
+            public void processError(JsonResponseBaseBean jsonResponse) {
+                super.processError(jsonResponse);
+                Log.d(TAG,jsonResponse.toString());
+            }
+        };
+
+        ConnectionManager.get(getActivity(), ConnectionManager.Urls.REASONS, null, responseListener, this);
 
     }
 

@@ -5,10 +5,16 @@ import android.content.Context;
 import android.util.Log;
 
 
+import com.dream.dreamtv.model.ErrorReason;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -67,6 +73,18 @@ public class DreamTVApp extends Application {
 
     public void setSharingMode(String mode) {
         SharedPreferenceUtils.save(this, getString(R.string.sharing_mode_preferences), mode);
+    }
+
+    public void setReasons(List<ErrorReason> reasons) {
+        String reasonList = gson.toJson(reasons);
+        SharedPreferenceUtils.save(this, getString(R.string.reasons_preferences), reasonList);
+    }
+
+    public List<ErrorReason> getReasons() {
+        String errorReasonList = SharedPreferenceUtils.getValue(this, getString(R.string.reasons_preferences));
+        Type listType = new TypeToken<ArrayList<ErrorReason>>(){}.getType();
+        List<ErrorReason> errorList = new Gson().fromJson(errorReasonList, listType);
+        return errorList;
     }
 
 }

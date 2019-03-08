@@ -47,7 +47,6 @@ import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,9 +169,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         setupAudioRecord();
 
         //The cached reasons are verified
-//        ReasonList reasonL = ((DreamTVApp) getActivity().getApplication()).getReasons();
+//        ReasonList reasonL = ((DreamTVApp) getActivity().getApplication()).setupReasons();
 //        if (reasonL == null)
-        getReasons();
+        setupReasons();
 //        else {
 //            errorReasonList = reasonL.data;
 //            setupReasons();
@@ -431,50 +430,65 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         }
     }
 
-    private void getReasons() {
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_options)) {
+    private void setupReasons() {
 
-            @Override
-            public void processResponse(String response) {
-                Gson gson = new Gson();
-                Log.d(TAG,response);
+        errorReasonList = ((DreamTVApp) getActivity().getApplication()).getReasons();
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<List<ErrorReason>>>() {
-                };
-                JsonResponseBaseBean<List<ErrorReason>> jsonResponse = JsonUtils.getJsonResponse(response, type);
+        Log.d(TAG, errorReasonList.toString());
 
-                errorReasonList = jsonResponse.data;
-                Log.d(TAG, errorReasonList.toString());
+        //Interface mode settings
+        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+        if (user.interface_mode.equals(Constants.BEGINNER_INTERFACE_MODE))
+            setupReasonsRadioGroup();
+        else
+            setupReasonsCheck();
 
-                //Interface mode settings
-                User user = ((DreamTVApp) getActivity().getApplication()).getUser();
-                if (user.interface_mode.equals(Constants.BEGINNER_INTERFACE_MODE))
-                    setupReasonsRadioGroup();
-                else
-                    setupReasons();
-
-                controlUserTask(); //To verify if we receive usertask, to repopulate the dialog
-
-            }
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-                Log.d(TAG,error.getMessage());
-            }
-
-            @Override
-            public void processError(JsonResponseBaseBean jsonResponse) {
-                super.processError(jsonResponse);
-                Log.d(TAG,jsonResponse.toString());
-            }
-        };
-
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.REASONS, null, responseListener, this);
+        controlUserTask(); //To verify if we receive usertask, to repopulate the dialog
 
     }
+//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_options)) {
+//
+//            @Override
+//            public void processResponse(String response) {
+//                Gson gson = new Gson();
+//                Log.d(TAG,response);
+//
+//                TypeToken type = new TypeToken<JsonResponseBaseBean<List<ErrorReason>>>() {
+//                };
+//                JsonResponseBaseBean<List<ErrorReason>> jsonResponse = JsonUtils.getJsonResponse(response, type);
+//
+//                errorReasonList = jsonResponse.data;
+//                Log.d(TAG, errorReasonList.toString());
+//
+//                //Interface mode settings
+//                User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+//                if (user.interface_mode.equals(Constants.BEGINNER_INTERFACE_MODE))
+//                    setupReasonsRadioGroup();
+//                else
+//                    setupReasons();
+//
+//                controlUserTask(); //To verify if we receive usertask, to repopulate the dialog
+//
+//            }
+//
+//            @Override
+//            public void processError(VolleyError error) {
+//                super.processError(error);
+//                Log.d(TAG,error.getMessage());
+//            }
+//
+//            @Override
+//            public void processError(JsonResponseBaseBean jsonResponse) {
+//                super.processError(jsonResponse);
+//                Log.d(TAG,jsonResponse.toString());
+//            }
+//        };
+//
+//        ConnectionManager.get(getActivity(), ConnectionManager.Urls.REASONS, null, responseListener, this);
+//
+//    }
 
-    private void setupReasons() {
+    private void setupReasonsCheck() {
         llComments.setVisibility(View.VISIBLE);
         scrollViewAdvanced.setVisibility(View.VISIBLE);
         scrollViewBeginner.setVisibility(View.GONE);
