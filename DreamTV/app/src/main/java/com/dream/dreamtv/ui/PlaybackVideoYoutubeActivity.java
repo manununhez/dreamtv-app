@@ -204,7 +204,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                 //Analytics Report Event
                 bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
                 bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
-                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
                 mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO, bundle);
                 return true;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
@@ -216,7 +215,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                 //Analytics Report Event
                 bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
                 bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
-                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
                 mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO, bundle);
                 return true;
 
@@ -296,7 +294,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                                 Bundle bundle = new Bundle();
                                 bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
                                 bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
-                                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
                                 mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO, bundle);
                             }
                         }, getString(R.string.btn_no_from_beggining), new DialogInterface.OnClickListener() {
@@ -308,7 +305,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
                                 Bundle bundle = new Bundle();
                                 bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
                                 bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
-                                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
                                 mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO, bundle);
                             }
                         }, new DialogInterface.OnCancelListener() {
@@ -342,7 +338,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         Bundle bundle = new Bundle();
         bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
         bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
-        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
         mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY, bundle);
     }
 
@@ -361,7 +356,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         Bundle bundle = new Bundle();
         bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
         bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
-        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
         mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSED, bundle);
     }
 
@@ -373,7 +367,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
             Bundle bundle = new Bundle();
             bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
             bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
-            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
             mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_STOP_VIDEO, bundle);
         }
     }
@@ -476,7 +469,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         Bundle bundle = new Bundle();
         bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
         bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
-        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
         mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS, bundle);
     }
 
@@ -486,7 +478,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
         Subtitle subtitleOld = userData.subtitle_json.subtitles.get(subtitleOriginalPosition);
         Subtitle subtitleOneBeforeNew;
 
-        if (selectedSubtitle != null){ // A subtitle from the subtitle navigation was pressed. The video is moving forward or backward
+        if (selectedSubtitle != null) { // A subtitle from the subtitle navigation was pressed. The video is moving forward or backward
                                         //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
             if (selectedSubtitle.position != subtitleOld.position) { //a different subtitle from the original was selected
                 if (selectedSubtitle.position - AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION >= 0) { //avoid index out of range
@@ -505,7 +497,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
             Bundle bundle = new Bundle();
             bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
             bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
-            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
             bundle.putBoolean(Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
             mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS, bundle);
 
@@ -515,7 +506,6 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
             Bundle bundle = new Bundle();
             bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
             bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
-            bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
             bundle.putBoolean(Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
             mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS, bundle);
 

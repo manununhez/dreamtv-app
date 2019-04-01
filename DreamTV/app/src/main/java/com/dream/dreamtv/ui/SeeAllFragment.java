@@ -16,17 +16,6 @@ package com.dream.dreamtv.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v17.leanback.app.VerticalGridSupportFragment;
-import android.support.v17.leanback.widget.ArrayObjectAdapter;
-import android.support.v17.leanback.widget.FocusHighlight;
-import android.support.v17.leanback.widget.ImageCardView;
-import android.support.v17.leanback.widget.OnItemViewClickedListener;
-import android.support.v17.leanback.widget.OnItemViewSelectedListener;
-import android.support.v17.leanback.widget.Presenter;
-import android.support.v17.leanback.widget.Row;
-import android.support.v17.leanback.widget.RowPresenter;
-import android.support.v17.leanback.widget.VerticalGridPresenter;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -34,13 +23,13 @@ import android.widget.Toast;
 import com.android.volley.VolleyError;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.UserData;
-import com.dream.dreamtv.presenter.VideoCardPresenter;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
+import com.dream.dreamtv.model.UserData;
+import com.dream.dreamtv.network.NetworkDataSource;
+import com.dream.dreamtv.presenter.VideoCardPresenter;
 import com.dream.dreamtv.model.TaskResponse;
 import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.Video;
-import com.dream.dreamtv.network.ConnectionManager;
 import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
@@ -50,6 +39,18 @@ import com.google.gson.reflect.TypeToken;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.leanback.app.VerticalGridSupportFragment;
+import androidx.leanback.widget.ArrayObjectAdapter;
+import androidx.leanback.widget.FocusHighlight;
+import androidx.leanback.widget.ImageCardView;
+import androidx.leanback.widget.OnItemViewClickedListener;
+import androidx.leanback.widget.OnItemViewSelectedListener;
+import androidx.leanback.widget.Presenter;
+import androidx.leanback.widget.Row;
+import androidx.leanback.widget.RowPresenter;
+import androidx.leanback.widget.VerticalGridPresenter;
 
 /**
  * An example how to use leanback's {@link VerticalGridSupportFragment}.
@@ -126,7 +127,7 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
                     currentPage = -1;
 
                 for (Task task : taskResponse.data) {
-                    mAdapter.add(new Video(task)); //SeeAllFragments only appears in Check New Tasks Category
+                    mAdapter.add(task.videos); //SeeAllFragments only appears in Check New Tasks Category
                 }
             }
 
@@ -144,7 +145,7 @@ public class SeeAllFragment extends VerticalGridSupportFragment {
         };
 
 
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.TASKS, urlParams, responseListener, this);
+//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.TASKS, urlParams, responseListener, this);
 
 
     }

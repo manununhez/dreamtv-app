@@ -7,12 +7,14 @@ package com.dream.dreamtv.model;
 public class JsonResponseBaseBean<T> {
     public Boolean success;
     public T data;
+    public String message;
 
     @Override
     public String toString() {
         return "JsonResponseBaseBean{" +
                 "success=" + success +
                 ", data=" + data +
+                ", message='" + message + '\'' +
                 '}';
     }
 }

@@ -2,7 +2,6 @@ package com.dream.dreamtv.ui;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.support.annotation.NonNull;
 import android.text.Html;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -17,6 +16,8 @@ import com.dream.dreamtv.utils.Constants;
 
 import java.util.List;
 import java.util.Objects;
+
+import androidx.annotation.NonNull;
 
 /**
  * Created by manuel on 9/11/17.

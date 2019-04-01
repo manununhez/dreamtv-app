@@ -1,0 +1,32 @@
+package com.dream.dreamtv.ui.Main;
+
+
+import com.dream.dreamtv.db.entity.UserEntity;
+import com.dream.dreamtv.model.Resource;
+import com.dream.dreamtv.model.User;
+import com.dream.dreamtv.repository.AppRepository;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
+
+class MainViewModel extends ViewModel {
+
+    private final AppRepository mRepository;
+
+
+    public MainViewModel(AppRepository appRepository) {
+        mRepository = appRepository;
+    }
+
+
+    public void requestFromLogin(String email, String password) {
+        mRepository.requestFromLogin(email, password);
+    }
+
+    public LiveData<Resource<UserEntity>> responseFromLogin() {
+        return mRepository.responseFromLogin();
+    }
+
+
+}
+

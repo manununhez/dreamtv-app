@@ -10,10 +10,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.support.annotation.IdRes;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -42,7 +38,7 @@ import com.dream.dreamtv.model.Subtitle;
 import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
-import com.dream.dreamtv.network.ConnectionManager;
+import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
@@ -53,6 +49,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -342,7 +342,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             }
         };
 
-        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_TASKS, null, jsonRequest, responseListener, this);
+//        NetworkDataSource.post(getActivity(), NetworkDataSource.Urls.USER_TASKS, null, jsonRequest, responseListener, this);
 
     }
 
@@ -484,7 +484,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 //            }
 //        };
 //
-//        ConnectionManager.get(getActivity(), ConnectionManager.Urls.REASONS, null, responseListener, this);
+//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.REASONS, null, responseListener, this);
 //
 //    }
 

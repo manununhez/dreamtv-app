@@ -1,20 +1,20 @@
 package com.dream.dreamtv.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Window;
 
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.ui.Main.MainActivity;
 
 
-public class SplashScreenActivity extends AppCompatActivity {
+
+public class SplashScreenActivity extends Activity {
     private static final String TAG = SplashScreenActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_splash_screen);

@@ -14,10 +14,10 @@
 
 package com.dream.dreamtv.presenter;
 
-import android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter;
-
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Video;
+
+import androidx.leanback.widget.AbstractDetailsDescriptionPresenter;
 
 
 public class DetailsDescriptionPresenter extends AbstractDetailsDescriptionPresenter {

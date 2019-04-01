@@ -5,9 +5,12 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.Checkable;
 
-public class CheckableTextView extends android.support.v7.widget.AppCompatTextView implements Checkable {
+import androidx.appcompat.widget.AppCompatTextView;
+
+public class CheckableTextView extends AppCompatTextView implements Checkable {
 
     private boolean mChecked;
     private boolean mBroadcasting;
@@ -127,7 +130,7 @@ public class CheckableTextView extends android.support.v7.widget.AppCompatTextVi
     /*   State persistency  **/
     /**************************/
 
-    static class SavedState extends BaseSavedState {
+    static class SavedState extends View.BaseSavedState {
         boolean checked;
 
         SavedState(Parcelable superState) {

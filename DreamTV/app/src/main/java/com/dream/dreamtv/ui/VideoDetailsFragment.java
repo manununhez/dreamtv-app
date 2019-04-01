@@ -18,18 +18,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v17.leanback.app.BackgroundManager;
-import android.support.v17.leanback.app.DetailsSupportFragment;
-import android.support.v17.leanback.widget.Action;
-import android.support.v17.leanback.widget.ArrayObjectAdapter;
-import android.support.v17.leanback.widget.ClassPresenterSelector;
-import android.support.v17.leanback.widget.DetailsOverviewRow;
-import android.support.v17.leanback.widget.FullWidthDetailsOverviewRowPresenter;
-import android.support.v17.leanback.widget.FullWidthDetailsOverviewSharedElementHelper;
-import android.support.v17.leanback.widget.OnActionClickedListener;
-import android.support.v17.leanback.widget.SparseArrayObjectAdapter;
-import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
@@ -49,7 +37,7 @@ import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.UserVideo;
 import com.dream.dreamtv.model.Video;
 import com.dream.dreamtv.model.VideoTests;
-import com.dream.dreamtv.network.ConnectionManager;
+import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.presenter.DetailsDescriptionPresenter;
 import com.dream.dreamtv.utils.Constants;
@@ -62,6 +50,19 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.leanback.app.BackgroundManager;
+import androidx.leanback.app.DetailsSupportFragment;
+import androidx.leanback.widget.Action;
+import androidx.leanback.widget.ArrayObjectAdapter;
+import androidx.leanback.widget.ClassPresenterSelector;
+import androidx.leanback.widget.DetailsOverviewRow;
+import androidx.leanback.widget.FullWidthDetailsOverviewRowPresenter;
+import androidx.leanback.widget.FullWidthDetailsOverviewSharedElementHelper;
+import androidx.leanback.widget.OnActionClickedListener;
+import androidx.leanback.widget.SparseArrayObjectAdapter;
 
 
 /*
@@ -104,7 +105,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             setupAdapter();
             setupDetailsOverviewRow();
             updateBackground(userData.mSelectedVideo.thumbnail);
-            verifyIfVideoIsInMyList();
+            //verifyIfVideoIsInMyList();
         } else {
             getActivity().finish(); //back to MainActivity
         }
@@ -167,9 +168,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                     prepareSubtitle(userData.mSelectedVideo);
 
                 } else if (action.getId() == ACTION_ADD_MY_LIST) {
-                    addVideoToMyList();
+                    //addVideoToMyList();
                 } else if (action.getId() == ACTION_REMOVE_MY_LIST) {
-                    removeVideoFromMyList();
+                   // removeVideoFromMyList();
                 } else {
                     Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
                 }
@@ -217,135 +218,133 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
 
-    private void verifyIfVideoIsInMyList() {
+//    private void verifyIfVideoIsInMyList() {
+//
+//        Map<String, String> urlParams = new HashMap<>();
+//        urlParams.put(PARAM_VIDEO_ID, userData.mSelectedVideo.video_id);
+//
+//
+//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_verifying_list)) {
+//
+//            @Override
+//            public void processResponse(String response) {
+//                Gson gson = new Gson();
+//                Log.d(TAG, response);
+//                TypeToken type = new TypeToken<JsonResponseBaseBean<UserVideo[]>>() {
+//                };
+//                JsonResponseBaseBean<UserVideo[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
+//
+//
+//                if (jsonResponse.data.length > 0) {
+//                    SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
+//                    adapter.clear(ACTION_ADD_MY_LIST);
+//                    adapter.set(ACTION_REMOVE_MY_LIST, new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_from_my_list)));
+//
+//                }
+//
+//            }
+//
+//            @Override
+//            public void processError(VolleyError error) {
+//                super.processError(error);
+//                Log.d(TAG, error.getMessage());
+//            }
+//
+//            @Override
+//            public void processError(JsonResponseBaseBean jsonResponse) {
+//                super.processError(jsonResponse);
+//                Log.d(TAG, jsonResponse.toString());
+//            }
+//        };
+//
+//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER_VIDEO_DETAILS, urlParams, responseListener, this);
+//
+//    }
 
-        Map<String, String> urlParams = new HashMap<>();
-        urlParams.put(PARAM_VIDEO_ID, userData.mSelectedVideo.id);
+//    private void addVideoToMyList() {
+//        final Video video = new Video();
+//        video.primary_audio_language_code = userData.mSelectedVideo.primary_audio_language_code;
+//        video.video_id = userData.mSelectedVideo.video_id;
+//
+//
+//        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), video);
+//
+//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_adding_videos_list)) {
+//
+//            @Override
+//            public void processResponse(String response) {
+//                Log.d(TAG, response);
+//
+//
+//                SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
+//                adapter.clear(ACTION_ADD_MY_LIST);
+//                adapter.set(ACTION_REMOVE_MY_LIST, new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_from_my_list)));
+//
+//                ((VideoDetailsActivity) Objects.requireNonNull(getActivity())).updateScreenAfterChanges = true;
+//
+//                //Analytics Report Event
+//                Bundle bundle = new Bundle();
+//                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, video.video_id);
+//                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, video.primary_audio_language_code);
+//                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN, bundle);
+//            }
+//
+//            @Override
+//            public void processError(VolleyError error) {
+//                super.processError(error);
+//                Log.d(TAG, error.getMessage());
+//            }
+//
+//            @Override
+//            public void processError(JsonResponseBaseBean jsonResponse) {
+//                super.processError(jsonResponse);
+//                Log.d(TAG, jsonResponse.toString());
+//            }
+//        };
+//
+//        NetworkDataSource.post(getActivity(), NetworkDataSource.Urls.USER_VIDEOS, null, jsonRequest, responseListener, this);
+//
+//    }
 
-
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_verifying_list)) {
-
-            @Override
-            public void processResponse(String response) {
-                Gson gson = new Gson();
-                Log.d(TAG, response);
-                TypeToken type = new TypeToken<JsonResponseBaseBean<UserVideo[]>>() {
-                };
-                JsonResponseBaseBean<UserVideo[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
-
-
-                if (jsonResponse.data.length > 0) {
-                    SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
-                    adapter.clear(ACTION_ADD_MY_LIST);
-                    adapter.set(ACTION_REMOVE_MY_LIST, new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_from_my_list)));
-
-                }
-
-            }
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-                Log.d(TAG, error.getMessage());
-            }
-
-            @Override
-            public void processError(JsonResponseBaseBean jsonResponse) {
-                super.processError(jsonResponse);
-                Log.d(TAG, jsonResponse.toString());
-            }
-        };
-
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_VIDEO_DETAILS, urlParams, responseListener, this);
-
-    }
-
-    private void addVideoToMyList() {
-        final Video video = new Video();
-        video.primary_audio_language_code = userData.mSelectedVideo.primary_audio_language_code;
-        video.original_language = userData.mSelectedVideo.original_language;
-        video.video_id = userData.mSelectedVideo.id;
-
-
-        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), video);
-
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_adding_videos_list)) {
-
-            @Override
-            public void processResponse(String response) {
-                Log.d(TAG, response);
-
-
-                SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
-                adapter.clear(ACTION_ADD_MY_LIST);
-                adapter.set(ACTION_REMOVE_MY_LIST, new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_from_my_list)));
-
-                ((VideoDetailsActivity) Objects.requireNonNull(getActivity())).updateScreenAfterChanges = true;
-
-                //Analytics Report Event
-                Bundle bundle = new Bundle();
-                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, video.video_id);
-                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, video.primary_audio_language_code);
-                bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, video.original_language);
-                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN, bundle);
-            }
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-                Log.d(TAG, error.getMessage());
-            }
-
-            @Override
-            public void processError(JsonResponseBaseBean jsonResponse) {
-                super.processError(jsonResponse);
-                Log.d(TAG, jsonResponse.toString());
-            }
-        };
-
-        ConnectionManager.post(getActivity(), ConnectionManager.Urls.USER_VIDEOS, null, jsonRequest, responseListener, this);
-
-    }
-
-    private void removeVideoFromMyList() {
-
-        Map<String, String> urlParams = new HashMap<>();
-        urlParams.put(PARAM_VIDEO_ID, userData.mSelectedVideo.id);
-
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_removing_videos_list)) {
-
-            @Override
-            public void processResponse(String response) {
-                Log.d(TAG, response);
-
-                SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
-                adapter.clear(ACTION_REMOVE_MY_LIST);
-                adapter.set(ACTION_ADD_MY_LIST, new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
-
-                ((VideoDetailsActivity) Objects.requireNonNull(getActivity())).updateScreenAfterChanges = true;
-
-                //Analytics Report Event
-                Bundle bundle = new Bundle();
-                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.id);
-                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN, bundle);
-            }
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-                Log.d(TAG, error.getMessage());
-            }
-
-            @Override
-            public void processError(JsonResponseBaseBean jsonResponse) {
-                super.processError(jsonResponse);
-                Log.d(TAG, jsonResponse.toString());
-            }
-        };
-
-        ConnectionManager.delete(getActivity(), ConnectionManager.Urls.USER_VIDEOS, urlParams, responseListener, this);
-
-    }
+//    private void removeVideoFromMyList() {
+//
+//        Map<String, String> urlParams = new HashMap<>();
+//        urlParams.put(PARAM_VIDEO_ID, userData.mSelectedVideo.video_id);
+//
+//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_removing_videos_list)) {
+//
+//            @Override
+//            public void processResponse(String response) {
+//                Log.d(TAG, response);
+//
+//                SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
+//                adapter.clear(ACTION_REMOVE_MY_LIST);
+//                adapter.set(ACTION_ADD_MY_LIST, new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
+//
+//                ((VideoDetailsActivity) Objects.requireNonNull(getActivity())).updateScreenAfterChanges = true;
+//
+//                //Analytics Report Event
+//                Bundle bundle = new Bundle();
+//                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
+//                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN, bundle);
+//            }
+//
+//            @Override
+//            public void processError(VolleyError error) {
+//                super.processError(error);
+//                Log.d(TAG, error.getMessage());
+//            }
+//
+//            @Override
+//            public void processError(JsonResponseBaseBean jsonResponse) {
+//                super.processError(jsonResponse);
+//                Log.d(TAG, jsonResponse.toString());
+//            }
+//        };
+//
+//        NetworkDataSource.delete(getActivity(), NetworkDataSource.Urls.USER_VIDEOS, urlParams, responseListener, this);
+//
+//    }
 
     private void prepareSubtitle(Video mSelectedVideo) {
         String mode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getTestingMode();
@@ -377,7 +376,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                 int videoTestIndex = 0;
                 for (int i = 0; i < videoTests.length; i++) {
-                    if (videoTests[i].video_id.equals(selectedVideo.id)) {
+                    if (videoTests[i].video_id.equals(selectedVideo.video_id)) {
                         videoTestIndex = i;
                         break;
                     }
@@ -401,7 +400,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             }
         };
 
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.VIDEO_TESTS, null, responseListener, this);
+       // NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.VIDEO_TESTS, null, responseListener, this);
     }
 
 
@@ -413,7 +412,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
 
         Map<String, String> urlParams = new HashMap<>();
-        urlParams.put(PARAM_VIDEO_ID, video.id);
+        urlParams.put(PARAM_VIDEO_ID, video.video_id);
         urlParams.put(PARAM_LANGUAGE_CODE, (user.sub_language != null &&
                 !user.sub_language.equals(Constants.NONE_OPTIONS_CODE)) ?
                 user.sub_language : userData.mSelectedVideo.subtitle_language);
@@ -467,7 +466,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             }
         };
 
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.SUBTITLE, urlParams, responseListener, this);
+//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.SUBTITLE, urlParams, responseListener, this);
 
     }
 
@@ -486,9 +485,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         //Analytics Report Event
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.id);
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
         bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
-        bundle.putString(Constants.FIREBASE_KEY_ORIGINAL_LANGUAGE, userData.mSelectedVideo.original_language);
         bundle.putString(Constants.FIREBASE_KEY_VIDEO_PROJECT_NAME, userData.mSelectedVideo.project);
         bundle.putLong(Constants.FIREBASE_KEY_VIDEO_DURATION, userData.mSelectedVideo.getVideoDurationInMs());
         mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN, bundle);
@@ -531,7 +529,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             }
         };
 
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS, urlParams, responseListener, this);
+//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER_TASKS, urlParams, responseListener, this);
 
     }
 
@@ -568,7 +566,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             }
         };
 
-        ConnectionManager.get(getActivity(), ConnectionManager.Urls.USER_TASKS, urlParams, responseListener, this);
+//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER_TASKS, urlParams, responseListener, this);
 
     }
 

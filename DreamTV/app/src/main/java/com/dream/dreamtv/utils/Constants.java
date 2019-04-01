@@ -39,7 +39,6 @@ public class Constants {
     public static final String FIREBASE_KEY_INTERFACE_LANGUAGE = "interface_language";
     public static final String FIREBASE_KEY_VIDEO_ID = "video_id";
     public static final String FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE = "primary_audio_language";
-    public static final String FIREBASE_KEY_ORIGINAL_LANGUAGE = "original_language";
     public static final String FIREBASE_KEY_VIDEO_PROJECT_NAME = "project";
     public static final String FIREBASE_KEY_VIDEO_DURATION = "duration";
 //    LOG EVENT NAMES

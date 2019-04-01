@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.dream.dreamtv.ui;
+package com.dream.dreamtv.ui.Main;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -20,20 +20,32 @@ import android.os.Bundle;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.utils.LocaleHelper;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
-/**
- * TODO: Javadoc
- */
-public class SeeAllActivity extends FragmentActivity {
 
-    @Override public void onCreate(Bundle savedInstanceState) {
+/*
+ * MainActivity class that loads MainFragment
+ */
+public class MainActivity extends FragmentActivity {
+    /**
+     * Called when the activity is first created.
+     */
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_see_all);
+        setContentView(R.layout.activity_main);
     }
 
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(LocaleHelper.onAttach(base));
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
 }

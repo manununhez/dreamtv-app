@@ -22,7 +22,7 @@ import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.User;
-import com.dream.dreamtv.network.ConnectionManager;
+import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.utils.CheckableTextView;
 import com.dream.dreamtv.utils.Constants;
@@ -357,7 +357,7 @@ public class SettingsActivity extends Activity {
             }
         };
 
-        ConnectionManager.put(this, ConnectionManager.Urls.USERS, null, jsonRequest, responseListener, this);
+//        NetworkDataSource.put(this, NetworkDataSource.Urls.USER, null, jsonRequest, responseListener, this);
 
     }
 

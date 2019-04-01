@@ -38,21 +38,23 @@ public class DreamTVApp extends Application {
 
     }
 
-    public User getUser() {
-        //todo control cuando viene null
+    public void setToken(String token){
+        Log.d(TAG,"Set Token updated");
+        SharedPreferenceUtils.save(this, this.getString(R.string.dreamTVApp_token), token);
 
+    }
+
+    public String getToken(){
+        return SharedPreferenceUtils.getValue(this, this.getString(R.string.dreamTVApp_token));
+
+    }
+
+    public User getUser() {
         String userString = SharedPreferenceUtils.getValue(this, getString(R.string.user_preferences));
         return userString == null ? null : gson.fromJson(userString, User.class);
     }
 
     public void setUser(User user) {
-        //todo controlar si es que viene token null, entonces no deberia actualizarse ese campo
-        if (user.token != null && !user.token.isEmpty()) {
-            Log.d(TAG,"(SetUser) Actualizacion de Token");
-            SharedPreferenceUtils.save(this, this.getString(R.string.dreamTVApp_token), user.token);
-        }
-
-
         String userString = gson.toJson(user);
         SharedPreferenceUtils.save(this, getString(R.string.user_preferences), userString);
 

@@ -4,6 +4,7 @@ buildscript {
     repositories {
         google()
         jcenter()
+        maven { url "https://kotlin.bintray.com/kotlinx/" }
         maven { url "https://maven.google.com"
         }
         maven {
@@ -13,7 +14,7 @@ buildscript {
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:3.3.2'
 
         // Check for v3.1.2 or higher
         classpath 'com.google.gms:google-services:4.2.0'
