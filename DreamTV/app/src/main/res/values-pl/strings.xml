@@ -9,20 +9,21 @@
     <string name="error_subtitle_not_found">Niestety, nie można znaleźć napisów dla tego filmu</string>
 
     <!--ERROR NETWORK MESSAGES-->
-    <string name="timeout_server_error">Coś nie wyszło, spróbuj ponownie</string>
-    <string name="no_network_error">Nie ma połączenia z Internetem</string>
-    <string name="defaultErrorMessage">Coś się nie powiodło</string>
-    <string name="generic_server_down">Nie ma połączenia z Internetem</string>
+    <string name="no_network_connection" translatable="false">No network connection found</string>
+    <string name="generic_server_down" translatable="false">Server down</string>
+    <string name="generic_server_timeout" translatable="false">Server Timeout</string>
+    <string name="generic_error" translatable="false">No internet</string>
+    <string name="no_internet" translatable="false">No internet</string>
+    <string name="parsing_failed" translatable="false">Parsing Failure</string>
+    <string name="auth_failed" translatable="false">Authentication Failure</string>
 
     <!--SHAREDPREFERENCES-->
     <string name="dreamTVApp_token">dreamTVApp_token</string>
     <string name="user_preferences">user_preferences</string>
-    <string name="url_base_preferences">url_base_preferences</string>
     <!--<string name="user_account_preferences">user_account_preferences</string>-->
     <string name="reasons_preferences">reasons_preferences</string>
     <string name="testing_mode_preferences">testing_mode_preferences</string>
     <string name="sharing_mode_preferences">sharing_mode_preferences</string>
-    <string name="languages_preferences">languages_preferences</string>
 
 
     <!--titles-->
@@ -40,7 +41,6 @@
     <string name="title_confirmation_user_saved_data">Dane użytkownika zostały zapisane poprawnie</string>
     <string name="title_confirmation_saved_data">Dziękujemy za pomoc</string>
     <string name="title_my_list_category">Moje filmy</string>
-    <string name="title_contributions_category">Mój wkład</string>
     <string name="title_preferences_category">Ustawienia</string>
     <string name="title_see_more_videos_category">Zobacz więcej filmów</string>
     <string name="title_continue_watching_category">Kontynuuj oglądanie</string>
@@ -71,7 +71,6 @@
     <string name="btn_no_from_beggining">Zacząć od nowa</string>
     <string name="btn_play_video">Odtwórz film</string>
     <string name="btn_add_to_my_list">+ Dodaj do moich filmów</string>
-    <string name="btn_remove_from_my_list">- Usuń z moich filmów</string>
 
     <!--alertDialog-->
     <string name="title_alert_dialog">Witamy ponownie</string>
@@ -81,14 +80,10 @@
     <string name="title_loading_buffering">Buforowanie…</string>
     <string name="title_loading_saving_data">Zapisywanie danych użytkownika…</string>
     <string name="title_loading_retrieve_subtitle">Pobieranie napisów…</string>
-    <string name="title_loading_retrieve_languages">Pobieranie języków…</string>
     <string name="title_loading_retrieve_user_tasks">Odzyskiwanie zadań użytkowników…</string>
     <string name="title_loading_retrieve_tasks">Pobieranie zadań…</string>
     <string name="title_loading_saving_reasons">Zapisywanie…</string>
     <string name="title_loading_retrieve_options">Synchronizacja opcji…</string>
-    <string name="title_loading_verifying_list">Weryfikacja czy obecny film znajduje się na mojej liście…</string>
-    <string name="title_loading_adding_videos_list">Dodawanie filmu do mojej listy…</string>
-    <string name="title_loading_removing_videos_list">Usuwanie filmu z mojej listy…</string>
 
     <!--Languages-->
     <string name="all_languages">Wszystkie języki</string>
@@ -101,12 +96,23 @@
     <string name="time_format">%02d:%02d</string>
     <string name="text_yes_option">Y</string>
     <string name="text_no_option">N</string>
-    <string name="text_subtitle_languages">Języki napisów</string>
-    <string name="text_audio_languages">Języki audio</string>
     <string name="alert_title_video_terminated">Zakończony!</string>
     <string name="alert_msg_video_terminated">Dzięki za obejrzenie filmu. Wróć do wyboru wideo.</string>
-    <string name="alert_title_permission_not_granted">Przepraszam za niedogodności!</string>
-    <string name="alert_msg_permission_not_granted">Aby zarejestrować użytkownika tej aplikacji, należy uzyskać dostęp do kont urządzenia. Podaj niezbędne uprawnienia dostępu.</string>
     <string name="text_pause">PAUSE</string>
+
+    <!--Preferences-->
+    <string name="pref_title_settings">App Settings</string>
+    <string name="pref_title_recommendations">Recommendations</string>
+    <string name="pref_key_recommendations">pref_recommendations</string>
+    <string name="pref_key_screen_general">general_settings</string>
+    <string name="pref_title_screen_general">General Settings</string>
+    <string name="pref_key_screen_signin">signin</string>
+    <string name="pref_title_screen_signin">Please Login</string>
+    <string name="pref_title_login_description">Please enter your username and password</string>
+    <string name="pref_title_username">Username</string>
+    <string name="pref_title_password">Password</string>
+    <string name="pref_key_login">pref_login</string>
+    <string name="pref_title_login">Login</string>
+    <string name="playback_tag">PLAYBACK_TAG</string>
 
 </resources>

@@ -2,12 +2,13 @@ package com.dream.dreamtv.repository;
 
 import android.util.Log;
 
+import com.dream.dreamtv.db.dao.TaskDao;
 import com.dream.dreamtv.db.dao.UserDao;
+import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.db.entity.UserEntity;
 import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.network.NetworkDataSource;
-import com.dream.dreamtv.utils.Utils;
+import com.dream.dreamtv.utils.Constants;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -23,17 +24,21 @@ public class AppRepository {
     private final NetworkDataSource mNetworkDataSource;
     private boolean mInitialized = false;
     private UserDao mUserDao;
+    private TaskDao mTaskDao;
 
-    private AppRepository(UserDao userDao, NetworkDataSource networkDataSource) {
+    private AppRepository(UserDao userDao, TaskDao taskDao, NetworkDataSource networkDataSource) {
         mNetworkDataSource = networkDataSource;
         mUserDao = userDao;
+        mTaskDao = taskDao;
 
 
         // As long as the repository exists, observe the network LiveData.
         // If that LiveData changes, update the database.
         // Group of current weathers that corresponds to the weather of all cities saved in the DB. Updated
         // using job schedules
-        LiveData<Resource<UserEntity>> newUserEntity = responseFromLogin();
+        LiveData<Resource<UserEntity>> newUserEntity = responseFromUserUpdate();
+        LiveData<Resource<TaskEntity[]>> newTasksEntities = responseFromTasks();
+        LiveData<Resource<TaskEntity[]>> newContinueTasksEntities = responseFromContinueTasks();
 
         newUserEntity.observeForever(new Observer<Resource<UserEntity>>() {
             @Override
@@ -41,7 +46,7 @@ public class AppRepository {
                 if (userFromNetwork != null) {
                     if (userFromNetwork.status.equals(Resource.Status.SUCCESS)) {
                         // Insert our new weather data into the database
-                        AppRepository.this.insert(userFromNetwork.data);
+                        insertUser(userFromNetwork.data);
 
                         Log.d(TAG, "New values inserted");
                     } else if (userFromNetwork.status.equals(Resource.Status.ERROR)) {
@@ -55,14 +60,56 @@ public class AppRepository {
 
             }
         });
+
+        newTasksEntities.observeForever(new Observer<Resource<TaskEntity[]>>() {
+            @Override
+            public void onChanged(Resource<TaskEntity[]> tasksFromNetwork) {
+                if (tasksFromNetwork != null) {
+                    if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
+                        // Insert our new weather data into the database
+                        insertAllTasks(tasksFromNetwork.data);
+
+                        Log.d(TAG, "New values inserted");
+                    } else if (tasksFromNetwork.status.equals(Resource.Status.ERROR)) {
+                        //TODO do something
+                        if (tasksFromNetwork.message != null)
+                            Log.d(TAG, tasksFromNetwork.message);
+                        else
+                            Log.d(TAG, "Status ERROR");
+                    }
+                }
+            }
+        });
+
+
+        newContinueTasksEntities.observeForever(new Observer<Resource<TaskEntity[]>>() {
+            @Override
+            public void onChanged(Resource<TaskEntity[]> tasksFromNetwork) {
+                if (tasksFromNetwork != null) {
+                    if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
+                        // Insert our new weather data into the database
+                        insertAllTasks(tasksFromNetwork.data);
+
+                        Log.d(TAG, "New values inserted");
+                    } else if (tasksFromNetwork.status.equals(Resource.Status.ERROR)) {
+                        //TODO do something
+                        if (tasksFromNetwork.message != null)
+                            Log.d(TAG, tasksFromNetwork.message);
+                        else
+                            Log.d(TAG, "Status ERROR");
+                    }
+                }
+            }
+        });
+
     }
 
-
-    public synchronized static AppRepository getInstance(UserDao userDao, NetworkDataSource networkDataSource) {
+    public synchronized static AppRepository getInstance(UserDao userDao, TaskDao taskDao,
+                                                         NetworkDataSource networkDataSource) {
         Log.d(TAG, "Getting the repository");
         if (INSTANCE == null) {
             synchronized (AppRepository.class) {
-                INSTANCE = new AppRepository(userDao, networkDataSource);
+                INSTANCE = new AppRepository(userDao, taskDao, networkDataSource);
                 Log.d(TAG, "Made new repository");
             }
         }
@@ -74,20 +121,40 @@ public class AppRepository {
     //  Database related operation
     //****************************
 
-
-
     /**
      * Inserts the list of current weather IDs just fetched from the weather server.
-     *
-     *  List of updated weather entries, ready to be inserted into the DB.
+     * <p>
+     * List of updated weather entries, ready to be inserted into the DB.
      */
-    private void insert(final UserEntity userEntity) {
+    private void insertUser(final UserEntity userEntity) {
         Executors.newSingleThreadScheduledExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 mUserDao.insert(userEntity);
             }
         });
+    }
+
+
+    private void insertAllTasks(final TaskEntity[] taskList) {
+        Executors.newSingleThreadScheduledExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                mTaskDao.bulkInsert(taskList);
+            }
+        });
+    }
+
+    private LiveData<UserEntity> getAuthUser(String email, String password) {
+        return mUserDao.getUser(email, password);
+    }
+
+    public LiveData<TaskEntity[]> requestAllTasks() {
+        return mTaskDao.getAllTasksByCategory(Constants.TASKS_ALL);
+    }
+
+    public LiveData<TaskEntity[]> requestContinueTasks() {
+        return mTaskDao.getAllTasksByCategory(Constants.TASKS_CONTINUE);
     }
 
 
@@ -98,8 +165,6 @@ public class AppRepository {
 
     /**
      * Fetch And Insert Weather from network by city name
-     *
-     *
      */
     public void requestFromLogin(final String email, final String password) {
         Executors.newSingleThreadScheduledExecutor().execute(new Runnable() {
@@ -115,8 +180,34 @@ public class AppRepository {
      *
      * @return Current weather by city name
      */
-    public LiveData<Resource<UserEntity>> responseFromLogin() {
-        return mNetworkDataSource.responseFromLogin();
+    public LiveData<Resource<UserEntity>> responseFromUserUpdate() {
+        return mNetworkDataSource.responseFromUserUpdate();
+    }
+
+    /**
+     * Used for search weather by city name.
+     *
+     * @return Current weather by city name
+     */
+    public LiveData<Resource<TaskEntity[]>> responseFromTasks() {
+        return mNetworkDataSource.responseFromTasks();
+    }
+
+    public LiveData<Resource<TaskEntity[]>> responseFromContinueTasks() {
+        return mNetworkDataSource.responseFromContinueTasks();
+    }
+
+    public void requestSyncData() {
+        Executors.newSingleThreadScheduledExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                mNetworkDataSource.syncData();
+            }
+        });
+    }
+
+    public LiveData<Resource<String>> responseFromSyncData() {
+        return mNetworkDataSource.responseFromSyncData();
     }
 
 }

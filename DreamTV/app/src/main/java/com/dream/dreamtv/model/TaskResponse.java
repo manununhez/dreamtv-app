@@ -8,7 +8,7 @@ import java.util.List;
 
 public class TaskResponse {
     public int current_page;
-    public List<Task> data;
+    public Task[] data;
     public int from;
     public int last_page;
     public int total;

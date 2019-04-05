@@ -10,6 +10,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
+import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
@@ -84,7 +85,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
         if (customLoading != null)
             customLoading.setVisibility(View.GONE);
 
-        Log.d(TAG,"Respuesta: " + response);
+        Log.d(TAG,"onResponse: " + response);
 //
         TypeToken typeToken = new TypeToken<JsonResponseBaseBean>() {
         };
@@ -96,12 +97,10 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
                 processResponse(response);
             } else {
                 if (showErrorMessage) {
-                    if (jsonResponse.data == null) {
-                        Toast.makeText(context, "Error en la conexión", Toast.LENGTH_SHORT).show();
-//                    EventBus.getDefault().post(new ResponseListenerEvent("Error en la conexión"));
-                    } else if (!jsonResponse.data.equals("")) {
+                    if (jsonResponse.data == null || jsonResponse.data.equals("")) {
+                        Toast.makeText(context, context.getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
+                    } else {
                         Toast.makeText(context, jsonResponse.data.toString(), Toast.LENGTH_SHORT).show();
-//                    EventBus.getDefault().post(new ResponseListenerEvent(jsonResponse.data.toString()));
                     }
                 }
                 processError(jsonResponse);

@@ -10,20 +10,21 @@
     <string name="error_subtitle_not_found">Sorry, we could not find subtitles for this video</string>
 
     <!--ERROR NETWORK MESSAGES-->
-    <string name="timeout_server_error">Timeout has expired, try again</string>
-    <string name="no_network_error">There is no Internet connection</string>
-    <string name="defaultErrorMessage">Failed to perform</string>
-    <string name="generic_server_down">There is no Internet connection</string>
+    <string name="no_network_connection" translatable="false">No network connection found</string>
+    <string name="generic_server_down" translatable="false">Server down</string>
+    <string name="generic_server_timeout" translatable="false">Server Timeout</string>
+    <string name="generic_error" translatable="false">No internet</string>
+    <string name="no_internet" translatable="false">No internet</string>
+    <string name="parsing_failed" translatable="false">Parsing Failure</string>
+    <string name="auth_failed" translatable="false">Authentication Failure</string>
 
     <!--SHAREDPREFERENCES-->
     <string name="dreamTVApp_token">dreamTVApp_token</string>
     <string name="user_preferences">user_preferences</string>
-    <string name="url_base_preferences">url_base_preferences</string>
     <!--<string name="user_account_preferences">user_account_preferences</string>-->
     <string name="reasons_preferences">reasons_preferences</string>
     <string name="testing_mode_preferences">testing_mode_preferences</string>
     <string name="sharing_mode_preferences">sharing_mode_preferences</string>
-    <string name="languages_preferences">languages_preferences</string>
 
 
     <!--titles-->
@@ -41,7 +42,6 @@
     <string name="title_confirmation_user_saved_data">User data saved correctly</string>
     <string name="title_confirmation_saved_data">Thank you for your help</string>
     <string name="title_my_list_category">My List</string>
-    <string name="title_contributions_category">Contributions</string>
     <string name="title_preferences_category">Settings</string>
     <string name="title_see_more_videos_category">See more videos</string>
     <string name="title_continue_watching_category">Continue watching</string>
@@ -72,7 +72,6 @@
     <string name="btn_no_from_beggining">Restart the talk</string>
     <string name="btn_play_video">Play video</string>
     <string name="btn_add_to_my_list">+ Add to my list</string>
-    <string name="btn_remove_from_my_list">- Remove from my list</string>
 
     <!--alertDialog-->
     <string name="title_alert_dialog">Welcome back</string>
@@ -82,14 +81,10 @@
     <string name="title_loading_buffering">Loading…</string>
     <string name="title_loading_saving_data">Saving user data…</string>
     <string name="title_loading_retrieve_subtitle">Retrieving subtitles…</string>
-    <string name="title_loading_retrieve_languages">Retrieving languages…</string>
     <string name="title_loading_retrieve_user_tasks">Retrieving user tasks…</string>
     <string name="title_loading_retrieve_tasks">Retrieving tasks…</string>
     <string name="title_loading_saving_reasons">Saving reasons…</string>
     <string name="title_loading_retrieve_options">Retrieving options…</string>
-    <string name="title_loading_verifying_list">Verifying is the current video is in my list…</string>
-    <string name="title_loading_adding_videos_list">Adding video to my list…</string>
-    <string name="title_loading_removing_videos_list">Removing video from my list…</string>
 
     <!--Languages-->
     <string name="all_languages">All languages</string>
@@ -102,13 +97,24 @@
     <string name="time_format">%02d:%02d</string>
     <string name="text_yes_option">Y</string>
     <string name="text_no_option">N</string>
-    <string name="text_subtitle_languages">Subtitle languages</string>
-    <string name="text_audio_languages">Audio languages</string>
     <string name="alert_title_video_terminated">Completed!</string>
     <string name="alert_msg_video_terminated">Thanks for watching the video. Go back to Video Selection.</string>
-    <string name="alert_title_permission_not_granted">Sorry for the inconveniences!</string>
-    <string name="alert_msg_permission_not_granted">To register the user of this app it is necessary to access to the device\'s accounts. Please give the necessary access permission.</string>
     <string name="text_pause">PAUSE</string>
 
+
+    <!--Preferences-->
+    <string name="pref_title_settings">App Settings</string>
+    <string name="pref_title_recommendations">Recommendations</string>
+    <string name="pref_key_recommendations">pref_recommendations</string>
+    <string name="pref_key_screen_general">general_settings</string>
+    <string name="pref_title_screen_general">General Settings</string>
+    <string name="pref_key_screen_signin">signin</string>
+    <string name="pref_title_screen_signin">Please Login</string>
+    <string name="pref_title_login_description">Please enter your username and password</string>
+    <string name="pref_title_username">Username</string>
+    <string name="pref_title_password">Password</string>
+    <string name="pref_key_login">pref_login</string>
+    <string name="pref_title_login">Login</string>
+    <string name="playback_tag">PLAYBACK_TAG</string>
 
 </resources>

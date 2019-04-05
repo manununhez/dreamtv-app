@@ -13,17 +13,17 @@
     </style>
 
     <!--<style name="FocusableGreenButton.Left" parent="FocusableGreenButton">-->
-        <!--<item name="android:bottomLeftRadius">15dp</item>-->
-        <!--<item name="android:topLeftRadius">15dp</item>-->
-        <!--<item name="android:topRightRadius">0dp</item>-->
-        <!--<item name="android:bottomRightRadius">0dp</item>-->
+    <!--<item name="android:bottomLeftRadius">15dp</item>-->
+    <!--<item name="android:topLeftRadius">15dp</item>-->
+    <!--<item name="android:topRightRadius">0dp</item>-->
+    <!--<item name="android:bottomRightRadius">0dp</item>-->
     <!--</style>-->
 
     <!--<style name="FocusableGreenButton.Right" parent="FocusableGreenButton">-->
-        <!--<item name="android:bottomLeftRadius">0dp</item>-->
-        <!--<item name="android:topLeftRadius">0dp</item>-->
-        <!--<item name="android:topRightRadius">15dp</item>-->
-        <!--<item name="android:bottomRightRadius">15dp</item>-->
+    <!--<item name="android:bottomLeftRadius">0dp</item>-->
+    <!--<item name="android:topLeftRadius">0dp</item>-->
+    <!--<item name="android:topRightRadius">15dp</item>-->
+    <!--<item name="android:bottomRightRadius">15dp</item>-->
     <!--</style>-->
     <style name="DefaultDialogFragmentStyle" parent="Theme.AppCompat.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -33,11 +33,32 @@
         <item name="colorControlNormal">@color/white</item>
     </style>
 
-    <!--<style name="DeliveryModeButton.Left">-->
-    <!--<item name="android:background">@drawable/selector_1</item>-->
-    <!--</style>-->
 
-    <!--<style name="DeliveryModeButton.Right">-->
-    <!--<item name="android:background">@drawable/selector_3_1</item>-->
-    <!--</style>-->
+    <style name="imageCardViewTitleStyle">
+        <item name="android:id">@id/content_text</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_alignParentStart">true</item>
+        <item name="android:layout_below">@+id/title_text</item>
+        <item name="android:maxLines">4</item>
+        <item name="android:textAlignment">viewStart</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textAppearance">@style/TextAppearance.Leanback.ImageCardView.Content
+        </item>
+    </style>
+
+    <style name="imageCardViewContentStyle">
+        <item name="android:id">@id/content_text</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_alignParentStart">true</item>
+        <item name="android:layout_below">@+id/title_text</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:textAlignment">viewStart</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textAppearance">@style/TextAppearance.Leanback.ImageCardView.Content
+        </item>
+    </style>
+
+
 </resources>

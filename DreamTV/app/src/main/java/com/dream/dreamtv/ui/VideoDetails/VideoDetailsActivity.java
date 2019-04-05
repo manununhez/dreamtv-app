@@ -12,9 +12,11 @@
  * the License.
  */
 
-package com.dream.dreamtv.ui;
+package com.dream.dreamtv.ui.VideoDetails;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.dream.dreamtv.R;
@@ -22,14 +24,33 @@ import com.dream.dreamtv.utils.LocaleHelper;
 
 import androidx.fragment.app.FragmentActivity;
 
-/**
- * TODO: Javadoc
- */
-public class SeeAllActivity extends FragmentActivity {
 
-    @Override public void onCreate(Bundle savedInstanceState) {
+/*
+ * Details activity class that loads LeanbackDetailsFragment class
+ */
+public class VideoDetailsActivity extends FragmentActivity {
+
+
+    public boolean updateScreenAfterChanges = false;
+
+    /**
+     * Called when the activity is first created.
+     */
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_see_all);
+        setContentView(R.layout.activity_video_details);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (updateScreenAfterChanges) {
+            Intent returnIntent = new Intent();
+            setResult(Activity.RESULT_OK, returnIntent);
+            finish();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override

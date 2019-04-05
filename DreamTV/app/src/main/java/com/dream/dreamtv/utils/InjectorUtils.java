@@ -15,7 +15,7 @@ public class InjectorUtils {
     public static AppRepository provideRepository(Context context) {
         AppRoomDatabase database = AppRoomDatabase.getInstance(context.getApplicationContext());
         NetworkDataSource networkDataSource = NetworkDataSource.getInstance(context.getApplicationContext());
-        return AppRepository.getInstance(database.userDao(), networkDataSource);
+        return AppRepository.getInstance(database.userDao(), database.taskDao(), networkDataSource);
     }
 
     public static MainViewModelFactory provideMainViewModelFactory(Context context) {

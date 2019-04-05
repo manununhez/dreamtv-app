@@ -2,8 +2,6 @@ package com.dream.dreamtv.db.dao;
 
 import com.dream.dreamtv.db.entity.UserEntity;
 
-import java.util.List;
-
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -17,37 +15,14 @@ import androidx.room.Query;
 @Dao // Required annotation for Dao to be recognized by Room
 public interface UserDao {
 
-//    /**
-//     * List of the IDs of the weather entries (without pulling all of the data.)
-//     *
-//     * @return {@link Integer} list of ID of all weather entries
-//     */
-//    @Query("SELECT id FROM user_table")
-//    List<Integer> getAllWeathersId();
-
     /**
-     * Weather entry by id
+     * user entry by id
      *
-     * @return {@link UserEntity} weather entry
+     * @return {@link UserEntity} user entry
      */
-    @Query("SELECT * FROM user_table WHERE token = :token")
-    LiveData<UserEntity> getUserByToken(String token);
+    @Query("SELECT * FROM user_table WHERE email = :email and password = :password")
+    LiveData<UserEntity> getUser(String email, String password);
 
-//    /**
-//     * Last update. We get the oldest dt, that's why we order dt by ASC. This is key to know if new
-//     * data should be fetched from network.
-//     *
-//     * @return {@link long} the oldest datetime entry in the database
-//     */
-//    @Query("SELECT dt FROM user_table ORDER by dt ASC LIMIT 1")
-//    long getLastUpdateTime();
-//
-//    /**
-//     * Selects all ids entries. This is for easily seeing
-//     * what entries are in the database without pulling all of the data.
-//     */
-//    @Query("SELECT count(*) FROM user_table")
-//    int getCountCurrentWeathers();
 
     /**
      * Insert a single {@link UserEntity} into the database
@@ -57,41 +32,35 @@ public interface UserDao {
     @Insert
     void insert(UserEntity userEntity);
 
-//
-//    /**
-//     * Selects all {@link UserEntity} entries order by name. The LiveData will
-//     * be kept in sync with the database, so that it will automatically notify observers when the
-//     * values in the table change.
-//     *
-//     * @return {@link LiveData} list of all {@link UserEntity} objects order by name
-//     */
-//    @Query("SELECT * FROM user_table ORDER by name ASC ")
-//    LiveData<List<UserEntity>> getCurrentWeather();
 
-//    /**
-//     * Inserts a list of {@link UserEntity} into the weather table. If there is a conflicting id
-//     * or date the weather entry uses the {@link OnConflictStrategy} of replacing the weather
-//     * forecast. The required uniqueness of these values is defined in the {@link UserEntity}.
-//     *
-//     * @param weather A list of weather forecasts to insert
-//     */
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    void bulkInsert(UserEntity... weather);
+    /**
+     * Inserts a list of {@link UserEntity} into the user table. If there is a conflicting id
+     * or date the user entry uses the {@link OnConflictStrategy} of replacing the user
+     * forecast. The required uniqueness of these values is defined in the {@link UserEntity}.
+     *
+     * @param userEntities A list of users to insert
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void bulkInsert(UserEntity... userEntities);
 //
 //
 //    /**
-//     * Deletes any weather data older than some date
+//     * Deletes any user data older than some date
 //     *
-//     * @param date The date to delete all prior weather from (exclusive)
+//     * @param date The date to delete all prior user from (exclusive)
 //     */
 //    @Query("DELETE FROM user_table WHERE dt < :date")
-//    void deleteOldWeather(long date);
+//    void deleteOlduser(long date);
 //
-//    /**
-//     * Delete a single {@link UserEntity} from the database
-//     */
-//    @Delete
-//    void delete(UserEntity weatherEntity);
+    /**
+     * Delete a single {@link UserEntity} from the database
+     */
+    @Delete
+    void delete(UserEntity userEntity);
+
+
+    @Query("DELETE from user_table")
+    void deleteAll();
 
 
 }

@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.dream.dreamtv.ui;
+package com.dream.dreamtv.ui.VideoDetails;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -34,16 +34,15 @@ import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserData;
 import com.dream.dreamtv.model.UserTask;
-import com.dream.dreamtv.model.UserVideo;
 import com.dream.dreamtv.model.Video;
 import com.dream.dreamtv.model.VideoTests;
-import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.presenter.DetailsDescriptionPresenter;
+import com.dream.dreamtv.ui.PlaybackVideoActivity;
+import com.dream.dreamtv.ui.PlaybackVideoYoutubeActivity;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.Arrays;
@@ -101,10 +100,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         userData = getActivity().getIntent()
                 .getParcelableExtra(Constants.USER_DATA);
-        if (userData.mSelectedVideo != null) {
+        if (userData.mSelectedTask != null) {
             setupAdapter();
             setupDetailsOverviewRow();
-            updateBackground(userData.mSelectedVideo.thumbnail);
+            updateBackground(userData.mSelectedTask.video.thumbnail);
             //verifyIfVideoIsInMyList();
         } else {
             getActivity().finish(); //back to MainActivity
@@ -165,7 +164,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             @Override
             public void onActionClicked(Action action) {
                 if (action.getId() == ACTION_PLAY_VIDEO) {
-                    prepareSubtitle(userData.mSelectedVideo);
+                    prepareSubtitle(userData.mSelectedTask.video);
 
                 } else if (action.getId() == ACTION_ADD_MY_LIST) {
                     //addVideoToMyList();
@@ -185,8 +184,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
 
     private void setupDetailsOverviewRow() {
-        rowPresenter = new DetailsOverviewRow(userData.mSelectedVideo);
-
+        rowPresenter = new DetailsOverviewRow(userData.mSelectedTask);
 
         RequestOptions options = new RequestOptions()
                 .error(R.drawable.default_background)
@@ -194,7 +192,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         Glide.with(this)
                 .asBitmap()
-                .load(userData.mSelectedVideo.thumbnail)
+                .load(userData.mSelectedTask.video.thumbnail)
                 .apply(options)
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
@@ -221,7 +219,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 //    private void verifyIfVideoIsInMyList() {
 //
 //        Map<String, String> urlParams = new HashMap<>();
-//        urlParams.put(PARAM_VIDEO_ID, userData.mSelectedVideo.video_id);
+//        urlParams.put(PARAM_VIDEO_ID, userData.mSelectedTask.video_id);
 //
 //
 //        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_verifying_list)) {
@@ -263,8 +261,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
 //    private void addVideoToMyList() {
 //        final Video video = new Video();
-//        video.primary_audio_language_code = userData.mSelectedVideo.primary_audio_language_code;
-//        video.video_id = userData.mSelectedVideo.video_id;
+//        video.primary_audio_language_code = userData.mSelectedTask.primary_audio_language_code;
+//        video.video_id = userData.mSelectedTask.video_id;
 //
 //
 //        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), video);
@@ -309,7 +307,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 //    private void removeVideoFromMyList() {
 //
 //        Map<String, String> urlParams = new HashMap<>();
-//        urlParams.put(PARAM_VIDEO_ID, userData.mSelectedVideo.video_id);
+//        urlParams.put(PARAM_VIDEO_ID, userData.mSelectedTask.video_id);
 //
 //        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_removing_videos_list)) {
 //
@@ -325,7 +323,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 //
 //                //Analytics Report Event
 //                Bundle bundle = new Bundle();
-//                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
+//                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedTask.video_id);
 //                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN, bundle);
 //            }
 //
@@ -415,7 +413,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         urlParams.put(PARAM_VIDEO_ID, video.video_id);
         urlParams.put(PARAM_LANGUAGE_CODE, (user.sub_language != null &&
                 !user.sub_language.equals(Constants.NONE_OPTIONS_CODE)) ?
-                user.sub_language : userData.mSelectedVideo.subtitle_language);
+                user.sub_language : userData.mSelectedTask.language);
 
         if (version > 0)  //if version == 0, no need to pass version parameter, For default is fetched last subtitle versions
             urlParams.put(PARAM_VERSION, String.valueOf(version));
@@ -473,7 +471,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void goToPlayVideo() {
         Intent intent;
 
-        if (userData.mSelectedVideo.isUrlFromYoutube()) {
+        if (userData.mSelectedTask.video.isUrlFromYoutube()) {
             intent = new Intent(getActivity(), PlaybackVideoYoutubeActivity.class);
 
         } else {
@@ -485,10 +483,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         //Analytics Report Event
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedVideo.video_id);
-        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedVideo.primary_audio_language_code);
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_PROJECT_NAME, userData.mSelectedVideo.project);
-        bundle.putLong(Constants.FIREBASE_KEY_VIDEO_DURATION, userData.mSelectedVideo.getVideoDurationInMs());
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedTask.video.video_id);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedTask.video.primary_audio_language_code);
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_PROJECT_NAME, userData.mSelectedTask.video.project);
+        bundle.putLong(Constants.FIREBASE_KEY_VIDEO_DURATION, userData.mSelectedTask.video.getVideoDurationInMs());
         mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN, bundle);
     }
 
@@ -496,7 +494,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void getMyTaskForThisVideo() {
 
         Map<String, String> urlParams = new HashMap<>();
-        urlParams.put(PARAM_TASK_ID, String.valueOf(userData.mSelectedVideo.task_id));
+        urlParams.put(PARAM_TASK_ID, String.valueOf(userData.mSelectedTask.task_id));
         urlParams.put(PARAM_TYPE, Constants.TASKS_USER);
 
 
@@ -535,7 +533,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     private void getOtherTasksForThisVideo() {
         Map<String, String> urlParams = new HashMap<>();
-        urlParams.put(PARAM_TASK_ID, String.valueOf(userData.mSelectedVideo.task_id));
+        urlParams.put(PARAM_TASK_ID, String.valueOf(userData.mSelectedTask.task_id));
         urlParams.put(PARAM_TYPE, Constants.TASKS_OTHER_USERS);
 
         ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_tasks)) {

@@ -84,4 +84,18 @@ public class UserEntity implements Parcelable {
         dest.writeString(interface_mode);
         dest.writeString(interface_language);
     }
+
+    @Override
+    public String toString() {
+        return "UserEntity{" +
+                "id=" + id +
+                ", token='" + token + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", sub_language='" + sub_language + '\'' +
+                ", audio_language='" + audio_language + '\'' +
+                ", interface_mode='" + interface_mode + '\'' +
+                ", interface_language='" + interface_language + '\'' +
+                '}';
+    }
 }

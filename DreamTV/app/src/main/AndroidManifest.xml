@@ -26,7 +26,6 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Leanback">
-        <activity android:name=".ui.Main.ui.mainactivity2.MainActivity2"></activity>
         <activity
             android:name=".ui.SplashScreenActivity"
             android:banner="@drawable/logo_tv"
@@ -44,14 +43,13 @@
             </intent-filter>
         </activity> <!-- configChanges, para evitar que cuando el control se desconecte, interrumpa el app -->
         <activity android:name=".ui.Main.MainActivity" />
-        <activity android:name=".ui.VideoDetailsActivity" />
+        <activity android:name=".ui.VideoDetails.VideoDetailsActivity" />
         <activity android:name=".ui.PlaybackVideoActivity" />
-        <activity android:name=".ui.SeeAllActivity" />
         <activity
             android:name=".ui.PlaybackVideoYoutubeActivity"
             android:label="@string/app_name" />
         <activity
-            android:name=".ui.SettingsActivity"
+            android:name=".ui.Settings.SettingsActivity"
             android:windowSoftInputMode="adjustResize" />
     </application>
 

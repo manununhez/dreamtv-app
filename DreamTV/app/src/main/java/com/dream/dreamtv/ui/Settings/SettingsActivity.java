@@ -1,4 +1,4 @@
-package com.dream.dreamtv.ui;
+package com.dream.dreamtv.ui.Settings;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,7 +22,6 @@ import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.User;
-import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.utils.CheckableTextView;
 import com.dream.dreamtv.utils.Constants;

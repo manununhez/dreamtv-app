@@ -14,15 +14,18 @@
 
 package com.dream.dreamtv.presenter;
 
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.model.Video;
 
 import androidx.core.content.ContextCompat;
@@ -37,13 +40,13 @@ import androidx.leanback.widget.Presenter;
 public class VideoCardPresenter extends Presenter {
     private static final String TAG = "VideoCardPresenter";
 
-    private static final int CARD_WIDTH = 313;
-    private static final int CARD_HEIGHT = 176;
+    private static final int CARD_WIDTH = 413;
+    private static final int CARD_HEIGHT = 276;
     private static int sSelectedBackgroundColor;
     private static int sDefaultBackgroundColor;
     private Drawable mDefaultCardImage;
 
-    private static void updateCardBackgroundColor(ImageCardView view, boolean selected) {
+    private static void updateCardBackgroundColor(ImageCardViewCustom view, boolean selected) {
         int color = selected ? sSelectedBackgroundColor : sDefaultBackgroundColor;
         // Both background colors should be set because the view's background is temporarily visible
         // during animations.
@@ -59,7 +62,7 @@ public class VideoCardPresenter extends Presenter {
         sSelectedBackgroundColor = ContextCompat.getColor(parent.getContext(), R.color.selected_background);
         mDefaultCardImage = parent.getResources().getDrawable(R.drawable.movie, null);
 
-        ImageCardView cardView = new ImageCardView(parent.getContext()) {
+        ImageCardViewCustom cardView = new ImageCardViewCustom(parent.getContext()) {
             @Override
             public void setSelected(boolean selected) {
                 updateCardBackgroundColor(this, selected);
@@ -75,15 +78,17 @@ public class VideoCardPresenter extends Presenter {
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
-        Video video = (Video) item;
-        ImageCardView cardView = (ImageCardView) viewHolder.view;
+        Video video = ((TaskEntity) item).video;
+        ImageCardViewCustom cardView = (ImageCardViewCustom) viewHolder.view;
 
         Log.d(TAG, "onBindViewHolder");
 //        String videoTypeTitle = video.video_type != null ? ("[" + video.video_type.toLowerCase() + "] ") : "";
         cardView.setTitleText(video.title);
         cardView.setContentText(video.description);
-        cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
+
         if (video.thumbnail != null) {
+            // Set card size from dimension resources.
+            cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
 
             RequestOptions options = new RequestOptions()
                     .centerCrop()
@@ -97,12 +102,13 @@ public class VideoCardPresenter extends Presenter {
                     .apply(options)
                     .into(cardView.getMainImageView());
         }
+
     }
 
     @Override
     public void onUnbindViewHolder(ViewHolder viewHolder) {
         Log.d(TAG, "onUnbindViewHolder");
-        ImageCardView cardView = (ImageCardView) viewHolder.view;
+        ImageCardViewCustom cardView = (ImageCardViewCustom) viewHolder.view;
         // Remove references to images so that the garbage collector can free up memory
         cardView.setBadgeImage(null);
         cardView.setMainImage(null);

@@ -3,10 +3,12 @@ package com.dream.dreamtv.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.dream.dreamtv.db.entity.TaskEntity;
+
 import java.util.List;
 
 public class UserData implements Parcelable {
-    public Video mSelectedVideo; //selected video from respect category
+    public TaskEntity mSelectedTask; //selected video from respect category
     public UserTask[] userTaskList; //all user tasks saved
     public SubtitleResponse subtitle_json; //To keep subtitle data between screens
 
@@ -59,7 +61,7 @@ public class UserData implements Parcelable {
 
 
     protected UserData(Parcel in) {
-        mSelectedVideo = in.readParcelable(Video.class.getClassLoader());
+        mSelectedTask = in.readParcelable(Video.class.getClassLoader());
         userTaskList = in.createTypedArray(UserTask.CREATOR);
         subtitle_json = in.readParcelable(SubtitleResponse.class.getClassLoader());
         category = in.readInt();
@@ -67,7 +69,7 @@ public class UserData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(mSelectedVideo, flags);
+        dest.writeParcelable(mSelectedTask, flags);
         dest.writeTypedArray(userTaskList, flags);
         dest.writeParcelable(subtitle_json, flags);
         dest.writeInt(category);

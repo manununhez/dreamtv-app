@@ -14,61 +14,54 @@
 
 package com.dream.dreamtv.ui.Main;
 
+import android.accounts.AccountManager;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.android.volley.VolleyError;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.db.entity.UserEntity;
-import com.dream.dreamtv.model.ErrorReason;
-import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.model.TaskResponse;
-import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserData;
 import com.dream.dreamtv.model.Video;
-import com.dream.dreamtv.network.NetworkDataSource;
-import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.presenter.GridItemPresenter;
+import com.dream.dreamtv.presenter.ImageCardViewCustom;
 import com.dream.dreamtv.presenter.VideoCardPresenter;
-import com.dream.dreamtv.ui.SeeAllActivity;
-import com.dream.dreamtv.ui.SettingsActivity;
-import com.dream.dreamtv.ui.VideoDetailsActivity;
+import com.dream.dreamtv.ui.Settings.SettingsActivity;
+import com.dream.dreamtv.ui.VideoDetails.VideoDetailsActivity;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.InjectorUtils;
+import com.dream.dreamtv.utils.LoadingDialog;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.google.android.gms.common.AccountPicker;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BackgroundManager;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
+import androidx.leanback.widget.DiffCallback;
 import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ImageCardView;
 import androidx.leanback.widget.ListRow;
@@ -81,9 +74,6 @@ import androidx.leanback.widget.RowPresenter;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-
-import static com.dream.dreamtv.utils.JsonUtils.getJsonRequest;
-import static com.dream.dreamtv.utils.JsonUtils.getJsonResponse;
 
 
 public class MainFragment extends BrowseSupportFragment {
@@ -105,6 +95,9 @@ public class MainFragment extends BrowseSupportFragment {
     private Uri mBackgroundURI;
     private BackgroundManager mBackgroundManager;
     private MainViewModel mViewModel;
+    private LoadingDialog loadingDialog;
+    private Observer<Resource<TaskEntity[]>> allTaskObserver;
+    private Observer<Resource<TaskEntity[]>> continueTasksObserver;
 
 
     @Override
@@ -112,8 +105,8 @@ public class MainFragment extends BrowseSupportFragment {
         Log.i(TAG, "onCreate");
         super.onActivityCreated(savedInstanceState);
 
-        // Get the ViewModel from the factory
-        MainViewModelFactory factory = InjectorUtils.provideMainViewModelFactory(Objects.requireNonNull(getContext()).getApplicationContext());
+//        // Get the ViewModel from the factory
+        MainViewModelFactory factory = InjectorUtils.provideMainViewModelFactory(Objects.requireNonNull(getActivity()));
         mViewModel = ViewModelProviders.of(this, factory).get(MainViewModel.class);
 
         prepareBackgroundManager();
@@ -123,24 +116,88 @@ public class MainFragment extends BrowseSupportFragment {
 
         setupEventListeners();
 
+        instantiateLoading();
 
-        //userRegistration();
+        userRegistration();
 
-        mViewModel.requestFromLogin("03.manu@gmail.com", "123456");
-        observeResponseFromLogin();
+//        tempData();
 
+        observeResponseFromUserUpdate();
+
+//        populateScreen();
+        observeFromSyncData();
+        observeResponseFromAllTasks();
+
+        observeResponseFromContinueTasks();
+
+//        observeResponseFromMyListTasks();
 
     }
 
-    private void observeResponseFromLogin() {
-        LiveData<Resource<UserEntity>> responseFromLogin = mViewModel.responseFromLogin();
-        responseFromLogin.observe(this, new Observer<Resource<UserEntity>>() {
+
+    private void tempData() {
+        Log.d(TAG, "TempData");
+        TaskEntity[] taskEntities = new TaskEntity[2];
+        taskEntities[0] = new TaskEntity(1, "en", "Review",
+                "", "", "", new Video("video_id",
+                "en", "title 0", "description", 1000,
+                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
+                Constants.TASKS_ALL);
+        taskEntities[1] = new TaskEntity(2, "en", "Review",
+                "", "", "", new Video("video_id",
+                "en", "title 1", "description", 1000,
+                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
+                Constants.TASKS_ALL);
+
+        loadVideos(taskEntities, Constants.CHECK_NEW_TASKS_CATEGORY);
+
+        tempData2();
+    }
+
+    private void tempData2() {
+        Log.d(TAG, "TempData2");
+        TaskEntity[] taskEntities = new TaskEntity[2];
+        taskEntities[0] = new TaskEntity(3, "en", "Review",
+                "", "", "", new Video("video_id",
+                "en", "title 2", "description", 1000,
+                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
+                Constants.TASKS_ALL);
+        taskEntities[1] = new TaskEntity(4, "en", "Review",
+                "", "", "", new Video("video_id",
+                "en", "title 3", "description", 1000,
+                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
+                Constants.TASKS_ALL);
+
+        loadVideos(taskEntities, Constants.CHECK_NEW_TASKS_CATEGORY);
+
+    }
+
+
+    private void requestLogin(String email, String password) {
+        showLoading();
+        mViewModel.requestFromLogin(email, password);
+    }
+
+
+    private void requestSyncData() {
+        Log.d(TAG, "requestSyncData()");
+
+        showLoading();
+        mViewModel.requestSyncData();
+    }
+
+    private void observeFromSyncData() {
+        LiveData<Resource<String>> responseFromSyncData = mViewModel.responseFromSyncData();
+        responseFromSyncData.observe(this, new Observer<Resource<String>>() {
             @Override
-            public void onChanged(@Nullable Resource<UserEntity> response) {
+            public void onChanged(Resource<String> response) {
                 if (response != null) {
                     if (response.status.equals(Resource.Status.SUCCESS)) {
-                        Log.d(TAG, "AddCityFragment = " + Objects.requireNonNull(response).toString());
-
+                        if (response.data != null && response.data.equals("Completed")) {
+                            Log.d(TAG, response.data);
+                            //                            populateScreen();
+                            setFootersOptions();
+                        }
                     } else if (response.status.equals(Resource.Status.ERROR)) {
                         //TODO do something error
                         if (response.message != null)
@@ -150,164 +207,179 @@ public class MainFragment extends BrowseSupportFragment {
                     }
 
                 }
+
+                dismissLoading();
             }
         });
     }
 
-//    private void userRegistration() {
+//    private void populateScreen() {
+//        LiveData<TaskEntity[]> taskEntities = mViewModel.requestAllTasks();
+//        taskEntities.observe(this, new Observer<TaskEntity[]>() {
+//            @Override
+//            public void onChanged(TaskEntity[] taskEntities) {
+//                if (taskEntities.length > 0)
+//                    loadVideos(taskEntities, Constants.CHECK_NEW_TASKS_CATEGORY);
+//            }
+//        });
 //
-//        String token = ((DreamTVApp) getActivity().getApplication()).getToken();
-//        if (token == null) //first time the app is initiated. The user has to select an account
-//            pickUserAccount();
-//        else //the user has already has an account. Proceed to get the videos
-//            getTasks(); //for the mainscreen, only the first page
+//        LiveData<TaskEntity[]> taskContinueEntities = mViewModel.requestContinueTasks();
+//        taskContinueEntities.observe(this, new Observer<TaskEntity[]>() {
+//            @Override
+//            public void onChanged(TaskEntity[] taskEntities) {
+//                if (taskEntities.length > 0)
+//                    loadVideos(taskEntities, Constants.CONTINUE_WATCHING_CATEGORY);
 //
+//            }
+//        });
+//
+//        setFootersOptions();
 //    }
 
+    //********************************************
+    // Loading and progress bar related functions
+    //********************************************
+    private void instantiateLoading() {
+        loadingDialog = new LoadingDialog(getActivity(), getString(R.string.title_loading_retrieve_tasks));
+        loadingDialog.setCanceledOnTouchOutside(false);
+    }
 
-//    private void getUser() {
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
-//                getString(R.string.title_loading_retrieve_user_tasks)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
-//                };
-//                JsonResponseBaseBean<User> jsonResponse = getJsonResponse(response, type);
-//                User user = jsonResponse.data;
-//
-//                ((DreamTVApp) getActivity().getApplication()).setUser(user);
-//
-//                //To update the screen with the selected interface language
-//                if (!LocaleHelper.getLanguage(getActivity()).equals(user.interface_language)) {
-//                    LocaleHelper.setLocale(getActivity(), user.interface_language);
-//                    getActivity().recreate(); //Recreate activity
-//                    Log.d(TAG, "Different language. Updating screen.");
-//                } else {
-//                    Log.d(TAG, "Same language. Not updating screen.");
-//                    getTasks();
-//
-//                }
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//            }
-//        };
-//
-//
-//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER, null, responseListener, this);
+    private void dismissLoading() {
+        loadingDialog.dismiss();
+    }
+
+
+    private void showLoading() {
+        loadingDialog.show();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mViewModel.responseFromTasks().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromContinueTasks().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromUserUpdate().removeObservers(getViewLifecycleOwner());
+
+
+    }
+
+    private void observeResponseFromUserUpdate() {
+        mViewModel.responseFromUserUpdate().observe(getViewLifecycleOwner(), new Observer<Resource<UserEntity>>() {
+            @Override
+            public void onChanged(@Nullable Resource<UserEntity> response) {
+                if (response != null) {
+                    if (response.status.equals(Resource.Status.SUCCESS)) {
+                        if (response.data != null) {
+                            Log.d(TAG, response.data.toString());
+                            updateScreenLanguage(response.data);
+                        }
+                    } else if (response.status.equals(Resource.Status.ERROR)) {
+                        //TODO do something error
+                        if (response.message != null)
+                            Log.d(TAG, response.message);
+                        else
+                            Log.d(TAG, "Status ERROR");
+                    }
+
+                }
+
+                dismissLoading();
+            }
+        });
+    }
+
+
+    private void observeResponseFromAllTasks() {
+        allTaskObserver = new Observer<Resource<TaskEntity[]>>() {
+            @Override
+            public void onChanged(Resource<TaskEntity[]> response) {
+                Log.d(TAG, "Response from all tasks");
+                if (response != null) {
+                    if (response.status.equals(Resource.Status.SUCCESS)) {
+                        if (response.data != null && response.data.length > 0)
+                            loadVideos(response.data, Constants.CHECK_NEW_TASKS_CATEGORY);
+                    } else if (response.status.equals(Resource.Status.ERROR)) {
+                        //TODO do something error
+                        if (response.message != null)
+                            Log.d(TAG, response.message);
+                        else
+                            Log.d(TAG, "Status ERROR");
+                    }
+                }
+
+            }
+        };
+        mViewModel.responseFromTasks().removeObserver(allTaskObserver);
+        mViewModel.responseFromTasks().observe(getViewLifecycleOwner(), allTaskObserver);
+    }
+
+
+    private void observeResponseFromContinueTasks() {
+
+        continueTasksObserver = new Observer<Resource<TaskEntity[]>>() {
+            @Override
+            public void onChanged(Resource<TaskEntity[]> response) {
+                Log.d(TAG, "Response from continue tasks");
+                if (response != null) {
+                    if (response.status.equals(Resource.Status.SUCCESS)) {
+                        if (response.data != null && response.data.length > 0)
+                            loadVideos(response.data, Constants.CONTINUE_WATCHING_CATEGORY);
+                    } else if (response.status.equals(Resource.Status.ERROR)) {
+                        //TODO do something error
+                        if (response.message != null)
+                            Log.d(TAG, response.message);
+                        else
+                            Log.d(TAG, "Status ERROR");
+                    }
+                }
+
+                dismissLoading();
+            }
+        };
+
+        mViewModel.responseFromContinueTasks().removeObserver(continueTasksObserver);
+        mViewModel.responseFromContinueTasks().observe(getViewLifecycleOwner(), continueTasksObserver);
+
+    }
+
+
+//    private void observeResponseFromMyListTasks() {
+////        TaskResponse taskResponse = jsonResponse.data;
+////
+////        Log.d(TAG, taskResponse.toString());
+////
+////        if (taskResponse.data.size() > 0)
+////            loadVideos(taskResponse, Constants.MY_LIST_CATEGORY);
 //    }
-//
-//
-//    private void login(final String accountName, final String accountType) {
-//        User user = new User();
-//        user.email = accountName;
-//        user.password = accountType;
-//
-//        final String jsonRequest = getJsonRequest(getActivity(), user);
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_user_tasks)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
-//                };
-//                JsonResponseBaseBean<User> jsonResponse = getJsonResponse(response, type);
-//                User user = jsonResponse.data;
-//
-//
-//                ((DreamTVApp) getActivity().getApplication()).setToken(user.token);
-//
-//                getUser();
-//
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//                setFootersOptions(); //the settings section is displayed anyway
-//
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//
-//                //The user does not exist, needs to register
-//                userRegister(accountName, accountType);
-//
-//            }
-//        };
-//
-//        NetworkDataSource.post(getActivity(), NetworkDataSource.Urls.LOGIN, null, jsonRequest, responseListener, this);
-//
-//    }
-//
-//    private void userRegister(final String accountName, final String accountType) {
-//        User user = new User();
-//        user.email = accountName;
-//        user.password = accountType;
-//
-//        final String jsonRequest = getJsonRequest(getActivity(), user);
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_user_tasks)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
-//                };
-//                JsonResponseBaseBean<User> jsonResponse = getJsonResponse(response, type);
-//                User user = jsonResponse.data;
-//
-//
-//                ((DreamTVApp) getActivity().getApplication()).setToken(user.token);
-//
-//                getUser();
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//                setFootersOptions(); //the settings section is displayed anyway
-//
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//                setFootersOptions(); //the settings section is displayed anyway
-//
-//            }
-//        };
-//
-//        NetworkDataSource.post(getActivity(), NetworkDataSource.Urls.REGISTER, null, jsonRequest, responseListener, this);
-//
-//    }
+
+    private void updateScreenLanguage(UserEntity user) {
+        if (!LocaleHelper.getLanguage(getActivity()).equals(user.interface_language)) {
+            LocaleHelper.setLocale(getActivity(), user.interface_language);
+            getActivity().recreate(); //Recreate activity
+            Log.d(TAG, "Different language. Updating screen.");
+        }
+    }
+
+
+    private void userRegistration() {
+
+        Log.d(TAG, "userRegistration()");
+        String token = ((DreamTVApp) getActivity().getApplication()).getToken();
+        if (token == null) //first time the app is initiated. The user has to select an account
+            pickUserAccount();
+        else
+            requestSyncData();
+
+    }
+
 
     private void pickUserAccount() {
+        Log.d(TAG, "pickUserAccount()");
+
         /*This will list all available accounts on device without any filtering*/
 
         Intent intent = AccountPicker.newChooseAccountIntent(null, null,
                 null, false, null, null, null, null);
-
-
-//        Intent intent = AccountManager.newChooseAccountIntent( null,
-//                null, null, null, null, null, null);
-
-//        Account[] accounts = AccountManager.get(getActivity()).getAccounts();
 
         startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
     }
@@ -324,193 +396,40 @@ public class MainFragment extends BrowseSupportFragment {
 
 
     private void setupVideosList() {
+        Log.d(TAG, "New mRowsAdapter()");
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
     }
 
-//    private void getTasks() {
-//        Map<String, String> urlParams = new HashMap<>();
-//        urlParams.put(PARAM_PAGE, FIRST_PAGE);
-//
-//        //testing mode
-//        String mode = ((DreamTVApp) getActivity().getApplication()).getTestingMode();
-//        if (mode == null || mode.equals(getString(R.string.text_no_option)))
-//            urlParams.put(PARAM_TYPE, Constants.TASKS_ALL);
-//        else if (mode.equals(getString(R.string.text_yes_option)))
-//            urlParams.put(PARAM_TYPE, Constants.TASKS_TEST);
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
-//                getString(R.string.title_loading_retrieve_user_tasks)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                Gson gson = new Gson();
-//                Log.d(TAG, response);
-//
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
-//                };
-//                JsonResponseBaseBean<TaskResponse> jsonResponse = getJsonResponse(response, type);
-//                TaskResponse taskResponse = jsonResponse.data;
-//
-//                Log.d(TAG, taskResponse.toString());
-//
-//                if (taskResponse.data.size() > 0)
-//                    loadVideos(taskResponse, Constants.CHECK_NEW_TASKS_CATEGORY);
-//
-//                getUserToContinueTasks(FIRST_PAGE);
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//            }
-//        };
-//
-//
-//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.TASKS, urlParams, responseListener, this);
-//
-//    }
-//
 
-//    private void getUserToContinueTasks(String pagina) {
-//        Map<String, String> urlParams = new HashMap<>();
-//        urlParams.put(PARAM_PAGE, pagina);
-//        urlParams.put(PARAM_TYPE, Constants.TASKS_CONTINUE);
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
-//                getString(R.string.title_loading_retrieve_user_tasks)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                Gson gson = new Gson();
-//                Log.d(TAG, response);
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
-//                };
-//                JsonResponseBaseBean<TaskResponse> jsonResponse = getJsonResponse(response, type);
-//                TaskResponse taskResponse = jsonResponse.data;
-//
-//                Log.d(TAG, taskResponse.toString());
-//
-//                if (taskResponse.data.size() > 0)
-//                    loadVideos(taskResponse, Constants.CONTINUE_WATCHING_CATEGORY);
-//
-//                getUserVideosList(FIRST_PAGE);
-//
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//            }
-//        };
-//
-//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.TASKS, urlParams, responseListener, this);
-//
-//    }
+    private void loadVideos(TaskEntity[] tasks, int taskState) {
 
-//    private void getUserVideosList(String pagina) {
-//        Map<String, String> urlParams = new HashMap<>();
-//        urlParams.put(PARAM_PAGE, pagina);
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
-//                getString(R.string.title_loading_retrieve_user_tasks)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                Gson gson = new Gson();
-//                Log.d(TAG, response);
-//
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
-//                };
-//                JsonResponseBaseBean<TaskResponse> jsonResponse = getJsonResponse(response, type);
-//                TaskResponse taskResponse = jsonResponse.data;
-//
-//                Log.d(TAG, taskResponse.toString());
-//
-//                if (taskResponse.data.size() > 0)
-//                    loadVideos(taskResponse, Constants.MY_LIST_CATEGORY);
-//
-//                setFootersOptions();
-//
-//
-//                getReasons();
-//
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//                setFootersOptions(); //the settings section is displayed anyway
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//                setFootersOptions(); //the settings section is displayed anyway
-//            }
-//        };
-//
-//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER_VIDEOS, urlParams, responseListener, this);
-//
-//    }
-
-//    private void getReasons() {
-//        ResponseListener responseListener = new ResponseListener(getActivity(), false, true, getString(R.string.title_loading_retrieve_options)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                Gson gson = new Gson();
-//                Log.d(TAG, response);
-//
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<List<ErrorReason>>>() {
-//                };
-//                JsonResponseBaseBean<List<ErrorReason>> jsonResponse = getJsonResponse(response, type);
-//
-//                ((DreamTVApp) getActivity().getApplication()).setReasons(jsonResponse.data);
-//
-//                Log.d(TAG, jsonResponse.data.toString());
-//
-//
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//            }
-//        };
-//
-//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.REASONS, null, responseListener, this);
-//
-//    }
-
-    private void loadVideos(TaskResponse taskResponse, int taskState) {
-
-        if (taskResponse != null) {
+        if (tasks != null) {
+            Log.d(TAG, "Loading videos");
             VideoCardPresenter videoCardPresenter = new VideoCardPresenter();
 
             ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(videoCardPresenter);
+
+//            val diffCallback = object : DiffCallback<DummyItem>() {
+//                override fun areItemsTheSame(oldItem: DummyItem,
+//                        newItem: DummyItem): Boolean =
+//                        oldItem.id == newItem.id
+//                override fun areContentsTheSame(oldItem: DummyItem,
+//                        newItem: DummyItem): Boolean =
+//                        oldItem == newItem
+//            }
+
+            DiffCallback diffCallback = new DiffCallback<TaskEntity>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull TaskEntity oldItem, @NonNull TaskEntity newItem) {
+                    return oldItem.task_id == newItem.task_id;
+                }
+
+                @Override
+                public boolean areContentsTheSame(@NonNull TaskEntity oldItem, @NonNull TaskEntity newItem) {
+                    return oldItem == newItem;
+                }
+            };
+
 
             int category;
             HeaderItem header;
@@ -523,36 +442,62 @@ public class MainFragment extends BrowseSupportFragment {
             } else {
                 header = new HeaderItem(getString(R.string.title_check_new_tasks_category));
                 category = Constants.CHECK_NEW_TASKS_CATEGORY;
+                //position = 0;
             }
 
-            for (Task task : taskResponse.data) {
-                listRowAdapter.add(task.videos);
+
+//            if (category == Constants.CHECK_NEW_TASKS_CATEGORY) { //Only in the Check_New_Tasks we add the SeeAll options. In others categories is not necessary
+//                Video lastVideoSeeMore = new Video();
+//                lastVideoSeeMore.title = getString(R.string.title_see_more_videos_category);
+//                lastVideoSeeMore.description = "";
+//                lastVideoSeeMore.thumbnail = SEE_MORE_VIDEOS_ICON_URL;
+//                listRowAdapter.add(lastVideoSeeMore);
+//            }
+            //If we found a task category already exists, instead of adding a new row,
+            // we found the correspondent category and add the tasks
+            boolean foundHeaderRow = false;
+            for (int i = 0; i < mRowsAdapter.size(); i++) {
+                ListRow listRow = ((ListRow) mRowsAdapter.get(i));
+                if (!foundHeaderRow && listRow.getHeaderItem().getName().equals(header.getName())) {
+                    foundHeaderRow = true;
+                    ArrayObjectAdapter arrayObjectAdapter = ((ArrayObjectAdapter) listRow.getAdapter());
+//                    List<Video> videoEntities = new ArrayList<>();
+//                    for (int j = 0; j < tasks.length; j++) {
+//                        videoEntities.add(tasks[j]);
+//                    }
+                    arrayObjectAdapter.setItems(Arrays.asList(tasks), diffCallback);
+                }
             }
 
-            if (category == Constants.CHECK_NEW_TASKS_CATEGORY) { //Only in the Check_New_Tasks we add the SeeAll options. In others categories is not necessary
-                Video lastVideoSeeMore = new Video();
-                lastVideoSeeMore.title = getString(R.string.title_see_more_videos_category);
-                lastVideoSeeMore.description = "";
-                lastVideoSeeMore.thumbnail = SEE_MORE_VIDEOS_ICON_URL;
-                listRowAdapter.add(lastVideoSeeMore);
-            }
+            //If we have not found a certain category, we add a new one
+            if (!foundHeaderRow) {
+                for (TaskEntity task : tasks) {
+                    listRowAdapter.add(task);
+                }
 
-            mRowsAdapter.add(new ListRow(header, listRowAdapter));
+                mRowsAdapter.add(0, new ListRow(header, listRowAdapter));
+            }
 
             setAdapter(mRowsAdapter);
         }
     }
 
-
+    //TODO
     private void setFootersOptions() {
-        HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
+        if ((mRowsAdapter.size() - 1) >= 0) { //If the footer category exists, we don't create a new one
+            ListRow listRow = (ListRow) mRowsAdapter.get(mRowsAdapter.size() - 1);
 
-        GridItemPresenter mGridPresenter = new GridItemPresenter();
-        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
-        gridRowAdapter.add(getResources().getString(R.string.title_video_settings));
-        mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
+            if (!listRow.getHeaderItem().getName().equals(getString(R.string.title_preferences_category))) {
+                HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
 
-        setAdapter(mRowsAdapter);
+                GridItemPresenter mGridPresenter = new GridItemPresenter();
+                ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
+                gridRowAdapter.add(getResources().getString(R.string.title_video_settings));
+                mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
+
+                setAdapter(mRowsAdapter);
+            }
+        }
     }
 
     private void prepareBackgroundManager() {
@@ -567,7 +512,7 @@ public class MainFragment extends BrowseSupportFragment {
         setBadgeDrawable(getActivity().getResources().getDrawable(R.drawable.logo_tv, null));
         setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent
         // over title
-        setHeadersState(HEADERS_HIDDEN);
+        setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(true);
 
         // set fastLane (or headers) background color
@@ -618,79 +563,72 @@ public class MainFragment extends BrowseSupportFragment {
         mBackgroundTimer.schedule(new UpdateBackgroundTask(), Constants.BACKGROUND_UPDATE_DELAY);
     }
 
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//
-//        if (resultCode == Activity.RESULT_OK) {
-//            if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE) { //After PreferencesSettings reload the screen
-//                Objects.requireNonNull(getActivity()).recreate();
-//
-//            } else if (requestCode == VIDEO_DETAILS_RESULT_CODE) { //After add videos to userlist (in videoDetailsActivity) reload the screen
-//                //Clear the screen
-//                setSelectedPosition(0);
-//                setupVideosList();
-//                //Load new video listSystem.out.println
-//                getTasks();
-//            } else if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
-//                // Receiving a result from the AccountPicker
-//                login(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME), data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
-//
-//            }
-//        }
-//
-//    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE) { //After PreferencesSettings reload the screen
+                Objects.requireNonNull(getActivity()).recreate();
+
+            } /*else if (requestCode == VIDEO_DETAILS_RESULT_CODE) { //After add videos to userlist (in videoDetailsActivity) reload the screen
+                //Clear the screen
+                setSelectedPosition(0);
+                setupVideosList();
+                //Load new video listSystem.out.println
+                //TODO//getTasks();
+            }*/ else if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
+                Log.d(TAG, "onActivityResult() - Result from pickAccount()");
+
+                // Receiving a result from the AccountPicker
+                requestLogin(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME), data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
+//                requestLogin("03.manu@gmail.com", "123456");
+
+            }
+        }
+
+    }
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
-            if (item instanceof Video) {
+            if (item instanceof TaskEntity) {
                 final ListRow listRow = (ListRow) row;
-                final ArrayObjectAdapter currentRowAdapter = (ArrayObjectAdapter) listRow.getAdapter();
-                int selectedIndex = currentRowAdapter.indexOf(item);
 
-                if (selectedIndex != -1 && (currentRowAdapter.size() - 1) == selectedIndex && listRow.getHeaderItem().getName().equals(getString(R.string.title_check_new_tasks_category))) { //Es el ultimo elemento de la fila (SEE ALL option)
-                    Intent intent = new Intent(getActivity(), SeeAllActivity.class);
+                TaskEntity taskEntity = (TaskEntity) item;
+                String categoryName = listRow.getHeaderItem().getName();
+                int category;
 
-                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            Objects.requireNonNull(getActivity()),
-                            ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                            Constants.SHARED_ELEMENT_NAME).toBundle();
-                    getActivity().startActivity(intent, bundle);
+                if (categoryName.equals(getString(R.string.title_my_list_category))) {
+                    category = Constants.MY_LIST_CATEGORY;
+                } else if (categoryName.equals(getString(R.string.title_continue_watching_category))) {
+                    category = Constants.CONTINUE_WATCHING_CATEGORY;
                 } else {
-                    Video video = (Video) item;
-                    String categoryName = listRow.getHeaderItem().getName();
-                    int category;
-
-                    if (categoryName.equals(getString(R.string.title_my_list_category))) {
-                        category = Constants.MY_LIST_CATEGORY;
-                    } else if (categoryName.equals(getString(R.string.title_continue_watching_category))) {
-                        category = Constants.CONTINUE_WATCHING_CATEGORY;
-                    } else {
-                        category = Constants.CHECK_NEW_TASKS_CATEGORY;
-                    }
-
-                    UserData userData = new UserData();
-                    userData.mSelectedVideo = video;
-                    userData.category = category;
-                    Log.d(TAG, "Item: " + item.toString());
-                    Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
-                    intent.putExtra(Constants.USER_DATA, userData);
-
-                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            Objects.requireNonNull(getActivity()),
-                            ((ImageCardView) itemViewHolder.view).getMainImageView(),
-                            Constants.SHARED_ELEMENT_NAME).toBundle();
-                    startActivityForResult(intent, VIDEO_DETAILS_RESULT_CODE, bundle);
-
+                    category = Constants.CHECK_NEW_TASKS_CATEGORY;
                 }
+
+                UserData userData = new UserData();
+                userData.mSelectedTask = taskEntity; //TODO uncomment
+                userData.category = category;
+                Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
+                intent.putExtra(Constants.USER_DATA, userData);
+
+                Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        Objects.requireNonNull(getActivity()),
+                        ((ImageCardViewCustom) itemViewHolder.view).getMainImageView(),
+                        Constants.SHARED_ELEMENT_NAME).toBundle();
+                startActivityForResult(intent, VIDEO_DETAILS_RESULT_CODE, bundle);
+
+//                }
             } else if (item instanceof String) {
 
                 if (((String) item).contains(Objects.requireNonNull(getActivity()).getString(R.string.title_video_settings))) {
                     Intent intent = new Intent(getActivity(), SettingsActivity.class);
                     startActivityForResult(intent, PREFERENCES_SETTINGS_RESULT_CODE);
+
+
 
                 } else {
                     Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT)
@@ -707,8 +645,8 @@ public class MainFragment extends BrowseSupportFragment {
         public void onItemSelected(Presenter.ViewHolder itemViewHolder, Object item,
                                    RowPresenter.ViewHolder rowViewHolder, Row row) {
 
-            if (item instanceof Video) {
-                Video video = ((Video) item);
+            if (item instanceof TaskEntity) {
+                Video video = ((TaskEntity) item).video;
                 if (video.thumbnail != null) {
                     mBackgroundURI = Uri.parse(video.thumbnail);
                     startBackgroundTimer();

@@ -54,9 +54,7 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
-/**
- * A simple {@link Fragment} subclass.
- */
+
 public class ErrorSelectionDialogFragment extends DialogFragment {
     private static final String TAG = ErrorSelectionDialogFragment.class.getSimpleName();
 
