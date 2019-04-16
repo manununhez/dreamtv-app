@@ -46,12 +46,8 @@ class MainViewModel extends ViewModel {
     }
 
 
-    public LiveData<TaskEntity[]> requestAllTasks() {
-        return mRepository.requestAllTasks();
-    }
-
-    public LiveData<TaskEntity[]> requestContinueTasks() {
-        return mRepository.requestContinueTasks();
+    public LiveData<TaskEntity[]> requestTasksByCategory(String category) {
+        return mRepository.requestTaskByCategory(category);
     }
 
     public LiveData<Resource<TaskEntity[]>> responseFromTestTasks() {

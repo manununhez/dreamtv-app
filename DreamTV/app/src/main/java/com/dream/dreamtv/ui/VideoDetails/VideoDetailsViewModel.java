@@ -49,8 +49,8 @@ class VideoDetailsViewModel extends ViewModel {
         return mRepository.requestAllTasks();
     }
 
-    public LiveData<TaskEntity[]> requestContinueTasks() {
-        return mRepository.requestContinueTasks();
-    }
+//    public LiveData<TaskEntity[]> requestContinueTasks() {
+//        return mRepository.requestContinueTasks();
+//    }
 }
 

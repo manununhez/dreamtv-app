@@ -2,8 +2,6 @@ package com.dream.dreamtv.db.dao;
 
 import com.dream.dreamtv.db.entity.TaskEntity;
 
-import java.util.List;
-
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -19,7 +17,7 @@ public interface TaskDao {
      * @return {@link TaskEntity} task entry
      */
     @Query("SELECT * FROM task_table WHERE category = :category")
-    LiveData<TaskEntity[]> getAllTasksByCategory(String category);
+    LiveData<TaskEntity[]> getTasksByCategory(String category);
 
 
     /**

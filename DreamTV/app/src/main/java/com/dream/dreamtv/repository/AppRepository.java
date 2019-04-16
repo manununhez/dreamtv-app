@@ -199,11 +199,11 @@ public class AppRepository {
 //    }
 
     public LiveData<TaskEntity[]> requestAllTasks() {
-        return mTaskDao.getAllTasksByCategory(Constants.TASKS_ALL);
+        return mTaskDao.getTasksByCategory(Constants.TASKS_ALL);
     }
 
-    public LiveData<TaskEntity[]> requestContinueTasks() {
-        return mTaskDao.getAllTasksByCategory(Constants.TASKS_CONTINUE);
+    public LiveData<TaskEntity[]> requestTaskByCategory(String category) {
+        return mTaskDao.getTasksByCategory(category);
     }
 
 

@@ -34,13 +34,14 @@ import com.bumptech.glide.request.transition.Transition;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.db.entity.TaskEntity;
+import com.dream.dreamtv.model.Card;
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserData;
 import com.dream.dreamtv.model.Video;
-import com.dream.dreamtv.presenter.GridItemPresenter;
+import com.dream.dreamtv.presenter.IconCardPresenter;
 import com.dream.dreamtv.presenter.ImageCardViewCustom;
-import com.dream.dreamtv.presenter.VideoCardPresenter;
+import com.dream.dreamtv.presenter.SideInfoCardPresenter;
 import com.dream.dreamtv.ui.Settings.SettingsActivity;
 import com.dream.dreamtv.ui.VideoDetails.VideoDetailsActivity;
 import com.dream.dreamtv.utils.Constants;
@@ -49,7 +50,8 @@ import com.dream.dreamtv.utils.LoadingDialog;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.google.android.gms.common.AccountPicker;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -97,7 +99,7 @@ public class MainFragment extends BrowseSupportFragment {
     private LoadingDialog loadingDialog;
     private Observer<Resource<TaskEntity[]>> allTaskObserver;
     private Observer<Resource<TaskEntity[]>> continueTasksObserver;
-
+    private ListRow rowSettings;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -121,17 +123,33 @@ public class MainFragment extends BrowseSupportFragment {
 
         observeResponseFromUserUpdate();
 
-//        populateScreen();
-        observeFromSyncData();
+        populateScreen();
 
-        observeResponseFromAllTasks();
+//        observeFromSyncData();
 
-        observeResponseFromContinueTasks();
-        observeResponseFromTestTasks();
+//        observeResponseFromAllTasks();
+//
+//        observeResponseFromContinueTasks();
+//        observeResponseFromTestTasks();
+//
+//        observeResponseFromMyListTasks();
+//        observeResponseFromFinishedTasks();
 
-        observeResponseFromMyListTasks();
-        observeResponseFromFinishedTasks();
+        initSettingsRow();
+    }
 
+    private void initSettingsRow() {
+        HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
+
+        IconCardPresenter mIconCardPresenter = new IconCardPresenter(getActivity());
+        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mIconCardPresenter);
+        Card settingsCard = new Card();
+        settingsCard.setType(Card.Type.ICON);
+        settingsCard.setTitle(Constants.SETTINGS);
+        settingsCard.setLocalImageResource("ic_settings_settings");
+        gridRowAdapter.add(settingsCard);
+
+        rowSettings = new ListRow(gridHeader, gridRowAdapter);
     }
 
 
@@ -142,7 +160,7 @@ public class MainFragment extends BrowseSupportFragment {
 //                "", "", "", new Video("video_id",
 //                "en", "title 0", "description", 1000,
 //                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
-//                Constants.TASKS_ALL);
+//                Constants.TASKS_ALsetL);
 //        taskEntities[1] = new TaskEntity(2, "en", "Review",
 //                "", "", "", new Video("video_id",
 //                "en", "title 1", "description", 1000,
@@ -189,8 +207,10 @@ public class MainFragment extends BrowseSupportFragment {
 
 
     private void populateScreen() {
-        LiveData<TaskEntity[]> taskEntities = mViewModel.requestAllTasks();
-        taskEntities.observe(this, new Observer<TaskEntity[]>() {
+
+//        reorderRowSettings();
+
+        mViewModel.requestTasksByCategory(Constants.TASKS_ALL).observe(this, new Observer<TaskEntity[]>() {
             @Override
             public void onChanged(TaskEntity[] taskEntities) {
                 if (taskEntities.length > 0)
@@ -198,12 +218,38 @@ public class MainFragment extends BrowseSupportFragment {
             }
         });
 
-        LiveData<TaskEntity[]> taskContinueEntities = mViewModel.requestContinueTasks();
-        taskContinueEntities.observe(this, new Observer<TaskEntity[]>() {
+        mViewModel.requestTasksByCategory(Constants.TASKS_CONTINUE).observe(this, new Observer<TaskEntity[]>() {
             @Override
             public void onChanged(TaskEntity[] taskEntities) {
                 if (taskEntities.length > 0)
                     loadVideos(taskEntities, Constants.TASKS_CONTINUE);
+
+            }
+        });
+
+        mViewModel.requestTasksByCategory(Constants.TASKS_FINISHED).observe(this, new Observer<TaskEntity[]>() {
+            @Override
+            public void onChanged(TaskEntity[] taskEntities) {
+                if (taskEntities.length > 0)
+                    loadVideos(taskEntities, Constants.TASKS_FINISHED);
+
+            }
+        });
+
+        mViewModel.requestTasksByCategory(Constants.TASKS_MY_LIST).observe(this, new Observer<TaskEntity[]>() {
+            @Override
+            public void onChanged(TaskEntity[] taskEntities) {
+                if (taskEntities.length > 0)
+                    loadVideos(taskEntities, Constants.TASKS_MY_LIST);
+
+            }
+        });
+
+        mViewModel.requestTasksByCategory(Constants.TASKS_TEST).observe(this, new Observer<TaskEntity[]>() {
+            @Override
+            public void onChanged(TaskEntity[] taskEntities) {
+                if (taskEntities.length > 0)
+                    loadVideos(taskEntities, Constants.TASKS_TEST);
 
             }
         });
@@ -411,8 +457,8 @@ public class MainFragment extends BrowseSupportFragment {
                     if (response.status.equals(Resource.Status.SUCCESS)) {
                         if (response.data != null && response.data.equals("Completed")) {
                             Log.d(TAG, response.data);
-//                            populateScreen();
-                            setFootersOptions();
+                            reorderRowSettings();
+
                         }
                     } else if (response.status.equals(Resource.Status.ERROR)) {
                         //TODO do something error
@@ -484,9 +530,17 @@ public class MainFragment extends BrowseSupportFragment {
 
         if (tasks != null) {
             Log.d(TAG, "Loading videos");
-            VideoCardPresenter videoCardPresenter = new VideoCardPresenter();
+//            VideoCardPresenter videoCardPresenter = new VideoCardPresenter();
 
-            ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(videoCardPresenter);
+            List<Card> cards = new ArrayList<>();
+
+            for (TaskEntity task : tasks) {
+                cards.add(new Card(task));
+            }
+
+            SideInfoCardPresenter presenter = new SideInfoCardPresenter(getActivity());
+            ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(presenter);
+
 
 //            val diffCallback = object : DiffCallback<DummyItem>() {
 //                override fun areItemsTheSame(oldItem: DummyItem,
@@ -497,15 +551,15 @@ public class MainFragment extends BrowseSupportFragment {
 //                        oldItem == newItem
 //            }
 
-            DiffCallback diffCallback = new DiffCallback<TaskEntity>() {
+            DiffCallback<Card> diffCallback = new DiffCallback<Card>() {
                 @Override
-                public boolean areItemsTheSame(@NonNull TaskEntity oldItem, @NonNull TaskEntity newItem) {
-                    return oldItem.task_id == newItem.task_id;
+                public boolean areItemsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
+                    return oldItem == newItem;
                 }
 
                 @Override
-                public boolean areContentsTheSame(@NonNull TaskEntity oldItem, @NonNull TaskEntity newItem) {
-                    return oldItem == newItem;
+                public boolean areContentsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
+                    return oldItem.getTaskEntity() == newItem.getTaskEntity();
                 }
             };
 
@@ -548,29 +602,30 @@ public class MainFragment extends BrowseSupportFragment {
                 if (!foundHeaderRow && listRow.getHeaderItem().getName().equals(header.getName())) {
                     foundHeaderRow = true;
                     ArrayObjectAdapter arrayObjectAdapter = ((ArrayObjectAdapter) listRow.getAdapter());
-//                    List<Video> videoEntities = new ArrayList<>();
-//                    for (int j = 0; j < tasks.length; j++) {
-//                        videoEntities.add(tasks[j]);
-//                    }
-                    arrayObjectAdapter.setItems(Arrays.asList(tasks), diffCallback);
+
+                    arrayObjectAdapter.setItems(cards, diffCallback);
                 }
             }
 
             //If we have not found a certain category, we add a new one
             if (!foundHeaderRow) {
-                for (TaskEntity task : tasks) {
-                    listRowAdapter.add(task);
-                }
+//                for (TaskEntity task : tasks) {
+//                    listRowAdapter.add(new Card(task));
+//                }
+                listRowAdapter.addAll(0, cards);
 
-                mRowsAdapter.add(0, new ListRow(header, listRowAdapter));
+                mRowsAdapter.add(new ListRow(header, listRowAdapter));
             }
+
+
+            reorderRowSettings();
 
             setAdapter(mRowsAdapter);
         }
     }
 
 
-//    private void setFootersOptions() {
+//    private void reorderRowSettings() {
 //        if ((mRowsAdapter.size() - 1) >= 0) { //If the footer category exists, we don't create a new one
 //
 //            ListRow listRow = (ListRow) mRowsAdapter.get(mRowsAdapter.size() - 1);
@@ -588,26 +643,14 @@ public class MainFragment extends BrowseSupportFragment {
 //        }
 //    }
 
-    private void setFootersOptions() {
-        boolean foundHeader = false;
-        for (int i = 0; i < mRowsAdapter.size(); i++) {
-            ListRow listRow = (ListRow) mRowsAdapter.get(i);
-            if (listRow.getHeaderItem().getName().equals(getString(R.string.title_preferences_category))) {
-                foundHeader = true;
-                break;
-            }
-        }
+    private void reorderRowSettings() {
 
-        if (!foundHeader) { //To avoid duplicate category
-            HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
+        int lastIndexOf = mRowsAdapter.indexOf(rowSettings);
 
-            GridItemPresenter mGridPresenter = new GridItemPresenter();
-            ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
-            gridRowAdapter.add(Constants.SETTINGS);
-            mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
+        if (lastIndexOf != -1) //If settings already exists, first we remove it and then add it to the end of the list
+            mRowsAdapter.remove(rowSettings);
 
-            setAdapter(mRowsAdapter);
-        }
+        mRowsAdapter.add(rowSettings);
     }
 
     private void prepareBackgroundManager() {
@@ -619,17 +662,21 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
     private void setupUIElements() {
+
         setBadgeDrawable(Objects.requireNonNull(getActivity()).getResources().getDrawable(R.drawable.logo_tv, null));
-        setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent
+//        setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent
+
         // over title
         setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(true);
 
         // set fastLane (or headers) background color
-        setBrandColor(ContextCompat.getColor(getActivity(), R.color.black_opaque));
+        setBrandColor(ContextCompat.getColor(getActivity(), R.color.default_background));
         // set search icon color
         setSearchAffordanceColor(ContextCompat.getColor(getActivity(), R.color.search_opaque));
+
     }
+
 
     private void setupEventListeners() {
         setOnSearchClickedListener(new View.OnClickListener() {
@@ -708,14 +755,14 @@ public class MainFragment extends BrowseSupportFragment {
                         Constants.SHARED_ELEMENT_NAME).toBundle();
                 startActivity(intent, bundle);
 
-            } else if (item instanceof String) {
-                String value = String.valueOf(item);
-                if (value.equals(Constants.SETTINGS)) {
-                    Toast.makeText(getActivity(), value, Toast.LENGTH_SHORT).show();
+            } else if (item instanceof Card) {
+                Card value = (Card) item;
+                if (value.getTitle().equals(Constants.SETTINGS)) {
+//                    Toast.makeText(getActivity(), value, Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(getActivity(), SettingsActivity.class);
                     startActivity(intent);
                 } else
-                    Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), value.getTitle(), Toast.LENGTH_SHORT).show();
             } else
                 Toast.makeText(getActivity(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();
 
