@@ -41,8 +41,7 @@ public class GridItemPresenter extends Presenter {
         view.setLayoutParams(new ViewGroup.LayoutParams(width, height));
         view.setFocusable(true);
         view.setFocusableInTouchMode(true);
-        view.setBackgroundColor(ContextCompat.getColor(parent.getContext(),
-                R.color.default_background));
+        view.setBackgroundColor(ContextCompat.getColor(parent.getContext(), R.color.default_background));
         view.setTextColor(Color.WHITE);
         view.setGravity(Gravity.CENTER);
         return new ViewHolder(view);

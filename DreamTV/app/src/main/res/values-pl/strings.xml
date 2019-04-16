@@ -41,6 +41,8 @@
     <string name="title_confirmation_user_saved_data">Dane użytkownika zostały zapisane poprawnie</string>
     <string name="title_confirmation_saved_data">Dziękujemy za pomoc</string>
     <string name="title_my_list_category">Moje filmy</string>
+    <string name="title_finished_category">Oglądać jeszcze raz</string>
+    <string name="title_test_category">Tylko do testowania</string>
     <string name="title_preferences_category">Ustawienia</string>
     <string name="title_see_more_videos_category">Zobacz więcej filmów</string>
     <string name="title_continue_watching_category">Kontynuuj oglądanie</string>
@@ -67,14 +69,14 @@
     <string name="btn_cancel">Anuluj</string>
     <string name="btn_ok">OK</string>
     <string name="btn_start_recording">Kliknij na mikrofon żeby nagrać wiadomość</string>
-    <string name="btn_continue_watching">Kontynuuj od ostatnio wybranego błędu</string>
-    <string name="btn_no_from_beggining">Zacząć od nowa</string>
+    <string name="btn_continue_watching">Wznów:%1$s min.</string>
+    <string name="btn_no_from_beggining">Graj od początku</string>
     <string name="btn_play_video">Odtwórz film</string>
     <string name="btn_add_to_my_list">+ Dodaj do moich filmów</string>
 
     <!--alertDialog-->
     <string name="title_alert_dialog">Witamy ponownie</string>
-    <string name="title_continue_from_saved_point">Jesteś w %1$s min. Film jest %2$s min. Czy chcesz:</string>
+    <string name="title_continue_from_saved_point">Czy chcesz:</string>
 
     <!--loadingDialog-->
     <string name="title_loading_buffering">Buforowanie…</string>

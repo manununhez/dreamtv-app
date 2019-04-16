@@ -12,8 +12,6 @@ public class UserData implements Parcelable {
     public UserTask[] userTaskList; //all user tasks saved
     public SubtitleResponse subtitle_json; //To keep subtitle data between screens
 
-    public int category; //indicates task category
-
     public UserData() {
     }
 
@@ -64,7 +62,6 @@ public class UserData implements Parcelable {
         mSelectedTask = in.readParcelable(Video.class.getClassLoader());
         userTaskList = in.createTypedArray(UserTask.CREATOR);
         subtitle_json = in.readParcelable(SubtitleResponse.class.getClassLoader());
-        category = in.readInt();
     }
 
     @Override
@@ -72,7 +69,6 @@ public class UserData implements Parcelable {
         dest.writeParcelable(mSelectedTask, flags);
         dest.writeTypedArray(userTaskList, flags);
         dest.writeParcelable(subtitle_json, flags);
-        dest.writeInt(category);
     }
 
     @Override

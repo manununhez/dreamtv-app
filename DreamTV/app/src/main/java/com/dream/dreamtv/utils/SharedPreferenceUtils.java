@@ -27,6 +27,12 @@ public class SharedPreferenceUtils {
         return preferences.getString(key, null);
     }
 
+    public static String getValue(Context context, String key, String defaultValue) {
+        SharedPreferences preferences = context.getSharedPreferences(context.getPackageName(),
+                MODE_PRIVATE);
+        return preferences.getString(key, defaultValue);
+    }
+
     public static void clearSharedPreference(Context context) {
 
         SharedPreferences preferences = context.getSharedPreferences(context.getPackageName(),

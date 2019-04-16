@@ -38,7 +38,6 @@ import com.dream.dreamtv.model.Subtitle;
 import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
-import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
@@ -87,7 +86,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private int subtitleOriginalPosition;
     private int currentSubtitlePosition;
     private int idTask;
-    private int taskState;
+    private String taskState;
     private OnDialogClosedListener mCallback;
 
     public ErrorSelectionDialogFragment() {
@@ -106,7 +105,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         return f;
     }
 
-    public static ErrorSelectionDialogFragment newInstance(SubtitleResponse subtitle, int subtitlePosition, int idTask, UserTask userTask, int taskState) {
+    public static ErrorSelectionDialogFragment newInstance(SubtitleResponse subtitle, int subtitlePosition, int idTask, UserTask userTask, String taskState) {
         ErrorSelectionDialogFragment f = new ErrorSelectionDialogFragment();
 
         // Supply num input as an argument.
@@ -114,7 +113,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         args.putParcelable(SUBTITLE_JSON, subtitle);
         args.putInt(SUBTITLE_ORIGINAL_POSITION, subtitlePosition);
         args.putInt(ID_TASK, idTask);
-        args.putInt(TASK_STATE, taskState);
+        args.putString(TASK_STATE, taskState);
         args.putParcelable(USER_TASK, userTask);
         f.setArguments(args);
         return f;
@@ -139,7 +138,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         subtitleOriginalPosition = getArguments().getInt(SUBTITLE_ORIGINAL_POSITION);
         subtitle = getArguments().getParcelable(SUBTITLE_JSON);
         idTask = getArguments().getInt(ID_TASK);
-        taskState = getArguments().getInt(TASK_STATE);
+        taskState = getArguments().getString(TASK_STATE);
         userTask = getArguments().getParcelable(USER_TASK);
     }
 
@@ -240,12 +239,12 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private void controlUserTask() {
         //controlUserTask. We repopulate the form with user task data
         if (userTask != null)
-            if (taskState == Constants.CONTINUE_WATCHING_CATEGORY) {
+            if (taskState.equals(Constants.TASKS_CONTINUE)) {
                 repopulateFormWithUserTaskData();
                 tvTitle.setText(getString(R.string.title_reasons_dialog_3));
                 llButtonsOptions1.setVisibility(View.VISIBLE);
                 llButtonsOptions2.setVisibility(View.GONE);
-            } else if (taskState == Constants.CHECK_NEW_TASKS_CATEGORY) {
+            } else if (taskState.equals(Constants.TASKS_ALL)) {
                 tvTitle.setText(getString(R.string.title_reasons_dialog_2));
                 llButtonsOptions1.setVisibility(View.GONE);
                 llButtonsOptions2.setVisibility(View.VISIBLE);
@@ -527,7 +526,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                             chkBox.setChecked(true);
                         }
                     } else { //estaba chequeado, pero se desactiva el mismo boton. Ahi se reinicia el selectedFeedbackReason
-                        selectedReasons.remove(selectedReasons.indexOf(view.getId()));
+                        selectedReasons.remove(view.getId());
                         chkBox.setChecked(false);
                     }
                 }
@@ -566,7 +565,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             radioButton.setAllCaps(true);
             radioButton.setId(errorReason.id);
             radioButton.setGravity(Gravity.CENTER);
-            radioButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_1));
+            radioButton.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.selector_1));
 
             RadioGroup.LayoutParams layoutParams = new RadioGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, pixels);
             layoutParams.setMargins(0, 0, 0, 15);

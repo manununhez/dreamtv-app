@@ -2,8 +2,8 @@ package com.dream.dreamtv.ui.VideoDetails;
 
 
 import com.dream.dreamtv.db.entity.TaskEntity;
-import com.dream.dreamtv.db.entity.UserEntity;
 import com.dream.dreamtv.model.Resource;
+import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.repository.AppRepository;
 
 import androidx.lifecycle.LiveData;
@@ -23,7 +23,7 @@ class VideoDetailsViewModel extends ViewModel {
         mRepository.requestFromLogin(email, password);
     }
 
-    public LiveData<Resource<UserEntity>> responseFromUserUpdate() {
+    public LiveData<Resource<User>> responseFromUserUpdate() {
         return mRepository.responseFromUserUpdate();
     }
 

@@ -34,8 +34,8 @@ import com.bumptech.glide.request.transition.Transition;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.db.entity.TaskEntity;
-import com.dream.dreamtv.db.entity.UserEntity;
 import com.dream.dreamtv.model.Resource;
+import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserData;
 import com.dream.dreamtv.model.Video;
 import com.dream.dreamtv.presenter.GridItemPresenter;
@@ -63,7 +63,6 @@ import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.DiffCallback;
 import androidx.leanback.widget.HeaderItem;
-import androidx.leanback.widget.ImageCardView;
 import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.ListRowPresenter;
 import androidx.leanback.widget.OnItemViewClickedListener;
@@ -120,121 +119,96 @@ public class MainFragment extends BrowseSupportFragment {
 
         userRegistration();
 
-//        tempData();
-
         observeResponseFromUserUpdate();
 
 //        populateScreen();
         observeFromSyncData();
+
         observeResponseFromAllTasks();
 
         observeResponseFromContinueTasks();
+        observeResponseFromTestTasks();
 
-//        observeResponseFromMyListTasks();
-
-    }
-
-
-    private void tempData() {
-        Log.d(TAG, "TempData");
-        TaskEntity[] taskEntities = new TaskEntity[2];
-        taskEntities[0] = new TaskEntity(1, "en", "Review",
-                "", "", "", new Video("video_id",
-                "en", "title 0", "description", 1000,
-                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
-                Constants.TASKS_ALL);
-        taskEntities[1] = new TaskEntity(2, "en", "Review",
-                "", "", "", new Video("video_id",
-                "en", "title 1", "description", 1000,
-                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
-                Constants.TASKS_ALL);
-
-        loadVideos(taskEntities, Constants.CHECK_NEW_TASKS_CATEGORY);
-
-        tempData2();
-    }
-
-    private void tempData2() {
-        Log.d(TAG, "TempData2");
-        TaskEntity[] taskEntities = new TaskEntity[2];
-        taskEntities[0] = new TaskEntity(3, "en", "Review",
-                "", "", "", new Video("video_id",
-                "en", "title 2", "description", 1000,
-                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
-                Constants.TASKS_ALL);
-        taskEntities[1] = new TaskEntity(4, "en", "Review",
-                "", "", "", new Video("video_id",
-                "en", "title 3", "description", 1000,
-                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
-                Constants.TASKS_ALL);
-
-        loadVideos(taskEntities, Constants.CHECK_NEW_TASKS_CATEGORY);
+        observeResponseFromMyListTasks();
+        observeResponseFromFinishedTasks();
 
     }
 
 
-    private void requestLogin(String email, String password) {
+//    private void tempData() {
+//        Log.d(TAG, "TempData");
+//        TaskEntity[] taskEntities = new TaskEntity[2];
+//        taskEntities[0] = new TaskEntity(1, "en", "Review",
+//                "", "", "", new Video("video_id",
+//                "en", "title 0", "description", 1000,
+//                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
+//                Constants.TASKS_ALL);
+//        taskEntities[1] = new TaskEntity(2, "en", "Review",
+//                "", "", "", new Video("video_id",
+//                "en", "title 1", "description", 1000,
+//                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
+//                Constants.TASKS_ALL);
+//
+//        loadVideos(taskEntities, Constants.CHECK_NEW_TASKS_CATEGORY);
+//
+//        tempData2();
+//    }
+//
+//    private void tempData2() {
+//        Log.d(TAG, "TempData2");
+//        TaskEntity[] taskEntities = new TaskEntity[2];
+//        taskEntities[0] = new TaskEntity(3, "en", "Review",
+//                "", "", "", new Video("video_id",
+//                "en", "title 2", "description", 1000,
+//                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
+//                Constants.TASKS_ALL);
+//        taskEntities[1] = new TaskEntity(4, "en", "Review",
+//                "", "", "", new Video("video_id",
+//                "en", "title 3", "description", 1000,
+//                SEE_MORE_VIDEOS_ICON_URL, "team", "project", SEE_MORE_VIDEOS_ICON_URL),
+//                Constants.TASKS_ALL);
+//
+//        loadVideos(taskEntities, Constants.CHECK_NEW_TASKS_CATEGORY);
+//
+//    }
+
+
+    private void requestLogin(String email) {
+        Log.d(TAG, ">>>>>>>>>>>>>>>>>>>REQUEST LOGIN");
         showLoading();
-        mViewModel.requestFromLogin(email, password);
+        mViewModel.requestFromLogin(email, "com.google"); //TODO change password
     }
 
 
-    private void requestSyncData() {
-        Log.d(TAG, "requestSyncData()");
+//    private void requestSyncData() {
+//        Log.d(TAG, "requestSyncData()");
+//
+//        showLoading();
+//        mViewModel.requestSyncData();
+//    }
 
-        showLoading();
-        mViewModel.requestSyncData();
-    }
 
-    private void observeFromSyncData() {
-        LiveData<Resource<String>> responseFromSyncData = mViewModel.responseFromSyncData();
-        responseFromSyncData.observe(this, new Observer<Resource<String>>() {
+    private void populateScreen() {
+        LiveData<TaskEntity[]> taskEntities = mViewModel.requestAllTasks();
+        taskEntities.observe(this, new Observer<TaskEntity[]>() {
             @Override
-            public void onChanged(Resource<String> response) {
-                if (response != null) {
-                    if (response.status.equals(Resource.Status.SUCCESS)) {
-                        if (response.data != null && response.data.equals("Completed")) {
-                            Log.d(TAG, response.data);
-                            //                            populateScreen();
-                            setFootersOptions();
-                        }
-                    } else if (response.status.equals(Resource.Status.ERROR)) {
-                        //TODO do something error
-                        if (response.message != null)
-                            Log.d(TAG, response.message);
-                        else
-                            Log.d(TAG, "Status ERROR");
-                    }
-
-                }
-
-                dismissLoading();
+            public void onChanged(TaskEntity[] taskEntities) {
+                if (taskEntities.length > 0)
+                    loadVideos(taskEntities, Constants.TASKS_ALL);
             }
         });
-    }
 
-//    private void populateScreen() {
-//        LiveData<TaskEntity[]> taskEntities = mViewModel.requestAllTasks();
-//        taskEntities.observe(this, new Observer<TaskEntity[]>() {
-//            @Override
-//            public void onChanged(TaskEntity[] taskEntities) {
-//                if (taskEntities.length > 0)
-//                    loadVideos(taskEntities, Constants.CHECK_NEW_TASKS_CATEGORY);
-//            }
-//        });
-//
-//        LiveData<TaskEntity[]> taskContinueEntities = mViewModel.requestContinueTasks();
-//        taskContinueEntities.observe(this, new Observer<TaskEntity[]>() {
-//            @Override
-//            public void onChanged(TaskEntity[] taskEntities) {
-//                if (taskEntities.length > 0)
-//                    loadVideos(taskEntities, Constants.CONTINUE_WATCHING_CATEGORY);
-//
-//            }
-//        });
-//
-//        setFootersOptions();
-//    }
+        LiveData<TaskEntity[]> taskContinueEntities = mViewModel.requestContinueTasks();
+        taskContinueEntities.observe(this, new Observer<TaskEntity[]>() {
+            @Override
+            public void onChanged(TaskEntity[] taskEntities) {
+                if (taskEntities.length > 0)
+                    loadVideos(taskEntities, Constants.TASKS_CONTINUE);
+
+            }
+        });
+
+    }
 
     //********************************************
     // Loading and progress bar related functions
@@ -256,21 +230,29 @@ public class MainFragment extends BrowseSupportFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        Log.d(TAG, "onDestroyView");
+        mViewModel.responseFromUserUpdate().removeObservers(getViewLifecycleOwner());
         mViewModel.responseFromTasks().removeObservers(getViewLifecycleOwner());
         mViewModel.responseFromContinueTasks().removeObservers(getViewLifecycleOwner());
-        mViewModel.responseFromUserUpdate().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromMyListTasks().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromFinishedTasks().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromTestTasks().removeObservers(getViewLifecycleOwner());
 
 
     }
 
     private void observeResponseFromUserUpdate() {
-        mViewModel.responseFromUserUpdate().observe(getViewLifecycleOwner(), new Observer<Resource<UserEntity>>() {
+        mViewModel.responseFromUserUpdate().removeObservers(getViewLifecycleOwner());
+
+        mViewModel.responseFromUserUpdate().observe(getViewLifecycleOwner(), new Observer<Resource<User>>() {
             @Override
-            public void onChanged(@Nullable Resource<UserEntity> response) {
+            public void onChanged(@Nullable Resource<User> response) {
                 if (response != null) {
                     if (response.status.equals(Resource.Status.SUCCESS)) {
+                        Log.d(TAG, "Response from userUpdate");
                         if (response.data != null) {
                             Log.d(TAG, response.data.toString());
+                            setupVideosList();
                             updateScreenLanguage(response.data);
                         }
                     } else if (response.status.equals(Resource.Status.ERROR)) {
@@ -290,14 +272,16 @@ public class MainFragment extends BrowseSupportFragment {
 
 
     private void observeResponseFromAllTasks() {
-        allTaskObserver = new Observer<Resource<TaskEntity[]>>() {
+        mViewModel.responseFromTasks().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromTasks().observe(getViewLifecycleOwner(), new Observer<Resource<TaskEntity[]>>() {
             @Override
             public void onChanged(Resource<TaskEntity[]> response) {
-                Log.d(TAG, "Response from all tasks");
+
                 if (response != null) {
                     if (response.status.equals(Resource.Status.SUCCESS)) {
+                        Log.d(TAG, "Response from all tasks");
                         if (response.data != null && response.data.length > 0)
-                            loadVideos(response.data, Constants.CHECK_NEW_TASKS_CATEGORY);
+                            loadVideos(response.data, Constants.TASKS_ALL);
                     } else if (response.status.equals(Resource.Status.ERROR)) {
                         //TODO do something error
                         if (response.message != null)
@@ -308,22 +292,21 @@ public class MainFragment extends BrowseSupportFragment {
                 }
 
             }
-        };
-        mViewModel.responseFromTasks().removeObserver(allTaskObserver);
-        mViewModel.responseFromTasks().observe(getViewLifecycleOwner(), allTaskObserver);
+        });
+
     }
 
 
     private void observeResponseFromContinueTasks() {
-
-        continueTasksObserver = new Observer<Resource<TaskEntity[]>>() {
+        mViewModel.responseFromContinueTasks().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromContinueTasks().observe(getViewLifecycleOwner(), new Observer<Resource<TaskEntity[]>>() {
             @Override
             public void onChanged(Resource<TaskEntity[]> response) {
-                Log.d(TAG, "Response from continue tasks");
                 if (response != null) {
                     if (response.status.equals(Resource.Status.SUCCESS)) {
+                        Log.d(TAG, "Response from continue tasks");
                         if (response.data != null && response.data.length > 0)
-                            loadVideos(response.data, Constants.CONTINUE_WATCHING_CATEGORY);
+                            loadVideos(response.data, Constants.TASKS_CONTINUE);
                     } else if (response.status.equals(Resource.Status.ERROR)) {
                         //TODO do something error
                         if (response.message != null)
@@ -335,27 +318,122 @@ public class MainFragment extends BrowseSupportFragment {
 
                 dismissLoading();
             }
-        };
+        });
 
-        mViewModel.responseFromContinueTasks().removeObserver(continueTasksObserver);
-        mViewModel.responseFromContinueTasks().observe(getViewLifecycleOwner(), continueTasksObserver);
 
     }
 
+    private void observeResponseFromTestTasks() {
+        mViewModel.responseFromTestTasks().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromTestTasks().observe(getViewLifecycleOwner(), new Observer<Resource<TaskEntity[]>>() {
+            @Override
+            public void onChanged(Resource<TaskEntity[]> response) {
+                if (response != null) {
+                    if (response.status.equals(Resource.Status.SUCCESS)) {
+                        Log.d(TAG, "Response from test tasks");
 
-//    private void observeResponseFromMyListTasks() {
-////        TaskResponse taskResponse = jsonResponse.data;
-////
-////        Log.d(TAG, taskResponse.toString());
-////
-////        if (taskResponse.data.size() > 0)
-////            loadVideos(taskResponse, Constants.MY_LIST_CATEGORY);
-//    }
+                        if (response.data != null && response.data.length > 0)
+                            loadVideos(response.data, Constants.TASKS_TEST);
+                    } else if (response.status.equals(Resource.Status.ERROR)) {
+                        //TODO do something error
+                        if (response.message != null)
+                            Log.d(TAG, response.message);
+                        else
+                            Log.d(TAG, "Status ERROR");
+                    }
+                }
 
-    private void updateScreenLanguage(UserEntity user) {
+                dismissLoading();
+            }
+        });
+
+
+    }
+
+    private void observeResponseFromMyListTasks() {
+        mViewModel.responseFromMyListTasks().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromMyListTasks().observe(getViewLifecycleOwner(), new Observer<Resource<TaskEntity[]>>() {
+            @Override
+            public void onChanged(Resource<TaskEntity[]> response) {
+                if (response != null) {
+                    if (response.status.equals(Resource.Status.SUCCESS)) {
+                        Log.d(TAG, "Response from my list tasks");
+                        if (response.data != null && response.data.length > 0)
+                            loadVideos(response.data, Constants.TASKS_MY_LIST);
+                    } else if (response.status.equals(Resource.Status.ERROR)) {
+                        //TODO do something error
+                        if (response.message != null)
+                            Log.d(TAG, response.message);
+                        else
+                            Log.d(TAG, "Status ERROR");
+                    }
+                }
+
+                dismissLoading();
+            }
+        });
+
+
+    }
+
+    private void observeResponseFromFinishedTasks() {
+        mViewModel.responseFromFinishedTasks().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromFinishedTasks().observe(getViewLifecycleOwner(), new Observer<Resource<TaskEntity[]>>() {
+            @Override
+            public void onChanged(Resource<TaskEntity[]> response) {
+                if (response != null) {
+                    if (response.status.equals(Resource.Status.SUCCESS)) {
+                        Log.d(TAG, "Response from finished tasks");
+                        if (response.data != null && response.data.length > 0)
+                            loadVideos(response.data, Constants.TASKS_FINISHED);
+                    } else if (response.status.equals(Resource.Status.ERROR)) {
+                        //TODO do something error
+                        if (response.message != null)
+                            Log.d(TAG, response.message);
+                        else
+                            Log.d(TAG, "Status ERROR");
+                    }
+                }
+
+                dismissLoading();
+            }
+        });
+
+
+    }
+
+    private void observeFromSyncData() {
+        LiveData<Resource<String>> responseFromSyncData = mViewModel.responseFromSyncData();
+        responseFromSyncData.observe(this, new Observer<Resource<String>>() {
+            @Override
+            public void onChanged(Resource<String> response) {
+                if (response != null) {
+                    if (response.status.equals(Resource.Status.SUCCESS)) {
+                        if (response.data != null && response.data.equals("Completed")) {
+                            Log.d(TAG, response.data);
+//                            populateScreen();
+                            setFootersOptions();
+                        }
+                    } else if (response.status.equals(Resource.Status.ERROR)) {
+                        //TODO do something error
+                        if (response.message != null)
+                            Log.d(TAG, response.message);
+                        else
+                            Log.d(TAG, "Status ERROR");
+                    }
+
+                }
+
+                dismissLoading();
+            }
+        });
+    }
+
+
+    private void updateScreenLanguage(User user) {
         if (!LocaleHelper.getLanguage(getActivity()).equals(user.interface_language)) {
             LocaleHelper.setLocale(getActivity(), user.interface_language);
-            getActivity().recreate(); //Recreate activity
+            Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
             Log.d(TAG, "Different language. Updating screen.");
         }
     }
@@ -364,11 +442,12 @@ public class MainFragment extends BrowseSupportFragment {
     private void userRegistration() {
 
         Log.d(TAG, "userRegistration()");
-        String token = ((DreamTVApp) getActivity().getApplication()).getToken();
-        if (token == null) //first time the app is initiated. The user has to select an account
+        String token = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getToken();
+        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+        if (token == null || user == null) //first time the app is initiated. The user has to select an account
             pickUserAccount();
         else
-            requestSyncData();
+            requestLogin(user.email);
 
     }
 
@@ -401,7 +480,7 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
 
-    private void loadVideos(TaskEntity[] tasks, int taskState) {
+    private void loadVideos(TaskEntity[] tasks, String category) {
 
         if (tasks != null) {
             Log.d(TAG, "Loading videos");
@@ -431,18 +510,26 @@ public class MainFragment extends BrowseSupportFragment {
             };
 
 
-            int category;
             HeaderItem header;
-            if (taskState == Constants.MY_LIST_CATEGORY) {
-                header = new HeaderItem(getString(R.string.title_my_list_category));
-                category = Constants.MY_LIST_CATEGORY;
-            } else if (taskState == Constants.CONTINUE_WATCHING_CATEGORY) {
-                header = new HeaderItem(getString(R.string.title_continue_watching_category));
-                category = Constants.CONTINUE_WATCHING_CATEGORY;
-            } else {
-                header = new HeaderItem(getString(R.string.title_check_new_tasks_category));
-                category = Constants.CHECK_NEW_TASKS_CATEGORY;
-                //position = 0;
+            switch (category) {
+                case Constants.TASKS_MY_LIST:
+                    header = new HeaderItem(getString(R.string.title_my_list_category));
+                    break;
+                case Constants.TASKS_FINISHED:
+                    header = new HeaderItem(getString(R.string.title_finished_category));
+                    break;
+                case Constants.TASKS_CONTINUE:
+                    header = new HeaderItem(getString(R.string.title_continue_watching_category));
+                    break;
+                case Constants.TASKS_ALL:
+                    header = new HeaderItem(getString(R.string.title_check_new_tasks_category));
+                    break;
+                case Constants.TASKS_TEST:
+                    header = new HeaderItem(getString(R.string.title_test_category));
+                    break;
+                default:
+                    header = new HeaderItem(getString(R.string.title_check_new_tasks_category));
+                    break;
             }
 
 
@@ -482,21 +569,44 @@ public class MainFragment extends BrowseSupportFragment {
         }
     }
 
-    //TODO
+
+//    private void setFootersOptions() {
+//        if ((mRowsAdapter.size() - 1) >= 0) { //If the footer category exists, we don't create a new one
+//
+//            ListRow listRow = (ListRow) mRowsAdapter.get(mRowsAdapter.size() - 1);
+//
+//            if (!listRow.getHeaderItem().getName().equals(getString(R.string.title_preferences_category))) {
+//                HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
+//
+//                GridItemPresenter mGridPresenter = new GridItemPresenter();
+//                ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
+//                gridRowAdapter.add(Constants.SETTINGS);
+//                mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
+//
+//                setAdapter(mRowsAdapter);
+//            }
+//        }
+//    }
+
     private void setFootersOptions() {
-        if ((mRowsAdapter.size() - 1) >= 0) { //If the footer category exists, we don't create a new one
-            ListRow listRow = (ListRow) mRowsAdapter.get(mRowsAdapter.size() - 1);
-
-            if (!listRow.getHeaderItem().getName().equals(getString(R.string.title_preferences_category))) {
-                HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
-
-                GridItemPresenter mGridPresenter = new GridItemPresenter();
-                ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
-                gridRowAdapter.add(getResources().getString(R.string.title_video_settings));
-                mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
-
-                setAdapter(mRowsAdapter);
+        boolean foundHeader = false;
+        for (int i = 0; i < mRowsAdapter.size(); i++) {
+            ListRow listRow = (ListRow) mRowsAdapter.get(i);
+            if (listRow.getHeaderItem().getName().equals(getString(R.string.title_preferences_category))) {
+                foundHeader = true;
+                break;
             }
+        }
+
+        if (!foundHeader) { //To avoid duplicate category
+            HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
+
+            GridItemPresenter mGridPresenter = new GridItemPresenter();
+            ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mGridPresenter);
+            gridRowAdapter.add(Constants.SETTINGS);
+            mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
+
+            setAdapter(mRowsAdapter);
         }
     }
 
@@ -509,7 +619,7 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
     private void setupUIElements() {
-        setBadgeDrawable(getActivity().getResources().getDrawable(R.drawable.logo_tv, null));
+        setBadgeDrawable(Objects.requireNonNull(getActivity()).getResources().getDrawable(R.drawable.logo_tv, null));
         setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent
         // over title
         setHeadersState(HEADERS_ENABLED);
@@ -568,21 +678,11 @@ public class MainFragment extends BrowseSupportFragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == PREFERENCES_SETTINGS_RESULT_CODE) { //After PreferencesSettings reload the screen
-                Objects.requireNonNull(getActivity()).recreate();
-
-            } /*else if (requestCode == VIDEO_DETAILS_RESULT_CODE) { //After add videos to userlist (in videoDetailsActivity) reload the screen
-                //Clear the screen
-                setSelectedPosition(0);
-                setupVideosList();
-                //Load new video listSystem.out.println
-                //TODO//getTasks();
-            }*/ else if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
+            if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
                 Log.d(TAG, "onActivityResult() - Result from pickAccount()");
 
                 // Receiving a result from the AccountPicker
-                requestLogin(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME), data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
-//                requestLogin("03.manu@gmail.com", "123456");
+                requestLogin(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
 
             }
         }
@@ -595,23 +695,10 @@ public class MainFragment extends BrowseSupportFragment {
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
             if (item instanceof TaskEntity) {
-                final ListRow listRow = (ListRow) row;
-
                 TaskEntity taskEntity = (TaskEntity) item;
-                String categoryName = listRow.getHeaderItem().getName();
-                int category;
-
-                if (categoryName.equals(getString(R.string.title_my_list_category))) {
-                    category = Constants.MY_LIST_CATEGORY;
-                } else if (categoryName.equals(getString(R.string.title_continue_watching_category))) {
-                    category = Constants.CONTINUE_WATCHING_CATEGORY;
-                } else {
-                    category = Constants.CHECK_NEW_TASKS_CATEGORY;
-                }
 
                 UserData userData = new UserData();
-                userData.mSelectedTask = taskEntity; //TODO uncomment
-                userData.category = category;
+                userData.mSelectedTask = taskEntity;
                 Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
                 intent.putExtra(Constants.USER_DATA, userData);
 
@@ -619,24 +706,19 @@ public class MainFragment extends BrowseSupportFragment {
                         Objects.requireNonNull(getActivity()),
                         ((ImageCardViewCustom) itemViewHolder.view).getMainImageView(),
                         Constants.SHARED_ELEMENT_NAME).toBundle();
-                startActivityForResult(intent, VIDEO_DETAILS_RESULT_CODE, bundle);
+                startActivity(intent, bundle);
 
-//                }
             } else if (item instanceof String) {
-
-                if (((String) item).contains(Objects.requireNonNull(getActivity()).getString(R.string.title_video_settings))) {
+                String value = String.valueOf(item);
+                if (value.equals(Constants.SETTINGS)) {
+                    Toast.makeText(getActivity(), value, Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(getActivity(), SettingsActivity.class);
-                    startActivityForResult(intent, PREFERENCES_SETTINGS_RESULT_CODE);
-
-
-
-                } else {
-                    Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT)
-                            .show();
-                }
-            } else {
+                    startActivity(intent);
+                } else
+                    Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT).show();
+            } else
                 Toast.makeText(getActivity(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();
-            }
+
         }
     }
 

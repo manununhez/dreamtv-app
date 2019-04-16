@@ -271,11 +271,11 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
 
     @Override
     public void playVideoMode() {
-        if (userData.category == Constants.CONTINUE_WATCHING_CATEGORY && showContinueDialogOnlyOnce) {
+        if (userData.mSelectedTask.category.equals(Constants.TASKS_CONTINUE) && showContinueDialogOnlyOnce) {
             final Subtitle subtitle = userData.getLastSubtitlePositionTime();
             if (subtitle != null) { //Si por alguna razon no se cuenta con subtitulo (algun fallo en el servicio al traer el requerido subt)
-                Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point, String.valueOf(subtitle.end / ONE_SEC_IN_MS / SECS_IN_ONE_MIN), String.valueOf(userData.mSelectedTask.video.duration / SECS_IN_ONE_MIN)),
-                        getString(R.string.btn_continue_watching), new DialogInterface.OnClickListener() {
+                Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point),
+                        getString(R.string.btn_continue_watching, String.valueOf(subtitle.end / ONE_SEC_IN_MS / SECS_IN_ONE_MIN)), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 playVideo(subtitle.end);
@@ -429,7 +429,7 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
 
             loadingDialog.dismiss(); //in case the loading is still visible
 
-            if (userData.category != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+            if (!userData.mSelectedTask.category.equals(Constants.TASKS_MY_LIST)) { //For now, we dont show the popup in my list category . This category is just to see saved videos
                 ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(userData.subtitle_json,
                         subtitle.position, userData.mSelectedTask.task_id);
                 if (!isFinishing()) {
@@ -448,9 +448,9 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
         if (subtitle != null) { //only shows the popup when exist an subtitle
             loadingDialog.dismiss(); //in case the loading is still visible
 
-            if (userData.category != Constants.MY_LIST_CATEGORY) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+            if (!userData.mSelectedTask.category.equals(Constants.TASKS_MY_LIST)) { //For now, we dont show the popup in my list category . This category is just to see saved videos
                 ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(userData.subtitle_json,
-                        subtitle.position, userData.mSelectedTask.task_id, userTask, userData.category);
+                        subtitle.position, userData.mSelectedTask.task_id, userTask, userData.mSelectedTask.category);
                 if (!isFinishing()) {
                     FragmentManager fm = getFragmentManager();
                     FragmentTransaction transaction = fm.beginTransaction();

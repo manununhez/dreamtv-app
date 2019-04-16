@@ -98,8 +98,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(Objects.requireNonNull(getActivity()));
 
-        userData = getActivity().getIntent()
-                .getParcelableExtra(Constants.USER_DATA);
+        userData = getActivity().getIntent().getParcelableExtra(Constants.USER_DATA);
         if (userData.mSelectedTask != null) {
             setupAdapter();
             setupDetailsOverviewRow();
@@ -348,7 +347,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         String mode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getTestingMode();
 
         //Testing mode true
-        if (mode != null && mode.equals(getString(R.string.text_yes_option)))
+        if (mode.equals(getString(R.string.text_yes_option)))
             getVideoTests(mSelectedVideo);
         else
             getSubtitleJson(mSelectedVideo, 0);
@@ -435,15 +434,19 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 if (userData.subtitle_json != null && userData.subtitle_json.subtitles != null) { //Si se encontraron los subtitulos, vamos a la pantalla de reproduccion
                     Log.d(TAG, jsonResponse.data.toString());
                     //verify the type of task. We get the data from users tasks
-                    if (userData.category == Constants.CHECK_NEW_TASKS_CATEGORY) {
-                        if (sharingMode == null || sharingMode.equals(getString(R.string.text_no_option)))
+                    switch (userData.mSelectedTask.category) {
+                        case Constants.TASKS_ALL:
+                            if (sharingMode.equals(getString(R.string.text_no_option)))
+                                goToPlayVideo();
+                            else if (sharingMode.equals(getString(R.string.text_yes_option)))
+                                getOtherTasksForThisVideo();
+                            break;
+                        case Constants.TASKS_CONTINUE:
+                            getMyTaskForThisVideo();
+                            break;
+                        default:
                             goToPlayVideo();
-                        else if (sharingMode.equals(getString(R.string.text_yes_option)))
-                            getOtherTasksForThisVideo();
-                    } else if ((userData.category == Constants.CONTINUE_WATCHING_CATEGORY)) {
-                        getMyTaskForThisVideo();
-                    } else {
-                        goToPlayVideo();
+                            break;
                     }
                 } else {
                     Toast.makeText(getActivity(), getString(R.string.error_subtitle_not_found), Toast.LENGTH_SHORT).show();

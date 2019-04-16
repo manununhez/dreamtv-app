@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
@@ -15,7 +14,6 @@ import com.android.volley.toolbox.Volley;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.db.entity.TaskEntity;
-import com.dream.dreamtv.db.entity.UserEntity;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.Task;
@@ -47,9 +45,12 @@ public class NetworkDataSource {
     private final Context context;
     // Volley requestQueue
     private RequestQueue mRequestQueue;
-    private MutableLiveData<Resource<UserEntity>> responseFromUserUpdate;
-    private MutableLiveData<Resource<TaskEntity[]>> responseFromTasks;
+    private MutableLiveData<Resource<TaskEntity[]>> responseFromAllTasks;
     private MutableLiveData<Resource<TaskEntity[]>> responseFromContinueTasks;
+    private MutableLiveData<Resource<TaskEntity[]>> responseFromTestTasks;
+    private MutableLiveData<Resource<TaskEntity[]>> responseFromFinishedTasks;
+    private MutableLiveData<Resource<TaskEntity[]>> responseFromMyListTasks;
+    private MutableLiveData<Resource<User>> responseFromUserUpdate;
     private MutableLiveData<Resource<String>> responseFromSyncData;
     private int currentPage = 1;
 
@@ -57,8 +58,11 @@ public class NetworkDataSource {
         this.context = context.getApplicationContext();
         mRequestQueue = getRequestQueue();
 
+        responseFromFinishedTasks = new MutableLiveData<>();
+        responseFromMyListTasks = new MutableLiveData<>();
+        responseFromTestTasks = new MutableLiveData<>();
         responseFromUserUpdate = new MutableLiveData<>();
-        responseFromTasks = new MutableLiveData<>();
+        responseFromAllTasks = new MutableLiveData<>();
         responseFromContinueTasks = new MutableLiveData<>();
         responseFromSyncData = new MutableLiveData<>();
 
@@ -92,284 +96,6 @@ public class NetworkDataSource {
             getRequestQueue().addRequestFinishedListener((RequestQueue.RequestFinishedListener<Object>) req);
     }
 
-//    /**
-//     *
-//     * @param context
-//     * @param url
-//     * @param urlParams
-//     * @param listener
-//     * @param tag
-//     * @return
-//     */
-//    public static MySingletonVolley get(
-//            final Context context,
-//            @NonNull Urls url, final Map<String, String> urlParams,
-//            ResponseListener listener, Object tag) {
-//
-//        StringBuilder urlParamsString = new StringBuilder();
-//        if (urlParams != null && urlParams.entrySet().size() >= 1) {
-//            int i = 0;
-//            for (Map.Entry<String, String> entry : urlParams.entrySet()) {
-//
-//                String key = entry.getKey();
-//                String value = entry.getValue();
-//
-//                if (i == 0)
-//                    urlParamsString = new StringBuilder("?" + key + "=" + value);
-//                else
-//                    urlParamsString.append("&").append(key).append("=").append(value);
-//
-//                i++;
-//
-//            }
-//        }
-//
-////        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
-//        String uri = URL_BASE + url.value + "/" + urlParamsString;
-//
-//        Log.d(TAG,"Url: " + uri);
-//
-//        MySingletonVolley volley = MySingletonVolley.getInstance(context);
-//
-//        StringRequest request = new StringRequest(Method.GET, uri, listener, listener) {
-//            @Override
-//            public String getBodyContentType() {
-//                return "application/json; charset=utf-8";
-//            }
-//
-//
-//            @Override
-//            public Map<String, String> getHeaders() {
-//                Map<String, String> map = new HashMap<>();
-////                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
-//                String string = SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
-//                Log.d(TAG,"TOKEN: " + string);
-//                map.put("Authorization", string);
-//                return map;
-//            }
-//
-//
-//        };
-//
-//        request.setShouldCache(false);
-//
-//        request.setRetryPolicy(new DefaultRetryPolicy(
-//                TIMEOUT_MS,
-//                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-//                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-//        ));
-//
-//        if (tag != null)
-//            volley.addToRequestQueue(request, tag);
-//        else
-//            volley.addToRequestQueue(request, context);
-//
-//        return volley;
-//    }
-
-//
-//    /**
-//     *
-//     * @param context
-//     * @param url
-//     * @param action
-//     * @param json
-//     * @param listener
-//     * @param tag
-//     * @return
-//     */
-//    public static MySingletonVolley post(
-//            final Context context,
-//            @NonNull Urls url, Actions action,
-//            final String json, ResponseListener listener, Object tag) {
-//
-//        String uri = URL_BASE + url.value;
-//
-//        if (action != null)
-//            uri += "/" + action.value;
-//
-//        Log.d(TAG,"Url: " + uri);
-//
-//        MySingletonVolley volley = MySingletonVolley.getInstance(context);
-//
-//        StringRequest request = new StringRequest(Method.POST, uri, listener, listener) {
-//            @Override
-//            public String getBodyContentType() {
-//                return "application/json; charset=utf-8";
-//            }
-//
-//            @Override
-//            protected Map<String, String> getParams() throws AuthFailureError {
-//                return super.getParams();
-//            }
-//
-//
-//            @Override
-//            public Map<String, String> getHeaders() {
-//                Map<String, String> map = new HashMap<>();
-////                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
-//                String string = SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
-//                Log.d(TAG,"TOKEN: " + string);
-//                map.put("Authorization", string);
-//                return map;
-//            }
-//        };
-//
-//        request.setShouldCache(false);
-//
-//        request.setRetryPolicy(new DefaultRetryPolicy(
-//                TIMEOUT_MS,
-//                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-//                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-//        ));
-//
-//        if (tag != null)
-//            volley.addToRequestQueue(request, tag);
-//        else
-//            volley.addToRequestQueue(request, context);
-//
-//        return volley;
-//    }
-
-//
-//    /**
-//     *
-//     * @param context
-//     * @param url
-//     * @param action
-//     * @param json
-//     * @param listener
-//     * @param tag
-//     * @return
-//     */
-//    public static MySingletonVolley put(
-//            final Context context,
-//            @NonNull Urls url, Actions action,
-//            final String json, ResponseListener listener, Object tag) {
-//
-////        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
-//        String uri = URL_BASE + url.value;
-//
-//        if (action != null)
-//            uri += "/" + action.value;
-//
-//        Log.d(TAG,"Url: " + uri);
-//
-//        MySingletonVolley volley = MySingletonVolley.getInstance(context);
-//
-//        StringRequest request = new StringRequest(Method.PUT, uri, listener, listener) {
-//            @Override
-//            public String getBodyContentType() {
-//                return "application/json; charset=utf-8";
-//            }
-//
-//            @Override
-//            public byte[] getBody() {
-//                return json.getBytes();
-//            }
-//
-//            @Override
-//            public Map<String, String> getHeaders() {
-//                Map<String, String> map = new HashMap<>();
-////                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
-//                String string = SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
-//                Log.d(TAG,"TOKEN: " + string);
-//                map.put("Authorization", string);
-//                return map;
-//            }
-//        };
-//
-//        request.setShouldCache(false);
-//
-//        request.setRetryPolicy(new DefaultRetryPolicy(
-//                TIMEOUT_MS,
-//                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-//                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-//        ));
-//
-//        if (tag != null)
-//            volley.addToRequestQueue(request, tag);
-//        else
-//            volley.addToRequestQueue(request, context);
-//
-//        return volley;
-//    }
-//
-//    /**
-//     *
-//     * @param context
-//     * @param url
-//     * @param urlParams
-//     * @param listener
-//     * @param tag
-//     * @return
-//     */
-//    public static MySingletonVolley delete(
-//            final Context context,
-//            @NonNull Urls url, final Map<String, String> urlParams,
-//            ResponseListener listener, Object tag) {
-//
-//        StringBuilder urlParamsString = new StringBuilder();
-//        if (urlParams != null && urlParams.entrySet().size() >= 1) {
-//            int i = 0;
-//            for (Map.Entry<String, String> entry : urlParams.entrySet()) {
-//
-//                String key = entry.getKey();
-//                String value = entry.getValue();
-//
-//                if (i == 0)
-//                    urlParamsString = new StringBuilder("?" + key + "=" + value);
-//                else
-//                    urlParamsString.append("&").append(key).append("=").append(value);
-//
-//                i++;
-//
-//            }
-//        }
-//
-////        String URL_BASE = ((DreamTVApp) ((Activity)context).getApplication()).getBaseURL();
-//        String uri = URL_BASE + url.value + "/" + urlParamsString;
-//
-//        Log.d(TAG,"Url: " + uri);
-//
-//        MySingletonVolley volley = MySingletonVolley.getInstance(context);
-//
-//        StringRequest request = new StringRequest(Method.DELETE, uri, listener, listener) {
-//            @Override
-//            public String getBodyContentType() {
-//                return "application/json; charset=utf-8";
-//            }
-//
-//
-//            @Override
-//            public Map<String, String> getHeaders() {
-//                Map<String, String> map = new HashMap<>();
-////                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
-//                String string = SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
-//                Log.d(TAG,"TOKEN: " + string);
-//                map.put("Authorization", string);
-//                return map;
-//            }
-//
-//
-//        };
-//
-//        request.setShouldCache(false);
-//
-//        request.setRetryPolicy(new DefaultRetryPolicy(
-//                TIMEOUT_MS,
-//                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-//                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-//        ));
-//
-//        if (tag != null)
-//            volley.addToRequestQueue(request, tag);
-//        else
-//            volley.addToRequestQueue(request, context);
-//
-//        return volley;
-//    }
-
 
     //**************************************
      /*        Volley Configuration
@@ -399,7 +125,7 @@ public class NetworkDataSource {
 //            }
 
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
+            public Map<String, String> getHeaders() {
                 Map<String, String> map = new HashMap<>();
                 String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
                 Log.d(TAG, "TOKEN: " + string);
@@ -408,7 +134,7 @@ public class NetworkDataSource {
             }
 
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
+            protected Map<String, String> getParams() {
                 return params;
             }
 
@@ -462,8 +188,6 @@ public class NetworkDataSource {
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-
-
             }
 
             @Override
@@ -526,7 +250,10 @@ public class NetworkDataSource {
 
     }
 
-
+    /**
+     *
+     */
+    @SuppressWarnings("unchecked")
     public void userDetails() {
         Uri userDetailsUri = Uri.parse(URL_BASE.concat(Urls.USER_DETAILS.value)).buildUpon().build();
 
@@ -540,10 +267,12 @@ public class NetworkDataSource {
 
                 Log.d(TAG, "userDetails Response JSON: " + response);
 
-                Resource<UserEntity> resourceResponse = null;
+                Resource<User> resourceResponse;
                 User user = jsonResponse.data;
-                resourceResponse = Resource.success(user.getEntity());
+                resourceResponse = Resource.success(user);
                 responseFromUserUpdate.postValue(resourceResponse); //post the value to live data
+
+                ((DreamTVApp) context.getApplicationContext()).setUser(user); //updating token
 
                 syncData();
             }
@@ -560,7 +289,7 @@ public class NetworkDataSource {
                 super.processError(error);
 
                 //TODO do something error
-                responseFromUserUpdate.postValue(Resource.<UserEntity>error(error.getMessage(), null));
+                responseFromUserUpdate.postValue(Resource.<User>error(error.getMessage(), null));
 
                 Log.d(TAG, "userDetails response: " + error.getMessage());
             }
@@ -569,17 +298,92 @@ public class NetworkDataSource {
         requestString(Method.GET, userDetailsUri.toString(), null, responseListener);
     }
 
-    public void syncData() {
-        Log.d(TAG, "synchronizing data ...");
-        allTasks(1);
+
+    /**
+     * @param user
+     */
+    @SuppressWarnings("unchecked")
+    public void userDetailsUpdate(User user) {
+        Map<String, String> params = new HashMap<>();
+        params.put("interface_mode", user.interface_mode);
+        params.put("interface_language", user.interface_language);
+        params.put("sub_language", user.sub_language);
+        params.put("audio_language", user.audio_language);
+
+        Uri userUri = Uri.parse(URL_BASE.concat(Urls.USER.value)).buildUpon().build();
+
+        ResponseListener responseListener = new ResponseListener(context, false,
+                false, "") {
+            @Override
+            protected void processResponse(String response) {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
+                };
+                JsonResponseBaseBean<User> jsonResponse = getJsonResponse(response, type);
+
+                Log.d(TAG, "userDetailsUpdate Response JSON: " + response);
+
+                Resource<User> resourceResponse;
+                User user = jsonResponse.data;
+                resourceResponse = Resource.success(user);
+                responseFromUserUpdate.postValue(resourceResponse); //post the value to live data
+
+                ((DreamTVApp) context.getApplicationContext()).setUser(user); //updating token
+
+                syncData();
+            }
+
+            @Override
+            public void processError(JsonResponseBaseBean jsonResponse) {
+                super.processError(jsonResponse);
+
+                Log.d(TAG, "userDetails response: " + jsonResponse.message, null);
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+
+                //TODO do something error
+                responseFromUserUpdate.postValue(Resource.<User>error(error.getMessage(), null));
+
+                Log.d(TAG, "userDetails response: " + error.getMessage());
+            }
+        };
+
+        requestString(Method.PUT, userUri.toString(), params, responseListener);
     }
 
+    public void syncData() {
+        Log.d(TAG, "synchronizing data ...");
+        //We start by calling allTasks() -> continueTasks()->MyList()->Reasons()
+        allTasks(1);
+        taskByCategory(Constants.TASKS_CONTINUE, responseFromContinueTasks);
+        taskByCategory(Constants.TASKS_MY_LIST, responseFromMyListTasks);
+        taskByCategory(Constants.TASKS_FINISHED, responseFromFinishedTasks);
+
+
+        String testingMode = ((DreamTVApp) context.getApplicationContext()).getTestingMode();
+        if (testingMode.equals(context.getString(R.string.text_yes_option)))
+            taskByCategory(Constants.TASKS_TEST, responseFromTestTasks);
+
+
+    }
+
+    private void reasons() {
+        //TODO completar
+    }
+
+    /**
+     * @param page
+     */
+    @SuppressWarnings("unchecked")
     private void allTasks(int page) {
 
         if (page == -1) {
-            continueTasks();
+//            continueTasks();
+            responseFromSyncData.setValue(Resource.success("Completed"));
             return;
-        } //other tasks
+        }
 
 
         Uri tasksUri = Uri.parse(URL_BASE.concat(Urls.TASKS.value)).buildUpon()
@@ -597,7 +401,7 @@ public class NetworkDataSource {
 
                 Log.d(TAG, "allTasks() Response JSON: " + response);
 
-                Resource<TaskEntity[]> resourceResponse = null;
+                Resource<TaskEntity[]> resourceResponse;
                 TaskResponse taskResponse = jsonResponse.data;
 
                 TaskEntity[] taskEntities = new TaskEntity[taskResponse.data.length];
@@ -608,7 +412,7 @@ public class NetworkDataSource {
 
 
                 resourceResponse = Resource.success(taskEntities);
-                responseFromTasks.postValue(resourceResponse); //post the value to live data
+                responseFromAllTasks.postValue(resourceResponse); //post the value to live data
 
 
                 if (taskResponse.current_page < taskResponse.last_page) //Pagination
@@ -631,7 +435,7 @@ public class NetworkDataSource {
                 super.processError(error);
 
                 //TODO do something error
-                responseFromTasks.postValue(Resource.<TaskEntity[]>error(error.getMessage(), null));
+                responseFromAllTasks.postValue(Resource.<TaskEntity[]>error(error.getMessage(), null));
 
                 Log.d(TAG, "all tasks response: " + error.getMessage());
             }
@@ -640,12 +444,19 @@ public class NetworkDataSource {
         requestString(Method.GET, tasksUri.toString(), null, responseListener);
     }
 
-    private void continueTasks() {
+    /**
+     *
+     * @param paramType
+     * @param responseMutable
+     */
+    @SuppressWarnings("unchecked")
+    private void taskByCategory(final String paramType, final MutableLiveData<Resource<TaskEntity[]>> responseMutable) {
 
 //        responseFromContinueTasks.postValue(Resource.loading(new TaskEntity[0]));
 
+
         Uri tasksUri = Uri.parse(URL_BASE.concat(Urls.TASKS.value)).buildUpon()
-                .appendQueryParameter(PARAM_TYPE, Constants.TASKS_CONTINUE)
+                .appendQueryParameter(PARAM_TYPE, paramType)
                 .build();
 
         ResponseListener responseListener = new ResponseListener(context, false,
@@ -656,24 +467,22 @@ public class NetworkDataSource {
                 };
                 JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
 
-                Log.d(TAG, "continueTasks() Response JSON: " + response);
+                Log.d(TAG, paramType + "Tasks() Response JSON: " + response);
 
-                Resource<TaskEntity[]> resourceResponse = null;
+                Resource<TaskEntity[]> resourceResponse;
                 Task[] taskResponse = jsonResponse.data;
 
-//                if (taskResponse != null) {
+                if (taskResponse.length > 0) {//If the response data if not empty
                     TaskEntity[] taskEntities = new TaskEntity[taskResponse.length];
 
                     for (int i = 0; i < taskResponse.length; i++) {
-                        taskEntities[i] = taskResponse[i].getEntity(Constants.TASKS_CONTINUE);
+                        taskEntities[i] = taskResponse[i].getEntity(paramType);
                     }
 
 
                     resourceResponse = Resource.success(taskEntities);
-                    responseFromContinueTasks.postValue(resourceResponse); //post the value to live data
-//                }
-
-                responseFromSyncData.setValue(Resource.success("Completed"));
+                    responseMutable.postValue(resourceResponse); //post the value to live data
+                }
 
             }
 
@@ -681,7 +490,7 @@ public class NetworkDataSource {
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
 
-                Log.d(TAG, "continue tasks response: " + jsonResponse.message, null);
+                Log.d(TAG, paramType + "Tasks() Response JSON Error: " + jsonResponse.message, null);
             }
 
             @Override
@@ -689,158 +498,15 @@ public class NetworkDataSource {
                 super.processError(error);
 
                 //TODO do something error
-                responseFromContinueTasks.postValue(Resource.<TaskEntity[]>error(error.getMessage(), null));
+                responseMutable.postValue(Resource.<TaskEntity[]>error(error.getMessage(), null));
 
-                Log.d(TAG, "continue tasks response: " + error.getMessage());
+                Log.d(TAG, paramType + "Tasks() Response Volley Error: " + error.getMessage());
             }
         };
 
         requestString(Method.GET, tasksUri.toString(), null, responseListener);
     }
 
-
-//    private void getAllTasks() {
-//        Map<String, String> urlParams = new HashMap<>();
-//        urlParams.put(PARAM_PAGE, FIRST_PAGE);
-//
-//        //testing mode
-//        String mode = ((DreamTVApp) getActivity().getApplication()).getTestingMode();
-//        if (mode == null || mode.equals(getString(R.string.text_no_option)))
-//            urlParams.put(PARAM_TYPE, Constants.TASKS_ALL);
-//        else if (mode.equals(getString(R.string.text_yes_option)))
-//            urlParams.put(PARAM_TYPE, Constants.TASKS_TEST);
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
-//                getString(R.string.title_loading_retrieve_user_tasks)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                Gson gson = new Gson();
-//                Log.d(TAG, response);
-//
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
-//                };
-//                JsonResponseBaseBean<TaskResponse> jsonResponse = getJsonResponse(response, type);
-//                TaskResponse taskResponse = jsonResponse.data;
-//
-//                Log.d(TAG, taskResponse.toString());
-//
-//                if (taskResponse.data.size() > 0)
-//                    loadVideos(taskResponse, Constants.CHECK_NEW_TASKS_CATEGORY);
-//
-//                getUserToContinueTasks(FIRST_PAGE);
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//            }
-//        };
-//
-//
-////        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.TASKS, urlParams, responseListener, this);
-//
-//    }
-
-    //
-//
-//    private void getUserToContinueTasks(String pagina) {
-//        Map<String, String> urlParams = new HashMap<>();
-//        urlParams.put(PARAM_PAGE, pagina);
-//        urlParams.put(PARAM_TYPE, Constants.TASKS_CONTINUE);
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
-//                getString(R.string.title_loading_retrieve_user_tasks)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                Gson gson = new Gson();
-//                Log.d(TAG, response);
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
-//                };
-//                JsonResponseBaseBean<TaskResponse> jsonResponse = getJsonResponse(response, type);
-//                TaskResponse taskResponse = jsonResponse.data;
-//
-//                Log.d(TAG, taskResponse.toString());
-//
-//                if (taskResponse.data.size() > 0)
-//                    loadVideos(taskResponse, Constants.CONTINUE_WATCHING_CATEGORY);
-//
-//                getUserVideosList(FIRST_PAGE);
-//
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//            }
-//        };
-//
-////        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.TASKS, urlParams, responseListener, this);
-//
-//    }
-//
-//    private void getUserVideosList(String pagina) {
-//        Map<String, String> urlParams = new HashMap<>();
-//        urlParams.put(PARAM_PAGE, pagina);
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
-//                getString(R.string.title_loading_retrieve_user_tasks)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                Gson gson = new Gson();
-//                Log.d(TAG, response);
-//
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
-//                };
-//                JsonResponseBaseBean<TaskResponse> jsonResponse = getJsonResponse(response, type);
-//                TaskResponse taskResponse = jsonResponse.data;
-//
-//                Log.d(TAG, taskResponse.toString());
-//
-//                if (taskResponse.data.size() > 0)
-//                    loadVideos(taskResponse, Constants.MY_LIST_CATEGORY);
-//
-//                setFootersOptions();
-//
-//
-//                getReasons();
-//
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//                setFootersOptions(); //the settings section is displayed anyway
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//                setFootersOptions(); //the settings section is displayed anyway
-//            }
-//        };
-//
-////        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER_VIDEOS, urlParams, responseListener, this);
-//
-//    }
 //
 //    private void getReasons() {
 //        ResponseListener responseListener = new ResponseListener(getActivity(), false, true, getString(R.string.title_loading_retrieve_options)) {
@@ -883,7 +549,7 @@ public class NetworkDataSource {
      *
      * @return {@link LiveData} representing the response of the request requestCurrentWeathersByCityIDs()
      */
-    public LiveData<Resource<UserEntity>> responseFromUserUpdate() {
+    public LiveData<Resource<User>> responseFromUserUpdate() {
         return responseFromUserUpdate;
     }
 
@@ -894,12 +560,24 @@ public class NetworkDataSource {
      * @return {@link LiveData} representing the response of the request requestCurrentWeathersByCityIDs()
      */
     public LiveData<Resource<TaskEntity[]>> responseFromTasks() {
-        return responseFromTasks;
+        return responseFromAllTasks;
     }
 
 
     public LiveData<Resource<TaskEntity[]>> responseFromContinueTasks() {
         return responseFromContinueTasks;
+    }
+
+    public LiveData<Resource<TaskEntity[]>> responseFromTestTasks() {
+        return responseFromTestTasks;
+    }
+
+    public LiveData<Resource<TaskEntity[]>> responseFromFinishedTasks() {
+        return responseFromFinishedTasks;
+    }
+
+    public LiveData<Resource<TaskEntity[]>> responseFromMyListTasks() {
+        return responseFromMyListTasks;
     }
 
     public LiveData<Resource<String>> responseFromSyncData() {
@@ -942,19 +620,5 @@ public class NetworkDataSource {
             this.value = value;
         }
     }
-
-
-//    public enum Actions {
-//        CREATE("create"),
-//        UPDATE("update"),
-//        DELETE("delete");
-//
-//        final String value;
-//
-//        Actions(String value) {
-//            this.value = value;
-//        }
-//    }
-
 
 }

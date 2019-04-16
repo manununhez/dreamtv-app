@@ -42,6 +42,8 @@
     <string name="title_confirmation_user_saved_data">User data saved correctly</string>
     <string name="title_confirmation_saved_data">Thank you for your help</string>
     <string name="title_my_list_category">My List</string>
+    <string name="title_finished_category">Watch again</string>
+    <string name="title_test_category">Only for testing</string>
     <string name="title_preferences_category">Settings</string>
     <string name="title_see_more_videos_category">See more videos</string>
     <string name="title_continue_watching_category">Continue watching</string>
@@ -68,14 +70,14 @@
     <string name="btn_cancel">Cancel</string>
     <string name="btn_ok">OK</string>
     <string name="btn_start_recording">Click the mic to record your comment</string>
-    <string name="btn_continue_watching">Continue from the last selected error</string>
-    <string name="btn_no_from_beggining">Restart the talk</string>
+    <string name="btn_continue_watching">Resume:%1$s min</string>
+    <string name="btn_no_from_beggining">Play from beginning</string>
     <string name="btn_play_video">Play video</string>
     <string name="btn_add_to_my_list">+ Add to my list</string>
 
     <!--alertDialog-->
     <string name="title_alert_dialog">Welcome back</string>
-    <string name="title_continue_from_saved_point">You are in %1$s min. The video is %2$s min. Do you want to:</string>
+    <string name="title_continue_from_saved_point">Do you want to:</string>
 
     <!--loadingDialog-->
     <string name="title_loading_buffering">Loading…</string>

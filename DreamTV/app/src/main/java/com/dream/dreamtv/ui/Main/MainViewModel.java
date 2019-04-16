@@ -2,8 +2,8 @@ package com.dream.dreamtv.ui.Main;
 
 
 import com.dream.dreamtv.db.entity.TaskEntity;
-import com.dream.dreamtv.db.entity.UserEntity;
 import com.dream.dreamtv.model.Resource;
+import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.repository.AppRepository;
 
 import androidx.lifecycle.LiveData;
@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel;
 class MainViewModel extends ViewModel {
 
     private final AppRepository mRepository;
+
 
 
     public MainViewModel(AppRepository appRepository) {
@@ -23,7 +24,7 @@ class MainViewModel extends ViewModel {
         mRepository.requestFromLogin(email, password);
     }
 
-    public LiveData<Resource<UserEntity>> responseFromUserUpdate() {
+    public LiveData<Resource<User>> responseFromUserUpdate() {
         return mRepository.responseFromUserUpdate();
     }
 
@@ -51,6 +52,18 @@ class MainViewModel extends ViewModel {
 
     public LiveData<TaskEntity[]> requestContinueTasks() {
         return mRepository.requestContinueTasks();
+    }
+
+    public LiveData<Resource<TaskEntity[]>> responseFromTestTasks() {
+        return mRepository.responseFromTestTasks();
+    }
+
+    public LiveData<Resource<TaskEntity[]>> responseFromFinishedTasks() {
+        return mRepository.responseFromFinishedTasks();
+    }
+
+    public LiveData<Resource<TaskEntity[]>> responseFromMyListTasks() {
+        return mRepository.responseFromMyListTasks();
     }
 }
 

@@ -1,7 +1,5 @@
 package com.dream.dreamtv.model;
 
-import com.dream.dreamtv.db.entity.UserEntity;
-
 /**
  * Created by manuel on 7/8/17.
  */
@@ -32,7 +30,4 @@ public class User {
                 '}';
     }
 
-    public UserEntity getEntity() {
-        return new UserEntity(token, email, password, sub_language, audio_language, id, interface_mode, interface_language);
-    }
 }

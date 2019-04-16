@@ -5,9 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.dream.dreamtv.db.dao.TaskDao;
-import com.dream.dreamtv.db.dao.UserDao;
 import com.dream.dreamtv.db.entity.TaskEntity;
-import com.dream.dreamtv.db.entity.UserEntity;
 
 import androidx.annotation.NonNull;
 import androidx.room.Database;
@@ -21,10 +19,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
  */
 
 /**
- * {@link AppRoomDatabase} database for the application including a table for {@link UserEntity}
- * with the DAO {@link UserDao}.
+ * {@link AppRoomDatabase} database for the application including a table for {@link TaskEntity}
+ * with the DAO {@link TaskDao}.
  */
-@Database(entities = {UserEntity.class, TaskEntity.class}, version = 1)
+@Database(entities = {TaskEntity.class}, version = 1)
 public abstract class AppRoomDatabase extends RoomDatabase {
     private static final String TAG = AppRoomDatabase.class.getSimpleName();
     private static final String DATABASE_NAME = "dreamtv_database";
@@ -51,7 +49,6 @@ public abstract class AppRoomDatabase extends RoomDatabase {
     }
 
     // The associated DAOs for the database
-    public abstract UserDao userDao();
     public abstract TaskDao taskDao();
 
 
@@ -77,11 +74,9 @@ public abstract class AppRoomDatabase extends RoomDatabase {
      */
     private static class ClearDbAsync extends AsyncTask<Void, Void, Void> {
 
-        private final UserDao mUserDao;
         private final TaskDao mTaskDao;
 
         ClearDbAsync(AppRoomDatabase db) {
-            mUserDao = db.userDao();
             mTaskDao = db.taskDao();
         }
 
@@ -89,7 +84,6 @@ public abstract class AppRoomDatabase extends RoomDatabase {
         protected Void doInBackground(final Void... params) {
             // Start the app with a clean database every time.
             // Not needed if you only populate on creation.
-            mUserDao.deleteAll();
             mTaskDao.deleteAll();
 
             return null;

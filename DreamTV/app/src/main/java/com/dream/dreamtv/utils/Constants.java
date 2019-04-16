@@ -15,19 +15,17 @@ public class Constants {
     public static final String SHARED_ELEMENT_NAME = "hero";
     public static final String USER_DATA = "UserData";
 
+    //Types of tasks and categories
     public static final String TASKS_ALL = "all";
     public static final String TASKS_CONTINUE = "continue";
     public static final String TASKS_FINISHED = "finished";
+    public static final String TASKS_MY_LIST = "myList";
     public static final String TASKS_TEST = "test";
     public static final String TASKS_USER = "user";
     public static final String TASKS_OTHER_USERS = "others";
+    public static final String SETTINGS = "settings";
 
     public static final int BACKGROUND_UPDATE_DELAY = 300;
-
-    public static final int MY_LIST_CATEGORY = 1250;
-    public static final int CONTINUE_WATCHING_CATEGORY = 1251;
-    public static final int CHECK_NEW_TASKS_CATEGORY = 1252;
-
 
 //    FIREBASE LOG EVENTS
 //    KEYS
@@ -56,16 +54,5 @@ public class Constants {
     public static final String FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO = "pressed_playback_video_bwd_btn";//backward
     public static final String FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO = "pressed_playback_video_fwd_btn"; //forward
 
-    public enum Actions {
-        PLAY("play"),
-        PAUSE("pause"),
-        FORWARD("forward"),
-        REWIND("rewind");
-        final String value;
-
-        Actions(String value) {
-            this.value = value;
-        }
-    }
 
 }
