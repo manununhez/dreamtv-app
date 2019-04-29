@@ -54,7 +54,7 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
     private static final int SECS_IN_ONE_MIN = 60;
     private static final int PLAY = 0;
     private static final int PAUSE = 1;
-    private static final int POSITION_OFFSET = 30000;//30 secs in ms
+    private static final int POSITION_OFFSET = 7000;//7 secs in ms
     private VideoView mVideoView;
     //private Video mSelectedTask;
     private UserData userData;

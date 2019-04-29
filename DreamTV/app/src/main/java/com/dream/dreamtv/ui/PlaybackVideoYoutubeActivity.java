@@ -72,7 +72,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
     private static final String STATE_BUFFERING = "BUFFERING";
     private static final String STATE_ENDED = "ENDED";
     private static final String STATE_PAUSED = "PAUSED";
-    private static final int POSITION_OFFSET = 30;//30 secs
+    private static final int POSITION_OFFSET = 7;//7 secs
     private static final int DELAY_IN_MS = 100;
     private static final int ONE_SEC_IN_MS = 1000;
     private static final int SECS_IN_ONE_MIN = 60;

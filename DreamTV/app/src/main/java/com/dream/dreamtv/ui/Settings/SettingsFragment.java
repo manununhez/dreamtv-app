@@ -67,12 +67,12 @@ public class SettingsFragment extends Fragment {
     private String selectedAudioLanguageCode;
     private RadioButton rbYes;
     private RadioButton rbNot;
-    private RadioButton rbShareYes;
+//    private RadioButton rbShareYes;
     private RadioButton rbEnglish;
     private RadioButton rbPolish;
     private RadioButton rbAdvanced;
     private RadioButton rbBeginner;
-    private RadioButton rbShareNot;
+//    private RadioButton rbShareNot;
     private Button btnSave;
     private ArrayAdapter<String> lvLanguagesAdapter;
     private FirebaseAnalytics mFirebaseAnalytics;
@@ -109,8 +109,8 @@ public class SettingsFragment extends Fragment {
         rbYes = view.findViewById(R.id.rbYes);
         rbNot = view.findViewById(R.id.rbNot);
 
-        rbShareYes = view.findViewById(R.id.rbShareYes);
-        rbShareNot = view.findViewById(R.id.rbShareNot);
+//        rbShareYes = view.findViewById(R.id.rbShareYes);
+//        rbShareNot = view.findViewById(R.id.rbShareNot);
         return view;
     }
 
@@ -140,7 +140,7 @@ public class SettingsFragment extends Fragment {
         interfaceLanguageSettings();
         interfaceModeSettings();
         testingModeSettings();
-        shareModeSettings();
+//        shareModeSettings();
         initializeLanguagesList();
         setupListView();
 
@@ -262,15 +262,15 @@ public class SettingsFragment extends Fragment {
     }
 
 
-    private void shareModeSettings() {
-
-        String mode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getSharingMode();
-
-        if (mode.equals(getString(R.string.text_no_option)))
-            rbShareNot.setChecked(true);
-        else if (mode.equals(getString(R.string.text_yes_option)))
-            rbShareYes.setChecked(true);
-    }
+//    private void shareModeSettings() {
+//
+////        String mode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getSharingMode();
+//
+//        if (mode.equals(getString(R.string.text_no_option)))
+//            rbShareNot.setChecked(true);
+//        else if (mode.equals(getString(R.string.text_yes_option)))
+//            rbShareYes.setChecked(true);
+//    }
 
     private void initializeLanguagesList() { //based on the 10 most spoken languages http://www.foxnewspoint.com/top-10-most-spoken-language-in-the-world-2017/
 
@@ -335,9 +335,6 @@ public class SettingsFragment extends Fragment {
         user.interface_language = rbPolish.isChecked() ? Constants.LANGUAGE_POLISH :
                 Constants.LANGUAGE_ENGLISH; //interface language updated
 
-        //Save
-        mViewModel.requestUserUpdate(user);
-
 
         DreamTVApp dreamTVApp = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
         //Save testing mode
@@ -347,76 +344,26 @@ public class SettingsFragment extends Fragment {
             dreamTVApp.setTestingMode(getString(R.string.text_no_option));
 
 
-        //Save sharing mode
-        if (rbShareYes.isChecked())
-            dreamTVApp.setSharingMode(getString(R.string.text_yes_option));
-        else
-            dreamTVApp.setSharingMode(getString(R.string.text_no_option));
+//        //Save sharing mode
+//        if (rbShareYes.isChecked())
+//            dreamTVApp.setSharingMode(getString(R.string.text_yes_option));
+//        else
+//            dreamTVApp.setSharingMode(getString(R.string.text_no_option));
 
 
         firebaseAnalyticsReportEvent(user);
 
 
+        if (isChangesAudioSubVerified())
+            mViewModel.requestUserUpdate(user);
+
         getActivity().finish();
 
-//        final String jsonRequest = JsonUtils.getJsonRequest(this, user);
-//
-//        ResponseListener responseListener = new ResponseListener(this, true, true, getString(R.string.title_loading_saving_data)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                Log.d(TAG, response);
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
-//                };
-//                JsonResponseBaseBean<User> jsonResponse = JsonUtils.getJsonResponse(response, type);
-//                User user = jsonResponse.data;
-//
-//                DreamTVApp dreamTVApp = ((DreamTVApp) getApplication());
-//                dreamTVApp.setUser(user);
-//
-//
-//                //Save testing mode
-//                if (rbYes.isChecked())
-//                    dreamTVApp.setTestingMode(getString(R.string.text_yes_option));
-//                else
-//                    dreamTVApp.setTestingMode(getString(R.string.text_no_option));
-//
-//
-//                //Save sharing mode
-//                if (rbShareYes.isChecked())
-//                    dreamTVApp.setSharingMode(getString(R.string.text_yes_option));
-//                else
-//                    dreamTVApp.setSharingMode(getString(R.string.text_no_option));
-//
-//
-//                Intent returnIntent = new Intent();
-//                setResult(Activity.RESULT_OK, returnIntent);
-//                Toast.makeText(SettingsActivity.this, getString(R.string.title_confirmation_user_saved_data), Toast.LENGTH_SHORT).show();
-//
-//                firebaseAnalyticsReportEvent(user);
-//
-//
-//                finish();
-//
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Toast.makeText(SettingsActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-//                Log.d(TAG, error.getMessage());
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Toast.makeText(SettingsActivity.this, jsonResponse.toString(), Toast.LENGTH_SHORT).show();
-//                Log.d(TAG, jsonResponse.toString());
-//            }
-//        };
 
-//        NetworkDataSource.put(this, NetworkDataSource.Urls.USER, null, jsonRequest, responseListener, this);
+    }
 
+    private boolean isChangesAudioSubVerified() {
+        return false;
     }
 
 //    private void observeResponseFromUserUpdate() {
@@ -549,18 +496,5 @@ public class SettingsFragment extends Fragment {
             mListView.setItemChecked(languagesKeyListCode.indexOf(code), true);
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        super.onBackPressed();
-//
-//        //We check if the language interface has changed. if not, we go back to the previous value
-//        String selectedMode = rbPolish.isChecked() ? Constants.LANGUAGE_POLISH :
-//                Constants.LANGUAGE_ENGLISH;
-//        User user = ((DreamTVApp) getApplication()).getUser();
-//        if (user != null)
-//            if (!user.interface_language.equals(selectedMode)) {
-//                LocaleHelper.setLocale(this, user.interface_language);
-//            }
-//    }
 
 }

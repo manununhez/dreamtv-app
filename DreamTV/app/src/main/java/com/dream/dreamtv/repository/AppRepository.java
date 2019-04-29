@@ -261,14 +261,14 @@ public class AppRepository {
         return mNetworkDataSource.responseFromTestTasks();
     }
 
-    public void requestSyncData() {
-        Executors.newSingleThreadScheduledExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                mNetworkDataSource.syncData();
-            }
-        });
-    }
+//    public void requestSyncData() {
+//        Executors.newSingleThreadScheduledExecutor().execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                mNetworkDataSource.syncData();
+//            }
+//        });
+//    }
 
     public LiveData<Resource<String>> responseFromSyncData() {
         return mNetworkDataSource.responseFromSyncData();

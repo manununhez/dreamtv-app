@@ -405,7 +405,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         User user = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getUser();
 
         //sharing mode
-        final String sharingMode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getSharingMode();
+//        final String sharingMode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getSharingMode();
 
 
         Map<String, String> urlParams = new HashMap<>();
@@ -436,10 +436,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                     //verify the type of task. We get the data from users tasks
                     switch (userData.mSelectedTask.category) {
                         case Constants.TASKS_ALL:
-                            if (sharingMode.equals(getString(R.string.text_no_option)))
+//                            if (sharingMode.equals(getString(R.string.text_no_option)))
                                 goToPlayVideo();
-                            else if (sharingMode.equals(getString(R.string.text_yes_option)))
-                                getOtherTasksForThisVideo();
+//                            else if (sharingMode.equals(getString(R.string.text_yes_option)))
+//                                getOtherTasksForThisVideo();
                             break;
                         case Constants.TASKS_CONTINUE:
                             getMyTaskForThisVideo();
@@ -534,42 +534,42 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     }
 
-    private void getOtherTasksForThisVideo() {
-        Map<String, String> urlParams = new HashMap<>();
-        urlParams.put(PARAM_TASK_ID, String.valueOf(userData.mSelectedTask.task_id));
-        urlParams.put(PARAM_TYPE, Constants.TASKS_OTHER_USERS);
-
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_tasks)) {
-
-            @Override
-            public void processResponse(String response) {
-
-                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask[]>>() {
-                };
-                JsonResponseBaseBean<UserTask[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
-                userData.userTaskList = jsonResponse.data;
-
-                goToPlayVideo();
-
-
-            }
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-                Log.d(TAG, error.getMessage());
-            }
-
-            @Override
-            public void processError(JsonResponseBaseBean jsonResponse) {
-                super.processError(jsonResponse);
-                Log.d(TAG, jsonResponse.toString());
-            }
-        };
-
-//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER_TASKS, urlParams, responseListener, this);
-
-    }
+//    private void getOtherTasksForThisVideo() {
+//        Map<String, String> urlParams = new HashMap<>();
+//        urlParams.put(PARAM_TASK_ID, String.valueOf(userData.mSelectedTask.task_id));
+//        urlParams.put(PARAM_TYPE, Constants.TASKS_OTHER_USERS);
+//
+//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_tasks)) {
+//
+//            @Override
+//            public void processResponse(String response) {
+//
+//                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask[]>>() {
+//                };
+//                JsonResponseBaseBean<UserTask[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
+//                userData.userTaskList = jsonResponse.data;
+//
+//                goToPlayVideo();
+//
+//
+//            }
+//
+//            @Override
+//            public void processError(VolleyError error) {
+//                super.processError(error);
+//                Log.d(TAG, error.getMessage());
+//            }
+//
+//            @Override
+//            public void processError(JsonResponseBaseBean jsonResponse) {
+//                super.processError(jsonResponse);
+//                Log.d(TAG, jsonResponse.toString());
+//            }
+//        };
+//
+////        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER_TASKS, urlParams, responseListener, this);
+//
+//    }
 
 
 }

@@ -27,30 +27,6 @@ class VideoDetailsViewModel extends ViewModel {
         return mRepository.responseFromUserUpdate();
     }
 
-    public LiveData<Resource<TaskEntity[]>> responseFromTasks() {
-        return mRepository.responseFromTasks();
-    }
 
-    public LiveData<Resource<TaskEntity[]>> responseFromContinueTasks() {
-        return mRepository.responseFromContinueTasks();
-    }
-
-    public LiveData<Resource<String>> responseFromSyncData() {
-        return mRepository.responseFromSyncData();
-    }
-
-
-    public void requestSyncData() {
-        mRepository.requestSyncData();
-    }
-
-
-    public LiveData<TaskEntity[]> requestAllTasks() {
-        return mRepository.requestAllTasks();
-    }
-
-//    public LiveData<TaskEntity[]> requestContinueTasks() {
-//        return mRepository.requestContinueTasks();
-//    }
 }
 
