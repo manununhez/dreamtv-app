@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.dream.dreamtv.model.ErrorReason;
 import com.dream.dreamtv.model.User;
+import com.dream.dreamtv.model.VideoTests;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.Gson;
@@ -68,9 +69,9 @@ public class DreamTVApp extends Application {
     }
 
 
-    public void setReasons(List<ErrorReason> reasons) {
-        String reasonList = gson.toJson(reasons);
-        SharedPreferenceUtils.save(this, getString(R.string.reasons_preferences), reasonList);
+    public void setReasons(List<ErrorReason> reasonsList) {
+        String reasons = gson.toJson(reasonsList);
+        SharedPreferenceUtils.save(this, getString(R.string.reasons_preferences), reasons);
     }
 
     public List<ErrorReason> getReasons() {
@@ -79,4 +80,14 @@ public class DreamTVApp extends Application {
         return new Gson().fromJson(errorReasonList, listType);
     }
 
+    public void setVideoTests(List<VideoTests> videoTestsList) {
+        String videoTests = gson.toJson(videoTestsList);
+        SharedPreferenceUtils.save(this, getString(R.string.video_tests_preferences), videoTests);
+    }
+
+    public List<VideoTests> getVideoTests() {
+        String videoTestsList = SharedPreferenceUtils.getValue(this, getString(R.string.video_tests_preferences));
+        Type listType = new TypeToken<ArrayList<VideoTests>>(){}.getType();
+        return new Gson().fromJson(videoTestsList, listType);
+    }
 }

@@ -28,6 +28,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
     private View customLoading;
     private boolean showErrorMessage = false;
 
+    //TODO change this class. Use without context
     private ResponseListener(Context context) {
         this.context = context.getApplicationContext();
     }

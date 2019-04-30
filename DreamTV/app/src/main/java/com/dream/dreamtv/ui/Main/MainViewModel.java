@@ -13,28 +13,26 @@ class MainViewModel extends ViewModel {
 
     private final AppRepository mRepository;
 
-
-
-    public MainViewModel(AppRepository appRepository) {
+    MainViewModel(AppRepository appRepository) {
         mRepository = appRepository;
     }
 
 
-    public void requestFromLogin(String email, String password) {
+    void requestFromLogin(String email, String password) {
         mRepository.requestFromLogin(email, password);
     }
 
-    public LiveData<Resource<User>> responseFromUserUpdate() {
+    LiveData<Resource<User>> responseFromUserUpdate() {
         return mRepository.responseFromUserUpdate();
     }
 
 
-    public void initializeSyncData() {
+    void initializeSyncData() {
         mRepository.initializeSyncData();
     }
 
 
-    public LiveData<TaskEntity[]> requestTasksByCategory(String category) {//TODO add Resource to taskEntity
+    LiveData<TaskEntity[]> requestTasksByCategory(String category) {//TODO add Resource to taskEntity
         return mRepository.requestTaskByCategory(category);
     }
 

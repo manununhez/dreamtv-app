@@ -5,11 +5,8 @@ package com.dream.dreamtv.model;
  */
 
 public class ErrorReason {
-    public int id;
-    public String code;
+    public String reason_code;
     public String name;
     public String description;
     public String language;
-    public String created_at;
-    public String updated_at;
 }

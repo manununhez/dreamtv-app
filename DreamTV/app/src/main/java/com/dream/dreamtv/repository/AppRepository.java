@@ -5,10 +5,10 @@ import android.util.Log;
 import com.dream.dreamtv.db.dao.TaskDao;
 import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.model.Resource;
+import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.utils.AppExecutors;
-import com.dream.dreamtv.utils.Constants;
 
 import androidx.lifecycle.LiveData;
 
@@ -33,11 +33,11 @@ public class AppRepository {
         // If that LiveData changes, update the database.
         // Group of current weathers that corresponds to the weather of all cities saved in the DB. Updated
         // using job schedules
-        LiveData<Resource<TaskEntity[]>> newTasksEntities = responseFromTasks();
-        LiveData<Resource<TaskEntity[]>> newContinueTasksEntities = responseFromContinueTasks();
-        LiveData<Resource<TaskEntity[]>> newTestTasksEntities = responseFromTestTasks();
-        LiveData<Resource<TaskEntity[]>> newFinishedTasksEntities = responseFromFinishedTasks();
-        LiveData<Resource<TaskEntity[]>> newMyListTasksEntities = responseFromMyListTasks();
+        LiveData<Resource<TaskEntity[]>> newTasksEntities = responseFromFetchAllTasks();
+        LiveData<Resource<TaskEntity[]>> newContinueTasksEntities = responseFromFetchContinueTasks();
+        LiveData<Resource<TaskEntity[]>> newTestTasksEntities = responseFromFetchTestTasks();
+        LiveData<Resource<TaskEntity[]>> newFinishedTasksEntities = responseFromFetchFinishedTasks();
+        LiveData<Resource<TaskEntity[]>> newMyListTasksEntities = responseFromFetchMyListTasks();
 
 
         newTasksEntities.observeForever(tasksFromNetwork -> {
@@ -180,7 +180,7 @@ public class AppRepository {
 //        mInitialized = true;
 
         mExecutors.diskIO().execute(() -> {
-//            if (isFetchNeeded()) {
+//            if (isFetchNeeded()) { //TODO add this isFetchNeeded. Use NetworkBoundResource Class
             deleteOldData();
             startFetchingData();
 //            }
@@ -191,6 +191,28 @@ public class AppRepository {
         mTaskDao.deleteAll();
     }
 
+    public LiveData<TaskEntity> verifyIfTaskIsInList(TaskEntity taskEntity, String category) {
+        return mTaskDao.verifyTask(taskEntity.task_id, category);
+    }
+
+    public void requestAddToList(TaskEntity taskEntity) {
+        //TODO add to the db and with webservice
+        mExecutors.diskIO().execute(() -> {
+            mTaskDao.insert(taskEntity);
+        });
+
+        mNetworkDataSource.addTaskToList(taskEntity.task_id, taskEntity.language, taskEntity.video.primary_audio_language_code);
+
+    }
+
+    public void requestRemoveFromList(int taskId, String category) {
+        //TODO remove from the db and from the webservice
+        mExecutors.diskIO().execute(() -> {
+            mTaskDao.deleteByTaskIdAndCategory(taskId, category);
+        });
+
+        mNetworkDataSource.removeTaskFromList(taskId);
+    }
     /**
      * Checks if there are enough days of future weather for the app to display all the needed data.
      *
@@ -223,29 +245,33 @@ public class AppRepository {
     }
 
 
-
-    private LiveData<Resource<TaskEntity[]>> responseFromTasks() {
-        return mNetworkDataSource.responseFromTasks();
+    private LiveData<Resource<TaskEntity[]>> responseFromFetchAllTasks() {
+        return mNetworkDataSource.responseFromFetchAllTasks();
     }
 
-    private LiveData<Resource<TaskEntity[]>> responseFromContinueTasks() {
-        return mNetworkDataSource.responseFromContinueTasks();
+    private LiveData<Resource<TaskEntity[]>> responseFromFetchContinueTasks() {
+        return mNetworkDataSource.responseFromFetchContinueTasks();
     }
 
-    private LiveData<Resource<TaskEntity[]>> responseFromTestTasks() {
-        return mNetworkDataSource.responseFromTestTasks();
+    private LiveData<Resource<TaskEntity[]>> responseFromFetchTestTasks() {
+        return mNetworkDataSource.responseFromFetchTestTasks();
     }
 
-    private LiveData<Resource<TaskEntity[]>> responseFromFinishedTasks() {
-        return mNetworkDataSource.responseFromFinishedTasks();
+    private LiveData<Resource<TaskEntity[]>> responseFromFetchFinishedTasks() {
+        return mNetworkDataSource.responseFromFetchFinishedTasks();
     }
 
-    private LiveData<Resource<TaskEntity[]>> responseFromMyListTasks() {
-        return mNetworkDataSource.responseFromMyListTasks();
+    private LiveData<Resource<TaskEntity[]>> responseFromFetchMyListTasks() {
+        return mNetworkDataSource.responseFromFetchMyListTasks();
+    }
+
+    public LiveData<Resource<User>> responseFromUserUpdate() {
+        return mNetworkDataSource.responseFromUserUpdate();
     }
 
 
     public void requestFromLogin(final String email, final String password) {
+        //TODO Check login in DB first, and then in Server
         mNetworkDataSource.login(email, password);
     }
 
@@ -254,28 +280,12 @@ public class AppRepository {
         mNetworkDataSource.userDetailsUpdate(user);
     }
 
-    public LiveData<Resource<User>> responseFromUserUpdate() {
-        return mNetworkDataSource.responseFromUserUpdate();
+
+    public LiveData<Resource<SubtitleResponse>> responseFromFetchSubtitle() {
+        return mNetworkDataSource.responseFromFetchSubtitle();
     }
 
-
-    public void requestAddToList(TaskEntity taskEntity) {
-        //TODO add to the db and with webservice
-        mExecutors.diskIO().execute(() -> {
-            mTaskDao.insert(taskEntity);
-        });
-
-
-    }
-
-    public void requestRemoveFromList(int taskId, String category) {
-        //TODO remove from the db and from the webservice
-        mExecutors.diskIO().execute(() -> {
-            mTaskDao.deleteByTaskIdAndCategory(taskId, category);
-        });
-    }
-
-    public LiveData<TaskEntity> verifyIfTaskIsInList(TaskEntity taskEntity, String category) {
-        return mTaskDao.verifyTask(taskEntity.task_id, category);
+    public void fetchSubtitle(String videoId, String languageCode, int version) {
+        mNetworkDataSource.fetchSubtitle(videoId, languageCode, version);
     }
 }

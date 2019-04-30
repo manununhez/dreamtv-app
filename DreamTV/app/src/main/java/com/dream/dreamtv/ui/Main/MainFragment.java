@@ -206,11 +206,15 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
     private void dismissLoading() {
+
+        //TODO use dismissLoading
         loadingDialog.dismiss();
     }
 
 
     private void showLoading() {
+
+        //TODO use showLoading
         loadingDialog.show();
     }
 

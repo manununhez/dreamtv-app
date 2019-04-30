@@ -13,7 +13,7 @@ import androidx.room.Ignore;
 public class Video implements Parcelable {
 
     private static final String YOUTUBE_COM = "youtube.com";
-    public static final String QUERY_PARAMETER = "v";
+    private static final String QUERY_PARAMETER = "v";
 
 
     public static final Creator<Video> CREATOR = new Creator<Video>() {

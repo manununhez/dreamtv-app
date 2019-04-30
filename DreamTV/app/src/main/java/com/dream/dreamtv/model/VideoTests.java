@@ -9,7 +9,5 @@ public class VideoTests  {
     public String video_id;
     public int version;
     public String language_code;
-    public String created_at;
-    public String updated_at;
 
 }
