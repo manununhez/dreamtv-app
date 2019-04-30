@@ -68,14 +68,6 @@ public class DreamTVApp extends Application {
     }
 
 
-//    public String getSharingMode() {
-//        return SharedPreferenceUtils.getValue(this, getString(R.string.sharing_mode_preferences), getString(R.string.text_no_option));
-//    }
-
-//    public void setSharingMode(String mode) {
-//        SharedPreferenceUtils.save(this, getString(R.string.sharing_mode_preferences), mode);
-//    }
-
     public void setReasons(List<ErrorReason> reasons) {
         String reasonList = gson.toJson(reasons);
         SharedPreferenceUtils.save(this, getString(R.string.reasons_preferences), reasonList);

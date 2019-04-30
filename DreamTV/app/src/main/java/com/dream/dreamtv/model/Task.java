@@ -4,6 +4,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.dream.dreamtv.db.entity.TaskEntity;
+import com.dream.dreamtv.utils.Utils;
+
+import java.time.Instant;
 
 /**
  * Created by manuel on 7/8/17.
@@ -32,21 +35,6 @@ public class Task implements Parcelable {
     public String updated_at;
     public Video videos;
 
-    public Task(int task_id, String video_id, String language,
-                String type, String created, String modified,
-                String completed, String created_at, String updated_at,
-                Video videos) {
-        this.task_id = task_id;
-        this.video_id = video_id;
-        this.language = language;
-        this.type = type;
-        this.created = created;
-        this.modified = modified;
-        this.completed = completed;
-        this.created_at = created_at;
-        this.updated_at = updated_at;
-        this.videos = videos;
-    }
 
     protected Task(Parcel in) {
         task_id = in.readInt();
@@ -63,9 +51,9 @@ public class Task implements Parcelable {
 
     public TaskEntity getEntity(String category) {
         return new TaskEntity(task_id, language,
-                type, created, completed, modified, new Video(videos.video_id, videos.primary_audio_language_code,
+                type, created, completed, modified, category, Utils.getUnixTimeNowInSecs(), new Video(videos.video_id, videos.primary_audio_language_code,
                 videos.title, videos.description, videos.duration, videos.thumbnail, videos.team,
-                videos.project, videos.video_url), category);
+                videos.project, videos.video_url));
     }
 
     @Override

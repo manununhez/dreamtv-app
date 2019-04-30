@@ -58,4 +58,19 @@ public interface TaskDao {
     @Query("DELETE from task_table")
     void deleteAll();
 
+    /**
+     * Last update. We get the oldest dt, that's why we order dt by ASC. This is key to know if new
+     * data should be fetched from network.
+     *
+     * @return {@link long} the oldest datetime entry in the database
+     */
+    @Query("SELECT sync_time FROM task_table ORDER by sync_time ASC LIMIT 1")
+    long getLastUpdateTime();
+
+
+    @Query("SELECT * FROM task_table WHERE task_id = :task_id AND category = :category LIMIT 1")
+    LiveData<TaskEntity> verifyTask(int task_id, String category);
+
+    @Query("DELETE from task_table WHERE task_id=:task_id AND category=:category")
+    void deleteByTaskIdAndCategory(int task_id, String category);
 }

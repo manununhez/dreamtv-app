@@ -20,6 +20,7 @@ import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.TaskResponse;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.ui.Main.MainFragment;
+import com.dream.dreamtv.utils.AppExecutors;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.reflect.TypeToken;
@@ -42,7 +43,8 @@ public class NetworkDataSource {
     public static int MAX_RETRIES = 3;
     // For Singleton instantiation
     private static NetworkDataSource INSTANCE;
-    private final Context context;
+    private final Context mContext;
+    private final AppExecutors mExecutors;
     // Volley requestQueue
     private RequestQueue mRequestQueue;
     private MutableLiveData<Resource<TaskEntity[]>> responseFromAllTasks;
@@ -51,27 +53,29 @@ public class NetworkDataSource {
     private MutableLiveData<Resource<TaskEntity[]>> responseFromFinishedTasks;
     private MutableLiveData<Resource<TaskEntity[]>> responseFromMyListTasks;
     private MutableLiveData<Resource<User>> responseFromUserUpdate;
-    private MutableLiveData<Resource<String>> responseFromSyncData;
     private int currentPage = 1;
 
-    private NetworkDataSource(Context context) {
-        this.context = context.getApplicationContext();
+    private NetworkDataSource(Context context, AppExecutors executors) {
+        mContext = context;
         mRequestQueue = getRequestQueue();
 
+        //TODO si se decide hacer sincrono, solo existiria una variable que agrupe los tasks y que luego insertaria en BD todo de una sola vez
         responseFromFinishedTasks = new MutableLiveData<>();
         responseFromMyListTasks = new MutableLiveData<>();
         responseFromTestTasks = new MutableLiveData<>();
         responseFromUserUpdate = new MutableLiveData<>();
         responseFromAllTasks = new MutableLiveData<>();
         responseFromContinueTasks = new MutableLiveData<>();
-        responseFromSyncData = new MutableLiveData<>();
+
+        mExecutors = executors;
+
 
     }
 
-    public static synchronized NetworkDataSource getInstance(Context context) {
+    public static synchronized NetworkDataSource getInstance(Context context, AppExecutors executors) {
         if (INSTANCE == null) {
             synchronized (NetworkDataSource.class) {
-                INSTANCE = new NetworkDataSource(context);
+                INSTANCE = new NetworkDataSource(context, executors);
                 Log.d(TAG, "Made new NetworkDataSource");
 
             }
@@ -83,7 +87,7 @@ public class NetworkDataSource {
         if (mRequestQueue == null) {
             // getApplicationContext() is key, it keeps you from leaking the
             // Activity or BroadcastReceiver if someone passes one in.
-            mRequestQueue = Volley.newRequestQueue(context);
+            mRequestQueue = Volley.newRequestQueue(mContext);
         }
         return mRequestQueue;
     }
@@ -127,7 +131,7 @@ public class NetworkDataSource {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> map = new HashMap<>();
-                String string = "Bearer " + SharedPreferenceUtils.getValue(context, context.getString(R.string.dreamTVApp_token));
+                String string = "Bearer " + SharedPreferenceUtils.getValue(mContext, mContext.getString(R.string.dreamTVApp_token));
                 Log.d(TAG, "TOKEN: " + string);
                 map.put("Authorization", string);
                 return map;
@@ -167,7 +171,7 @@ public class NetworkDataSource {
         Uri loginUri = Uri.parse(URL_BASE.concat(Urls.LOGIN.value)).buildUpon().build();
 
 
-        ResponseListener responseListener = new ResponseListener(context, false, false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext, false, false, "") {
             @Override
             protected void processResponse(String response) {
                 TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
@@ -178,7 +182,7 @@ public class NetworkDataSource {
 
                 User user = jsonResponse.data;
 
-                ((DreamTVApp) context.getApplicationContext()).setToken(user.token); //updating token
+                ((DreamTVApp) mContext.getApplicationContext()).setToken(user.token); //updating token
 
                 userDetails();
 
@@ -195,13 +199,16 @@ public class NetworkDataSource {
                 super.processError(error);
                 //TODO do something error
 //                Log.d(TAG, "login() Error response: " + error.getMessage());
-                if (VolleyErrorHelper.getErrorType(error, context).equals(context.getString(R.string.auth_failed)))
+                if (VolleyErrorHelper.getErrorType(error, mContext).equals(mContext.getString(R.string.auth_failed)))
                     register(email, password);
 
             }
         };
 
-        requestString(Method.POST, loginUri.toString(), params, responseListener);
+
+        mExecutors.networkIO().execute(() -> {
+            requestString(Method.POST, loginUri.toString(), params, responseListener);
+        });
 
     }
 
@@ -211,12 +218,13 @@ public class NetworkDataSource {
      */
     @SuppressWarnings("unchecked")
     public void register(final String email, final String password) {
+
         Map<String, String> params = new HashMap<>();
         params.put("email", email);
         params.put("password", password);
         Uri registerUri = Uri.parse(URL_BASE.concat(Urls.REGISTER.value)).buildUpon().build();
 
-        ResponseListener responseListener = new ResponseListener(context, false, false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext, false, false, "") {
             @Override
             protected void processResponse(String response) {
                 TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
@@ -226,7 +234,7 @@ public class NetworkDataSource {
                 Log.d(TAG, "register() response JSON: " + response);
 
                 User user = jsonResponse.data;
-                ((DreamTVApp) context.getApplicationContext()).setToken(user.token); //updating token
+                ((DreamTVApp) mContext.getApplicationContext()).setToken(user.token); //updating token
 
                 userDetails();
             }
@@ -234,8 +242,6 @@ public class NetworkDataSource {
             @Override
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
-
-
             }
 
             @Override
@@ -246,8 +252,10 @@ public class NetworkDataSource {
             }
         };
 
-        requestString(Method.POST, registerUri.toString(), params, responseListener);
 
+        mExecutors.networkIO().execute(() -> {
+            requestString(Method.POST, registerUri.toString(), params, responseListener);
+        });
     }
 
     /**
@@ -257,7 +265,7 @@ public class NetworkDataSource {
     public void userDetails() {
         Uri userDetailsUri = Uri.parse(URL_BASE.concat(Urls.USER_DETAILS.value)).buildUpon().build();
 
-        ResponseListener responseListener = new ResponseListener(context, false,
+        ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
             @Override
             protected void processResponse(String response) {
@@ -272,9 +280,9 @@ public class NetworkDataSource {
                 resourceResponse = Resource.success(user);
                 responseFromUserUpdate.postValue(resourceResponse); //post the value to live data
 
-                ((DreamTVApp) context.getApplicationContext()).setUser(user); //updating token
+                ((DreamTVApp) mContext.getApplicationContext()).setUser(user); //updating token
 
-                syncData();
+//                syncData();
             }
 
             @Override
@@ -289,13 +297,15 @@ public class NetworkDataSource {
                 super.processError(error);
 
                 //TODO do something error
-                responseFromUserUpdate.postValue(Resource.<User>error(error.getMessage(), null));
+                responseFromUserUpdate.postValue(Resource.error(error.getMessage(), null));
 
                 Log.d(TAG, "userDetails response: " + error.getMessage());
             }
         };
 
-        requestString(Method.GET, userDetailsUri.toString(), null, responseListener);
+        mExecutors.networkIO().execute(() -> {
+            requestString(Method.GET, userDetailsUri.toString(), null, responseListener);
+        });
     }
 
 
@@ -312,7 +322,7 @@ public class NetworkDataSource {
 
         Uri userUri = Uri.parse(URL_BASE.concat(Urls.USER.value)).buildUpon().build();
 
-        ResponseListener responseListener = new ResponseListener(context, false,
+        ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
             @Override
             protected void processResponse(String response) {
@@ -327,9 +337,9 @@ public class NetworkDataSource {
                 resourceResponse = Resource.success(user);
                 responseFromUserUpdate.postValue(resourceResponse); //post the value to live data
 
-                ((DreamTVApp) context.getApplicationContext()).setUser(user); //updating token
+                ((DreamTVApp) mContext.getApplicationContext()).setUser(user); //updating token
 
-                syncData();
+//                syncData();
             }
 
             @Override
@@ -344,26 +354,28 @@ public class NetworkDataSource {
                 super.processError(error);
 
                 //TODO do something error
-                responseFromUserUpdate.postValue(Resource.<User>error(error.getMessage(), null));
+                responseFromUserUpdate.postValue(Resource.error(error.getMessage(), null));
 
                 Log.d(TAG, "userDetails response: " + error.getMessage());
             }
         };
 
-        requestString(Method.PUT, userUri.toString(), params, responseListener);
+        mExecutors.networkIO().execute(() -> {
+            requestString(Method.PUT, userUri.toString(), params, responseListener);
+        });
     }
 
     public void syncData() {
         Log.d(TAG, "synchronizing data ...");
-        //We start by calling allTasks() -> continueTasks()->MyList()->Reasons()
+        //We start by calling allTasks() -> continueTasks()->MyList()->Reasons()->videoTestsDetails
         allTasks(1);
         taskByCategory(Constants.TASKS_CONTINUE, responseFromContinueTasks);
         taskByCategory(Constants.TASKS_MY_LIST, responseFromMyListTasks);
         taskByCategory(Constants.TASKS_FINISHED, responseFromFinishedTasks);
 
 
-        String testingMode = ((DreamTVApp) context.getApplicationContext()).getTestingMode();
-        if (testingMode.equals(context.getString(R.string.text_yes_option)))
+        String testingMode = ((DreamTVApp) mContext.getApplicationContext()).getTestingMode();
+        if (testingMode.equals(mContext.getString(R.string.text_yes_option))) //TODO dejar esto aca? o moverlo
             taskByCategory(Constants.TASKS_TEST, responseFromTestTasks);
 
 
@@ -379,11 +391,7 @@ public class NetworkDataSource {
     @SuppressWarnings("unchecked")
     private void allTasks(int page) {
 
-        if (page == -1) {
-//            continueTasks();
-            responseFromSyncData.setValue(Resource.success("Completed"));
-            return;
-        }
+        if (page == -1) return;
 
 
         Uri tasksUri = Uri.parse(URL_BASE.concat(Urls.TASKS.value)).buildUpon()
@@ -391,7 +399,7 @@ public class NetworkDataSource {
                 .appendQueryParameter(PARAM_TYPE, Constants.TASKS_ALL)
                 .build();
 
-        ResponseListener responseListener = new ResponseListener(context, false,
+        ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
             @Override
             protected void processResponse(String response) {
@@ -435,31 +443,29 @@ public class NetworkDataSource {
                 super.processError(error);
 
                 //TODO do something error
-                responseFromAllTasks.postValue(Resource.<TaskEntity[]>error(error.getMessage(), null));
+                responseFromAllTasks.postValue(Resource.error(error.getMessage(), null));
 
                 Log.d(TAG, "all tasks response: " + error.getMessage());
             }
         };
 
-        requestString(Method.GET, tasksUri.toString(), null, responseListener);
+        mExecutors.networkIO().execute(() -> {
+            requestString(Method.GET, tasksUri.toString(), null, responseListener);
+        });
     }
 
     /**
-     *
      * @param paramType
      * @param responseMutable
      */
     @SuppressWarnings("unchecked")
     private void taskByCategory(final String paramType, final MutableLiveData<Resource<TaskEntity[]>> responseMutable) {
 
-//        responseFromContinueTasks.postValue(Resource.loading(new TaskEntity[0]));
-
-
         Uri tasksUri = Uri.parse(URL_BASE.concat(Urls.TASKS.value)).buildUpon()
                 .appendQueryParameter(PARAM_TYPE, paramType)
                 .build();
 
-        ResponseListener responseListener = new ResponseListener(context, false,
+        ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
             @Override
             protected void processResponse(String response) {
@@ -498,13 +504,15 @@ public class NetworkDataSource {
                 super.processError(error);
 
                 //TODO do something error
-                responseMutable.postValue(Resource.<TaskEntity[]>error(error.getMessage(), null));
+                responseMutable.postValue(Resource.error(error.getMessage(), null));
 
                 Log.d(TAG, paramType + "Tasks() Response Volley Error: " + error.getMessage());
             }
         };
 
-        requestString(Method.GET, tasksUri.toString(), null, responseListener);
+        mExecutors.networkIO().execute(() -> {
+            requestString(Method.GET, tasksUri.toString(), null, responseListener);
+        });
     }
 
 //
@@ -544,6 +552,51 @@ public class NetworkDataSource {
 //
 //    }
 
+    //    private void getVideoTests(final Video selectedVideo) {
+//
+//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
+//                getString(R.string.title_loading_retrieve_user_tasks)) {
+//
+//            @Override
+//            public void processResponse(String response) {
+//                Log.d(TAG, response);
+//
+//                TypeToken type = new TypeToken<JsonResponseBaseBean<VideoTests[]>>() {
+//                };
+//                JsonResponseBaseBean<VideoTests[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
+//
+//                VideoTests[] videoTests = jsonResponse.data;
+//                Log.d(TAG, Arrays.toString(videoTests));
+//
+//                int videoTestIndex = 0;
+//                for (int i = 0; i < videoTests.length; i++) {
+//                    if (videoTests[i].video_id.equals(selectedVideo.video_id)) {
+//                        videoTestIndex = i;
+//                        break;
+//                    }
+//                }
+//
+//                getSubtitleJson(selectedVideo, videoTests[videoTestIndex].version);
+//
+//
+//            }
+//
+//            @Override
+//            public void processError(VolleyError error) {
+//                super.processError(error);
+//                Log.d(TAG, error.getMessage());
+//            }
+//
+//            @Override
+//            public void processError(JsonResponseBaseBean jsonResponse) {
+//                super.processError(jsonResponse);
+//                Log.d(TAG, jsonResponse.toString());
+//            }
+//        };
+//
+//       // NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.VIDEO_TESTS, null, responseListener, this);
+//    }
+
     /**
      * Get the current weather of a list of cities ID.
      *
@@ -580,10 +633,6 @@ public class NetworkDataSource {
         return responseFromMyListTasks;
     }
 
-    public LiveData<Resource<String>> responseFromSyncData() {
-        return responseFromSyncData;
-    }
-
 
     //********************
     //  Network requests
@@ -596,22 +645,11 @@ public class NetworkDataSource {
 
         USER_DETAILS("details"),
 
-        USER("user"),
+        TASKS("tasks"),
 
-        REASONS("reasons"),
+        VIDEO_TESTS("resource/videotests"),
 
-        USER_VIDEOS("users/videos"),
-        USER_VIDEO_DETAILS("users/video"),
-
-        USER_TASKS("users/task"),
-
-        TASKS("task/categories"),
-
-        LANGUAGES("languages"),
-
-        SUBTITLE("subtitle"),
-
-        VIDEO_TESTS("videotests");
+        USER("user");
 
 
         final String value;

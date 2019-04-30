@@ -20,6 +20,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
@@ -35,22 +38,24 @@ import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserData;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.Video;
-import com.dream.dreamtv.model.VideoTests;
+import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.presenter.DetailsDescriptionPresenter;
+import com.dream.dreamtv.ui.Main.MainViewModelFactory;
 import com.dream.dreamtv.ui.PlaybackVideoActivity;
 import com.dream.dreamtv.ui.PlaybackVideoYoutubeActivity;
 import com.dream.dreamtv.utils.Constants;
+import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.reflect.TypeToken;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BackgroundManager;
 import androidx.leanback.app.DetailsSupportFragment;
@@ -62,6 +67,7 @@ import androidx.leanback.widget.FullWidthDetailsOverviewRowPresenter;
 import androidx.leanback.widget.FullWidthDetailsOverviewSharedElementHelper;
 import androidx.leanback.widget.OnActionClickedListener;
 import androidx.leanback.widget.SparseArrayObjectAdapter;
+import androidx.lifecycle.ViewModelProviders;
 
 
 /*
@@ -87,23 +93,56 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private DisplayMetrics mMetrics;
     private DetailsOverviewRow rowPresenter;
     private FirebaseAnalytics mFirebaseAnalytics;
+    private VideoDetailsViewModel mViewModel;
+
+//    @Override
+//    public void onCreate(Bundle savedInstanceState) {
+//        Log.d(TAG, "onCreate DetailsFragment");
+//        super.onCreate(savedInstanceState);
+//
+//        prepareBackgroundManager();
+//
+//        // Get the ViewModel from the factory
+//        VideoDetailsViewModelFactory factory = InjectorUtils.provideVideoDetailsViewModelFactory(Objects.requireNonNull(getActivity()));
+//        mViewModel = ViewModelProviders.of(this, factory).get(VideoDetailsViewModel.class);
+//
+//
+//        // Obtain the FirebaseAnalytics instance.
+//        mFirebaseAnalytics = FirebaseAnalytics.getInstance(Objects.requireNonNull(getActivity()));
+//
+//        userData = getActivity().getIntent().getParcelableExtra(Constants.USER_DATA);
+//
+//        if (userData.mSelectedTask != null) {
+//            setupAdapter();
+//            setupDetailsOverviewRow();
+//            updateBackground(userData.mSelectedTask.video.thumbnail);
+//            verifyIfVideoIsInMyList();
+//        } else {
+//            getActivity().finish(); //back to MainActivity
+//        }
+//    }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate DetailsFragment");
-        super.onCreate(savedInstanceState);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
         prepareBackgroundManager();
+
+        // Get the ViewModel from the factory
+        VideoDetailsViewModelFactory factory = InjectorUtils.provideVideoDetailsViewModelFactory(Objects.requireNonNull(getActivity()));
+        mViewModel = ViewModelProviders.of(this, factory).get(VideoDetailsViewModel.class);
+
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(Objects.requireNonNull(getActivity()));
 
         userData = getActivity().getIntent().getParcelableExtra(Constants.USER_DATA);
+
         if (userData.mSelectedTask != null) {
             setupAdapter();
             setupDetailsOverviewRow();
             updateBackground(userData.mSelectedTask.video.thumbnail);
-            //verifyIfVideoIsInMyList();
+            verifyIfVideoIsInMyList();
         } else {
             getActivity().finish(); //back to MainActivity
         }
@@ -166,9 +205,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                     prepareSubtitle(userData.mSelectedTask.video);
 
                 } else if (action.getId() == ACTION_ADD_MY_LIST) {
-                    //addVideoToMyList();
+                    addVideoToMyList();
                 } else if (action.getId() == ACTION_REMOVE_MY_LIST) {
-                   // removeVideoFromMyList();
+                     removeVideoFromMyList();
                 } else {
                     Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
                 }
@@ -215,50 +254,24 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
 
-//    private void verifyIfVideoIsInMyList() {
-//
-//        Map<String, String> urlParams = new HashMap<>();
-//        urlParams.put(PARAM_VIDEO_ID, userData.mSelectedTask.video_id);
-//
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_verifying_list)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                Gson gson = new Gson();
-//                Log.d(TAG, response);
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<UserVideo[]>>() {
-//                };
-//                JsonResponseBaseBean<UserVideo[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
-//
-//
-//                if (jsonResponse.data.length > 0) {
-//                    SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
-//                    adapter.clear(ACTION_ADD_MY_LIST);
-//                    adapter.set(ACTION_REMOVE_MY_LIST, new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_from_my_list)));
-//
-//                }
-//
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//            }
-//        };
-//
-//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER_VIDEO_DETAILS, urlParams, responseListener, this);
-//
-//    }
+    private void verifyIfVideoIsInMyList() {
 
-//    private void addVideoToMyList() {
+        mViewModel.verifyIfTaskIsInList(userData.mSelectedTask).observe(getViewLifecycleOwner(), taskEntity -> {
+                    SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
+                    if (taskEntity != null) {
+                        adapter.clear(ACTION_ADD_MY_LIST);
+                        adapter.set(ACTION_REMOVE_MY_LIST, new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
+                    } else {
+                        adapter.clear(ACTION_REMOVE_MY_LIST);
+                        adapter.set(ACTION_ADD_MY_LIST, new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
+                    }
+                });
+
+
+    }
+
+    private void addVideoToMyList() {
+        mViewModel.requestAddToList(userData.mSelectedTask);
 //        final Video video = new Video();
 //        video.primary_audio_language_code = userData.mSelectedTask.primary_audio_language_code;
 //        video.video_id = userData.mSelectedTask.video_id;
@@ -300,11 +313,11 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 //        };
 //
 //        NetworkDataSource.post(getActivity(), NetworkDataSource.Urls.USER_VIDEOS, null, jsonRequest, responseListener, this);
-//
-//    }
 
-//    private void removeVideoFromMyList() {
-//
+    }
+
+    private void removeVideoFromMyList() {
+        mViewModel.requestRemoveFromList(userData.mSelectedTask);
 //        Map<String, String> urlParams = new HashMap<>();
 //        urlParams.put(PARAM_VIDEO_ID, userData.mSelectedTask.video_id);
 //
@@ -340,64 +353,19 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 //        };
 //
 //        NetworkDataSource.delete(getActivity(), NetworkDataSource.Urls.USER_VIDEOS, urlParams, responseListener, this);
-//
-//    }
+
+    }
 
     private void prepareSubtitle(Video mSelectedVideo) {
         String mode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getTestingMode();
 
         //Testing mode true
-        if (mode.equals(getString(R.string.text_yes_option)))
-            getVideoTests(mSelectedVideo);
-        else
-            getSubtitleJson(mSelectedVideo, 0);
+//        if (mode.equals(getString(R.string.text_yes_option)))
+//            getSubtitleJson(selectedVideo, videoTests[videoTestIndex].version);
+//        else
+//            getSubtitleJson(mSelectedVideo, 0);
 
 
-    }
-
-    private void getVideoTests(final Video selectedVideo) {
-
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true,
-                getString(R.string.title_loading_retrieve_user_tasks)) {
-
-            @Override
-            public void processResponse(String response) {
-                Log.d(TAG, response);
-
-                TypeToken type = new TypeToken<JsonResponseBaseBean<VideoTests[]>>() {
-                };
-                JsonResponseBaseBean<VideoTests[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
-
-                VideoTests[] videoTests = jsonResponse.data;
-                Log.d(TAG, Arrays.toString(videoTests));
-
-                int videoTestIndex = 0;
-                for (int i = 0; i < videoTests.length; i++) {
-                    if (videoTests[i].video_id.equals(selectedVideo.video_id)) {
-                        videoTestIndex = i;
-                        break;
-                    }
-                }
-
-                getSubtitleJson(selectedVideo, videoTests[videoTestIndex].version);
-
-
-            }
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-                Log.d(TAG, error.getMessage());
-            }
-
-            @Override
-            public void processError(JsonResponseBaseBean jsonResponse) {
-                super.processError(jsonResponse);
-                Log.d(TAG, jsonResponse.toString());
-            }
-        };
-
-       // NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.VIDEO_TESTS, null, responseListener, this);
     }
 
 
@@ -437,7 +405,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                     switch (userData.mSelectedTask.category) {
                         case Constants.TASKS_ALL:
 //                            if (sharingMode.equals(getString(R.string.text_no_option)))
-                                goToPlayVideo();
+                            goToPlayVideo();
 //                            else if (sharingMode.equals(getString(R.string.text_yes_option)))
 //                                getOtherTasksForThisVideo();
                             break;
@@ -533,43 +501,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 //        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER_TASKS, urlParams, responseListener, this);
 
     }
-
-//    private void getOtherTasksForThisVideo() {
-//        Map<String, String> urlParams = new HashMap<>();
-//        urlParams.put(PARAM_TASK_ID, String.valueOf(userData.mSelectedTask.task_id));
-//        urlParams.put(PARAM_TYPE, Constants.TASKS_OTHER_USERS);
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_tasks)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask[]>>() {
-//                };
-//                JsonResponseBaseBean<UserTask[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
-//                userData.userTaskList = jsonResponse.data;
-//
-//                goToPlayVideo();
-//
-//
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//            }
-//        };
-//
-////        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER_TASKS, urlParams, responseListener, this);
-//
-//    }
 
 
 }

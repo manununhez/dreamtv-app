@@ -56,7 +56,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        Log.d(TAG,"Response: " + error.getMessage());
+        Log.d(TAG,"Respuesta: " + error.getMessage());
         if (loadingDialog != null) {
             loadingDialog.dismiss();
         }
@@ -66,11 +66,9 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
 
         String errorMessage = VolleyErrorHelper.getMessage(error, context);
         Log.d(TAG,errorMessage);
-
         if (errorMessage != null && !errorMessage.isEmpty()) {
             Toast.makeText(context.getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
-        } else
-            error = new VolleyError("Unexpected error");
+        }
 
         processError(error);
     }
@@ -85,7 +83,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
         if (customLoading != null)
             customLoading.setVisibility(View.GONE);
 
-        Log.d(TAG,"onResponse: " + response);
+        Log.d(TAG,"Respuesta: " + response);
 //
         TypeToken typeToken = new TypeToken<JsonResponseBaseBean>() {
         };
@@ -97,10 +95,12 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
                 processResponse(response);
             } else {
                 if (showErrorMessage) {
-                    if (jsonResponse.data == null || jsonResponse.data.equals("")) {
-                        Toast.makeText(context, context.getString(R.string.no_network_connection), Toast.LENGTH_SHORT).show();
-                    } else {
+                    if (jsonResponse.data == null) {
+                        Toast.makeText(context, "Error en la conexión", Toast.LENGTH_SHORT).show();
+//                    EventBus.getDefault().post(new ResponseListenerEvent("Error en la conexión"));
+                    } else if (!jsonResponse.data.equals("")) {
                         Toast.makeText(context, jsonResponse.data.toString(), Toast.LENGTH_SHORT).show();
+//                    EventBus.getDefault().post(new ResponseListenerEvent(jsonResponse.data.toString()));
                     }
                 }
                 processError(jsonResponse);

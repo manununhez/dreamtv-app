@@ -25,7 +25,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.dream.dreamtv.DreamTVApp;
@@ -53,7 +52,6 @@ public class SettingsFragment extends Fragment {
     private static final String ABR_ARABIC = "ar";
     private static final String ABR_FRENCH = "fr";
     private static final String ABR_POLISH = "pl";
-    //    private Activity mActivity;
     private ListView mListView;
     private LinearLayout llBodyLanguages;
     private TextView tvSubtitleValue;
@@ -67,17 +65,14 @@ public class SettingsFragment extends Fragment {
     private String selectedAudioLanguageCode;
     private RadioButton rbYes;
     private RadioButton rbNot;
-//    private RadioButton rbShareYes;
     private RadioButton rbEnglish;
     private RadioButton rbPolish;
     private RadioButton rbAdvanced;
     private RadioButton rbBeginner;
-//    private RadioButton rbShareNot;
     private Button btnSave;
     private ArrayAdapter<String> lvLanguagesAdapter;
     private FirebaseAnalytics mFirebaseAnalytics;
     private LinearLayout llVideosSettings;
-    private RadioGroup rgInterfaceLanguage;
     private SettingsViewModel mViewModel;
 
 
@@ -90,8 +85,6 @@ public class SettingsFragment extends Fragment {
 
         llVideosSettings = view.findViewById(R.id.llVideosSettings);
         llBodyLanguages = view.findViewById(R.id.llBodyLanguages);
-
-        rgInterfaceLanguage = view.findViewById(R.id.rgInterfaceLanguage);
 
         rbEnglish = view.findViewById(R.id.rbEnglish);
         rbPolish = view.findViewById(R.id.rbPolish);
@@ -109,21 +102,17 @@ public class SettingsFragment extends Fragment {
         rbYes = view.findViewById(R.id.rbYes);
         rbNot = view.findViewById(R.id.rbNot);
 
-//        rbShareYes = view.findViewById(R.id.rbShareYes);
-//        rbShareNot = view.findViewById(R.id.rbShareNot);
         return view;
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mViewModel.responseFromUserUpdate().removeObservers(getViewLifecycleOwner());
 
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        Log.i(TAG, "onCreate");
         super.onActivityCreated(savedInstanceState);
 
         SettingsViewModelFactory factory = InjectorUtils.provideSettingsViewModelFactory(Objects.requireNonNull(getActivity()));
@@ -132,9 +121,6 @@ public class SettingsFragment extends Fragment {
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
-
-
-//        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
 
         interfaceLanguageSettings();
@@ -146,112 +132,70 @@ public class SettingsFragment extends Fragment {
 
         setupEventsListener();
 
-//        observeResponseFromUserUpdate();
-
         Log.d(TAG, "OnCreateSettingsActivity");
 
     }
 
     private void setupEventsListener() {
-        btnSubtitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (b) {
-                    btnAudio.setChecked(false);
-                    btnSubtitle.setChecked(true);
-                    updateListItemChecked(true);
-                }
+        btnSubtitle.setOnFocusChangeListener((view, b) -> {
+            if (b) {
+                btnAudio.setChecked(false);
+                btnSubtitle.setChecked(true);
+                updateListItemChecked(true);
             }
         });
 
-        btnSubtitle.setOnCheckedChangeListener(new CheckableTextView.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
-                if (isChecked) {
-//                    tvVideoLanguagesTitle.setText(R.string.text_subtitle_languages);
+        btnSubtitle.setOnCheckedChangeListener((view, isChecked) -> {
+            if (isChecked) {
+                int position = lvLanguagesAdapter.getPosition(getString(R.string.all_languages));
 
-                    int position = lvLanguagesAdapter.getPosition(getString(R.string.all_languages));
-
-                    if (position >= 0) {
-                        lvLanguagesAdapter.remove(getString(R.string.all_languages));
-                        lvLanguagesAdapter.notifyDataSetChanged();
-                    }
-
+                if (position >= 0) {
+                    lvLanguagesAdapter.remove(getString(R.string.all_languages));
+                    lvLanguagesAdapter.notifyDataSetChanged();
                 }
+
             }
         });
 
-        btnAudio.setOnCheckedChangeListener(new CheckableTextView.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CheckableTextView view, boolean isChecked) {
-                if (isChecked) {
-//                    tvVideoLanguagesTitle.setText(R.string.text_audio_languages);
+        btnAudio.setOnCheckedChangeListener((view, isChecked) -> {
+            if (isChecked) {
+                int position = lvLanguagesAdapter.getPosition(getString(R.string.all_languages));
 
-                    int position = lvLanguagesAdapter.getPosition(getString(R.string.all_languages));
-
-                    if (position < 0) {
-                        lvLanguagesAdapter.add(getString(R.string.all_languages));
-                        lvLanguagesAdapter.notifyDataSetChanged();
-                    }
+                if (position < 0) {
+                    lvLanguagesAdapter.add(getString(R.string.all_languages));
+                    lvLanguagesAdapter.notifyDataSetChanged();
                 }
             }
         });
 
 
-        btnAudio.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (b) {
-                    btnSubtitle.setChecked(false);
-                    btnAudio.setChecked(true);
-                    updateListItemChecked(false);
-                }
+        btnAudio.setOnFocusChangeListener((view, b) -> {
+            if (b) {
+                btnSubtitle.setChecked(false);
+                btnAudio.setChecked(true);
+                updateListItemChecked(false);
             }
         });
 
-        llVideosSettings.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (b)
-                    llBodyLanguages.setVisibility(View.VISIBLE);
-                else {
-                    llBodyLanguages.setVisibility(View.GONE);
-                    btnSubtitle.setChecked(false);
-                    btnAudio.setChecked(false);
+        llVideosSettings.setOnFocusChangeListener((view, b) -> {
+            if (b)
+                llBodyLanguages.setVisibility(View.VISIBLE);
+            else {
+                llBodyLanguages.setVisibility(View.GONE);
+                btnSubtitle.setChecked(false);
+                btnAudio.setChecked(false);
 
-                }
             }
         });
 
 
-//        rgInterfaceLanguage.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-//
-//            @Override
-//            public void onCheckedChanged(RadioGroup group, int checkedId) {
-//                // find which radio button is selected
-//                if (checkedId == R.id.rbEnglish) {
-//                    updateViews(Constants.LANGUAGE_ENGLISH);
-//                } else if (checkedId == R.id.rbPolish) {
-//                    updateViews(Constants.LANGUAGE_POLISH);
-//                }
-//            }
-//
-//        });
 
-
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                saveUSerPreferences();
-            }
-        });
+        btnSave.setOnClickListener(view -> saveUSerPreferences());
 
     }
 
 
     private void testingModeSettings() {
-
-
         String mode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getTestingMode();
 
         if (mode.equals(getString(R.string.text_no_option)))
@@ -261,16 +205,6 @@ public class SettingsFragment extends Fragment {
 
     }
 
-
-//    private void shareModeSettings() {
-//
-////        String mode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getSharingMode();
-//
-//        if (mode.equals(getString(R.string.text_no_option)))
-//            rbShareNot.setChecked(true);
-//        else if (mode.equals(getString(R.string.text_yes_option)))
-//            rbShareYes.setChecked(true);
-//    }
 
     private void initializeLanguagesList() { //based on the 10 most spoken languages http://www.foxnewspoint.com/top-10-most-spoken-language-in-the-world-2017/
 
@@ -317,14 +251,6 @@ public class SettingsFragment extends Fragment {
     }
 
 
-//    private void updateViews(String languageCode) {
-//        LocaleHelper.setLocale(this, languageCode);
-//    }
-//
-//    private void requestUserUpdate(){
-
-//    }
-
     private void saveUSerPreferences() {
 
         User user = new User();
@@ -344,17 +270,10 @@ public class SettingsFragment extends Fragment {
             dreamTVApp.setTestingMode(getString(R.string.text_no_option));
 
 
-//        //Save sharing mode
-//        if (rbShareYes.isChecked())
-//            dreamTVApp.setSharingMode(getString(R.string.text_yes_option));
-//        else
-//            dreamTVApp.setSharingMode(getString(R.string.text_no_option));
-
-
         firebaseAnalyticsReportEvent(user);
 
 
-        if (isChangesAudioSubVerified())
+//        if (isChangesAudioSubVerified())
             mViewModel.requestUserUpdate(user);
 
         getActivity().finish();
@@ -365,51 +284,6 @@ public class SettingsFragment extends Fragment {
     private boolean isChangesAudioSubVerified() {
         return false;
     }
-
-//    private void observeResponseFromUserUpdate() {
-//        mViewModel.responseFromUserUpdate().removeObservers(getViewLifecycleOwner());
-//
-//        mViewModel.responseFromUserUpdate().observe(this, new Observer<Resource<User>>() {
-//            @Override
-//            public void onChanged(@Nullable Resource<User> response) {
-//                if (response != null) {
-//                    if (response.status.equals(Resource.Status.SUCCESS)) {
-//                        if (response.data != null) {
-//                            Log.d(TAG, response.data.toString());
-//                            //==== TODO cambiar esto, guardarlo ya al hacer el request?
-//                            DreamTVApp dreamTVApp = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
-//                            //Save testing mode
-//                            if (rbYes.isChecked())
-//                                dreamTVApp.setTestingMode(getString(R.string.text_yes_option));
-//                            else
-//                                dreamTVApp.setTestingMode(getString(R.string.text_no_option));
-//
-//
-//                            //Save sharing mode
-//                            if (rbShareYes.isChecked())
-//                                dreamTVApp.setSharingMode(getString(R.string.text_yes_option));
-//                            else
-//                                dreamTVApp.setSharingMode(getString(R.string.text_no_option));
-//
-//
-//                            firebaseAnalyticsReportEvent(response.data);
-//
-//
-////                            getActivity().finish();
-//                            //====
-//                        }
-//                    } else if (response.status.equals(Resource.Status.ERROR)) {
-//                        //TODO do something error
-//                        if (response.message != null)
-//                            Log.d(TAG, response.message);
-//                        else
-//                            Log.d(TAG, "Status ERROR");
-//                    }
-//
-//                }
-//            }
-//        });
-//    }
 
     private void firebaseAnalyticsReportEvent(User user) {
         String mode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getTestingMode();
@@ -452,14 +326,11 @@ public class SettingsFragment extends Fragment {
                 if (btnSubtitle.isChecked()) {
                     selectedSubtitleLanguageCode = languagesKeyListCode.get(keyListForAdapter.indexOf(item));
                     tvSubtitleValue.setText(keyListForAdapter.get(languagesKeyListCode.indexOf(selectedSubtitleLanguageCode)));
-
-
                 }
 
                 if (btnAudio.isChecked()) {
                     selectedAudioLanguageCode = languagesKeyListCode.get(keyListForAdapter.indexOf(item));
                     tvAudioValue.setText(keyListForAdapter.get(languagesKeyListCode.indexOf(selectedAudioLanguageCode)));
-
                 }
 
             }

@@ -127,9 +127,9 @@ public abstract class CustomAbstractDetailsDescriptionPresenter extends Presente
 
         public ViewHolder(final View view) {
             super(view);
-            mTitle = (TextView) view.findViewById(R.id.lb_details_description_title);
-            mSubtitle = (TextView) view.findViewById(R.id.lb_details_description_subtitle);
-            mBody = (TextView) view.findViewById(R.id.lb_details_description_body);
+            mTitle = view.findViewById(R.id.lb_details_description_title);
+            mSubtitle = view.findViewById(R.id.lb_details_description_subtitle);
+            mBody = view.findViewById(R.id.lb_details_description_body);
 
             FontMetricsInt titleFontMetricsInt = getFontMetricsInt(mTitle);
             final int titleAscent = view.getResources().getDimensionPixelSize(

@@ -64,7 +64,7 @@ public abstract class AppRoomDatabase extends RoomDatabase {
             super.onOpen(db);
             // If you want to keep the data through app restarts,
             // comment out the following line.
-            new ClearDbAsync(INSTANCE).execute();
+            //new ClearDbAsync(INSTANCE).execute();
         }
     };
 

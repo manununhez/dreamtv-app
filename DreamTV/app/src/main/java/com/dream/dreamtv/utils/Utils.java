@@ -19,6 +19,8 @@ import android.content.DialogInterface;
 
 import com.dream.dreamtv.R;
 
+import java.util.Date;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.view.ContextThemeWrapper;
 
@@ -78,6 +80,13 @@ public class Utils {
     public static String getTimeFormat(Context context,  long millis) {
         return String.format(context.getString(R.string.time_format), MILLISECONDS.toMinutes(millis) % HOURS.toMinutes(1),
                 MILLISECONDS.toSeconds(millis) % MINUTES.toSeconds(1));
+    }
+
+
+
+    public static long getUnixTimeNowInSecs(){
+        return  new Date(System.currentTimeMillis() / 1000L).getTime();
+
     }
 
 }

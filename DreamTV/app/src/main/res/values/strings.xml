@@ -74,6 +74,8 @@
     <string name="btn_no_from_beggining">Play from beginning</string>
     <string name="btn_play_video">Play video</string>
     <string name="btn_add_to_my_list">+ Add to my list</string>
+    <string name="btn_remove_to_my_list">- Remove from my list</string>
+
 
     <!--alertDialog-->
     <string name="title_alert_dialog">Welcome back</string>

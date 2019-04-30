@@ -29,39 +29,14 @@ class MainViewModel extends ViewModel {
     }
 
 
-    public LiveData<Resource<String>> responseFromSyncData() {
-        return mRepository.responseFromSyncData();
+    public void initializeSyncData() {
+        mRepository.initializeSyncData();
     }
 
-//
-//    public void requestSyncData() {
-//        mRepository.requestSyncData();
-//    }
 
-
-    public LiveData<TaskEntity[]> requestTasksByCategory(String category) {
+    public LiveData<TaskEntity[]> requestTasksByCategory(String category) {//TODO add Resource to taskEntity
         return mRepository.requestTaskByCategory(category);
     }
 
-
-    public LiveData<Resource<TaskEntity[]>> responseFromTasks() {
-        return mRepository.responseFromTasks();
-    }
-
-    public LiveData<Resource<TaskEntity[]>> responseFromContinueTasks() {
-        return mRepository.responseFromContinueTasks();
-    }
-
-    public LiveData<Resource<TaskEntity[]>> responseFromTestTasks() {
-        return mRepository.responseFromTestTasks();
-    }
-
-    public LiveData<Resource<TaskEntity[]>> responseFromFinishedTasks() {
-        return mRepository.responseFromFinishedTasks();
-    }
-
-    public LiveData<Resource<TaskEntity[]>> responseFromMyListTasks() {
-        return mRepository.responseFromMyListTasks();
-    }
 }
 
