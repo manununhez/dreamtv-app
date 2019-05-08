@@ -14,6 +14,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -45,8 +46,8 @@ public class DreamTVApp extends Application {
     }
 
     public String getToken(){
+        //TODO change the way the token is stored
         return SharedPreferenceUtils.getValue(this, this.getString(R.string.dreamTVApp_token));
-
     }
 
     public User getUser() {
@@ -69,8 +70,8 @@ public class DreamTVApp extends Application {
     }
 
 
-    public void setReasons(List<ErrorReason> reasonsList) {
-        String reasons = gson.toJson(reasonsList);
+    public void setReasons(ErrorReason[] reasonsList) {
+        String reasons = gson.toJson(Arrays.asList(reasonsList);
         SharedPreferenceUtils.save(this, getString(R.string.reasons_preferences), reasons);
     }
 
@@ -80,8 +81,8 @@ public class DreamTVApp extends Application {
         return new Gson().fromJson(errorReasonList, listType);
     }
 
-    public void setVideoTests(List<VideoTests> videoTestsList) {
-        String videoTests = gson.toJson(videoTestsList);
+    public void setVideoTests(VideoTests[] videoTestsList) {
+        String videoTests = gson.toJson(Arrays.asList(videoTestsList);
         SharedPreferenceUtils.save(this, getString(R.string.video_tests_preferences), videoTests);
     }
 

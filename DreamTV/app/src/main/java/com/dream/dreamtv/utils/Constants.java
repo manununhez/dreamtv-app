@@ -13,7 +13,9 @@ public class Constants {
     public static final String ADVANCED_INTERFACE_MODE = "advanced";
 
     public static final String SHARED_ELEMENT_NAME = "hero";
-    public static final String USER_DATA = "UserData";
+    public static final String USER_DATA_TASK = "USER_DATA_TASK";
+    public static final String USER_DATA_SUBTITLE = "USER_DATA_SUBTITLE";
+    public static final String USER_DATA_TASK_ERRORS = "USER_DATA_TASK_ERRORS";
 
     //Types of tasks and categories
     public static final String TASKS_ALL = "all";
@@ -21,8 +23,6 @@ public class Constants {
     public static final String TASKS_FINISHED = "finished";
     public static final String TASKS_MY_LIST = "myList";
     public static final String TASKS_TEST = "test";
-    public static final String TASKS_USER = "user";
-    public static final String TASKS_OTHER_USERS = "others";
     public static final String SETTINGS = "settings";
 
     public static final int BACKGROUND_UPDATE_DELAY = 300;

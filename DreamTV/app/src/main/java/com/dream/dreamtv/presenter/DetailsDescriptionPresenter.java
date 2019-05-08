@@ -18,8 +18,6 @@ import com.dream.dreamtv.R;
 import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.model.Video;
 
-import androidx.leanback.widget.AbstractDetailsDescriptionPresenter;
-
 
 public class DetailsDescriptionPresenter extends CustomAbstractDetailsDescriptionPresenter {
 
@@ -31,7 +29,7 @@ public class DetailsDescriptionPresenter extends CustomAbstractDetailsDescriptio
         if (video != null) {
             viewHolder.getTitle().setText(video.title);
             viewHolder.getSubtitle().setText(viewHolder.view.getContext().getString(R.string.title_video_details, video.project,
-                    video.primary_audio_language_code, taskEntity.language, (video.duration / 60)));
+                    video.primaryAudioLanguageCode, taskEntity.language, (video.duration / 60)));
             viewHolder.getBody().setText(video.description);
         }
     }

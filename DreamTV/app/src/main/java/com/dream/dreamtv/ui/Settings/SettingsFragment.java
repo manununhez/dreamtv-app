@@ -235,18 +235,18 @@ public class SettingsFragment extends Fragment {
     private void interfaceLanguageSettings() {
         User user = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getUser();
         if (user != null)
-            if (user.interface_language.equals(Constants.LANGUAGE_ENGLISH))
+            if (user.interfaceLanguage.equals(Constants.LANGUAGE_ENGLISH))
                 rbEnglish.setChecked(true);
-            else if (user.interface_language.equals(Constants.LANGUAGE_POLISH))
+            else if (user.interfaceLanguage.equals(Constants.LANGUAGE_POLISH))
                 rbPolish.setChecked(true);
     }
 
     private void interfaceModeSettings() {
         User user = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getUser();
         if (user != null)
-            if (user.interface_mode.equals(Constants.BEGINNER_INTERFACE_MODE))
+            if (user.interfaceMode.equals(Constants.BEGINNER_INTERFACE_MODE))
                 rbBeginner.setChecked(true);
-            else if (user.interface_mode.equals(Constants.ADVANCED_INTERFACE_MODE))
+            else if (user.interfaceMode.equals(Constants.ADVANCED_INTERFACE_MODE))
                 rbAdvanced.setChecked(true);
     }
 
@@ -254,11 +254,11 @@ public class SettingsFragment extends Fragment {
     private void saveUSerPreferences() {
 
         User user = new User();
-        user.sub_language = selectedSubtitleLanguageCode;
-        user.audio_language = selectedAudioLanguageCode;
-        user.interface_mode = rbBeginner.isChecked() ? Constants.BEGINNER_INTERFACE_MODE :
+        user.subLanguage = selectedSubtitleLanguageCode;
+        user.audioLanguage = selectedAudioLanguageCode;
+        user.interfaceMode = rbBeginner.isChecked() ? Constants.BEGINNER_INTERFACE_MODE :
                 Constants.ADVANCED_INTERFACE_MODE; //interface mode updated
-        user.interface_language = rbPolish.isChecked() ? Constants.LANGUAGE_POLISH :
+        user.interfaceLanguage = rbPolish.isChecked() ? Constants.LANGUAGE_POLISH :
                 Constants.LANGUAGE_ENGLISH; //interface language updated
 
 
@@ -274,7 +274,7 @@ public class SettingsFragment extends Fragment {
 
 
 //        if (isChangesAudioSubVerified())
-            mViewModel.requestUserUpdate(user);
+            mViewModel.updateUser(user);
 
         getActivity().finish();
 
@@ -295,10 +295,10 @@ public class SettingsFragment extends Fragment {
             bundle.putBoolean(Constants.FIREBASE_KEY_TESTING_MODE, true);
 
         //User Settings Saved - Analytics Report Event
-        bundle.putString(Constants.FIREBASE_KEY_SUB_LANGUAGE, user.sub_language);
-        bundle.putString(Constants.FIREBASE_KEY_AUDIO_LANGUAGE, user.audio_language);
-        bundle.putString(Constants.FIREBASE_KEY_INTERFACE_MODE, user.interface_mode);
-        bundle.putString(Constants.FIREBASE_KEY_INTERFACE_LANGUAGE, user.interface_language);
+        bundle.putString(Constants.FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
+        bundle.putString(Constants.FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
+        bundle.putString(Constants.FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
+        bundle.putString(Constants.FIREBASE_KEY_INTERFACE_LANGUAGE, user.interfaceLanguage);
         mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN, bundle);
     }
 
@@ -340,8 +340,8 @@ public class SettingsFragment extends Fragment {
         //--------------
         User user = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getUser();
         if (user != null) {
-            selectedSubtitleLanguageCode = user.sub_language;
-            selectedAudioLanguageCode = user.audio_language;
+            selectedSubtitleLanguageCode = user.subLanguage;
+            selectedAudioLanguageCode = user.audioLanguage;
 
             btnSubtitle.setChecked(false); //initiliaze unchecked
             btnAudio.setChecked(true); //initiliaze checked

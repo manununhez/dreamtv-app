@@ -15,8 +15,8 @@ class SettingsViewModel extends ViewModel {
     }
 
 
-    void requestUserUpdate(User user) {
-        mRepository.requestFromUserUpdate(user);
+    void updateUser(User user) {
+        mRepository.updateUser(user);
     }
 
 }

@@ -101,7 +101,7 @@ public class TaskEntity implements Parcelable {
     @Override
     public String toString() {
         return "TaskEntity{" +
-                "task_id=" + task_id +
+                "taskId=" + task_id +
                 ", language='" + language + '\'' +
                 ", type='" + type + '\'' +
                 ", created='" + created + '\'' +
