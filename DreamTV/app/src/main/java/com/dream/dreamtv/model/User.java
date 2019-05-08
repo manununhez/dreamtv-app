@@ -1,19 +1,28 @@
 package com.dream.dreamtv.model;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by manuel on 7/8/17.
  */
 
 public class User {
-    public String token;
-    public String email;
-    public String password;
-    public String sub_language;
-    public String audio_language;
+    @SerializedName("id")
     public int id;
-
-    public String interface_mode;
-    public String interface_language;
+    @SerializedName("token")
+    public String token;
+    @SerializedName("email")
+    public String email;
+    @SerializedName("password")
+    public String password;
+    @SerializedName("sub_language")
+    public String subLanguage;
+    @SerializedName("audio_language")
+    public String audioLanguage;
+    @SerializedName("interface_mode")
+    public String interfaceMode;
+    @SerializedName("interface_language")
+    public String interfaceLanguage;
 
 
     @Override
@@ -22,11 +31,11 @@ public class User {
                 "token='" + token + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", sub_language='" + sub_language + '\'' +
-                ", audio_language='" + audio_language + '\'' +
+                ", subLanguage='" + subLanguage + '\'' +
+                ", audioLanguage='" + audioLanguage + '\'' +
                 ", id='" + id + '\'' +
-                ", interface_mode='" + interface_mode + '\'' +
-                ", interface_language='" + interface_language + '\'' +
+                ", interfaceMode='" + interfaceMode + '\'' +
+                ", interfaceLanguage='" + interfaceLanguage + '\'' +
                 '}';
     }
 

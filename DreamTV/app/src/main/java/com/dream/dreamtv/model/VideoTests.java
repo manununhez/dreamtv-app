@@ -1,13 +1,19 @@
 package com.dream.dreamtv.model;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by manuel on 7/18/17.
  */
 
 public class VideoTests  {
+    @SerializedName("id")
     public int id;
-    public String video_id;
+    @SerializedName("video_id")
+    public String videoId;
+    @SerializedName("version")
     public int version;
-    public String language_code;
+    @SerializedName("language_code")
+    public String languageCode;
 
 }

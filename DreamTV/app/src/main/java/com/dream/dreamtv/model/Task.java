@@ -5,14 +5,35 @@ import android.os.Parcelable;
 
 import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.utils.Utils;
-
-import java.time.Instant;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by manuel on 7/8/17.
  */
 
 public class Task implements Parcelable {
+    @SerializedName("task_id")
+    public int taskId;
+    @SerializedName("video_id")
+    public String videoId;
+    @SerializedName("language")
+    public String language;
+    @SerializedName("type")
+    public String type;
+    @SerializedName("created")
+    public String created;
+    @SerializedName("modified")
+    public String modified;
+    @SerializedName("completed")
+    public String completed;
+    @SerializedName("created_at")
+    public String created_at;
+    @SerializedName("updated_at")
+    public String updated_at;
+    @SerializedName("videos")
+    public Video videos;
+
+
     public static final Creator<Task> CREATOR = new Creator<Task>() {
         @Override
         public Task createFromParcel(Parcel in) {
@@ -24,21 +45,10 @@ public class Task implements Parcelable {
             return new Task[size];
         }
     };
-    public int task_id;
-    public String video_id;
-    public String language;
-    public String type;
-    public String created;
-    public String modified;
-    public String completed;
-    public String created_at;
-    public String updated_at;
-    public Video videos;
-
 
     protected Task(Parcel in) {
-        task_id = in.readInt();
-        video_id = in.readString();
+        taskId = in.readInt();
+        videoId = in.readString();
         language = in.readString();
         type = in.readString();
         created = in.readString();
@@ -50,10 +60,10 @@ public class Task implements Parcelable {
     }
 
     public TaskEntity getEntity(String category) {
-        return new TaskEntity(task_id, language,
-                type, created, completed, modified, category, Utils.getUnixTimeNowInSecs(), new Video(videos.video_id, videos.primary_audio_language_code,
+        return new TaskEntity(taskId, language,
+                type, created, completed, modified, category, Utils.getUnixTimeNowInSecs(), new Video(videos.videoId, videos.primaryAudioLanguageCode,
                 videos.title, videos.description, videos.duration, videos.thumbnail, videos.team,
-                videos.project, videos.video_url));
+                videos.project, videos.videoUrl));
     }
 
     @Override
@@ -63,8 +73,8 @@ public class Task implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(task_id);
-        parcel.writeString(video_id);
+        parcel.writeInt(taskId);
+        parcel.writeString(videoId);
         parcel.writeString(language);
         parcel.writeString(type);
         parcel.writeString(created);

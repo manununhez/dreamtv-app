@@ -4,6 +4,8 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 import androidx.room.Ignore;
 
 /**
@@ -11,10 +13,6 @@ import androidx.room.Ignore;
  */
 
 public class Video implements Parcelable {
-
-    private static final String YOUTUBE_COM = "youtube.com";
-    private static final String QUERY_PARAMETER = "v";
-
 
     public static final Creator<Video> CREATOR = new Creator<Video>() {
         @Override
@@ -27,65 +25,76 @@ public class Video implements Parcelable {
             return new Video[size];
         }
     };
+    private static final String YOUTUBE_COM = "youtube.com";
+    private static final String QUERY_PARAMETER = "v";
 
-    public String video_id;
-    public String primary_audio_language_code;
+    @SerializedName("video_id")
+    public String videoId;
+    @SerializedName("primary_audio_language_code")
+    public String primaryAudioLanguageCode;
+    @SerializedName("title")
     public String title;
+    @SerializedName("description")
     public String description;
+    @SerializedName("duration")
     public int duration;
+    @SerializedName("thumbnail")
     public String thumbnail;
+    @SerializedName("team")
     public String team;
+    @SerializedName("project")
     public String project;
-    public String video_url;
+    @SerializedName("video_url")
+    public String videoUrl;
+    @SerializedName("created_at")
     public String created_at;
+    @SerializedName("updated_at")
     public String updated_at;
-
-
 
     @Ignore
     public Video() {
 
     }
 
-    public Video(String video_id, String primary_audio_language_code,
+    public Video(String videoId, String primaryAudioLanguageCode,
                  String title, String description, int duration, String thumbnail,
-                 String team, String project, String video_url) {
-        this.video_id = video_id;
-        this.primary_audio_language_code = primary_audio_language_code;
+                 String team, String project, String videoUrl) {
+        this.videoId = videoId;
+        this.primaryAudioLanguageCode = primaryAudioLanguageCode;
         this.title = title;
         this.description = description;
         this.duration = duration;
         this.thumbnail = thumbnail;
         this.team = team;
         this.project = project;
-        this.video_url = video_url;
+        this.videoUrl = videoUrl;
     }
 
     protected Video(Parcel in) {
-        video_id = in.readString();
-        primary_audio_language_code = in.readString();
+        videoId = in.readString();
+        primaryAudioLanguageCode = in.readString();
         title = in.readString();
         description = in.readString();
         duration = in.readInt();
         thumbnail = in.readString();
         team = in.readString();
         project = in.readString();
-        video_url = in.readString();
+        videoUrl = in.readString();
         created_at = in.readString();
         updated_at = in.readString();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(video_id);
-        dest.writeString(primary_audio_language_code);
+        dest.writeString(videoId);
+        dest.writeString(primaryAudioLanguageCode);
         dest.writeString(title);
         dest.writeString(description);
         dest.writeInt(duration);
         dest.writeString(thumbnail);
         dest.writeString(team);
         dest.writeString(project);
-        dest.writeString(video_url);
+        dest.writeString(videoUrl);
         dest.writeString(created_at);
         dest.writeString(updated_at);
     }
@@ -97,17 +106,17 @@ public class Video implements Parcelable {
 
 
     public boolean isUrlFromYoutube() {
-        return this.video_url.contains(YOUTUBE_COM);
+        return this.videoUrl.contains(YOUTUBE_COM);
     }
 
     public String getVideoYoutubeId() {
-        Uri newUrl = Uri.parse(this.video_url);
+        Uri newUrl = Uri.parse(this.videoUrl);
 
         return newUrl.getQueryParameter(QUERY_PARAMETER);
     }
 
 
-    public long getVideoDurationInMs(){
+    public long getVideoDurationInMs() {
         return this.duration * 1000;
     }
 
