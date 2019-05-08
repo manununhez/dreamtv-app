@@ -28,7 +28,6 @@ import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.model.Card;
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.User;
-import com.dream.dreamtv.model.UserData;
 import com.dream.dreamtv.presenter.IconCardPresenter;
 import com.dream.dreamtv.presenter.SideInfoCardPresenter;
 import com.dream.dreamtv.ui.Settings.SettingsActivity;
@@ -126,7 +125,7 @@ public class MainFragment extends BrowseSupportFragment {
     private void requestLogin(String email) {
         Log.d(TAG, ">>>>>>>>>>>>>>>>>>>REQUEST LOGIN");
 //        showLoading();
-        mViewModel.requestFromLogin(email, "com.google"); //TODO change password
+        mViewModel.login(email, "com.google"); //TODO change password
     }
 
 
@@ -256,8 +255,8 @@ public class MainFragment extends BrowseSupportFragment {
 
 
     private void updateScreenLanguage(User user) {
-        if (!LocaleHelper.getLanguage(getActivity()).equals(user.interface_language)) {
-            LocaleHelper.setLocale(getActivity(), user.interface_language);
+        if (!LocaleHelper.getLanguage(getActivity()).equals(user.interfaceLanguage)) {
+            LocaleHelper.setLocale(getActivity(), user.interfaceLanguage);
             Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
             Log.d(TAG, "Different language. Updating screen.");
         } else {
@@ -459,10 +458,8 @@ public class MainFragment extends BrowseSupportFragment {
                 } else {
                     TaskEntity taskEntity = value.getTaskEntity();
 
-                    UserData userData = new UserData();
-                    userData.mSelectedTask = taskEntity;
                     Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
-                    intent.putExtra(Constants.USER_DATA, userData);
+                    intent.putExtra(Constants.USER_DATA_TASK, taskEntity);
 
                     startActivity(intent);
                 }

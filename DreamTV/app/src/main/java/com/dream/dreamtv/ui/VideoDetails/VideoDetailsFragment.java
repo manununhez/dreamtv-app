@@ -22,7 +22,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.android.volley.VolleyError;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -30,24 +29,17 @@ import com.bumptech.glide.request.transition.Transition;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.db.entity.TaskEntity;
-import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.UserData;
-import com.dream.dreamtv.model.UserTask;
+import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.VideoTests;
-import com.dream.dreamtv.network.ResponseListener;
 import com.dream.dreamtv.presenter.DetailsDescriptionPresenter;
 import com.dream.dreamtv.ui.PlaybackVideoActivity;
 import com.dream.dreamtv.ui.PlaybackVideoYoutubeActivity;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.InjectorUtils;
-import com.dream.dreamtv.utils.JsonUtils;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.gson.reflect.TypeToken;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
@@ -74,14 +66,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private static final int ACTION_ADD_MY_LIST = 3;
     private static final int ACTION_REMOVE_MY_LIST = 4;
     private static final String TAG = "VideoDetailsFragment";
-    private static final String PARAM_LAST = "last";
-    private static final String PARAM_VIDEO_ID = "video_id";
-    private static final String PARAM_VERSION = "version";
-    private static final String PARAM_LANGUAGE_CODE = "language_code";
-    private static final String PARAM_VERSION_NUMBER = "version_number";
-    private static final String PARAM_TASK_ID = "task_id";
+    private static final String PARAM_TASK_ID = "taskId";
     private static final String PARAM_TYPE = "type";
-    private UserData userData;
     private ArrayObjectAdapter mAdapter;
     private BackgroundManager mBackgroundManager;
     private Drawable mDefaultBackground;
@@ -89,7 +75,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private DetailsOverviewRow rowPresenter;
     private FirebaseAnalytics mFirebaseAnalytics;
     private VideoDetailsViewModel mViewModel;
-
+    private TaskEntity mSelectedTask;
+    private SubtitleResponse mSubtitleResponse;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -105,13 +92,15 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(Objects.requireNonNull(getActivity()));
 
-        userData = getActivity().getIntent().getParcelableExtra(Constants.USER_DATA);
+        mSelectedTask = getActivity().getIntent().getParcelableExtra(Constants.USER_DATA_TASK);
 
-        if (userData.mSelectedTask != null) {
+        if (mSelectedTask != null) {
             setupAdapter();
             setupDetailsOverviewRow();
-            updateBackground(userData.mSelectedTask.video.thumbnail);
+            updateBackground(mSelectedTask.video.thumbnail);
             verifyIfVideoIsInMyList();
+            prepareSubtitle(mSelectedTask);
+            getMyTaskForThisVideo(mSelectedTask);
         } else {
             getActivity().finish(); //back to MainActivity
         }
@@ -169,8 +158,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         detailsPresenter.setOnActionClickedListener(action -> {
             if (action.getId() == ACTION_PLAY_VIDEO) {
-                prepareSubtitle(userData.mSelectedTask);
-
+//                prepareSubtitle(userData.mSelectedTask);
+                goToPlayVideo();
             } else if (action.getId() == ACTION_ADD_MY_LIST) {
                 addVideoToMyList();
             } else if (action.getId() == ACTION_REMOVE_MY_LIST) {
@@ -187,7 +176,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void setupDetailsOverviewRow() {
-        rowPresenter = new DetailsOverviewRow(userData.mSelectedTask);
+        rowPresenter = new DetailsOverviewRow(mSelectedTask);
 
         RequestOptions options = new RequestOptions()
                 .error(R.drawable.default_background)
@@ -195,7 +184,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         Glide.with(this)
                 .asBitmap()
-                .load(userData.mSelectedTask.video.thumbnail)
+                .load(mSelectedTask.video.thumbnail)
                 .apply(options)
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
@@ -221,7 +210,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     private void verifyIfVideoIsInMyList() {
 
-        mViewModel.verifyIfTaskIsInList(userData.mSelectedTask).observe(getViewLifecycleOwner(), taskEntity -> {
+        mViewModel.verifyIfTaskIsInList(mSelectedTask).observe(getViewLifecycleOwner(), taskEntity -> {
             SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
             if (taskEntity != null) {
                 adapter.clear(ACTION_ADD_MY_LIST);
@@ -235,24 +224,24 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void addVideoToMyList() {
-        mViewModel.requestAddToList(userData.mSelectedTask);
+        mViewModel.requestAddToList(mSelectedTask);
         //TODO bug fix, when remove the last item of the row, and then add a new task, the livedata receive an extra wrong value and it is added to the list
 
         //                Bundle bundle = new Bundle();
-//                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, video.video_id);
-//                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, video.primary_audio_language_code);
+//                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, video.videoId);
+//                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, video.primaryAudioLanguageCode);
 //                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN, bundle);
 
 
     }
 
     private void removeVideoFromMyList() {
-        mViewModel.requestRemoveFromList(userData.mSelectedTask);
+        mViewModel.requestRemoveFromList(mSelectedTask);
 
         //TODO bug fix, when remove the last item of the row, and then add a new task, the livedata receive an extra wrong value and it is added to the list
         //Analytics Report Event
 //                Bundle bundle = new Bundle();
-//                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedTask.video_id);
+//                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedTask.videoId);
 //                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN, bundle);
     }
 
@@ -263,7 +252,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         if (taskEntity.category.equals(Constants.TASKS_TEST)) {
             //We find the version of the video test
             for (VideoTests videoTests : videoTestsList)
-                if (videoTests.video_id.equals(taskEntity.video.video_id)) {
+                if (videoTests.videoId.equals(taskEntity.video.videoId)) {
                     getSubtitleJson(taskEntity, videoTests.version);
                     break;
                 }
@@ -276,13 +265,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void getSubtitleJson(TaskEntity taskEntity, int version) {
 
 //        Request
-        mViewModel.fetchSubtitle(taskEntity.video.video_id, taskEntity.language, version);
+        mViewModel.fetchSubtitle(taskEntity.video.videoId, taskEntity.language, version);
 
 //        Response
         mViewModel.responseFromFetchSubtitle().removeObservers(getViewLifecycleOwner());
         mViewModel.responseFromFetchSubtitle().observe(getViewLifecycleOwner(), subtitleResponseResource -> {
             if (subtitleResponseResource.status.equals(Resource.Status.SUCCESS)) {
-                getMyTaskForThisVideo(subtitleResponseResource.data);
+                mSubtitleResponse = subtitleResponseResource.data;
 
                 Log.d(TAG, "Subtitle response");
             } else if (subtitleResponseResource.status.equals(Resource.Status.ERROR)) {
@@ -308,63 +297,50 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void goToPlayVideo() {
         Intent intent;
 
-        if (userData.mSelectedTask.video.isUrlFromYoutube()) {
+        if (mSelectedTask.video.isUrlFromYoutube()) {
             intent = new Intent(getActivity(), PlaybackVideoYoutubeActivity.class);
 
         } else {
             intent = new Intent(getActivity(), PlaybackVideoActivity.class);
         }
 
-        intent.putExtra(Constants.USER_DATA, userData);
+        intent.putExtra(Constants.USER_DATA_TASK, mSelectedTask);
+        intent.putExtra(Constants.USER_DATA_SUBTITLE, mSubtitleResponse);
+        intent.putExtra(Constants.USER_DATA_TASK_ERRORS, mUserTaskList);
         startActivity(intent);
 
         //Analytics Report Event
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedTask.video.video_id);
-        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, userData.mSelectedTask.video.primary_audio_language_code);
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_PROJECT_NAME, userData.mSelectedTask.video.project);
-        bundle.putLong(Constants.FIREBASE_KEY_VIDEO_DURATION, userData.mSelectedTask.video.getVideoDurationInMs());
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_PROJECT_NAME, mSelectedTask.video.project);
+        bundle.putLong(Constants.FIREBASE_KEY_VIDEO_DURATION, mSelectedTask.video.getVideoDurationInMs());
         mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN, bundle);
     }
 
 
-    private void getMyTaskForThisVideo() {
+    private void getMyTaskForThisVideo(TaskEntity taskEntity) {
 
-        Map<String, String> urlParams = new HashMap<>();
-        urlParams.put(PARAM_TASK_ID, String.valueOf(userData.mSelectedTask.task_id));
-        urlParams.put(PARAM_TYPE, Constants.TASKS_USER);
+        //        Request
+        mViewModel.fetchTaskErrorDetails(taskEntity.task_id);
 
+//        Response
+        mViewModel.responseFromFetchTaskDetails().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromFetchTaskDetails().observe(getViewLifecycleOwner(), subtitleResponseResource -> {
+            if (subtitleResponseResource.status.equals(Resource.Status.SUCCESS)) {
+                mUserTaskList = subtitleResponseResource.data;
 
-        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_tasks)) {
-
-            @Override
-            public void processResponse(String response) {
-//                Gson gson = new Gson();
-                Log.d(TAG, "Tasks -> Mine: " + response);
-                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask[]>>() {
-                };
-                JsonResponseBaseBean<UserTask[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
-                userData.userTaskList = jsonResponse.data;
-
-                goToPlayVideo();
-
-
+                Log.d(TAG, "Subtitle response");
+            } else if (subtitleResponseResource.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (subtitleResponseResource.message != null)
+                    Log.d(TAG, subtitleResponseResource.message);
+                else
+                    Log.d(TAG, "Status ERROR");
             }
 
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-                Log.d(TAG, error.getMessage());
-            }
+        });
 
-            @Override
-            public void processError(JsonResponseBaseBean jsonResponse) {
-                super.processError(jsonResponse);
-                Log.d(TAG, jsonResponse.toString());
-            }
-        };
-
-//        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER_TASKS, urlParams, responseListener, this);
 
     }
 
