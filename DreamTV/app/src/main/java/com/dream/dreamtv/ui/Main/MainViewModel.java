@@ -18,8 +18,8 @@ class MainViewModel extends ViewModel {
     }
 
 
-    void requestFromLogin(String email, String password) {
-        mRepository.requestFromLogin(email, password);
+    void login(String email, String password) {
+        mRepository.login(email, password);
     }
 
     LiveData<Resource<User>> responseFromUserUpdate() {

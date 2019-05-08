@@ -41,5 +41,13 @@ class VideoDetailsViewModel extends ViewModel {
     public void fetchSubtitle(String videoId, String languageCode, int version) {
         mRepository.fetchSubtitle(videoId, languageCode, version);
     }
+
+    public void fetchTaskErrorDetails(int taskId) {
+        mRepository.fetchTaskErrorDetails(taskId);
+    }
+
+    public LiveData<Object> responseFromFetchTaskDetails() {
+        return null;
+    }
 }
 
