@@ -1,5 +1,6 @@
 # DREAMTV - Android TV application for Video Subtitle Corrections
  
+ [DREAMTV - Middle-ware platform to gather the videos from Amara and save users’ recollected data.](https://github.com/manununhez/dreamtv-server)
  
 [DREAM Project](https://sites.google.com/a/unitn.it/rise-dream/)- Social Participation for improving emotional, mental, and physical well-being in independently living older Adults.  
 
