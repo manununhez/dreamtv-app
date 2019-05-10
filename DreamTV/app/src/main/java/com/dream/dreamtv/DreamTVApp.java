@@ -71,7 +71,7 @@ public class DreamTVApp extends Application {
 
 
     public void setReasons(ErrorReason[] reasonsList) {
-        String reasons = gson.toJson(Arrays.asList(reasonsList);
+        String reasons = gson.toJson(Arrays.asList(reasonsList));
         SharedPreferenceUtils.save(this, getString(R.string.reasons_preferences), reasons);
     }
 
@@ -82,7 +82,7 @@ public class DreamTVApp extends Application {
     }
 
     public void setVideoTests(VideoTests[] videoTestsList) {
-        String videoTests = gson.toJson(Arrays.asList(videoTestsList);
+        String videoTests = gson.toJson(Arrays.asList(videoTestsList));
         SharedPreferenceUtils.save(this, getString(R.string.video_tests_preferences), videoTests);
     }
 
