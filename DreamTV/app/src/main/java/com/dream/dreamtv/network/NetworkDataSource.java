@@ -26,29 +26,41 @@ import com.dream.dreamtv.model.VideoTests;
 import com.dream.dreamtv.ui.Main.MainFragment;
 import com.dream.dreamtv.ui.Settings.SettingsFragment;
 import com.dream.dreamtv.utils.AppExecutors;
-import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE_CONFIG;
+import static com.dream.dreamtv.utils.Constants.PARAM_EMAIL;
+import static com.dream.dreamtv.utils.Constants.PARAM_INTERFACE_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.PARAM_INTERFACE_MODE;
+import static com.dream.dreamtv.utils.Constants.PARAM_LANG_CODE;
+import static com.dream.dreamtv.utils.Constants.PARAM_PAGE;
+import static com.dream.dreamtv.utils.Constants.PARAM_PASSWORD;
+import static com.dream.dreamtv.utils.Constants.PARAM_SUB_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.PARAM_SUB_LANGUAGE_CONFIG;
+import static com.dream.dreamtv.utils.Constants.PARAM_TASK_ID;
+import static com.dream.dreamtv.utils.Constants.PARAM_TYPE;
+import static com.dream.dreamtv.utils.Constants.PARAM_VERSION;
+import static com.dream.dreamtv.utils.Constants.PARAM_VIDEO_ID;
+import static com.dream.dreamtv.utils.Constants.TASKS_ALL;
+import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE;
+import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED;
+import static com.dream.dreamtv.utils.Constants.TASKS_MY_LIST;
+import static com.dream.dreamtv.utils.Constants.TASKS_TEST;
 import static com.dream.dreamtv.utils.JsonUtils.getJsonResponse;
 
 public class NetworkDataSource {
 
     private static final String TAG = NetworkDataSource.class.getSimpleName();
 
-    private static final String PARAM_PAGE = "page";
-    private static final String PARAM_TYPE = "type";
-    private static final String PARAM_VIDEO_ID = "video_id";
-    private static final String PARAM_LANG_CODE = "language_code";
-    private static final String PARAM_VERSION = "version";
     private static final String URL_BASE = "http://www.dreamproject.pjwstk.edu.pl/api/";     // Facu Produccion
     private static final int TIMEOUT_MS = 60000; //60 segundos
 
@@ -66,6 +78,7 @@ public class NetworkDataSource {
     private MutableLiveData<Resource<TaskEntity[]>> responseFromFetchMyListTasks;
     private MutableLiveData<Resource<User>> responseFromUserUpdate;
     private MutableLiveData<Resource<SubtitleResponse>> responseFromFetchSubtitle;
+    private MutableLiveData<Resource<UserTask[]>> responseFromFetchTaskDetails;
     private int currentPage = 1;
 
     private NetworkDataSource(Context context, AppExecutors executors) {
@@ -82,6 +95,7 @@ public class NetworkDataSource {
         responseFromFetchTestTasks = new MutableLiveData<>();
         responseFromFetchAllTasks = new MutableLiveData<>();
         responseFromFetchContinueTasks = new MutableLiveData<>();
+        responseFromFetchTaskDetails = new MutableLiveData<>();
 
     }
 
@@ -140,7 +154,7 @@ public class NetworkDataSource {
             public Map<String, String> getHeaders() {
                 Map<String, String> map = new HashMap<>();
                 String string = "Bearer " + SharedPreferenceUtils.getValue(mContext, mContext.getString(R.string.dreamTVApp_token));
-                Log.d(TAG, "TOKEN: " + string);
+//                Log.d(TAG, "TOKEN: " + string);
                 map.put("Authorization", string);
                 return map;
             }
@@ -175,15 +189,15 @@ public class NetworkDataSource {
     public void syncData() {
         Log.d(TAG, "synchronizing data ...");
         //We start by calling allTasks() -> continueTasks()->MyList()->Reasons()->videoTestsDetails
-        fetchTasksByCategory(Constants.TASKS_ALL, responseFromFetchAllTasks, 1);
-        fetchTasksByCategory(Constants.TASKS_CONTINUE, responseFromFetchContinueTasks);
-        fetchTasksByCategory(Constants.TASKS_MY_LIST, responseFromFetchMyListTasks);
-        fetchTasksByCategory(Constants.TASKS_FINISHED, responseFromFetchFinishedTasks);
+        fetchTasksByCategory(TASKS_ALL, responseFromFetchAllTasks, 1);
+        fetchTasksByCategory(TASKS_CONTINUE, responseFromFetchContinueTasks);
+        fetchTasksByCategory(TASKS_MY_LIST, responseFromFetchMyListTasks);
+        fetchTasksByCategory(TASKS_FINISHED, responseFromFetchFinishedTasks);
 
 
         String testingMode = getApplication().getTestingMode();
         if (testingMode.equals(mContext.getString(R.string.text_yes_option))) //TODO dejar esto aca? o moverlo
-            fetchTasksByCategory(Constants.TASKS_TEST, responseFromFetchTestTasks);
+            fetchTasksByCategory(TASKS_TEST, responseFromFetchTestTasks);
 
 
         fetchReasons();
@@ -201,15 +215,16 @@ public class NetworkDataSource {
     @SuppressWarnings("unchecked")
     public void login(final String email, final String password) {
         Map<String, String> params = new HashMap<>();
-        params.put("email", email);
-        params.put("password", password);
+        params.put(PARAM_EMAIL, email);
+        params.put(PARAM_PASSWORD, password);
         Uri loginUri = Uri.parse(URL_BASE.concat(Urls.LOGIN.value)).buildUpon().build();
 
+        Log.d(TAG, "login() Request URL: " + loginUri.toString() + " Paramaters: email=>" + email + "; password=>" + password);
 
         ResponseListener responseListener = new ResponseListener(mContext, false, false, "") {
             @Override
             protected void processResponse(String response) {
-                Log.d(TAG, "login() response JSON: " + response);
+                Log.d(TAG, "login() Response JSON: " + response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
                 };
@@ -220,7 +235,7 @@ public class NetworkDataSource {
 
                 getApplication().setToken(user.token); //updating token
 
-                userDetails();
+                fetchUserDetails();
 
 
             }
@@ -251,14 +266,16 @@ public class NetworkDataSource {
     private void register(final String email, final String password) {
 
         Map<String, String> params = new HashMap<>();
-        params.put("email", email);
-        params.put("password", password);
+        params.put(PARAM_EMAIL, email);
+        params.put(PARAM_PASSWORD, password);
         Uri registerUri = Uri.parse(URL_BASE.concat(Urls.REGISTER.value)).buildUpon().build();
+
+        Log.d(TAG, "register() Request URL: " + registerUri.toString() + " Paramaters: email=>" + email + "; password=>" + password);
 
         ResponseListener responseListener = new ResponseListener(mContext, false, false, "") {
             @Override
             protected void processResponse(String response) {
-                Log.d(TAG, "register() response JSON: " + response);
+                Log.d(TAG, "register() Response JSON: " + response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
                 };
@@ -268,7 +285,7 @@ public class NetworkDataSource {
                 User user = jsonResponse.data;
                 getApplication().setToken(user.token); //updating token
 
-                userDetails();
+                fetchUserDetails();
             }
 
             @Override
@@ -287,14 +304,16 @@ public class NetworkDataSource {
      * UserDetails. Used in {@link MainFragment} to get user details
      */
     @SuppressWarnings("unchecked")
-    private void userDetails() {
+    private void fetchUserDetails() {
         Uri userDetailsUri = Uri.parse(URL_BASE.concat(Urls.USER_DETAILS.value)).buildUpon().build();
+
+        Log.d(TAG, "fetchUserDetails() Request URL: " + userDetailsUri.toString());
 
         ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
             @Override
             protected void processResponse(String response) {
-                Log.d(TAG, "userDetails Response JSON: " + response);
+                Log.d(TAG, "fetchUserDetails() Response JSON: " + response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
                 };
@@ -318,7 +337,7 @@ public class NetworkDataSource {
                 //TODO do something error
                 responseFromUserUpdate.postValue(Resource.error(error.getMessage(), null));
 
-                Log.d(TAG, "userDetails response: " + error.getMessage());
+                Log.d(TAG, "fetchUserDetails() Response Error: " + error.getMessage());
             }
         };
 
@@ -332,20 +351,23 @@ public class NetworkDataSource {
      * @param user User
      */
     @SuppressWarnings("unchecked")
-    public void userDetailsUpdate(User user) {
+    public void updateUser(User user) {
         Map<String, String> params = new HashMap<>();
-        params.put("interface_mode", user.interface_mode);
-        params.put("interface_language", user.interface_language);
-        params.put("sub_language", user.sub_language);
-        params.put("audio_language", user.audio_language);
+        params.put(PARAM_INTERFACE_MODE, user.interfaceMode);
+        params.put(PARAM_INTERFACE_LANGUAGE, user.interfaceLanguage);
+        params.put(PARAM_SUB_LANGUAGE, user.subLanguage);
+        params.put(PARAM_AUDIO_LANGUAGE, user.audioLanguage);
 
         Uri userUri = Uri.parse(URL_BASE.concat(Urls.USER.value)).buildUpon().build();
+
+        Log.d(TAG, "updateUser() Request URL: " + userUri.toString() + " Params: interfaceMode=>" + user.interfaceMode
+                + "; interfaceLanguage=>" + user.interfaceLanguage + "; subLanguage=>" + user.subLanguage + "; audioLanguage=>" + user.audioLanguage);
 
         ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
             @Override
             protected void processResponse(String response) {
-                Log.d(TAG, "userDetailsUpdate Response JSON: " + response);
+                Log.d(TAG, "updateUser() Response JSON: " + response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
                 };
@@ -369,7 +391,7 @@ public class NetworkDataSource {
                 //TODO do something error
                 responseFromUserUpdate.postValue(Resource.error(error.getMessage(), null));
 
-                Log.d(TAG, "userDetails response: " + error.getMessage());
+                Log.d(TAG, "updateUser() Response Error: " + error.getMessage());
             }
         };
 
@@ -384,15 +406,18 @@ public class NetworkDataSource {
     private void fetchReasons() {
         Uri errorsUri = Uri.parse(URL_BASE.concat(Urls.REASON_ERRORS.value)).buildUpon().build();
 
+        Log.d(TAG, "fetchReasons() Request URL: " + errorsUri.toString());
+
+
         ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
             @Override
             protected void processResponse(String response) {
-                Log.d(TAG, "fetchReasons() response JSON: " + response);
+                Log.d(TAG, "fetchReasons() Response JSON: " + response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<List<ErrorReason>>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<ErrorReason[]>>() {
                 };
-                JsonResponseBaseBean<List<ErrorReason>> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<ErrorReason[]> jsonResponse = getJsonResponse(response, type);
 
 
                 getApplication().setReasons(jsonResponse.data);
@@ -416,15 +441,18 @@ public class NetworkDataSource {
     private void fetchVideoTestsDetails() {
         Uri videoTestsUri = Uri.parse(URL_BASE.concat(Urls.VIDEO_TESTS.value)).buildUpon().build();
 
+        Log.d(TAG, "fetchVideoTestsDetails() Request URL: " + videoTestsUri.toString());
+
+
         ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
             @Override
             protected void processResponse(String response) {
-                Log.d(TAG, "fetchVideoTestsDetails() response JSON: " + response);
+                Log.d(TAG, "fetchVideoTestsDetails() Response JSON: " + response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<List<VideoTests>>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<VideoTests[]>>() {
                 };
-                JsonResponseBaseBean<List<VideoTests>> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<VideoTests[]> jsonResponse = getJsonResponse(response, type);
 
 
                 getApplication().setVideoTests(jsonResponse.data);
@@ -444,24 +472,35 @@ public class NetworkDataSource {
 
     /**
      * FetchSubtitle
-     * @param videoId Video id
+     *
+     * @param videoId      Video id
      * @param languageCode LanguageCode
-     * @param version version
+     * @param version      version
      */
     @SuppressWarnings("unchecked")
     public void fetchSubtitle(String videoId, String languageCode, int version) {
+        Uri subtitleUri;
+        if (version > 0) {
+            subtitleUri = Uri.parse(URL_BASE.concat(Urls.SUBTITLE.value)).buildUpon()
+                    .appendQueryParameter(PARAM_VIDEO_ID, videoId)
+                    .appendQueryParameter(PARAM_LANG_CODE, languageCode)
+                    .appendQueryParameter(PARAM_VERSION, String.valueOf(version))
+                    .build();
+        } else
+            subtitleUri = Uri.parse(URL_BASE.concat(Urls.SUBTITLE.value)).buildUpon()
+                    .appendQueryParameter(PARAM_VIDEO_ID, videoId)
+                    .appendQueryParameter(PARAM_LANG_CODE, languageCode)
+                    .build();
 
-        Uri subtitleUri = Uri.parse(URL_BASE.concat(Urls.SUBTITLE.value)).buildUpon()
-                .appendQueryParameter(PARAM_VIDEO_ID, videoId)
-                .appendQueryParameter(PARAM_LANG_CODE, languageCode)
-                .appendQueryParameter(PARAM_VERSION, String.valueOf(version))
-                .build();
+        Log.d(TAG, "fetchSubtitle() Request URL: " + subtitleUri.toString() + " Params: " + PARAM_VIDEO_ID +
+                "=>" + videoId + "; " + PARAM_LANG_CODE + "=>" + languageCode + "; " + PARAM_VERSION + "=>" + version);
+
 
         ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
             @Override
             protected void processResponse(String response) {
-                Log.d(TAG, "fetchSubtitle() response JSON: " + response);
+                Log.d(TAG, "fetchSubtitle() Response JSON: " + response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<SubtitleResponse>>() {
                 };
@@ -482,14 +521,13 @@ public class NetworkDataSource {
                 //TODO do something error
                 responseFromFetchSubtitle.postValue(Resource.error(error.getMessage(), null));
 
-                Log.d(TAG, "fetchSubtitle() Error response: " + error.getMessage());
+                Log.d(TAG, "fetchSubtitle() Response Error: " + error.getMessage());
             }
         };
 
 
         mExecutors.networkIO().execute(() -> requestString(Method.GET, subtitleUri.toString(), null, responseListener));
     }
-
 
 
     /**
@@ -510,6 +548,10 @@ public class NetworkDataSource {
                 .appendQueryParameter(PARAM_TYPE, paramType)
                 .build();
 
+        Log.d(TAG, "fetchTasksByCategory() Request URL: " + tasksUri.toString() + " Params: " + PARAM_PAGE +
+                "=>" + page + "; " + PARAM_TYPE + "=>" + paramType);
+
+
         ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
             @Override
@@ -518,7 +560,7 @@ public class NetworkDataSource {
                 };
                 JsonResponseBaseBean<TaskResponse> jsonResponse = getJsonResponse(response, type);
 
-                Log.d(TAG, "allTasks() Response JSON: " + response);
+                Log.d(TAG, "fetchTasksByCategory() Response JSON: " + response);
 
                 Resource<TaskEntity[]> resourceResponse;
                 TaskResponse taskResponse = jsonResponse.data;
@@ -526,7 +568,7 @@ public class NetworkDataSource {
                 TaskEntity[] taskEntities = new TaskEntity[taskResponse.data.length];
 
                 for (int i = 0; i < taskResponse.data.length; i++) {
-                    taskEntities[i] = taskResponse.data[i].getEntity(Constants.TASKS_ALL);
+                    taskEntities[i] = taskResponse.data[i].getEntity(TASKS_ALL);
                 }
 
 
@@ -546,7 +588,7 @@ public class NetworkDataSource {
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
 
-                Log.d(TAG, "all tasks response: " + jsonResponse.message, null);
+                Log.d(TAG, "fetchTasksByCategory() Response Error: " + jsonResponse.message, null);
             }
 
             @Override
@@ -578,6 +620,8 @@ public class NetworkDataSource {
                 .appendQueryParameter(PARAM_TYPE, paramType)
                 .build();
 
+        Log.d(TAG, "fetchTasksByCategory() Request URL: " + tasksUri.toString() + " Params: " + PARAM_TYPE + "=>" + paramType);
+
         ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
             @Override
@@ -586,7 +630,7 @@ public class NetworkDataSource {
                 };
                 JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
 
-                Log.d(TAG, paramType + "Tasks() Response JSON: " + response);
+                Log.d(TAG, paramType + "fetchTasksByCategory() Response JSON: " + response);
 
                 Resource<TaskEntity[]> resourceResponse;
                 Task[] taskResponse = jsonResponse.data;
@@ -609,7 +653,7 @@ public class NetworkDataSource {
             public void processError(JsonResponseBaseBean jsonResponse) {
                 super.processError(jsonResponse);
 
-                Log.d(TAG, paramType + "Tasks() Response JSON Error: " + jsonResponse.message, null);
+                Log.d(TAG, paramType + "fetchTasksByCategory() Response JSON Error: " + jsonResponse.message, null);
             }
 
             @Override
@@ -619,7 +663,7 @@ public class NetworkDataSource {
                 //TODO do something error
                 responseMutable.postValue(Resource.error(error.getMessage(), null));
 
-                Log.d(TAG, paramType + "Tasks() Response Volley Error: " + error.getMessage());
+                Log.d(TAG, paramType + "fetchTasksByCategory() Response Error: " + error.getMessage());
             }
         };
 
@@ -629,38 +673,137 @@ public class NetworkDataSource {
     }
 
 
-    private void fetchTaskErrorDetails(){
-        //TODO completar
+    public void fetchTaskErrorDetails(int taskId) {
+        Uri taskErrorsUri = Uri.parse(URL_BASE.concat(Urls.USER_TASKS.value)).buildUpon()
+                .appendQueryParameter(PARAM_TASK_ID, String.valueOf(taskId))
+                .build();
+
+        Log.d(TAG, "fetchTaskErrorDetails() Request URL: " + taskErrorsUri.toString() + " Params: " + PARAM_TASK_ID +
+                "=>" + taskId);
+
+
+        ResponseListener responseListener = new ResponseListener(mContext, false,
+                false, "") {
+            @Override
+            protected void processResponse(String response) {
+                Log.d(TAG, "fetchTaskErrorDetails() Response JSON: " + response);
+
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask[]>>() {
+                };
+                JsonResponseBaseBean<UserTask[]> jsonResponse = getJsonResponse(response, type);
+
+                Resource<UserTask[]> resourceResponse;
+                UserTask[] userTasks = jsonResponse.data;
+                resourceResponse = Resource.success(userTasks);
+                responseFromFetchTaskDetails.postValue(resourceResponse); //post the value to live data
+
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+
+                //TODO do something error
+                responseFromFetchTaskDetails.postValue(Resource.error(error.getMessage(), null));
+
+                Log.d(TAG, "fetchTaskErrorDetails() Response Error: " + error.getMessage());
+            }
+        };
+
+
+        mExecutors.networkIO().execute(() -> requestString(Method.GET, taskErrorsUri.toString(), null, responseListener));
+
     }
 
-    public void addTaskToList(int task_id, String sub_language_config, String audio_language_config){
-        //TODO completar
+    public void addTaskToList(int taskId, String subLanguageConfig, String audioLanguageConfig) {
+        Uri addToListUri = Uri.parse(URL_BASE.concat(Urls.USER_TASK_MY_LIST_RS.value)).buildUpon()
+                .appendQueryParameter(PARAM_TASK_ID, String.valueOf(taskId))
+                .appendQueryParameter(PARAM_SUB_LANGUAGE_CONFIG, subLanguageConfig)
+                .appendQueryParameter(PARAM_AUDIO_LANGUAGE_CONFIG, audioLanguageConfig)
+                .build();
+
+        Log.d(TAG, "addTaskToList() Request URL: " + addToListUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + taskId
+        +"; "+PARAM_SUB_LANGUAGE_CONFIG+"=>"+subLanguageConfig+"; "+PARAM_AUDIO_LANGUAGE_CONFIG+"=>"+audioLanguageConfig);
+
+        ResponseListener responseListener = new ResponseListener(mContext, false,
+                false, "") {
+            @Override
+            protected void processResponse(String response) {
+//
+                Log.d(TAG, "addTaskToList() Response JSON: " + response);
+
+            }
+
+            @Override
+            public void processError(JsonResponseBaseBean jsonResponse) {
+                super.processError(jsonResponse);
+
+                Log.d(TAG, "addTaskToList() Response JSON Error: " + jsonResponse.message, null);
+            }
+
+        };
+
+        mExecutors.networkIO().execute(() -> {
+            requestString(Method.POST, addToListUri.toString(), null, responseListener);
+        });
     }
 
-    public void removeTaskFromList(int taskId){
-        //TODO change delete service by taskId
-        //TODO completar
+    public void removeTaskFromList(int taskId) {
+        Uri removeFromListUri = Uri.parse(URL_BASE.concat(Urls.USER_TASK_MY_LIST.value)).buildUpon()
+                .appendQueryParameter(PARAM_TASK_ID, String.valueOf(taskId))
+                .build();
+
+        Log.d(TAG, "removeTaskFromList() Request URL: " + removeFromListUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + taskId);
+
+        ResponseListener responseListener = new ResponseListener(mContext, false,
+                false, "") {
+            @Override
+            protected void processResponse(String response) {
+//
+                Log.d(TAG, "removeTaskFromList() Response JSON: " + response);
+
+            }
+
+            @Override
+            public void processError(JsonResponseBaseBean jsonResponse) {
+                super.processError(jsonResponse);
+
+                Log.d(TAG, "removeTaskFromList() Response JSON Error: " + jsonResponse.message, null);
+            }
+
+        };
+
+        mExecutors.networkIO().execute(() -> {
+            requestString(Method.DELETE, removeFromListUri.toString(), null, responseListener);
+        });
     }
-//    private void getMyTaskForThisVideo() {
+
+
+//    private void saveReasons() {
+//        UserTask userTask = new UserTask();
+//        userTask.comments = voiceInput.getText().toString();
+//        userTask.subtitlePosition = currentSubtitlePosition;
+//        userTask.subtitleVersion = String.valueOf(subtitle.versionNumber);
+//        userTask.taskId = idTask;
+//        //Interface mode settings
+//        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+//        if (user.interfaceMode.equals(Constants.BEGINNER_INTERFACE_MODE)) { //We add the selected radio button
+//            List<Integer> tempList = new ArrayList<>();
+//            tempList.add(rgReasons.getCheckedRadioButtonId());
+//            userTask.reasonList = tempList.toString();
+//        } else //we add the selected checkbox ADVANCED
+//            userTask.reasonList = selectedReasons.toString();
 //
-//        Map<String, String> urlParams = new HashMap<>();
-//        urlParams.put(PARAM_TASK_ID, String.valueOf(userData.mSelectedTask.task_id));
-//        urlParams.put(PARAM_TYPE, Constants.TASKS_USER);
+//        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), userTask);
 //
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_retrieve_tasks)) {
+//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_saving_reasons)) {
 //
 //            @Override
 //            public void processResponse(String response) {
-////                Gson gson = new Gson();
-//                Log.d(TAG, "Tasks -> Mine: " + response);
-//                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask[]>>() {
-//                };
-//                JsonResponseBaseBean<UserTask[]> jsonResponse = JsonUtils.getJsonResponse(response, type);
-//                userData.userTaskList = jsonResponse.data;
+//                Gson gson = new Gson();
+//                Log.d(TAG, response);
 //
-//                goToPlayVideo();
-//
+//                dismiss();
 //
 //            }
 //
@@ -677,9 +820,10 @@ public class NetworkDataSource {
 //            }
 //        };
 //
-////        NetworkDataSource.get(getActivity(), NetworkDataSource.Urls.USER_TASKS, urlParams, responseListener, this);
+////        NetworkDataSource.post(getActivity(), NetworkDataSource.Urls.USER_TASKS, null, jsonRequest, responseListener, this);
 //
 //    }
+
     /**
      * Get the current weather of a list of cities ID.
      *
@@ -739,6 +883,10 @@ public class NetworkDataSource {
         return responseFromFetchSubtitle;
     }
 
+    public LiveData<Resource<UserTask[]>> responseFromFetchTaskDetails() {
+        return responseFromFetchTaskDetails;
+    }
+
 
     //********************
     //  Network requests
@@ -752,6 +900,12 @@ public class NetworkDataSource {
         USER_DETAILS("details"),
 
         TASKS("tasks"),
+
+        USER_TASKS("usertasks"),
+
+        USER_TASK_MY_LIST_RS("resource/usertask/list"),
+
+        USER_TASK_MY_LIST("usertask/list"),
 
         VIDEO_TESTS("resource/videotests"),
 

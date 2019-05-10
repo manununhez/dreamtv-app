@@ -31,6 +31,7 @@ import com.dream.dreamtv.R;
 import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.SubtitleResponse;
+import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.VideoTests;
 import com.dream.dreamtv.presenter.DetailsDescriptionPresenter;
 import com.dream.dreamtv.ui.PlaybackVideoActivity;
@@ -66,8 +67,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private static final int ACTION_ADD_MY_LIST = 3;
     private static final int ACTION_REMOVE_MY_LIST = 4;
     private static final String TAG = "VideoDetailsFragment";
-    private static final String PARAM_TASK_ID = "taskId";
-    private static final String PARAM_TYPE = "type";
     private ArrayObjectAdapter mAdapter;
     private BackgroundManager mBackgroundManager;
     private Drawable mDefaultBackground;
@@ -77,6 +76,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private VideoDetailsViewModel mViewModel;
     private TaskEntity mSelectedTask;
     private SubtitleResponse mSubtitleResponse;
+    private UserTask[] mUserTaskList;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -109,6 +109,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     @Override
     public void onStop() {
         super.onStop();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        mViewModel.responseFromFetchSubtitle().removeObservers(getViewLifecycleOwner());
     }
 
     private void prepareBackgroundManager() {
@@ -207,9 +214,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         mAdapter.add(rowPresenter);
     }
 
-
     private void verifyIfVideoIsInMyList() {
-
         mViewModel.verifyIfTaskIsInList(mSelectedTask).observe(getViewLifecycleOwner(), taskEntity -> {
             SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
             if (taskEntity != null) {
@@ -224,25 +229,26 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void addVideoToMyList() {
-        mViewModel.requestAddToList(mSelectedTask);
         //TODO bug fix, when remove the last item of the row, and then add a new task, the livedata receive an extra wrong value and it is added to the list
+        mViewModel.requestAddToList(mSelectedTask);
 
-        //                Bundle bundle = new Bundle();
-//                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, video.videoId);
-//                bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, video.primaryAudioLanguageCode);
-//                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN, bundle);
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN, bundle);
 
 
     }
 
     private void removeVideoFromMyList() {
+        //TODO bug fix, when remove the last item of the row, and then add a new task, the livedata receive an extra wrong value and it is added to the list
         mViewModel.requestRemoveFromList(mSelectedTask);
 
-        //TODO bug fix, when remove the last item of the row, and then add a new task, the livedata receive an extra wrong value and it is added to the list
         //Analytics Report Event
-//                Bundle bundle = new Bundle();
-//                bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, userData.mSelectedTask.videoId);
-//                mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN, bundle);
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN, bundle);
     }
 
     private void prepareSubtitle(TaskEntity taskEntity) {
@@ -261,9 +267,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     }
 
-
     private void getSubtitleJson(TaskEntity taskEntity, int version) {
-
 //        Request
         mViewModel.fetchSubtitle(taskEntity.video.videoId, taskEntity.language, version);
 
@@ -287,26 +291,19 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        mViewModel.responseFromFetchSubtitle().removeObservers(getViewLifecycleOwner());
-    }
-
     private void goToPlayVideo() {
+        //TODO put loading until subtitles and other are retrieved. You cant play video until that
         Intent intent;
 
-        if (mSelectedTask.video.isUrlFromYoutube()) {
+        if (mSelectedTask.video.isUrlFromYoutube())
             intent = new Intent(getActivity(), PlaybackVideoYoutubeActivity.class);
-
-        } else {
+        else
             intent = new Intent(getActivity(), PlaybackVideoActivity.class);
-        }
+
 
         intent.putExtra(Constants.USER_DATA_TASK, mSelectedTask);
-        intent.putExtra(Constants.USER_DATA_SUBTITLE, mSubtitleResponse);
-        intent.putExtra(Constants.USER_DATA_TASK_ERRORS, mUserTaskList);
+        intent.putExtra(Constants.USER_DATA_SUBTITLE, mSubtitleResponse); //TODO si no hay subtitulo, no deberia avanzar a la sgte pantalla
+        intent.putExtra(Constants.USER_DATA_TASK_ERRORS, mUserTaskList); //@NULLABLE
         startActivity(intent);
 
         //Analytics Report Event
@@ -318,30 +315,25 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN, bundle);
     }
 
-
     private void getMyTaskForThisVideo(TaskEntity taskEntity) {
-
         //        Request
         mViewModel.fetchTaskErrorDetails(taskEntity.task_id);
 
-//        Response
+        //        Response
         mViewModel.responseFromFetchTaskDetails().removeObservers(getViewLifecycleOwner());
-        mViewModel.responseFromFetchTaskDetails().observe(getViewLifecycleOwner(), subtitleResponseResource -> {
-            if (subtitleResponseResource.status.equals(Resource.Status.SUCCESS)) {
-                mUserTaskList = subtitleResponseResource.data;
+        mViewModel.responseFromFetchTaskDetails().observe(getViewLifecycleOwner(), userTaskResource -> {
+            if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
+                mUserTaskList = userTaskResource.data;
 
-                Log.d(TAG, "Subtitle response");
-            } else if (subtitleResponseResource.status.equals(Resource.Status.ERROR)) {
+                Log.d(TAG, "responseFromFetchTaskDetails response");
+            } else if (userTaskResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
-                if (subtitleResponseResource.message != null)
-                    Log.d(TAG, subtitleResponseResource.message);
+                if (userTaskResource.message != null)
+                    Log.d(TAG, userTaskResource.message);
                 else
                     Log.d(TAG, "Status ERROR");
             }
-
         });
-
-
     }
 
 

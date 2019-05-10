@@ -414,17 +414,11 @@ public class MainFragment extends BrowseSupportFragment {
 
 
     private void setupEventListeners() {
-        setOnSearchClickedListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getActivity(), getString(R.string.title_search), Toast.LENGTH_SHORT).show();
-
-            }
-        });
+        setOnSearchClickedListener(view ->
+                Toast.makeText(getActivity(), getString(R.string.title_search), Toast.LENGTH_SHORT).show()
+        );
 
         setOnItemViewClickedListener(new ItemViewClickedListener());
-//        setOnItemViewSelectedListener(new ItemViewSelectedListener());
     }
 
 
@@ -452,7 +446,6 @@ public class MainFragment extends BrowseSupportFragment {
             if (item instanceof Card) {
                 Card value = (Card) item;
                 if (value.getTitle().equals(Constants.SETTINGS)) {
-//                    Toast.makeText(getActivity(), value, Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(getActivity(), SettingsActivity.class);
                     startActivity(intent);
                 } else {

@@ -55,4 +55,19 @@ public class Constants {
     public static final String FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO = "pressed_playback_video_fwd_btn"; //forward
 
 
+    //Network parameters
+    public static final String PARAM_PAGE = "page";
+    public static final String PARAM_TYPE = "type";
+    public static final String PARAM_VIDEO_ID = "video_id";
+    public static final String PARAM_LANG_CODE = "language_code";
+    public static final String PARAM_VERSION = "version";
+    public static final String PARAM_TASK_ID = "task_id";
+    public static final String PARAM_INTERFACE_MODE = "interfaceMode";
+    public static final String PARAM_INTERFACE_LANGUAGE = "interfaceLanguage";
+    public static final String PARAM_SUB_LANGUAGE = "subLanguage";
+    public static final String PARAM_AUDIO_LANGUAGE = "audioLanguage";
+    public static final String PARAM_EMAIL = "email";
+    public static final String PARAM_PASSWORD = "password";
+    public static final String PARAM_SUB_LANGUAGE_CONFIG = "sub_language_config";
+    public static final String PARAM_AUDIO_LANGUAGE_CONFIG = "audio_language_config";
 }
