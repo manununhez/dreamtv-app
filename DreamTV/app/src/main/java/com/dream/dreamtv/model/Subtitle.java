@@ -8,18 +8,6 @@ import android.os.Parcelable;
  */
 
 public class Subtitle implements Parcelable {
-    public final int start;
-    public final String text;
-    public final int end;
-    public final int position;
-
-    private Subtitle(Parcel in) {
-        start = in.readInt();
-        text = in.readString();
-        end = in.readInt();
-        position = in.readInt();
-    }
-
     public static final Creator<Subtitle> CREATOR = new Creator<Subtitle>() {
         @Override
         public Subtitle createFromParcel(Parcel in) {
@@ -31,6 +19,42 @@ public class Subtitle implements Parcelable {
             return new Subtitle[size];
         }
     };
+    private static final int ONE_SEC_IN_MS = 1000;
+    public final String text;
+    public final int position;
+    private int start; //msecs
+    private int end; //msecs
+
+    private Subtitle(Parcel in) {
+        start = in.readInt();
+        text = in.readString();
+        end = in.readInt();
+        position = in.readInt();
+    }
+
+    public int getStartInSecs() {
+            return start / ONE_SEC_IN_MS;
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    public int getEndInSecs() {
+            return end / ONE_SEC_IN_MS;
+    }
+
+    public int getEnd() {
+        return end;
+    }
+
+    public void setEnd(int end) {
+        this.end = end;
+    }
 
     @Override
     public int describeContents() {
@@ -54,4 +78,5 @@ public class Subtitle implements Parcelable {
                 ", position=" + position +
                 '}';
     }
+
 }
