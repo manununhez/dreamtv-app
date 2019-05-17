@@ -62,7 +62,37 @@ public class UserTask implements Parcelable {
         updated_at = in.readString();
     }
 
-    
+    public int getTimeWatchedInSecs() {
+        return timeWatched / ONE_SEC_IN_MS;
+    }
+
+    public int getTimeWatchedInMins() {
+        return timeWatched / ONE_SEC_IN_MS / SECS_IN_ONE_MIN;
+    }
+
+    public int getTimeWatched() {
+        return timeWatched;
+    }
+
+    public void setTimeWatched(int timeWatched) {
+        this.timeWatched = timeWatched;
+    }
+
+    public ArrayList<UserTaskError> getUserTaskErrorsForASpecificSubtitlePosition(Subtitle subtitle) {
+        ArrayList<UserTaskError> userTaskErrorList = new ArrayList<>();
+
+        if (this.userTaskErrorList != null && this.userTaskErrorList.length > 0)
+            for (UserTaskError userTaskError : this.userTaskErrorList) {
+                //TODO si los errores vienen ordenados por subtitle_position (en forma ascendente), se puede mejorar la busqueda.
+                if (userTaskError.subtitlePosition == subtitle.position) {
+                    userTaskErrorList.add(userTaskError);
+                }
+            }
+
+
+        return userTaskErrorList;
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
