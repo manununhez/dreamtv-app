@@ -12,18 +12,22 @@ public class Constants {
     public static final String BEGINNER_INTERFACE_MODE = "beginner";
     public static final String ADVANCED_INTERFACE_MODE = "advanced";
 
-    public static final String SHARED_ELEMENT_NAME = "hero";
-    public static final String USER_DATA_TASK = "USER_DATA_TASK";
-    public static final String USER_DATA_SUBTITLE = "USER_DATA_SUBTITLE";
-    public static final String USER_DATA_TASK_ERRORS = "USER_DATA_TASK_ERRORS";
+    public static final String ARG_SUBTITLE = "ARG_SUBTITLE";
+    public static final String ARG_SUBTITLE_ORIGINAL_POSITION = "ARG_SUBTITLE_ORIGINAL_POSITION";
+    public static final String ARG_SELECTED_TASK = "ARG_SELECTED_TASK";
+    public static final String ARG_USER_TASK_ERROR = "ARG_USER_TASK_ERROR";
+
+    public static final String INTENT_USER_DATA_TASK = "INTENT_USER_DATA_TASK";
+    public static final String INTENT_USER_DATA_SUBTITLE = "INTENT_USER_DATA_SUBTITLE";
+    public static final String INTENT_USER_DATA_TASK_ERRORS = "INTENT_USER_DATA_TASK_ERRORS";
 
     //Types of tasks and categories
-    public static final String TASKS_ALL = "all";
-    public static final String TASKS_CONTINUE = "continue";
-    public static final String TASKS_FINISHED = "finished";
-    public static final String TASKS_MY_LIST = "myList";
-    public static final String TASKS_TEST = "test";
-    public static final String SETTINGS = "settings";
+    public static final String TASKS_ALL_CAT = "all";
+    public static final String TASKS_CONTINUE_CAT = "continue";
+    public static final String TASKS_FINISHED_CAT = "finished";
+    public static final String TASKS_MY_LIST_CAT = "myList";
+    public static final String TASKS_TEST_CAT = "test";
+    public static final String SETTINGS_CAT = "settings";
 
     public static final int BACKGROUND_UPDATE_DELAY = 300;
 
@@ -62,12 +66,27 @@ public class Constants {
     public static final String PARAM_LANG_CODE = "language_code";
     public static final String PARAM_VERSION = "version";
     public static final String PARAM_TASK_ID = "task_id";
-    public static final String PARAM_INTERFACE_MODE = "interfaceMode";
-    public static final String PARAM_INTERFACE_LANGUAGE = "interfaceLanguage";
-    public static final String PARAM_SUB_LANGUAGE = "subLanguage";
-    public static final String PARAM_AUDIO_LANGUAGE = "audioLanguage";
+    public static final String PARAM_INTERFACE_MODE = "interface_mode";
+    public static final String PARAM_INTERFACE_LANGUAGE = "interface_language";
+    public static final String PARAM_SUB_LANGUAGE = "sub_language";
+    public static final String PARAM_AUDIO_LANGUAGE = "audio_language";
     public static final String PARAM_EMAIL = "email";
     public static final String PARAM_PASSWORD = "password";
     public static final String PARAM_SUB_LANGUAGE_CONFIG = "sub_language_config";
     public static final String PARAM_AUDIO_LANGUAGE_CONFIG = "audio_language_config";
+    public static final String PARAM_SUB_VERSION = "subtitle_version";
+
+
+    public static final String YOUTUBE_VIDEO_ID = "videoId";
+    public static final String YOUTUBE_AUTOPLAY = "autoplay";
+    public static final String YOUTUBE_SHOW_RELATED_VIDEOS = "showRelatedVideos";
+    public static final String YOUTUBE_SHOW_VIDEO_INFO = "showVideoInfo";
+    public static final String YOUTUBE_VIDEO_ANNOTATION = "videoAnnotation";
+    public static final String YOUTUBE_DEBUG = "debug";
+    public static final String YOUTUBE_CLOSED_CAPTIONS = "closedCaptions";
+    public static final String STATE_PLAY = "PLAYING";
+    public static final String STATE_BUFFERING = "BUFFERING";
+    public static final String STATE_ENDED = "ENDED";
+    public static final String STATE_PAUSED = "PAUSED";
+
 }

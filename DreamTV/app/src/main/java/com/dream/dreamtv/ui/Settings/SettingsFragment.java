@@ -42,6 +42,8 @@ import java.util.Objects;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
+import static com.dream.dreamtv.utils.Constants.*;
+
 
 public class SettingsFragment extends Fragment {
     private static final String TAG = SettingsActivity.class.getSimpleName();
@@ -225,7 +227,7 @@ public class SettingsFragment extends Fragment {
         languagesKeyListCode.add(ABR_ARABIC);
         languagesKeyListCode.add(ABR_FRENCH);
         languagesKeyListCode.add(ABR_POLISH);
-        languagesKeyListCode.add(Constants.NONE_OPTIONS_CODE);
+        languagesKeyListCode.add(NONE_OPTIONS_CODE);
 
 
         keyListForAdapter = new ArrayList<>(languagesKeyList); //list to modifying in adapter, without affecting the languages list
@@ -235,18 +237,18 @@ public class SettingsFragment extends Fragment {
     private void interfaceLanguageSettings() {
         User user = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getUser();
         if (user != null)
-            if (user.interfaceLanguage.equals(Constants.LANGUAGE_ENGLISH))
+            if (user.interfaceLanguage.equals(LANGUAGE_ENGLISH))
                 rbEnglish.setChecked(true);
-            else if (user.interfaceLanguage.equals(Constants.LANGUAGE_POLISH))
+            else if (user.interfaceLanguage.equals(LANGUAGE_POLISH))
                 rbPolish.setChecked(true);
     }
 
     private void interfaceModeSettings() {
         User user = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getUser();
         if (user != null)
-            if (user.interfaceMode.equals(Constants.BEGINNER_INTERFACE_MODE))
+            if (user.interfaceMode.equals(BEGINNER_INTERFACE_MODE))
                 rbBeginner.setChecked(true);
-            else if (user.interfaceMode.equals(Constants.ADVANCED_INTERFACE_MODE))
+            else if (user.interfaceMode.equals(ADVANCED_INTERFACE_MODE))
                 rbAdvanced.setChecked(true);
     }
 
@@ -256,10 +258,10 @@ public class SettingsFragment extends Fragment {
         User user = new User();
         user.subLanguage = selectedSubtitleLanguageCode;
         user.audioLanguage = selectedAudioLanguageCode;
-        user.interfaceMode = rbBeginner.isChecked() ? Constants.BEGINNER_INTERFACE_MODE :
-                Constants.ADVANCED_INTERFACE_MODE; //interface mode updated
-        user.interfaceLanguage = rbPolish.isChecked() ? Constants.LANGUAGE_POLISH :
-                Constants.LANGUAGE_ENGLISH; //interface language updated
+        user.interfaceMode = rbBeginner.isChecked() ? BEGINNER_INTERFACE_MODE :
+                ADVANCED_INTERFACE_MODE; //interface mode updated
+        user.interfaceLanguage = rbPolish.isChecked() ? LANGUAGE_POLISH :
+                LANGUAGE_ENGLISH; //interface language updated
 
 
         DreamTVApp dreamTVApp = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
@@ -290,16 +292,16 @@ public class SettingsFragment extends Fragment {
         Bundle bundle = new Bundle();
 
         if (mode.equals(getString(R.string.text_no_option)))
-            bundle.putBoolean(Constants.FIREBASE_KEY_TESTING_MODE, false);
+            bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, false);
         else if (mode.equals(getString(R.string.text_yes_option)))
-            bundle.putBoolean(Constants.FIREBASE_KEY_TESTING_MODE, true);
+            bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, true);
 
         //User Settings Saved - Analytics Report Event
-        bundle.putString(Constants.FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
-        bundle.putString(Constants.FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
-        bundle.putString(Constants.FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
-        bundle.putString(Constants.FIREBASE_KEY_INTERFACE_LANGUAGE, user.interfaceLanguage);
-        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN, bundle);
+        bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
+        bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
+        bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
+        bundle.putString(FIREBASE_KEY_INTERFACE_LANGUAGE, user.interfaceLanguage);
+        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN, bundle);
     }
 
 

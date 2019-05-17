@@ -19,7 +19,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import com.dream.dreamtv.DreamTVApp;
@@ -58,6 +57,8 @@ import androidx.leanback.widget.RowPresenter;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import static com.dream.dreamtv.utils.Constants.*;
+
 
 public class MainFragment extends BrowseSupportFragment {
     private static final String TAG = MainFragment.class.getSimpleName();
@@ -95,8 +96,8 @@ public class MainFragment extends BrowseSupportFragment {
         observeResponseFromUserUpdate();
 
         initSettingsRow();
-        populateScreen();
 
+        populateScreen();
     }
 
     private void initSettingsRow() {
@@ -106,7 +107,7 @@ public class MainFragment extends BrowseSupportFragment {
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mIconCardPresenter);
         Card settingsCard = new Card();
         settingsCard.setType(Card.Type.ICON);
-        settingsCard.setTitle(Constants.SETTINGS);
+        settingsCard.setTitle(SETTINGS_CAT);
         settingsCard.setLocalImageResource("ic_settings_settings");
         gridRowAdapter.add(settingsCard);
 
@@ -141,11 +142,11 @@ public class MainFragment extends BrowseSupportFragment {
         super.onDestroyView();
         Log.d(TAG, "onDestroyView");
         mViewModel.responseFromUserUpdate().removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(Constants.TASKS_ALL).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(Constants.TASKS_CONTINUE).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(Constants.TASKS_FINISHED).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(Constants.TASKS_MY_LIST).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(Constants.TASKS_TEST).removeObservers(getViewLifecycleOwner());
+        mViewModel.requestTasksByCategory(TASKS_ALL_CAT).removeObservers(getViewLifecycleOwner());
+        mViewModel.requestTasksByCategory(TASKS_CONTINUE_CAT).removeObservers(getViewLifecycleOwner());
+        mViewModel.requestTasksByCategory(TASKS_FINISHED_CAT).removeObservers(getViewLifecycleOwner());
+        mViewModel.requestTasksByCategory(TASKS_MY_LIST_CAT).removeObservers(getViewLifecycleOwner());
+        mViewModel.requestTasksByCategory(TASKS_TEST_CAT).removeObservers(getViewLifecycleOwner());
 
 
     }
@@ -154,41 +155,43 @@ public class MainFragment extends BrowseSupportFragment {
 
         reorderRowSettings();
 
-        mViewModel.requestTasksByCategory(Constants.TASKS_ALL).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(Constants.TASKS_ALL).observe(getViewLifecycleOwner(), taskEntities -> {
+
+        mViewModel.requestTasksByCategory(TASKS_ALL_CAT).removeObservers(getViewLifecycleOwner());
+        mViewModel.requestTasksByCategory(TASKS_ALL_CAT).observe(getViewLifecycleOwner(), taskEntities -> {
             if (taskEntities.length > 0)
-                loadVideos(taskEntities, Constants.TASKS_ALL);
+                loadVideos(taskEntities, TASKS_ALL_CAT);
             else verifyRowExistenceAndRemove(rowAllTasks);
         });
 
-        mViewModel.requestTasksByCategory(Constants.TASKS_CONTINUE).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(Constants.TASKS_CONTINUE).observe(getViewLifecycleOwner(), taskEntities -> {
+        mViewModel.requestTasksByCategory(TASKS_CONTINUE_CAT).removeObservers(getViewLifecycleOwner());
+        mViewModel.requestTasksByCategory(TASKS_CONTINUE_CAT).observe(getViewLifecycleOwner(), taskEntities -> {
             if (taskEntities.length > 0)
-                loadVideos(taskEntities, Constants.TASKS_CONTINUE);
+                loadVideos(taskEntities, TASKS_CONTINUE_CAT);
             else verifyRowExistenceAndRemove(rowContinueTasks);
 
         });
 
-        mViewModel.requestTasksByCategory(Constants.TASKS_FINISHED).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(Constants.TASKS_FINISHED).observe(getViewLifecycleOwner(), taskEntities -> {
+        mViewModel.requestTasksByCategory(TASKS_FINISHED_CAT).removeObservers(getViewLifecycleOwner());
+        mViewModel.requestTasksByCategory(TASKS_FINISHED_CAT).observe(getViewLifecycleOwner(), taskEntities -> {
             if (taskEntities.length > 0)
-                loadVideos(taskEntities, Constants.TASKS_FINISHED);
+                loadVideos(taskEntities, TASKS_FINISHED_CAT);
             else verifyRowExistenceAndRemove(rowFinishedTasks);
 
         });
 
-        mViewModel.requestTasksByCategory(Constants.TASKS_MY_LIST).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(Constants.TASKS_MY_LIST).observe(getViewLifecycleOwner(), taskEntities -> {
+        mViewModel.requestTasksByCategory(TASKS_MY_LIST_CAT).removeObservers(getViewLifecycleOwner());
+        mViewModel.requestTasksByCategory(TASKS_MY_LIST_CAT).observe(getViewLifecycleOwner(), taskEntities -> {
             if (taskEntities.length > 0)
-                loadVideos(taskEntities, Constants.TASKS_MY_LIST);
+                loadVideos(taskEntities, TASKS_MY_LIST_CAT);
             else verifyRowExistenceAndRemove(rowMyListTasks);
 
         });
 
-        mViewModel.requestTasksByCategory(Constants.TASKS_TEST).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(Constants.TASKS_TEST).observe(getViewLifecycleOwner(), taskEntities -> {
+
+        mViewModel.requestTasksByCategory(TASKS_TEST_CAT).removeObservers(getViewLifecycleOwner());
+        mViewModel.requestTasksByCategory(TASKS_TEST_CAT).observe(getViewLifecycleOwner(), taskEntities -> {
             if (taskEntities.length > 0)
-                loadVideos(taskEntities, Constants.TASKS_TEST);
+                loadVideos(taskEntities, TASKS_TEST_CAT);
             else verifyRowExistenceAndRemove(rowTestTasks);
 
         });
@@ -333,19 +336,19 @@ public class MainFragment extends BrowseSupportFragment {
 
             ListRow listRow;
             switch (category) {
-                case Constants.TASKS_MY_LIST:
+                case TASKS_MY_LIST_CAT:
                     listRow = rowMyListTasks;
                     break;
-                case Constants.TASKS_FINISHED:
+                case TASKS_FINISHED_CAT:
                     listRow = rowFinishedTasks;
                     break;
-                case Constants.TASKS_CONTINUE:
+                case TASKS_CONTINUE_CAT:
                     listRow = rowContinueTasks;
                     break;
-                case Constants.TASKS_ALL:
+                case TASKS_ALL_CAT:
                     listRow = rowAllTasks;
                     break;
-                case Constants.TASKS_TEST:
+                case TASKS_TEST_CAT:
                     listRow = rowTestTasks;
                     break;
                 default:
@@ -445,14 +448,14 @@ public class MainFragment extends BrowseSupportFragment {
 
             if (item instanceof Card) {
                 Card value = (Card) item;
-                if (value.getTitle().equals(Constants.SETTINGS)) {
+                if (value.getTitle().equals(SETTINGS_CAT)) {
                     Intent intent = new Intent(getActivity(), SettingsActivity.class);
                     startActivity(intent);
                 } else {
                     TaskEntity taskEntity = value.getTaskEntity();
 
                     Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
-                    intent.putExtra(Constants.USER_DATA_TASK, taskEntity);
+                    intent.putExtra(INTENT_USER_DATA_TASK, taskEntity);
 
                     startActivity(intent);
                 }
