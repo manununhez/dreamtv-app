@@ -4,19 +4,13 @@ import android.util.Log;
 
 import com.dream.dreamtv.db.dao.TaskDao;
 import com.dream.dreamtv.db.entity.TaskEntity;
-import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
-import com.dream.dreamtv.network.NetworkBoundResource;
 import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.utils.AppExecutors;
 
-import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 
 public class AppRepository {
@@ -192,27 +186,10 @@ public class AppRepository {
     }
 
     public LiveData<TaskEntity> verifyIfTaskIsInList(TaskEntity taskEntity, String category) {
-        return mTaskDao.verifyTask(taskEntity.task_id, category);
+        return mTaskDao.verifyTask(taskEntity.taskId, category);
     }
 
-    public void requestAddToList(TaskEntity taskEntity) {
-        //TODO add to the db and with webservice
-        mExecutors.diskIO().execute(() -> {
-            mTaskDao.insert(taskEntity);
-        });
 
-        mNetworkDataSource.addTaskToList(taskEntity.task_id, taskEntity.language, taskEntity.video.primaryAudioLanguageCode);
-
-    }
-
-    public void requestRemoveFromList(int taskId, String category) {
-        //TODO remove from the db and from the webservice
-        mExecutors.diskIO().execute(() -> {
-            mTaskDao.deleteByTaskIdAndCategory(taskId, category);
-        });
-
-        mNetworkDataSource.removeTaskFromList(taskId);
-    }
     /**
      * Checks if there are enough days of future weather for the app to display all the needed data.
      *
@@ -269,6 +246,64 @@ public class AppRepository {
     }
 
 
+
+
+    public void login(final String email, final String password) {
+        //TODO Check login in DB first, and then in Server
+        mNetworkDataSource.login(email, password);
+    }
+
+
+    public void updateUser(final User user) {
+        mNetworkDataSource.updateUser(user);
+    }
+
+
+    public void fetchSubtitle(String videoId, String languageCode, int version) {
+        mNetworkDataSource.fetchSubtitle(videoId, languageCode, version);
+    }
+
+    public void fetchTaskErrorDetails(int taskId) {
+        mNetworkDataSource.fetchTaskErrorDetails(taskId);
+    }
+
+
+    public void createUserTask(TaskEntity taskEntity, int mSubtitleVersion) {
+        //TODO add to the db and with webservice
+        mExecutors.diskIO().execute(() -> {
+            mTaskDao.insert(taskEntity);
+        });
+
+        mNetworkDataSource.createUserTask(taskEntity.taskId, mSubtitleVersion);
+    }
+
+    public void requestAddToList(TaskEntity taskEntity) {
+        //TODO add to the db and with webservice
+        mExecutors.diskIO().execute(() -> {
+            mTaskDao.insert(taskEntity);
+        });
+
+        mNetworkDataSource.addTaskToList(taskEntity.taskId, taskEntity.language, taskEntity.video.primaryAudioLanguageCode);
+
+    }
+
+    public void requestRemoveFromList(int taskId, String category) {
+        //TODO remove from the db and from the webservice
+        mExecutors.diskIO().execute(() -> {
+            mTaskDao.deleteByTaskIdAndCategory(taskId, category);
+        });
+
+        mNetworkDataSource.removeTaskFromList(taskId);
+    }
+
+    public LiveData<Resource<UserTask>> responseFromCreateUserTask() {
+        return mNetworkDataSource.responseFromCreateUserTask();
+    }
+
+    public LiveData<Resource<UserTask>> responseFromFetchUserTaskErrorDetails() {
+        return mNetworkDataSource.responseFromFetchUserTaskErrorDetails();
+    }
+
     private LiveData<Resource<TaskEntity[]>> responseFromFetchAllTasks() {
         return mNetworkDataSource.responseFromFetchAllTasks();
     }
@@ -293,31 +328,7 @@ public class AppRepository {
         return mNetworkDataSource.responseFromUserUpdate();
     }
 
-
     public LiveData<Resource<SubtitleResponse>> responseFromFetchSubtitle() {
         return mNetworkDataSource.responseFromFetchSubtitle();
-    }
-
-    public void login(final String email, final String password) {
-        //TODO Check login in DB first, and then in Server
-        mNetworkDataSource.login(email, password);
-    }
-
-
-    public void updateUser(final User user) {
-        mNetworkDataSource.updateUser(user);
-    }
-
-
-    public void fetchSubtitle(String videoId, String languageCode, int version) {
-        mNetworkDataSource.fetchSubtitle(videoId, languageCode, version);
-    }
-
-    public void fetchTaskErrorDetails(int taskId) {
-        mNetworkDataSource.fetchTaskErrorDetails(taskId);
-    }
-
-    public LiveData<Resource<UserTask[]>> responseFromFetchTaskDetails() {
-        return mNetworkDataSource.responseFromFetchTaskDetails();
     }
 }

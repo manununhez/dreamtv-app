@@ -36,7 +36,6 @@ import com.dream.dreamtv.model.VideoTests;
 import com.dream.dreamtv.presenter.DetailsDescriptionPresenter;
 import com.dream.dreamtv.ui.PlaybackVideoActivity;
 import com.dream.dreamtv.ui.PlaybackVideoYoutubeActivity;
-import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -53,9 +52,20 @@ import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.ClassPresenterSelector;
 import androidx.leanback.widget.DetailsOverviewRow;
 import androidx.leanback.widget.FullWidthDetailsOverviewRowPresenter;
-import androidx.leanback.widget.FullWidthDetailsOverviewSharedElementHelper;
 import androidx.leanback.widget.SparseArrayObjectAdapter;
 import androidx.lifecycle.ViewModelProviders;
+
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_DURATION;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_PROJECT_NAME;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN;
+import static com.dream.dreamtv.utils.Constants.INTENT_USER_DATA_SUBTITLE;
+import static com.dream.dreamtv.utils.Constants.INTENT_USER_DATA_TASK;
+import static com.dream.dreamtv.utils.Constants.INTENT_USER_DATA_TASK_ERRORS;
+import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
 
 
 /*
@@ -76,7 +86,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private VideoDetailsViewModel mViewModel;
     private TaskEntity mSelectedTask;
     private SubtitleResponse mSubtitleResponse;
-    private UserTask[] mUserTaskList;
+    private UserTask mUserTaskErrorsDetails;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -92,15 +102,15 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(Objects.requireNonNull(getActivity()));
 
-        mSelectedTask = getActivity().getIntent().getParcelableExtra(Constants.USER_DATA_TASK);
+        mSelectedTask = getActivity().getIntent().getParcelableExtra(INTENT_USER_DATA_TASK);
 
         if (mSelectedTask != null) {
             setupAdapter();
             setupDetailsOverviewRow();
             updateBackground(mSelectedTask.video.thumbnail);
             verifyIfVideoIsInMyList();
-            prepareSubtitle(mSelectedTask);
-            getMyTaskForThisVideo(mSelectedTask);
+            prepareSubtitle();
+            getMyTaskForThisVideo();
         } else {
             getActivity().finish(); //back to MainActivity
         }
@@ -116,6 +126,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         super.onDestroyView();
 
         mViewModel.responseFromFetchSubtitle().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromFetchUserTaskErrorDetails().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromCreateUserTask().removeObservers(getViewLifecycleOwner());
     }
 
     private void prepareBackgroundManager() {
@@ -154,12 +166,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         detailsPresenter.setBackgroundColor(
                 ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.selected_background));
         detailsPresenter.setInitialState(FullWidthDetailsOverviewRowPresenter.STATE_HALF);
-
-        // Hook up transition element.
-        FullWidthDetailsOverviewSharedElementHelper mHelper = new FullWidthDetailsOverviewSharedElementHelper();
-        mHelper.setSharedElementEnterTransition(getActivity(),
-                Constants.SHARED_ELEMENT_NAME);
-        detailsPresenter.setListener(mHelper);
         detailsPresenter.setParticipatingEntranceTransition(false);
         prepareEntranceTransition();
 
@@ -233,9 +239,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         mViewModel.requestAddToList(mSelectedTask);
 
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN, bundle);
+        bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+        bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN, bundle);
 
 
     }
@@ -246,30 +252,37 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         //Analytics Report Event
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN, bundle);
+        bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+        bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN, bundle);
     }
 
-    private void prepareSubtitle(TaskEntity taskEntity) {
+    private void prepareSubtitle() {
+
+        getSubtitleJson(getSubtitleVersion());
+
+    }
+
+
+    private int getSubtitleVersion() {
+        int newestVersion = 0;
         DreamTVApp dreamTVApp = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
         List<VideoTests> videoTestsList = dreamTVApp.getVideoTests();
 
-        if (taskEntity.category.equals(Constants.TASKS_TEST)) {
+        if (mSelectedTask.category.equals(TASKS_TEST_CAT)) {
             //We find the version of the video test
             for (VideoTests videoTests : videoTestsList)
-                if (videoTests.videoId.equals(taskEntity.video.videoId)) {
-                    getSubtitleJson(taskEntity, videoTests.version);
-                    break;
+                if (videoTests.videoId.equals(mSelectedTask.video.videoId)) {
+                    return videoTests.version;
                 }
-        } else
-            getSubtitleJson(taskEntity, 0);
+        }
 
+        return newestVersion;
     }
 
-    private void getSubtitleJson(TaskEntity taskEntity, int version) {
+    private void getSubtitleJson(int subtitleVersion) {
 //        Request
-        mViewModel.fetchSubtitle(taskEntity.video.videoId, taskEntity.language, version);
+        mViewModel.fetchSubtitle(mSelectedTask.video.videoId, mSelectedTask.language, subtitleVersion);
 
 //        Response
         mViewModel.responseFromFetchSubtitle().removeObservers(getViewLifecycleOwner());
@@ -291,7 +304,43 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     }
 
+
     private void goToPlayVideo() {
+        if (mSubtitleResponse == null)
+            Toast.makeText(getActivity(), "Subtitle not found.", Toast.LENGTH_SHORT).show();
+        else if (mUserTaskErrorsDetails == null)
+            createUserTask();
+        else
+            playVideo();
+    }
+
+
+    private void createUserTask() {
+        //        Request
+        mViewModel.createUserTask(mSelectedTask, mSubtitleResponse.versionNumber);
+
+        //        Response
+        mViewModel.responseFromCreateUserTask().removeObservers(getViewLifecycleOwner());
+
+        mViewModel.responseFromCreateUserTask().observe(getViewLifecycleOwner(), userTaskResource -> {
+            if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
+                mUserTaskErrorsDetails = userTaskResource.data;
+
+                goToPlayVideo();
+
+                Log.d(TAG, "createUserTask() response");
+            } else if (userTaskResource.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (userTaskResource.message != null)
+                    Log.d(TAG, userTaskResource.message);
+                else
+                    Log.d(TAG, "Status ERROR");
+            }
+        });
+
+    }
+
+    private void playVideo() {
         //TODO put loading until subtitles and other are retrieved. You cant play video until that
         Intent intent;
 
@@ -301,31 +350,34 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             intent = new Intent(getActivity(), PlaybackVideoActivity.class);
 
 
-        intent.putExtra(Constants.USER_DATA_TASK, mSelectedTask);
-        intent.putExtra(Constants.USER_DATA_SUBTITLE, mSubtitleResponse); //TODO si no hay subtitulo, no deberia avanzar a la sgte pantalla
-        intent.putExtra(Constants.USER_DATA_TASK_ERRORS, mUserTaskList); //@NULLABLE
+        intent.putExtra(INTENT_USER_DATA_TASK, mSelectedTask);
+        intent.putExtra(INTENT_USER_DATA_SUBTITLE, mSubtitleResponse); //TODO si no hay subtitulo, no deberia avanzar a la sgte pantalla
+        intent.putExtra(INTENT_USER_DATA_TASK_ERRORS, mUserTaskErrorsDetails); //@NULLABLE puede no tener errores ya marcados
         startActivity(intent);
 
         //Analytics Report Event
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-        bundle.putString(Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-        bundle.putString(Constants.FIREBASE_KEY_VIDEO_PROJECT_NAME, mSelectedTask.video.project);
-        bundle.putLong(Constants.FIREBASE_KEY_VIDEO_DURATION, mSelectedTask.video.getVideoDurationInMs());
-        mFirebaseAnalytics.logEvent(Constants.FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN, bundle);
+        bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+        bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+        bundle.putString(FIREBASE_KEY_VIDEO_PROJECT_NAME, mSelectedTask.video.project);
+        bundle.putLong(FIREBASE_KEY_VIDEO_DURATION, mSelectedTask.video.getVideoDurationInMs());
+        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN, bundle);
     }
 
-    private void getMyTaskForThisVideo(TaskEntity taskEntity) {
+    /**
+     * Verify if the current task has already data created. IF not, is call createTask()
+     */
+    private void getMyTaskForThisVideo() {
         //        Request
-        mViewModel.fetchTaskErrorDetails(taskEntity.task_id);
+        mViewModel.fetchUserTaskErrorDetails(mSelectedTask.taskId);
 
         //        Response
-        mViewModel.responseFromFetchTaskDetails().removeObservers(getViewLifecycleOwner());
-        mViewModel.responseFromFetchTaskDetails().observe(getViewLifecycleOwner(), userTaskResource -> {
+        mViewModel.responseFromFetchUserTaskErrorDetails().removeObservers(getViewLifecycleOwner());
+        mViewModel.responseFromFetchUserTaskErrorDetails().observe(getViewLifecycleOwner(), userTaskResource -> {
             if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
-                mUserTaskList = userTaskResource.data;
+                mUserTaskErrorsDetails = userTaskResource.data;
 
-                Log.d(TAG, "responseFromFetchTaskDetails response");
+                Log.d(TAG, "responseFromFetchUserTaskErrorDetails response");
             } else if (userTaskResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
                 if (userTaskResource.message != null)

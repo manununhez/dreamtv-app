@@ -22,15 +22,13 @@ class MainViewModel extends ViewModel {
         mRepository.login(email, password);
     }
 
-    LiveData<Resource<User>> responseFromUserUpdate() {
-        return mRepository.responseFromUserUpdate();
-    }
-
-
     void initializeSyncData() {
         mRepository.initializeSyncData();
     }
 
+    LiveData<Resource<User>> responseFromUserUpdate() {
+        return mRepository.responseFromUserUpdate();
+    }
 
     LiveData<TaskEntity[]> requestTasksByCategory(String category) {//TODO add Resource to taskEntity
         return mRepository.requestTaskByCategory(category);

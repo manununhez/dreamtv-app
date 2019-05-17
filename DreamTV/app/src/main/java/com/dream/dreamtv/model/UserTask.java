@@ -5,65 +5,14 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by manuel on 7/20/17.
  */
 
 public class UserTask implements Parcelable {
-    @SerializedName("id")
-    public int id;
-    @SerializedName("user_id")
-    public int userId;
-    @SerializedName("task_id")
-    public int taskId;
-    @SerializedName("subtitle_position")
-    public int subtitlePosition;
-    @SerializedName("subtitle_version")
-    public String subtitleVersion;
-    @SerializedName("comments")
-    public String comments;
-    @SerializedName("time_watched")
-    public int timeWatched;
-    @SerializedName("completed")
-    public boolean completed;
-    @SerializedName("rating")
-    public int rating;
-    @SerializedName("user_task_errors")
-    public List<UserTaskError> userTaskErrorList;
-
-
-    protected UserTask(Parcel in) {
-        id = in.readInt();
-        userId = in.readInt();
-        taskId = in.readInt();
-        subtitlePosition = in.readInt();
-        subtitleVersion = in.readString();
-        comments = in.readString();
-        timeWatched = in.readInt();
-        completed = in.readByte() != 0;
-        rating = in.readInt();
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeInt(userId);
-        dest.writeInt(taskId);
-        dest.writeInt(subtitlePosition);
-        dest.writeString(subtitleVersion);
-        dest.writeString(comments);
-        dest.writeInt(timeWatched);
-        dest.writeByte((byte) (completed ? 1 : 0));
-        dest.writeInt(rating);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
     public static final Creator<UserTask> CREATOR = new Creator<UserTask>() {
         @Override
         public UserTask createFromParcel(Parcel in) {
@@ -75,4 +24,77 @@ public class UserTask implements Parcelable {
             return new UserTask[size];
         }
     };
+
+    private static final int ONE_SEC_IN_MS = 1000;
+    private static final int SECS_IN_ONE_MIN = 60;
+
+    @SerializedName("id")
+    public int id;
+    @SerializedName("user_id")
+    public int userId;
+    @SerializedName("task_id")
+    public int taskId;
+    @SerializedName("subtitle_version")
+    public String subtitleVersion;
+    @SerializedName("completed")
+    public int completed;
+    @SerializedName("rating")
+    public int rating;
+    @SerializedName("user_task_errors")
+    public UserTaskError[] userTaskErrorList;
+    @SerializedName("created_at")
+    public String created_at;
+    @SerializedName("updated_at")
+    public String updated_at;
+    @SerializedName("time_watched")
+    private int timeWatched;
+
+    protected UserTask(Parcel in) {
+        id = in.readInt();
+        userId = in.readInt();
+        taskId = in.readInt();
+        subtitleVersion = in.readString();
+        timeWatched = in.readInt();
+        completed = in.readInt();
+        rating = in.readInt();
+        userTaskErrorList = in.createTypedArray(UserTaskError.CREATOR);
+        created_at = in.readString();
+        updated_at = in.readString();
+    }
+
+    
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeInt(userId);
+        dest.writeInt(taskId);
+        dest.writeString(subtitleVersion);
+        dest.writeInt(timeWatched);
+        dest.writeInt(completed);
+        dest.writeInt(rating);
+        dest.writeTypedArray(userTaskErrorList, flags);
+        dest.writeString(created_at);
+        dest.writeString(updated_at);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "UserTask{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", taskId=" + taskId +
+                ", subtitleVersion='" + subtitleVersion + '\'' +
+                ", timeWatched=" + timeWatched +
+                ", completed=" + completed +
+                ", rating=" + rating +
+                ", userTaskErrorList=" + Arrays.toString(userTaskErrorList) +
+                ", created_at='" + created_at + '\'' +
+                ", updated_at='" + updated_at + '\'' +
+                '}';
+    }
 }
