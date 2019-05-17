@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import com.dream.dreamtv.model.Video;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -27,43 +28,45 @@ public class TaskEntity implements Parcelable {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-    public int task_id;
+    @ColumnInfo(name = "task_id")
+    public int taskId;
     public String language;
     public String type;
     public String created;
     public String completed;
     public String modified;
     public String category;
-    public long sync_time;//in secs //TODO delete if it is not used
+    @ColumnInfo(name = "sync_time")
+    public long syncTime;//in secs //TODO delete if it is not used
     @Embedded
     public Video video;
 
 
-    public TaskEntity(int task_id, String language, String type,
+    public TaskEntity(int taskId, String language, String type,
                       String created, String completed, String modified,
-                      String category, long sync_time, Video video) {
-        this.task_id = task_id;
+                      String category, long syncTime, Video video) {
+        this.taskId = taskId;
         this.language = language;
         this.type = type;
         this.created = created;
         this.completed = completed;
         this.modified = modified;
         this.category = category;
-        this.sync_time = sync_time;
+        this.syncTime = syncTime;
         this.video = video;
     }
 
 
     protected TaskEntity(Parcel in) {
         id = in.readInt();
-        task_id = in.readInt();
+        taskId = in.readInt();
         language = in.readString();
         type = in.readString();
         created = in.readString();
         completed = in.readString();
         modified = in.readString();
         category = in.readString();
-        sync_time = in.readLong();
+        syncTime = in.readLong();
         video = in.readParcelable(Video.class.getClassLoader());
     }
 
@@ -87,28 +90,28 @@ public class TaskEntity implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
-        dest.writeInt(task_id);
+        dest.writeInt(taskId);
         dest.writeString(language);
         dest.writeString(type);
         dest.writeString(created);
         dest.writeString(completed);
         dest.writeString(modified);
         dest.writeString(category);
-        dest.writeLong(sync_time);
+        dest.writeLong(syncTime);
         dest.writeParcelable(video, flags);
     }
 
     @Override
     public String toString() {
         return "TaskEntity{" +
-                "taskId=" + task_id +
+                "taskId=" + taskId +
                 ", language='" + language + '\'' +
                 ", type='" + type + '\'' +
                 ", created='" + created + '\'' +
                 ", completed='" + completed + '\'' +
                 ", modified='" + modified + '\'' +
                 ", category='" + category + '\'' +
-                ", sync_time='" + sync_time + '\'' +
+                ", sync_time='" + syncTime + '\'' +
                 ", video=" + video +
                 '}';
     }
