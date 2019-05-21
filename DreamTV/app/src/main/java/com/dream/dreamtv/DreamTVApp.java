@@ -39,15 +39,15 @@ public class DreamTVApp extends Application {
 
     }
 
-    public void setToken(String token){
-        Log.d(TAG,"Set Token updated");
-        SharedPreferenceUtils.save(this, this.getString(R.string.dreamTVApp_token), token);
-
-    }
-
-    public String getToken(){
+    public String getToken() {
         //TODO change the way the token is stored
         return SharedPreferenceUtils.getValue(this, this.getString(R.string.dreamTVApp_token));
+    }
+
+    public void setToken(String token) {
+        Log.d(TAG, "Set Token updated");
+        SharedPreferenceUtils.save(this, this.getString(R.string.dreamTVApp_token), token);
+
     }
 
     public User getUser() {
@@ -69,26 +69,41 @@ public class DreamTVApp extends Application {
         SharedPreferenceUtils.save(this, getString(R.string.testing_mode_preferences), mode);
     }
 
+    public List<ErrorReason> getReasons() {
+        String errorReasonList = SharedPreferenceUtils.getValue(this, getString(R.string.reasons_preferences));
+        Type listType = new TypeToken<ArrayList<ErrorReason>>() {
+        }.getType();
+
+        return getReasonsByLanguage(new Gson().fromJson(errorReasonList, listType));
+
+    }
 
     public void setReasons(ErrorReason[] reasonsList) {
         String reasons = gson.toJson(Arrays.asList(reasonsList));
         SharedPreferenceUtils.save(this, getString(R.string.reasons_preferences), reasons);
     }
 
-    public List<ErrorReason> getReasons() {
-        String errorReasonList = SharedPreferenceUtils.getValue(this, getString(R.string.reasons_preferences));
-        Type listType = new TypeToken<ArrayList<ErrorReason>>(){}.getType();
-        return new Gson().fromJson(errorReasonList, listType);
+    private List<ErrorReason> getReasonsByLanguage(List<ErrorReason> list) {
+        User user = getUser();
+        List<ErrorReason> newList = new ArrayList<>();
+
+        for (ErrorReason error : list) {
+            if (error.language.equals(user.interfaceLanguage))
+                newList.add(error);
+        }
+
+        return newList;
+    }
+
+    public List<VideoTests> getVideoTests() {
+        String videoTestsList = SharedPreferenceUtils.getValue(this, getString(R.string.video_tests_preferences));
+        Type listType = new TypeToken<ArrayList<VideoTests>>() {
+        }.getType();
+        return new Gson().fromJson(videoTestsList, listType);
     }
 
     public void setVideoTests(VideoTests[] videoTestsList) {
         String videoTests = gson.toJson(Arrays.asList(videoTestsList));
         SharedPreferenceUtils.save(this, getString(R.string.video_tests_preferences), videoTests);
-    }
-
-    public List<VideoTests> getVideoTests() {
-        String videoTestsList = SharedPreferenceUtils.getValue(this, getString(R.string.video_tests_preferences));
-        Type listType = new TypeToken<ArrayList<VideoTests>>(){}.getType();
-        return new Gson().fromJson(videoTestsList, listType);
     }
 }
