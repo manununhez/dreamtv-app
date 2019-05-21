@@ -319,6 +319,7 @@ public class PlaybackVideoActivity extends Activity implements ErrorSelectionDia
 
     @Override
     public void pauseVideo(Long position) {
+        stopSyncSubtitle();
 
         mVideoView.pause();
 

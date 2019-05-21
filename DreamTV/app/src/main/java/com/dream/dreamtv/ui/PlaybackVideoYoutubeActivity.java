@@ -327,6 +327,7 @@ public class PlaybackVideoYoutubeActivity extends Activity implements
 
     @Override
     public void pauseVideo(Long position) {
+        stopSyncSubtitle();
 
         String currentTime = Utils.getTimeFormat(this, position);
         String videoDuration = Utils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs());
