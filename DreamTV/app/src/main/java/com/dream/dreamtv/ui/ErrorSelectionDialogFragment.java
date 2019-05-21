@@ -79,7 +79,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private ScrollView scrollViewBeginner;
     private Subtitle selectedSubtitle;
     private int subtitleOriginalPosition;
-    private int currentSubtitlePosition;
+//    private int currentSubtitlePosition;
     private TaskEntity mSelectedTask;
     private OnDialogClosedListener mCallback;
 
@@ -133,7 +133,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         subtitleOriginalPosition = getArguments().getInt(ARG_SUBTITLE_ORIGINAL_POSITION);
         subtitle = getArguments().getParcelable(ARG_SUBTITLE);
         mSelectedTask = getArguments().getParcelable(ARG_SELECTED_TASK);
-        userTaskErrorsList = getArguments().getParcelable(ARG_USER_TASK_ERROR);
+        userTaskErrorsList = getArguments().getParcelableArrayList(ARG_USER_TASK_ERROR);
     }
 
     @NonNull
@@ -162,8 +162,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
         setupReasons();
 
-        //TODO improve
-        currentSubtitlePosition = subtitleOriginalPosition; //We save the original subtitleOriginalPosition
 
         //
 //        List<ErrorReason> errorReasonList = new ArrayList<>();
@@ -264,9 +262,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
         mListView.setOnItemClickListener((adapterView, view, i, l) -> {
             selectedSubtitle = (Subtitle) adapterView.getItemAtPosition(i);
-            Log.d(TAG, "CPRCurrentPosition: " + currentSubtitlePosition);
+            Log.d(TAG, "CPRCurrentPosition: " + subtitleOriginalPosition);
             Log.d(TAG, "CPRNewPosition: " + (i + 1));
-            currentSubtitlePosition = i + 1;
+//            currentSubtitlePosition = i + 1;
 
             setupSubtitleNavigation(i + 1);
 
