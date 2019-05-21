@@ -39,4 +39,7 @@ public class User {
                 '}';
     }
 
+    public boolean isEmpty() {
+        return email == null || email.length() == 0 ;
+    }
 }

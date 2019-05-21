@@ -26,10 +26,6 @@ class MainViewModel extends ViewModel {
         mRepository.initializeSyncData();
     }
 
-    LiveData<Resource<User>> responseFromUserUpdate() {
-        return mRepository.responseFromUserUpdate();
-    }
-
     LiveData<TaskEntity[]> requestTasksByCategory(String category) {//TODO add Resource to taskEntity
         return mRepository.requestTaskByCategory(category);
     }

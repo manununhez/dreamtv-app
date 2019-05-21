@@ -1,25 +1,11 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
-
 package com.dream.dreamtv.ui.Settings;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -29,10 +15,11 @@ import android.widget.TextView;
 
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.utils.CheckableTextView;
-import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.InjectorUtils;
+import com.dream.dreamtv.utils.LoadingDialog;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
@@ -42,7 +29,18 @@ import java.util.Objects;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
-import static com.dream.dreamtv.utils.Constants.*;
+import static android.app.Activity.RESULT_OK;
+import static com.dream.dreamtv.utils.Constants.ADVANCED_INTERFACE_MODE;
+import static com.dream.dreamtv.utils.Constants.BEGINNER_INTERFACE_MODE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_AUDIO_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_MODE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUB_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TESTING_MODE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN;
+import static com.dream.dreamtv.utils.Constants.LANGUAGE_ENGLISH;
+import static com.dream.dreamtv.utils.Constants.LANGUAGE_POLISH;
+import static com.dream.dreamtv.utils.Constants.NONE_OPTIONS_CODE;
 
 
 public class SettingsFragment extends Fragment {
@@ -55,6 +53,7 @@ public class SettingsFragment extends Fragment {
     private static final String ABR_FRENCH = "fr";
     private static final String ABR_POLISH = "pl";
     private ListView mListView;
+    private LoadingDialog loadingDialog;
     private LinearLayout llBodyLanguages;
     private TextView tvSubtitleValue;
     private TextView tvAudioValue;
@@ -110,7 +109,7 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
+        mViewModel.getUserUpdated().removeObservers(getViewLifecycleOwner());
     }
 
     @Override
@@ -118,21 +117,22 @@ public class SettingsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         SettingsViewModelFactory factory = InjectorUtils.provideSettingsViewModelFactory(Objects.requireNonNull(getActivity()));
-//        mViewModel = ViewModelProviders.of(this, factory).get(SettingsViewModel.class);
         mViewModel = ViewModelProviders.of(this, factory).get(SettingsViewModel.class);
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
 
-
+        instantiateLoading();
         interfaceLanguageSettings();
         interfaceModeSettings();
         testingModeSettings();
-//        shareModeSettings();
         initializeLanguagesList();
         setupListView();
 
         setupEventsListener();
+
+        observeResponseFromUserUpdate();
+
 
         Log.d(TAG, "OnCreateSettingsActivity");
 
@@ -191,7 +191,6 @@ public class SettingsFragment extends Fragment {
         });
 
 
-
         btnSave.setOnClickListener(view -> saveUSerPreferences());
 
     }
@@ -244,7 +243,7 @@ public class SettingsFragment extends Fragment {
     }
 
     private void interfaceModeSettings() {
-        User user = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getUser();
+        User user = getApplication().getUser();
         if (user != null)
             if (user.interfaceMode.equals(BEGINNER_INTERFACE_MODE))
                 rbBeginner.setChecked(true);
@@ -252,10 +251,17 @@ public class SettingsFragment extends Fragment {
                 rbAdvanced.setChecked(true);
     }
 
+    private DreamTVApp getApplication() {
+        return ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
+    }
+
 
     private void saveUSerPreferences() {
+        User userCached = getApplication().getUser();
 
         User user = new User();
+        user.email = userCached.email;
+        user.password = userCached.password;
         user.subLanguage = selectedSubtitleLanguageCode;
         user.audioLanguage = selectedAudioLanguageCode;
         user.interfaceMode = rbBeginner.isChecked() ? BEGINNER_INTERFACE_MODE :
@@ -264,23 +270,52 @@ public class SettingsFragment extends Fragment {
                 LANGUAGE_ENGLISH; //interface language updated
 
 
-        DreamTVApp dreamTVApp = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
         //Save testing mode
         if (rbYes.isChecked())
-            dreamTVApp.setTestingMode(getString(R.string.text_yes_option));
+            getApplication().setTestingMode(getString(R.string.text_yes_option));
         else
-            dreamTVApp.setTestingMode(getString(R.string.text_no_option));
+            getApplication().setTestingMode(getString(R.string.text_no_option));
 
 
         firebaseAnalyticsReportEvent(user);
 
 
 //        if (isChangesAudioSubVerified())
-            mViewModel.updateUser(user);
 
-        getActivity().finish();
+        mViewModel.updateUser(user);
+        showLoading();
 
 
+    }
+
+
+    private void observeResponseFromUserUpdate() {
+//        mViewModel.responseFromUserUpdate().removeObservers(getViewLifecycleOwner());
+
+        mViewModel.getUserUpdated().observe(getViewLifecycleOwner(), response -> {
+            if (response != null) {
+                if (response.status.equals(Resource.Status.SUCCESS)) {
+                    Log.d(TAG, "Response from userUpdate");
+                    if (response.data != null) {
+                        Log.d(TAG, response.data.toString());
+
+                        Intent returnIntent = new Intent();
+                        Objects.requireNonNull(getActivity()).setResult(RESULT_OK, returnIntent);
+                        Objects.requireNonNull(getActivity()).finish();
+
+                    }
+                } else if (response.status.equals(Resource.Status.ERROR)) {
+                    //TODO do something error
+                    if (response.message != null)
+                        Log.d(TAG, response.message);
+                    else
+                        Log.d(TAG, "Status ERROR");
+                }
+
+            }
+
+            dismissLoading();
+        });
     }
 
     private boolean isChangesAudioSubVerified() {
@@ -304,6 +339,28 @@ public class SettingsFragment extends Fragment {
         mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN, bundle);
     }
 
+    //********************************************
+    // Loading and progress bar related functions
+    //********************************************
+    private void instantiateLoading() {
+        //TODO set loading in the viewmodel(?)
+        loadingDialog = new LoadingDialog(getActivity(), getString(R.string.title_loading_retrieve_tasks));
+        loadingDialog.setCanceledOnTouchOutside(false);
+    }
+
+    private void dismissLoading() {
+
+        //TODO use dismissLoading
+        loadingDialog.dismiss();
+    }
+
+
+    private void showLoading() {
+
+        //TODO use showLoading
+        loadingDialog.show();
+    }
+
 
     private void setupListView() {
         // Initialize a new ArrayAdapter
@@ -317,25 +374,22 @@ public class SettingsFragment extends Fragment {
         mListView.setAdapter(lvLanguagesAdapter);
 
         // Set an item click listener for the ListView
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                mListView.clearChoices();
-                mListView.setItemChecked(i, true);
+        mListView.setOnItemClickListener((adapterView, view, i, l) -> {
+            mListView.clearChoices();
+            mListView.setItemChecked(i, true);
 
-                String item = (String) mListView.getItemAtPosition(i);
+            String item = (String) mListView.getItemAtPosition(i);
 
-                if (btnSubtitle.isChecked()) {
-                    selectedSubtitleLanguageCode = languagesKeyListCode.get(keyListForAdapter.indexOf(item));
-                    tvSubtitleValue.setText(keyListForAdapter.get(languagesKeyListCode.indexOf(selectedSubtitleLanguageCode)));
-                }
-
-                if (btnAudio.isChecked()) {
-                    selectedAudioLanguageCode = languagesKeyListCode.get(keyListForAdapter.indexOf(item));
-                    tvAudioValue.setText(keyListForAdapter.get(languagesKeyListCode.indexOf(selectedAudioLanguageCode)));
-                }
-
+            if (btnSubtitle.isChecked()) {
+                selectedSubtitleLanguageCode = languagesKeyListCode.get(keyListForAdapter.indexOf(item));
+                tvSubtitleValue.setText(keyListForAdapter.get(languagesKeyListCode.indexOf(selectedSubtitleLanguageCode)));
             }
+
+            if (btnAudio.isChecked()) {
+                selectedAudioLanguageCode = languagesKeyListCode.get(keyListForAdapter.indexOf(item));
+                tvAudioValue.setText(keyListForAdapter.get(languagesKeyListCode.indexOf(selectedAudioLanguageCode)));
+            }
+
         });
 
 

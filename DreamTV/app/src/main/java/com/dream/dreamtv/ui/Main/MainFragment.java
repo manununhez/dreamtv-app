@@ -65,6 +65,7 @@ public class MainFragment extends BrowseSupportFragment {
 
     private static final String EMPTY_ITEM = "Some item";
     private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
+    private static final int REQUEST_SETTINGS = 45686;
     private ArrayObjectAdapter mRowsAdapter;
     private MainViewModel mViewModel;
     private LoadingDialog loadingDialog;
@@ -92,8 +93,6 @@ public class MainFragment extends BrowseSupportFragment {
         instantiateLoading();
 
         userRegistration();
-
-        observeResponseFromUserUpdate();
 
         initSettingsRow();
 
@@ -141,7 +140,6 @@ public class MainFragment extends BrowseSupportFragment {
     public void onDestroyView() {
         super.onDestroyView();
         Log.d(TAG, "onDestroyView");
-        mViewModel.responseFromUserUpdate().removeObservers(getViewLifecycleOwner());
         mViewModel.requestTasksByCategory(TASKS_ALL_CAT).removeObservers(getViewLifecycleOwner());
         mViewModel.requestTasksByCategory(TASKS_CONTINUE_CAT).removeObservers(getViewLifecycleOwner());
         mViewModel.requestTasksByCategory(TASKS_FINISHED_CAT).removeObservers(getViewLifecycleOwner());
@@ -221,36 +219,12 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
 
-    private void observeResponseFromUserUpdate() {
-        mViewModel.responseFromUserUpdate().removeObservers(getViewLifecycleOwner());
 
-        mViewModel.responseFromUserUpdate().observe(getViewLifecycleOwner(), new Observer<Resource<User>>() {
-            @Override
-            public void onChanged(@Nullable Resource<User> response) {
-                if (response != null) {
-                    if (response.status.equals(Resource.Status.SUCCESS)) {
-                        Log.d(TAG, "Response from userUpdate");
-                        if (response.data != null) {
-                            Log.d(TAG, response.data.toString());
-                            reInitScreen(response.data);
-                        }
-                    } else if (response.status.equals(Resource.Status.ERROR)) {
-                        //TODO do something error
-                        if (response.message != null)
-                            Log.d(TAG, response.message);
-                        else
-                            Log.d(TAG, "Status ERROR");
-                    }
-
-                }
-
-//                dismissLoading();
-            }
-        });
-    }
 
     private void reInitScreen(User user) {
 //        setupVideosList();
+
+        Log.d(TAG, "reInitScreen()");
         updateScreenLanguage(user);
 
         initializeSyncData();
@@ -436,6 +410,9 @@ public class MainFragment extends BrowseSupportFragment {
                 // Receiving a result from the AccountPicker
                 requestLogin(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
 
+            } else if(requestCode == REQUEST_SETTINGS){
+                User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+                reInitScreen(user);
             }
         }
 
@@ -450,7 +427,7 @@ public class MainFragment extends BrowseSupportFragment {
                 Card value = (Card) item;
                 if (value.getTitle().equals(SETTINGS_CAT)) {
                     Intent intent = new Intent(getActivity(), SettingsActivity.class);
-                    startActivity(intent);
+                    startActivityForResult(intent, REQUEST_SETTINGS);
                 } else {
                     TaskEntity taskEntity = value.getTaskEntity();
 

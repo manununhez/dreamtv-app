@@ -245,8 +245,10 @@ public class AppRepository {
     }
 
 
-    public void updateUser(final User user) {
+    public LiveData<Resource<User>> updateUser(final User user) {
         mNetworkDataSource.updateUser(user);
+
+        return mNetworkDataSource.responseFromUserUpdate();
     }
 
 
@@ -313,10 +315,6 @@ public class AppRepository {
 
     private LiveData<Resource<TaskEntity[]>> responseFromFetchMyListTasks() {
         return mNetworkDataSource.responseFromFetchMyListTasks();
-    }
-
-    public LiveData<Resource<User>> responseFromUserUpdate() {
-        return mNetworkDataSource.responseFromUserUpdate();
     }
 
     public LiveData<Resource<SubtitleResponse>> responseFromFetchSubtitle() {
