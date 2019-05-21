@@ -32,14 +32,7 @@ public class AppRepository {
 
         // As long as the repository exists, observe the network LiveData.
         // If that LiveData changes, update the database.
-        LiveData<Resource<TaskEntity[]>> newTasksEntities = responseFromFetchAllTasks();
-        LiveData<Resource<TaskEntity[]>> newContinueTasksEntities = responseFromFetchContinueTasks();
-        LiveData<Resource<TaskEntity[]>> newTestTasksEntities = responseFromFetchTestTasks();
-        LiveData<Resource<TaskEntity[]>> newFinishedTasksEntities = responseFromFetchFinishedTasks();
-        LiveData<Resource<TaskEntity[]>> newMyListTasksEntities = responseFromFetchMyListTasks();
-
-
-        newTasksEntities.observeForever(
+        responseFromFetchAllTasks().observeForever(
                 tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
                     if (tasksFromNetwork != null) {
                         if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
@@ -58,7 +51,7 @@ public class AppRepository {
                 }));
 
 
-        newContinueTasksEntities.observeForever(
+        responseFromFetchContinueTasks().observeForever(
                 tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
                     if (tasksFromNetwork != null) {
                         if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
@@ -77,7 +70,7 @@ public class AppRepository {
                 }));
 
 
-        newTestTasksEntities.observeForever(
+        responseFromFetchTestTasks().observeForever(
                 tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
                     if (tasksFromNetwork != null) {
                         if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
@@ -95,7 +88,7 @@ public class AppRepository {
                     }
                 }));
 
-        newFinishedTasksEntities.observeForever(
+        responseFromFetchFinishedTasks().observeForever(
                 tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
                     if (tasksFromNetwork != null) {
                         if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
@@ -113,7 +106,7 @@ public class AppRepository {
                     }
                 }));
 
-        newMyListTasksEntities.observeForever(
+        responseFromFetchMyListTasks().observeForever(
                 tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
                     if (tasksFromNetwork != null) {
                         if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
@@ -244,8 +237,6 @@ public class AppRepository {
 ////        }.asLiveData();
         mNetworkDataSource.syncData();
     }
-
-
 
 
     public void login(final String email, final String password) {

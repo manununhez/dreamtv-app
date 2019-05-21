@@ -30,9 +30,6 @@ import androidx.fragment.app.FragmentActivity;
  */
 public class VideoDetailsActivity extends FragmentActivity {
 
-
-    public boolean updateScreenAfterChanges = false;
-
     /**
      * Called when the activity is first created.
      */
@@ -42,16 +39,6 @@ public class VideoDetailsActivity extends FragmentActivity {
         setContentView(R.layout.activity_video_details);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (updateScreenAfterChanges) {
-            Intent returnIntent = new Intent();
-            setResult(Activity.RESULT_OK, returnIntent);
-            finish();
-        } else {
-            super.onBackPressed();
-        }
-    }
 
     @Override
     protected void attachBaseContext(Context base) {

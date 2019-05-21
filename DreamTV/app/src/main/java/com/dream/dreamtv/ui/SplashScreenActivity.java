@@ -35,9 +35,9 @@ public class SplashScreenActivity extends Activity {
             intent.setAction(Intent.ACTION_VIEW);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            SplashScreenActivity.this.startActivity(intent);
-            SplashScreenActivity.this.overridePendingTransition(0, 0);
-            SplashScreenActivity.this.finish();
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+            finish();
         }
     }
 }
