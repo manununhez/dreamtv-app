@@ -12,6 +12,13 @@ import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.utils.AppExecutors;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
+import static com.dream.dreamtv.utils.Constants.TASKS_ALL_CAT;
+import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
+import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
+import static com.dream.dreamtv.utils.Constants.TASKS_MY_LIST_CAT;
+import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
 
 public class AppRepository {
     private final static String TAG = AppRepository.class.getSimpleName();
@@ -30,99 +37,99 @@ public class AppRepository {
         mExecutors = executors;
 
 
-        // As long as the repository exists, observe the network LiveData.
-        // If that LiveData changes, update the database.
-        responseFromFetchAllTasks().observeForever(
-                tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
-                    if (tasksFromNetwork != null) {
-                        if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
-                            // Insert our new weather data into the database
-                            insertAllTasks(tasksFromNetwork.data);
-
-                            Log.d(TAG, "New values inserted");
-                        } else if (tasksFromNetwork.status.equals(Resource.Status.ERROR)) {
-                            //TODO do something
-                            if (tasksFromNetwork.message != null)
-                                Log.d(TAG, tasksFromNetwork.message);
-                            else
-                                Log.d(TAG, "Status ERROR");
-                        }
-                    }
-                }));
-
-
-        responseFromFetchContinueTasks().observeForever(
-                tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
-                    if (tasksFromNetwork != null) {
-                        if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
-                            // Insert our new weather data into the database
-                            insertAllTasks(tasksFromNetwork.data);
-
-                            Log.d(TAG, "New values inserted");
-                        } else if (tasksFromNetwork.status.equals(Resource.Status.ERROR)) {
-                            //TODO do something
-                            if (tasksFromNetwork.message != null)
-                                Log.d(TAG, tasksFromNetwork.message);
-                            else
-                                Log.d(TAG, "Status ERROR");
-                        }
-                    }
-                }));
-
-
-        responseFromFetchTestTasks().observeForever(
-                tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
-                    if (tasksFromNetwork != null) {
-                        if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
-                            // Insert our new weather data into the database
-                            insertAllTasks(tasksFromNetwork.data);
-
-                            Log.d(TAG, "New values inserted");
-                        } else if (tasksFromNetwork.status.equals(Resource.Status.ERROR)) {
-                            //TODO do something
-                            if (tasksFromNetwork.message != null)
-                                Log.d(TAG, tasksFromNetwork.message);
-                            else
-                                Log.d(TAG, "Status ERROR");
-                        }
-                    }
-                }));
-
-        responseFromFetchFinishedTasks().observeForever(
-                tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
-                    if (tasksFromNetwork != null) {
-                        if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
-                            // Insert our new weather data into the database
-                            insertAllTasks(tasksFromNetwork.data);
-
-                            Log.d(TAG, "New values inserted");
-                        } else if (tasksFromNetwork.status.equals(Resource.Status.ERROR)) {
-                            //TODO do something
-                            if (tasksFromNetwork.message != null)
-                                Log.d(TAG, tasksFromNetwork.message);
-                            else
-                                Log.d(TAG, "Status ERROR");
-                        }
-                    }
-                }));
-
-        responseFromFetchMyListTasks().observeForever(
-                tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
-                    if (tasksFromNetwork != null) {
-                        if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
-                            // Insert our new weather data into the database
-                            insertAllTasks(tasksFromNetwork.data);
-
-                            Log.d(TAG, "New values inserted");
-                        } else if (tasksFromNetwork.status.equals(Resource.Status.ERROR)) {
-                            //TODO do something
-                            if (tasksFromNetwork.message != null)
-                                Log.d(TAG, tasksFromNetwork.message);
-                            else
-                                Log.d(TAG, "Status ERROR");
-                        }
-                    }
-                }));
+//        // As long as the repository exists, observe the network LiveData.
+//        // If that LiveData changes, update the database.
+//        mNetworkDataSource.responseFromFetchAllTasks().observeForever(
+//                tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
+//                    if (tasksFromNetwork != null) {
+//                        if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
+//                            // Insert our new weather data into the database
+//                            insertAllTasks(tasksFromNetwork.data);
+//
+//                            Log.d(TAG, "New values inserted");
+//                        } else if (tasksFromNetwork.status.equals(Resource.Status.ERROR)) {
+//                            //TODO do something
+//                            if (tasksFromNetwork.message != null)
+//                                Log.d(TAG, tasksFromNetwork.message);
+//                            else
+//                                Log.d(TAG, "Status ERROR");
+//                        }
+//                    }
+//                }));
+//
+//
+//        mNetworkDataSource.responseFromFetchContinueTasks().observeForever(
+//                tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
+//                    if (tasksFromNetwork != null) {
+//                        if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
+//                            // Insert our new weather data into the database
+//                            insertAllTasks(tasksFromNetwork.data);
+//
+//                            Log.d(TAG, "New values inserted");
+//                        } else if (tasksFromNetwork.status.equals(Resource.Status.ERROR)) {
+//                            //TODO do something
+//                            if (tasksFromNetwork.message != null)
+//                                Log.d(TAG, tasksFromNetwork.message);
+//                            else
+//                                Log.d(TAG, "Status ERROR");
+//                        }
+//                    }
+//                }));
+//
+//
+//        mNetworkDataSource.responseFromFetchTestTasks().observeForever(
+//                tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
+//                    if (tasksFromNetwork != null) {
+//                        if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
+//                            // Insert our new weather data into the database
+//                            insertAllTasks(tasksFromNetwork.data);
+//
+//                            Log.d(TAG, "New values inserted");
+//                        } else if (tasksFromNetwork.status.equals(Resource.Status.ERROR)) {
+//                            //TODO do something
+//                            if (tasksFromNetwork.message != null)
+//                                Log.d(TAG, tasksFromNetwork.message);
+//                            else
+//                                Log.d(TAG, "Status ERROR");
+//                        }
+//                    }
+//                }));
+//
+//        mNetworkDataSource.responseFromFetchFinishedTasks().observeForever(
+//                tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
+//                    if (tasksFromNetwork != null) {
+//                        if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
+//                            // Insert our new weather data into the database
+//                            insertAllTasks(tasksFromNetwork.data);
+//
+//                            Log.d(TAG, "New values inserted");
+//                        } else if (tasksFromNetwork.status.equals(Resource.Status.ERROR)) {
+//                            //TODO do something
+//                            if (tasksFromNetwork.message != null)
+//                                Log.d(TAG, tasksFromNetwork.message);
+//                            else
+//                                Log.d(TAG, "Status ERROR");
+//                        }
+//                    }
+//                }));
+//
+//        mNetworkDataSource.responseFromFetchMyListTasks().observeForever(
+//                tasksFromNetwork -> mExecutors.diskIO().execute(() -> {
+//                    if (tasksFromNetwork != null) {
+//                        if (tasksFromNetwork.status.equals(Resource.Status.SUCCESS)) {
+//                            // Insert our new weather data into the database
+//                            insertAllTasks(tasksFromNetwork.data);
+//
+//                            Log.d(TAG, "New values inserted");
+//                        } else if (tasksFromNetwork.status.equals(Resource.Status.ERROR)) {
+//                            //TODO do something
+//                            if (tasksFromNetwork.message != null)
+//                                Log.d(TAG, tasksFromNetwork.message);
+//                            else
+//                                Log.d(TAG, "Status ERROR");
+//                        }
+//                    }
+//                }));
 
     }
 
@@ -145,14 +152,52 @@ public class AppRepository {
     //  Database related operation
     //****************************
 
-    private void insertAllTasks(final TaskEntity[] taskList) {
-        mTaskDao.bulkInsert(taskList);
-    }
+//    private void insertAllTasks(final TaskEntity[] taskList) {
+//        mTaskDao.bulkInsert(taskList);
+//    }
 
 
-    public LiveData<TaskEntity[]> requestTaskByCategory(String category) {
-        return mTaskDao.getTasksByCategory(category);
+    public LiveData<Resource<TaskEntity[]>> requestTaskByCategory(String category) {
+        switch (category) {
+            case TASKS_MY_LIST_CAT:
+                return mNetworkDataSource.responseFromFetchMyListTasks();
+            case TASKS_FINISHED_CAT:
+                return mNetworkDataSource.responseFromFetchFinishedTasks();
+            case TASKS_CONTINUE_CAT:
+                return mNetworkDataSource.responseFromFetchContinueTasks();
+            case TASKS_ALL_CAT:
+                return mNetworkDataSource.responseFromFetchAllTasks();
+            case TASKS_TEST_CAT:
+                return mNetworkDataSource.responseFromFetchTestTasks();
+            default:
+                return mNetworkDataSource.responseFromFetchAllTasks();
+
+        }
     }
+
+//    public LiveData<TaskEntity[]> requestTaskByCategory(String category) {
+//        return mTaskDao.requestTaskByCategory(category);
+//    }
+
+//    private LiveData<Resource<TaskEntity[]>> responseFromFetchAllTasks() {
+//        return mNetworkDataSource.responseFromFetchAllTasks();
+//    }
+//
+//    private LiveData<Resource<TaskEntity[]>> responseFromFetchContinueTasks() {
+//        return mNetworkDataSource.responseFromFetchContinueTasks();
+//    }
+//
+//    private LiveData<Resource<TaskEntity[]>> responseFromFetchTestTasks() {
+//        return mNetworkDataSource.responseFromFetchTestTasks();
+//    }
+//
+//    private LiveData<Resource<TaskEntity[]>> responseFromFetchFinishedTasks() {
+//        return mNetworkDataSource.responseFromFetchFinishedTasks();
+//    }
+//
+//    private LiveData<Resource<TaskEntity[]>> responseFromFetchMyListTasks() {
+//        return mNetworkDataSource.responseFromFetchMyListTasks();
+//    }
 
 
     /**
@@ -166,20 +211,32 @@ public class AppRepository {
 //        if (mInitialized) return;
 //        mInitialized = true;
 
-        mExecutors.diskIO().execute(() -> {
-//            if (isFetchNeeded()) { //TODO add this isFetchNeeded. Use NetworkBoundResource Class
-            deleteOldData();
-            startFetchingData();
+        //            if (isFetchNeeded()) { //TODO add this isFetchNeeded. Use NetworkBoundResource Class
 //            }
-        });
+//        mExecutors.diskIO().execute(this::deleteOldData);
+
+        startFetchingData();
     }
 
-    private void deleteOldData() {
-        mTaskDao.deleteAll();
-    }
+//    private void deleteOldData() {
+//        mTaskDao.deleteAll();
+//    }
 
-    public LiveData<TaskEntity> verifyIfTaskIsInList(TaskEntity taskEntity, String category) {
-        return mTaskDao.verifyTask(taskEntity.taskId, category);
+    public boolean verifyIfTaskIsInList(TaskEntity taskEntity) {
+
+        Resource<TaskEntity[]> results = mNetworkDataSource.responseFromFetchMyListTasks().getValue();
+        if (results != null && results.data != null) {
+            if (results.data.length > 0) {
+                for (TaskEntity entity : results.data) {
+                    if (taskEntity.taskId == entity.taskId)
+                        return true;
+                }
+            }
+        }
+//        return mTaskDao.verifyTask(taskEntity.taskId, TASKS_MY_LIST_CAT);
+
+
+        return false;
     }
 
 
@@ -244,80 +301,61 @@ public class AppRepository {
         mNetworkDataSource.login(email, password);
     }
 
+    public void updateTasksCategory(String category) {
+        switch (category) {
+            case TASKS_MY_LIST_CAT:
+                mNetworkDataSource.updateMyListTaskCategory();
+                break;
+            case TASKS_FINISHED_CAT:
+                mNetworkDataSource.updateFinishedTaskCategory();
+                break;
+            case TASKS_CONTINUE_CAT:
+                mNetworkDataSource.updateContinueTaskCategory();
+                break;
+            case TASKS_ALL_CAT:
+                mNetworkDataSource.updateAllTaskCategory();
+                break;
+            case TASKS_TEST_CAT:
+                mNetworkDataSource.updateTestTaskCategory();
+                break;
+            default:
+                mNetworkDataSource.updateAllTaskCategory();
+                break;
+        }
+    }
+
 
     public LiveData<Resource<User>> updateUser(final User user) {
-        mNetworkDataSource.updateUser(user);
-
-        return mNetworkDataSource.responseFromUserUpdate();
+        return mNetworkDataSource.updateUser(user);
     }
 
 
-    public void fetchSubtitle(String videoId, String languageCode, int version) {
-        mNetworkDataSource.fetchSubtitle(videoId, languageCode, version);
+    public LiveData<Resource<SubtitleResponse>> fetchSubtitle(String videoId, String languageCode, int version) {
+        return mNetworkDataSource.fetchSubtitle(videoId, languageCode, version);
     }
 
-    public void fetchTaskErrorDetails(int taskId) {
-        mNetworkDataSource.fetchTaskErrorDetails(taskId);
+    public LiveData<Resource<UserTask>> fetchTaskErrorDetails(int taskId) {
+        return mNetworkDataSource.fetchTaskErrorDetails(taskId);
     }
 
 
-    public void createUserTask(TaskEntity taskEntity, int mSubtitleVersion) {
-        //TODO add to the db and with webservice
-        mExecutors.diskIO().execute(() -> {
-            mTaskDao.insert(taskEntity);
-        });
-
-        mNetworkDataSource.createUserTask(taskEntity.taskId, mSubtitleVersion);
+    public LiveData<Resource<UserTask>> createUserTask(TaskEntity taskEntity, int mSubtitleVersion) {
+        return mNetworkDataSource.createUserTask(taskEntity.taskId, mSubtitleVersion);
     }
 
-    public void requestAddToList(TaskEntity taskEntity) {
-        //TODO add to the db and with webservice
-        mExecutors.diskIO().execute(() -> {
-            mTaskDao.insert(taskEntity);
-        });
+    public MutableLiveData<Resource<Boolean>> requestAddToList(TaskEntity taskEntity) {
 
-        mNetworkDataSource.addTaskToList(taskEntity.taskId, taskEntity.language, taskEntity.video.primaryAudioLanguageCode);
+//        mExecutors.diskIO().execute(() -> mTaskDao.insert(taskEntity));
+
+        return mNetworkDataSource.addTaskToList(taskEntity.taskId, taskEntity.language, taskEntity.video.primaryAudioLanguageCode);
 
     }
 
-    public void requestRemoveFromList(int taskId, String category) {
-        //TODO remove from the db and from the webservice
-        mExecutors.diskIO().execute(() -> {
-            mTaskDao.deleteByTaskIdAndCategory(taskId, category);
-        });
+    public MutableLiveData<Resource<Boolean>> requestRemoveFromList(int taskId, String category) {
+//        mExecutors.diskIO().execute(() -> mTaskDao.deleteByTaskIdAndCategory(taskId, category));
 
-        mNetworkDataSource.removeTaskFromList(taskId);
+        return mNetworkDataSource.removeTaskFromList(taskId);
     }
 
-    public LiveData<Resource<UserTask>> responseFromCreateUserTask() {
-        return mNetworkDataSource.responseFromCreateUserTask();
-    }
 
-    public LiveData<Resource<UserTask>> responseFromFetchUserTaskErrorDetails() {
-        return mNetworkDataSource.responseFromFetchUserTaskErrorDetails();
-    }
-
-    private LiveData<Resource<TaskEntity[]>> responseFromFetchAllTasks() {
-        return mNetworkDataSource.responseFromFetchAllTasks();
-    }
-
-    private LiveData<Resource<TaskEntity[]>> responseFromFetchContinueTasks() {
-        return mNetworkDataSource.responseFromFetchContinueTasks();
-    }
-
-    private LiveData<Resource<TaskEntity[]>> responseFromFetchTestTasks() {
-        return mNetworkDataSource.responseFromFetchTestTasks();
-    }
-
-    private LiveData<Resource<TaskEntity[]>> responseFromFetchFinishedTasks() {
-        return mNetworkDataSource.responseFromFetchFinishedTasks();
-    }
-
-    private LiveData<Resource<TaskEntity[]>> responseFromFetchMyListTasks() {
-        return mNetworkDataSource.responseFromFetchMyListTasks();
-    }
-
-    public LiveData<Resource<SubtitleResponse>> responseFromFetchSubtitle() {
-        return mNetworkDataSource.responseFromFetchSubtitle();
-    }
 }

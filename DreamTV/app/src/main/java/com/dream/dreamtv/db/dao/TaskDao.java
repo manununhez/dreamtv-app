@@ -17,7 +17,7 @@ public interface TaskDao {
      * @return {@link TaskEntity} task entry
      */
     @Query("SELECT * FROM task_table WHERE category = :category")
-    LiveData<TaskEntity[]> getTasksByCategory(String category);
+    LiveData<TaskEntity[]> requestTaskByCategory(String category);
 
 
     /**

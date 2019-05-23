@@ -84,7 +84,7 @@ public abstract class AppRoomDatabase extends RoomDatabase {
         protected Void doInBackground(final Void... params) {
             // Start the app with a clean database every time.
             // Not needed if you only populate on creation.
-            mTaskDao.deleteAll();
+//            mTaskDao.deleteAll();
 
             return null;
         }

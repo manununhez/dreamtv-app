@@ -31,18 +31,16 @@ import com.dream.dreamtv.presenter.IconCardPresenter;
 import com.dream.dreamtv.presenter.SideInfoCardPresenter;
 import com.dream.dreamtv.ui.Settings.SettingsActivity;
 import com.dream.dreamtv.ui.VideoDetails.VideoDetailsActivity;
-import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
-import com.dream.dreamtv.utils.LocaleHelper;
 import com.google.android.gms.common.AccountPicker;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
@@ -54,10 +52,17 @@ import androidx.leanback.widget.OnItemViewClickedListener;
 import androidx.leanback.widget.Presenter;
 import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
-import androidx.lifecycle.Observer;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
-import static com.dream.dreamtv.utils.Constants.*;
+import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
+import static com.dream.dreamtv.utils.Constants.INTENT_USER_DATA_TASK;
+import static com.dream.dreamtv.utils.Constants.SETTINGS_CAT;
+import static com.dream.dreamtv.utils.Constants.TASKS_ALL_CAT;
+import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
+import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
+import static com.dream.dreamtv.utils.Constants.TASKS_MY_LIST_CAT;
+import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
 
 
 public class MainFragment extends BrowseSupportFragment {
@@ -75,6 +80,11 @@ public class MainFragment extends BrowseSupportFragment {
     private ListRow rowFinishedTasks;
     private ListRow rowContinueTasks;
     private ListRow rowTestTasks;
+    private LiveData<Resource<TaskEntity[]>> allTaskLiveData;
+    private LiveData<Resource<TaskEntity[]>> continueTaskLiveData;
+    private LiveData<Resource<TaskEntity[]>> finishedTaskLiveData;
+    private LiveData<Resource<TaskEntity[]>> myListTaskLiveData;
+    private LiveData<Resource<TaskEntity[]>> testTaskLiveData;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -86,15 +96,16 @@ public class MainFragment extends BrowseSupportFragment {
         mViewModel = ViewModelProviders.of(this, factory).get(MainViewModel.class);
 
         setupUIElements();
+
         setupVideosList();
 
         setupEventListeners();
 
         instantiateLoading();
 
-        userRegistration();
-
         initSettingsRow();
+
+        userRegistration();
 
         populateScreen();
     }
@@ -129,22 +140,26 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
 
-    private void initializeSyncData() {
-        Log.d(TAG, "initializeSyncData()");
-
-//        showLoading();
-        mViewModel.initializeSyncData();
-    }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         Log.d(TAG, "onDestroyView");
-        mViewModel.requestTasksByCategory(TASKS_ALL_CAT).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(TASKS_CONTINUE_CAT).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(TASKS_FINISHED_CAT).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(TASKS_MY_LIST_CAT).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(TASKS_TEST_CAT).removeObservers(getViewLifecycleOwner());
+
+        if (allTaskLiveData != null)
+            allTaskLiveData.removeObservers(getViewLifecycleOwner());
+
+        if (continueTaskLiveData != null)
+            continueTaskLiveData.removeObservers(getViewLifecycleOwner());
+
+        if (finishedTaskLiveData != null)
+            finishedTaskLiveData.removeObservers(getViewLifecycleOwner());
+
+        if (myListTaskLiveData != null)
+            myListTaskLiveData.removeObservers(getViewLifecycleOwner());
+
+        if (testTaskLiveData != null)
+            testTaskLiveData.removeObservers(getViewLifecycleOwner());
 
 
     }
@@ -154,108 +169,153 @@ public class MainFragment extends BrowseSupportFragment {
         reorderRowSettings();
 
 
-        mViewModel.requestTasksByCategory(TASKS_ALL_CAT).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(TASKS_ALL_CAT).observe(getViewLifecycleOwner(), taskEntities -> {
-            if (taskEntities.length > 0)
-                loadVideos(taskEntities, TASKS_ALL_CAT);
-            else verifyRowExistenceAndRemove(rowAllTasks);
-        });
+        allTaskLiveData = mViewModel.requestTasksByCategory(TASKS_ALL_CAT);
+        allTaskLiveData.removeObservers(getViewLifecycleOwner());
+        allTaskLiveData.observe(getViewLifecycleOwner(), taskEntities -> {
 
-        mViewModel.requestTasksByCategory(TASKS_CONTINUE_CAT).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(TASKS_CONTINUE_CAT).observe(getViewLifecycleOwner(), taskEntities -> {
-            if (taskEntities.length > 0)
-                loadVideos(taskEntities, TASKS_CONTINUE_CAT);
-            else verifyRowExistenceAndRemove(rowContinueTasks);
+            if (taskEntities.status.equals(Resource.Status.LOADING))
+                showLoading();
+            else if (taskEntities.status.equals(Resource.Status.SUCCESS)) {
+                if (taskEntities.data != null && taskEntities.data.length > 0)
+                    loadVideos(taskEntities.data);
+                else verifyRowExistenceAndRemove(rowAllTasks);
 
-        });
+                Log.d(TAG, "task response");
 
-        mViewModel.requestTasksByCategory(TASKS_FINISHED_CAT).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(TASKS_FINISHED_CAT).observe(getViewLifecycleOwner(), taskEntities -> {
-            if (taskEntities.length > 0)
-                loadVideos(taskEntities, TASKS_FINISHED_CAT);
-            else verifyRowExistenceAndRemove(rowFinishedTasks);
+                dismissLoading();
+            } else if (taskEntities.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (taskEntities.message != null)
+                    Log.d(TAG, taskEntities.message);
+                else
+                    Log.d(TAG, "Status ERROR");
 
-        });
-
-        mViewModel.requestTasksByCategory(TASKS_MY_LIST_CAT).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(TASKS_MY_LIST_CAT).observe(getViewLifecycleOwner(), taskEntities -> {
-            if (taskEntities.length > 0)
-                loadVideos(taskEntities, TASKS_MY_LIST_CAT);
-            else verifyRowExistenceAndRemove(rowMyListTasks);
+                dismissLoading();
+            }
 
         });
 
+        continueTaskLiveData = mViewModel.requestTasksByCategory(TASKS_CONTINUE_CAT);
+        continueTaskLiveData.removeObservers(getViewLifecycleOwner());
+        continueTaskLiveData.observe(getViewLifecycleOwner(), taskEntities -> {
+            if (taskEntities.status.equals(Resource.Status.LOADING))
+                showLoading();
+            else if (taskEntities.status.equals(Resource.Status.SUCCESS)) {
+                if (taskEntities.data != null && taskEntities.data.length > 0)
+                    loadVideos(taskEntities.data);
+                else verifyRowExistenceAndRemove(rowContinueTasks);
 
-        mViewModel.requestTasksByCategory(TASKS_TEST_CAT).removeObservers(getViewLifecycleOwner());
-        mViewModel.requestTasksByCategory(TASKS_TEST_CAT).observe(getViewLifecycleOwner(), taskEntities -> {
-            if (taskEntities.length > 0)
-                loadVideos(taskEntities, TASKS_TEST_CAT);
-            else verifyRowExistenceAndRemove(rowTestTasks);
+                Log.d(TAG, "task response");
+
+                dismissLoading();
+            } else if (taskEntities.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (taskEntities.message != null)
+                    Log.d(TAG, taskEntities.message);
+                else
+                    Log.d(TAG, "Status ERROR");
+
+                dismissLoading();
+            }
+
+            throw new RuntimeException("Get list sorted of continued tasks");
 
         });
 
+        finishedTaskLiveData = mViewModel.requestTasksByCategory(TASKS_FINISHED_CAT);
+        finishedTaskLiveData.removeObservers(getViewLifecycleOwner());
+        finishedTaskLiveData.observe(getViewLifecycleOwner(), taskEntities -> {
+            if (taskEntities.status.equals(Resource.Status.LOADING))
+                showLoading();
+            else if (taskEntities.status.equals(Resource.Status.SUCCESS)) {
+                if (taskEntities.data != null && taskEntities.data.length > 0)
+                    loadVideos(taskEntities.data);
+                else verifyRowExistenceAndRemove(rowFinishedTasks);
+
+                Log.d(TAG, "task response");
+                dismissLoading();
+            } else if (taskEntities.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (taskEntities.message != null)
+                    Log.d(TAG, taskEntities.message);
+                else
+                    Log.d(TAG, "Status ERROR");
+
+                dismissLoading();
+            }
+
+            throw new RuntimeException("Get list sorted of finished tasks");
+
+        });
+
+        myListTaskLiveData = mViewModel.requestTasksByCategory(TASKS_MY_LIST_CAT);
+        myListTaskLiveData.removeObservers(getViewLifecycleOwner());
+        myListTaskLiveData.observe(getViewLifecycleOwner(), taskEntities -> {
+            if (taskEntities.status.equals(Resource.Status.LOADING))
+                showLoading();
+            else if (taskEntities.status.equals(Resource.Status.SUCCESS)) {
+                if (taskEntities.data != null && taskEntities.data.length > 0) {
+                    Log.d(TAG, "task response My list:[" + taskEntities.data.length + "]" + Arrays.toString(taskEntities.data));
+
+                    loadVideos(taskEntities.data);
+                } else verifyRowExistenceAndRemove(rowMyListTasks);
+
+                dismissLoading();
+            } else if (taskEntities.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (taskEntities.message != null)
+                    Log.d(TAG, taskEntities.message);
+                else
+                    Log.d(TAG, "Status ERROR");
+
+                dismissLoading();
+            }
+
+            throw new RuntimeException("Get list sorted of my list tasks");
+
+        });
+
+        if (getApplication().getTestingMode().equals(getString(R.string.text_yes_option)))
+            callTestTasks();
+
+    }
+
+    private void callTestTasks() {
+        testTaskLiveData = mViewModel.requestTasksByCategory(TASKS_TEST_CAT);
+        testTaskLiveData.removeObservers(getViewLifecycleOwner());
+        testTaskLiveData.observe(getViewLifecycleOwner(), taskEntities -> {
+            if (taskEntities.status.equals(Resource.Status.LOADING))
+                showLoading();
+            else if (taskEntities.status.equals(Resource.Status.SUCCESS)) {
+                if (taskEntities.data != null && taskEntities.data.length > 0)
+                    loadVideos(taskEntities.data);
+                else verifyRowExistenceAndRemove(rowTestTasks);
+
+                Log.d(TAG, "task response");
+
+                dismissLoading();
+            } else if (taskEntities.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (taskEntities.message != null)
+                    Log.d(TAG, taskEntities.message);
+                else
+                    Log.d(TAG, "Status ERROR");
+
+                dismissLoading();
+            }
+
+        });
     }
 
 
-    //********************************************
-    // Loading and progress bar related functions
-    //********************************************
-    private void instantiateLoading() {
-        loadingDialog = new LoadingDialog(getActivity(), getString(R.string.title_loading_retrieve_tasks));
-        loadingDialog.setCanceledOnTouchOutside(false);
+    private DreamTVApp getApplication() {
+        return ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
     }
-
-    private void dismissLoading() {
-
-        //TODO use dismissLoading
-        loadingDialog.dismiss();
-    }
-
-
-    private void showLoading() {
-
-        //TODO use showLoading
-        loadingDialog.show();
-    }
-
-
-
-
-    private void reInitScreen(User user) {
-//        setupVideosList();
-
-        Log.d(TAG, "reInitScreen()");
-        updateScreenLanguage(user);
-
-        initializeSyncData();
-    }
-
-
-    private void updateScreenLanguage(User user) {
-        if (!LocaleHelper.getLanguage(getActivity()).equals(user.interfaceLanguage)) {
-            LocaleHelper.setLocale(getActivity(), user.interfaceLanguage);
-            Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
-            Log.d(TAG, "Different language. Updating screen.");
-        } else {
-            //we check is we are not in testing mode. If the language screen does not recreate the activity,
-            // we manually delete the row testing
-            DreamTVApp dreamTVApp = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
-            if (dreamTVApp.getTestingMode().equals(getString(R.string.text_no_option)))
-                verifyRowExistenceAndRemove(rowTestTasks);
-
-        }
-    }
-
-    private void verifyRowExistenceAndRemove(ListRow listRow) {
-        if (mRowsAdapter.indexOf(listRow) != -1)
-            mRowsAdapter.remove(listRow);
-    }
-
 
     private void userRegistration() {
 
         Log.d(TAG, "userRegistration()");
-        String token = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getToken();
+        String token = getApplication().getToken();
         User user = ((DreamTVApp) getActivity().getApplication()).getUser();
         if (token == null || user == null) //first time the app is initiated. The user has to select an account
             pickUserAccount();
@@ -283,80 +343,72 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
 
-    private void loadVideos(TaskEntity[] tasks, String category) {
+    private void loadVideos(TaskEntity[] tasks) {
 
-        if (tasks != null) {
-            Log.d(TAG, "Loading videos => Category:" + category);
+        String category = tasks[0].category;
 
-            List<Card> cards = new ArrayList<>();
+        Log.d(TAG, "Loading videos => Category:" + category);
 
-            for (TaskEntity task : tasks) {
-                cards.add(new Card(task));
-            }
+        List<Card> cards = new ArrayList<>();
 
-
-            DiffCallback<Card> diffCallback = new DiffCallback<Card>() {
-                @Override
-                public boolean areItemsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
-                    return oldItem.getTaskEntity().id == newItem.getTaskEntity().id;
-                }
-
-                @Override
-                public boolean areContentsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
-                    return oldItem.getTaskEntity().equals(newItem.getTaskEntity());
-                }
-            };
-
-
-            ListRow listRow;
-            switch (category) {
-                case TASKS_MY_LIST_CAT:
-                    listRow = rowMyListTasks;
-                    break;
-                case TASKS_FINISHED_CAT:
-                    listRow = rowFinishedTasks;
-                    break;
-                case TASKS_CONTINUE_CAT:
-                    listRow = rowContinueTasks;
-                    break;
-                case TASKS_ALL_CAT:
-                    listRow = rowAllTasks;
-                    break;
-                case TASKS_TEST_CAT:
-                    listRow = rowTestTasks;
-                    break;
-                default:
-                    listRow = rowAllTasks;
-                    break;
-            }
-
-
-            int indexOfRow = mRowsAdapter.indexOf(listRow);
-
-            ArrayObjectAdapter arrayObjectAdapter = ((ArrayObjectAdapter) listRow.getAdapter());
-            if (indexOfRow != -1) {
-                arrayObjectAdapter.setItems(cards, diffCallback);
-//                mRowsAdapter.remove(listRow);
-            } else {
-
-                arrayObjectAdapter.addAll(arrayObjectAdapter.size(), cards);
-
-                mRowsAdapter.add(0, listRow);
-            }
-
-
-            //TEMP - To check size of rows----
-//            HeaderItem headerItem = listRow.getHeaderItem();
-//            StringBuilder name = new StringBuilder(headerItem.getName());
-//            String value = "(".concat(String.valueOf(listRow.getAdapter().size())).concat(")");
-//            if(name.lastIndexOf("(") != -1) name.replace(name.lastIndexOf("("), name.length(), value);
-//            else name.append(value);
-//            listRow.setHeaderItem(new HeaderItem(name.toString()));
-            //-----
-
-
-            setAdapter(mRowsAdapter);
+        for (TaskEntity task : tasks) {
+            cards.add(new Card(task));
         }
+
+
+        DiffCallback<Card> diffCallback = new DiffCallback<Card>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
+                return oldItem.getTaskEntity().id == newItem.getTaskEntity().id;
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
+                return oldItem.getTaskEntity().equals(newItem.getTaskEntity());
+            }
+        };
+
+
+        ListRow listRow;
+        switch (category) {
+            case TASKS_MY_LIST_CAT:
+                listRow = rowMyListTasks;
+                break;
+            case TASKS_FINISHED_CAT:
+                listRow = rowFinishedTasks;
+                break;
+            case TASKS_CONTINUE_CAT:
+                listRow = rowContinueTasks;
+                break;
+            case TASKS_ALL_CAT:
+                listRow = rowAllTasks;
+                break;
+            case TASKS_TEST_CAT:
+                listRow = rowTestTasks;
+                break;
+            default:
+                listRow = rowAllTasks;
+                break;
+        }
+
+
+        int indexOfRow = mRowsAdapter.indexOf(listRow);
+
+        ArrayObjectAdapter arrayObjectAdapter = ((ArrayObjectAdapter) listRow.getAdapter());
+
+        if (indexOfRow != -1)
+            arrayObjectAdapter.setItems(cards, diffCallback);
+        else {
+
+            arrayObjectAdapter.clear(); //clear row before add new ones
+
+            arrayObjectAdapter.addAll(arrayObjectAdapter.size(), cards);
+
+            mRowsAdapter.add(0, listRow);
+        }
+
+        setAdapter(mRowsAdapter);
+
     }
 
 
@@ -367,9 +419,16 @@ public class MainFragment extends BrowseSupportFragment {
         if (lastIndexOf == -1) //If settings already exists, first we remove it and then add it to the end of the list
             mRowsAdapter.add(rowSettings);
 
-//        mRowsAdapter.add(rowSettings);
-
         setAdapter(mRowsAdapter);
+    }
+
+    private void verifyRowExistenceAndRemove(ListRow listRow) {
+
+        if (mRowsAdapter.indexOf(listRow) != -1) {
+            ((ArrayObjectAdapter) listRow.getAdapter()).clear();//clear elements from row
+
+            mRowsAdapter.remove(listRow);
+        }
     }
 
 
@@ -410,12 +469,49 @@ public class MainFragment extends BrowseSupportFragment {
                 // Receiving a result from the AccountPicker
                 requestLogin(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
 
-            } else if(requestCode == REQUEST_SETTINGS){
-                User user = ((DreamTVApp) getActivity().getApplication()).getUser();
-                reInitScreen(user);
+            } else if (requestCode == REQUEST_SETTINGS) {
+                boolean restart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
+
+                if (restart) {
+                    //To update screen language
+                    Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
+                    Log.d(TAG, "REQUEST_SETTINGS - Different language. Updating screen.");
+                } else {
+
+//                    boolean callTasks = data.getBooleanExtra(INTENT_EXTRA_CALL_TASKS, false);
+//                    if (callTasks) {
+//                        populateScreen();
+//                        Log.d(TAG, "REQUEST_SETTINGS - Call all Tasks again.");
+//                    } else {
+                    //we check is we are not in testing mode. If the language screen does not recreate the activity,
+                    // we manually delete the row testing
+                    if (getApplication().getTestingMode().equals(getString(R.string.text_no_option)))
+                        verifyRowExistenceAndRemove(rowTestTasks);
+                    else {
+                        callTestTasks();
+                        Log.d(TAG, "REQUEST_SETTINGS - Call only test Tasks again.");
+                    }
+//                    }
+                }
             }
         }
 
+    }
+
+    //********************************************
+    // Loading and progress bar related functions
+    //********************************************
+    private void instantiateLoading() {
+        loadingDialog = new LoadingDialog(getActivity(), getString(R.string.title_loading_retrieve_tasks));
+        loadingDialog.setCanceledOnTouchOutside(false);
+    }
+
+    private void dismissLoading() {
+        loadingDialog.dismiss();
+    }
+
+    private void showLoading() {
+        loadingDialog.show();
     }
 
     private final class ItemViewClickedListener implements OnItemViewClickedListener {

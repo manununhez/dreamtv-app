@@ -13,15 +13,15 @@ import androidx.lifecycle.ViewModel;
 class SettingsViewModel extends ViewModel {
 
     private final AppRepository mRepository;
-    private final MutableLiveData<User> liveUser;
+    private final MutableLiveData<User> userMutableLiveData;
     private final LiveData<Resource<User>> user;
 
     SettingsViewModel(AppRepository appRepository) {
         mRepository = appRepository;
 
-        this.liveUser = new MutableLiveData<>();
+        userMutableLiveData = new MutableLiveData<>();
 
-        user = Transformations.switchMap(liveUser, input -> {
+        user = Transformations.switchMap(userMutableLiveData, input -> {
             if (input.isEmpty()) {
                 return AbsentLiveData.create();
             }
@@ -30,11 +30,9 @@ class SettingsViewModel extends ViewModel {
     }
 
 
-    void updateUser(User user) {
-        liveUser.setValue(user);
-    }
+    LiveData<Resource<User>> updateUser(User userData) {
+        userMutableLiveData.setValue(userData);
 
-    LiveData<Resource<User>> getUserUpdated() {
         return user;
     }
 

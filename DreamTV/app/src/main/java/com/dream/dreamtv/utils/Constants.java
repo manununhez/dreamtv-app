@@ -20,6 +20,15 @@ public class Constants {
     public static final String INTENT_USER_DATA_TASK = "INTENT_USER_DATA_TASK";
     public static final String INTENT_USER_DATA_SUBTITLE = "INTENT_USER_DATA_SUBTITLE";
     public static final String INTENT_USER_DATA_TASK_ERRORS = "INTENT_USER_DATA_TASK_ERRORS";
+    public static final String INTENT_EXTRA_CALL_TASKS = "callTasks";
+    public static final String INTENT_EXTRA_RESTART = "restart";
+
+    public static final String ABR_CHINESE = "zh";
+    public static final String ABR_ENGLISH = "en";
+    public static final String ABR_SPANISH = "es";
+    public static final String ABR_ARABIC = "ar";
+    public static final String ABR_FRENCH = "fr";
+    public static final String ABR_POLISH = "pl";
 
     //Types of tasks and categories
     public static final String TASKS_ALL_CAT = "all";

@@ -20,6 +20,7 @@ import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.utils.CheckableTextView;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
+import com.dream.dreamtv.utils.LocaleHelper;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
@@ -27,9 +28,16 @@ import java.util.List;
 import java.util.Objects;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
 import static android.app.Activity.RESULT_OK;
+import static com.dream.dreamtv.utils.Constants.ABR_ARABIC;
+import static com.dream.dreamtv.utils.Constants.ABR_CHINESE;
+import static com.dream.dreamtv.utils.Constants.ABR_ENGLISH;
+import static com.dream.dreamtv.utils.Constants.ABR_FRENCH;
+import static com.dream.dreamtv.utils.Constants.ABR_POLISH;
+import static com.dream.dreamtv.utils.Constants.ABR_SPANISH;
 import static com.dream.dreamtv.utils.Constants.ADVANCED_INTERFACE_MODE;
 import static com.dream.dreamtv.utils.Constants.BEGINNER_INTERFACE_MODE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_AUDIO_LANGUAGE;
@@ -38,6 +46,7 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_MODE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUB_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TESTING_MODE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN;
+import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
 import static com.dream.dreamtv.utils.Constants.LANGUAGE_ENGLISH;
 import static com.dream.dreamtv.utils.Constants.LANGUAGE_POLISH;
 import static com.dream.dreamtv.utils.Constants.NONE_OPTIONS_CODE;
@@ -46,12 +55,6 @@ import static com.dream.dreamtv.utils.Constants.NONE_OPTIONS_CODE;
 public class SettingsFragment extends Fragment {
     private static final String TAG = SettingsActivity.class.getSimpleName();
 
-    private static final String ABR_CHINESE = "zh";
-    private static final String ABR_ENGLISH = "en";
-    private static final String ABR_SPANISH = "es";
-    private static final String ABR_ARABIC = "ar";
-    private static final String ABR_FRENCH = "fr";
-    private static final String ABR_POLISH = "pl";
     private ListView mListView;
     private LoadingDialog loadingDialog;
     private LinearLayout llBodyLanguages;
@@ -75,6 +78,7 @@ public class SettingsFragment extends Fragment {
     private FirebaseAnalytics mFirebaseAnalytics;
     private LinearLayout llVideosSettings;
     private SettingsViewModel mViewModel;
+    private LiveData<Resource<User>> updateUserLiveData;
 
 
     @Override
@@ -109,7 +113,9 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mViewModel.getUserUpdated().removeObservers(getViewLifecycleOwner());
+
+        if (updateUserLiveData != null)
+            updateUserLiveData.removeObservers(getViewLifecycleOwner());
     }
 
     @Override
@@ -130,9 +136,6 @@ public class SettingsFragment extends Fragment {
         setupListView();
 
         setupEventsListener();
-
-        observeResponseFromUserUpdate();
-
 
         Log.d(TAG, "OnCreateSettingsActivity");
 
@@ -259,14 +262,14 @@ public class SettingsFragment extends Fragment {
     private void saveUSerPreferences() {
         User userCached = getApplication().getUser();
 
-        User user = new User();
-        user.email = userCached.email;
-        user.password = userCached.password;
-        user.subLanguage = selectedSubtitleLanguageCode;
-        user.audioLanguage = selectedAudioLanguageCode;
-        user.interfaceMode = rbBeginner.isChecked() ? BEGINNER_INTERFACE_MODE :
+        User userUpdated = new User();
+        userUpdated.email = userCached.email;
+        userUpdated.password = userCached.password;
+        userUpdated.subLanguage = selectedSubtitleLanguageCode;
+        userUpdated.audioLanguage = selectedAudioLanguageCode;
+        userUpdated.interfaceMode = rbBeginner.isChecked() ? BEGINNER_INTERFACE_MODE :
                 ADVANCED_INTERFACE_MODE; //interface mode updated
-        user.interfaceLanguage = rbPolish.isChecked() ? LANGUAGE_POLISH :
+        userUpdated.interfaceLanguage = rbPolish.isChecked() ? LANGUAGE_POLISH :
                 LANGUAGE_ENGLISH; //interface language updated
 
 
@@ -277,46 +280,57 @@ public class SettingsFragment extends Fragment {
             getApplication().setTestingMode(getString(R.string.text_no_option));
 
 
-        firebaseAnalyticsReportEvent(user);
+        boolean restart = !userCached.interfaceLanguage.equals(userUpdated.interfaceLanguage)
+                || !selectedAudioLanguageCode.equals(userCached.audioLanguage)
+                || !selectedSubtitleLanguageCode.equals(userCached.subLanguage);
+//        boolean callAllTaskAgain = !selectedAudioLanguageCode.equals(userCached.audioLanguage) || !selectedSubtitleLanguageCode.equals(userCached.subLanguage);
 
 
-//        if (isChangesAudioSubVerified())
+        if (!userCached.interfaceLanguage.equals(userUpdated.interfaceLanguage))
+            LocaleHelper.setLocale(getActivity(), userUpdated.interfaceLanguage);
 
-        mViewModel.updateUser(user);
-        showLoading();
 
+        updateUser(userUpdated, restart);
 
     }
 
 
-    private void observeResponseFromUserUpdate() {
-//        mViewModel.responseFromUserUpdate().removeObservers(getViewLifecycleOwner());
+    private void updateUser(User userUpdated, boolean restart) {
+        updateUserLiveData = mViewModel.updateUser(userUpdated);
 
-        mViewModel.getUserUpdated().observe(getViewLifecycleOwner(), response -> {
-            if (response != null) {
-                if (response.status.equals(Resource.Status.SUCCESS)) {
-                    Log.d(TAG, "Response from userUpdate");
-                    if (response.data != null) {
-                        Log.d(TAG, response.data.toString());
+        updateUserLiveData.observe(getViewLifecycleOwner(), response -> {
+            if (response.status.equals(Resource.Status.LOADING))
+                showLoading();
+            else if (response.status.equals(Resource.Status.SUCCESS)) {
+                Log.d(TAG, "Response from userUpdate");
+                if (response.data != null) {
+                    Log.d(TAG, response.data.toString());
 
-                        Intent returnIntent = new Intent();
-                        Objects.requireNonNull(getActivity()).setResult(RESULT_OK, returnIntent);
-                        Objects.requireNonNull(getActivity()).finish();
+                    firebaseAnalyticsReportEvent(userUpdated);
 
-                    }
-                } else if (response.status.equals(Resource.Status.ERROR)) {
-                    //TODO do something error
-                    if (response.message != null)
-                        Log.d(TAG, response.message);
-                    else
-                        Log.d(TAG, "Status ERROR");
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra(INTENT_EXTRA_RESTART, restart);
+//                        returnIntent.putExtra(INTENT_EXTRA_CALL_TASKS, callAllTaskAgain);
+                    Objects.requireNonNull(getActivity()).setResult(RESULT_OK, returnIntent);
+                    Objects.requireNonNull(getActivity()).finish();
+
                 }
+                dismissLoading();
+            } else if (response.status.equals(Resource.Status.ERROR)) {
+                //TODO do something error
+                if (response.message != null)
+                    Log.d(TAG, response.message);
+                else
+                    Log.d(TAG, "Status ERROR");
 
+
+                dismissLoading();
             }
 
-            dismissLoading();
+
         });
     }
+
 
     private boolean isChangesAudioSubVerified() {
         return false;
@@ -337,28 +351,6 @@ public class SettingsFragment extends Fragment {
         bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
         bundle.putString(FIREBASE_KEY_INTERFACE_LANGUAGE, user.interfaceLanguage);
         mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN, bundle);
-    }
-
-    //********************************************
-    // Loading and progress bar related functions
-    //********************************************
-    private void instantiateLoading() {
-        //TODO set loading in the viewmodel(?)
-        loadingDialog = new LoadingDialog(getActivity(), getString(R.string.title_loading_retrieve_tasks));
-        loadingDialog.setCanceledOnTouchOutside(false);
-    }
-
-    private void dismissLoading() {
-
-        //TODO use dismissLoading
-        loadingDialog.dismiss();
-    }
-
-
-    private void showLoading() {
-
-        //TODO use showLoading
-        loadingDialog.show();
     }
 
 
@@ -421,6 +413,22 @@ public class SettingsFragment extends Fragment {
         String code = isSubtitleButtonSelected ? selectedSubtitleLanguageCode : selectedAudioLanguageCode;
         if (code != null && !code.isEmpty())
             mListView.setItemChecked(languagesKeyListCode.indexOf(code), true);
+    }
+
+    //********************************************
+    // Loading and progress bar related functions
+    //********************************************
+    private void instantiateLoading() {
+        loadingDialog = new LoadingDialog(getActivity(), getString(R.string.title_loading_saving_data));
+        loadingDialog.setCanceledOnTouchOutside(false);
+    }
+
+    private void showLoading() {
+        loadingDialog.show();
+    }
+
+    private void dismissLoading() {
+        loadingDialog.dismiss();
     }
 
 
