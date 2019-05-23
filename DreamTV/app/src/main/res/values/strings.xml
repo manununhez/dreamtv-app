@@ -91,6 +91,9 @@
     <string name="title_loading_retrieve_tasks">Retrieving tasks…</string>
     <string name="title_loading_saving_reasons">Saving reasons…</string>
     <string name="title_loading_retrieve_options">Retrieving options…</string>
+    <string name="title_loading_add_to_list">Adding video to list…</string>
+    <string name="title_loading_preparing_task">Preparing task…</string>
+    <string name="title_loading_remove_from_list">Removing video from list…</string>
 
     <!--Languages-->
     <string name="all_languages">All languages</string>
