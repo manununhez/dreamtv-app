@@ -39,8 +39,7 @@
     <string name="title_share_mode_settings">Verify mistakes found by others</string>
     <string name="title_video_languages_settings">Video languages</string>
     <string name="title_reasons_dialog">What is wrong here?</string>
-    <string name="title_reasons_dialog_2">Someone found a mistake here. What do you think?</string>
-    <string name="title_reasons_dialog_3">You chose this:</string>
+    <string name="title_reasons_dialog_2">Edit what have you chosen:</string>
     <string name="title_confirmation_user_saved_data">User data saved correctly</string>
     <string name="title_confirmation_saved_data">Thank you for your help</string>
     <string name="title_my_list_category">My List</string>
@@ -70,6 +69,7 @@
     <string name="btn_save_settings">Save settings</string>
     <string name="btn_save">Save</string>
     <string name="btn_cancel">Cancel</string>
+    <string name="btn_save_exit">Save and Exit</string>
     <string name="btn_ok">OK</string>
     <string name="btn_start_recording">Click the mic to record your comment</string>
     <string name="btn_continue_watching">Resume:%1$s min</string>
@@ -105,7 +105,7 @@
     <string name="language_polish">Polish</string>
     <string name="time_format">%02d:%02d</string>
     <string name="alert_title_video_terminated">Completed!</string>
-    <string name="alert_msg_video_terminated">Thanks for watching the video. Go back to Video Selection.</string>
+    <string name="alert_msg_video_terminated">Thanks for watching the video. Please rate the video :)</string>
     <string name="text_pause">PAUSE</string>
 
 </resources>

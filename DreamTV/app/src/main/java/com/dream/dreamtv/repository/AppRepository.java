@@ -2,12 +2,12 @@ package com.dream.dreamtv.repository;
 
 import android.util.Log;
 
-import com.dream.dreamtv.db.dao.TaskDao;
 import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
+import com.dream.dreamtv.model.UserTaskError;
 import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.utils.AppExecutors;
 
@@ -28,13 +28,13 @@ public class AppRepository {
     private static AppRepository INSTANCE;
     private final NetworkDataSource mNetworkDataSource;
     private boolean mInitialized = false;
-    private TaskDao mTaskDao;
-    private AppExecutors mExecutors;
+//    private TaskDao mTaskDao;
+//    private AppExecutors mExecutors;
 
-    private AppRepository(TaskDao taskDao, NetworkDataSource networkDataSource, AppExecutors executors) {
+    private AppRepository(/*TaskDao taskDao, */NetworkDataSource networkDataSource, AppExecutors executors) {
         mNetworkDataSource = networkDataSource;
-        mTaskDao = taskDao;
-        mExecutors = executors;
+//        mTaskDao = taskDao;
+//        mExecutors = executors;
 
 
 //        // As long as the repository exists, observe the network LiveData.
@@ -134,13 +134,13 @@ public class AppRepository {
     }
 
 
-    public synchronized static AppRepository getInstance(TaskDao taskDao,
+    public synchronized static AppRepository getInstance(/*TaskDao taskDao,*/
                                                          NetworkDataSource networkDataSource,
                                                          AppExecutors executors) {
         Log.d(TAG, "Getting the repository");
         if (INSTANCE == null) {
             synchronized (AppRepository.class) {
-                INSTANCE = new AppRepository(taskDao, networkDataSource, executors);
+                INSTANCE = new AppRepository(/*taskDao, */networkDataSource, executors);
                 Log.d(TAG, "Made new repository");
             }
         }
@@ -334,8 +334,8 @@ public class AppRepository {
         return mNetworkDataSource.fetchSubtitle(videoId, languageCode, version);
     }
 
-    public LiveData<Resource<UserTask>> fetchTaskErrorDetails(int taskId) {
-        return mNetworkDataSource.fetchTaskErrorDetails(taskId);
+    public LiveData<Resource<UserTask>> fetchUserTask(int taskId) {
+        return mNetworkDataSource.fetchUserTask(taskId);
     }
 
 
@@ -351,11 +351,18 @@ public class AppRepository {
 
     }
 
-    public MutableLiveData<Resource<Boolean>> requestRemoveFromList(int taskId, String category) {
+    public MutableLiveData<Resource<Boolean>> requestRemoveFromList(int taskId) {
 //        mExecutors.diskIO().execute(() -> mTaskDao.deleteByTaskIdAndCategory(taskId, category));
 
         return mNetworkDataSource.removeTaskFromList(taskId);
     }
 
 
+    public void updateUserTask(UserTask userTask) {
+        mNetworkDataSource.updateUserTask(userTask);
+    }
+
+    public void saveErrors(UserTaskError userTaskError) {
+        mNetworkDataSource.saveErrors(userTaskError);
+    }
 }

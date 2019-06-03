@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:layout_centerInParent="true"
     android:gravity="center"
-    tools:context="com.dream.dreamtv.ui.ErrorSelectionDialogFragment">
+    tools:context="com.dream.dreamtv.ui.PlayVideo.Dialogs.ErrorSelectionDialogFragment">
 
 
     <LinearLayout
@@ -35,43 +35,43 @@
         android:paddingStart="20dp">
 
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="15dp"
-            android:background="@color/blue"
-            android:gravity="center"
-            android:padding="3dp"
-            android:textColor="@color/white"
-            android:textSize="14sp"
-            android:visibility="gone"
-            android:textStyle="italic" />
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:layout_marginTop="15dp"-->
+            <!--android:background="@color/blue"-->
+            <!--android:gravity="center"-->
+            <!--android:padding="3dp"-->
+            <!--android:textColor="@color/white"-->
+            <!--android:textSize="14sp"-->
+            <!--android:visibility="gone"-->
+            <!--android:textStyle="italic" />-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:background="@color/blue"
-            android:gravity="center"
-            android:padding="3dp"
-            android:visibility="gone"
-            android:textColor="@color/white"
-            android:textSize="18sp" />
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:layout_marginTop="20dp"-->
+            <!--android:background="@color/blue"-->
+            <!--android:gravity="center"-->
+            <!--android:padding="3dp"-->
+            <!--android:visibility="gone"-->
+            <!--android:textColor="@color/white"-->
+            <!--android:textSize="18sp" />-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:background="@color/blue"
-            android:gravity="center"
-            android:padding="3dp"
-            android:visibility="gone"
-            android:textColor="@color/white"
-            android:textSize="14sp"
-            android:textStyle="italic" />
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:layout_marginTop="20dp"-->
+            <!--android:background="@color/blue"-->
+            <!--android:gravity="center"-->
+            <!--android:padding="3dp"-->
+            <!--android:visibility="gone"-->
+            <!--android:textColor="@color/white"-->
+            <!--android:textSize="14sp"-->
+            <!--android:textStyle="italic" />-->
         <!--<TextView-->
         <!--android:id="@+id/titleReasons"-->
         <!--android:layout_width="wrap_content"-->

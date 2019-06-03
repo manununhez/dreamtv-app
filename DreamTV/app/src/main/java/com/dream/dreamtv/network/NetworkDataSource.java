@@ -22,6 +22,7 @@ import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.TaskResponse;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
+import com.dream.dreamtv.model.UserTaskError;
 import com.dream.dreamtv.model.VideoTests;
 import com.dream.dreamtv.ui.Main.MainFragment;
 import com.dream.dreamtv.ui.Settings.SettingsFragment;
@@ -38,16 +39,21 @@ import androidx.lifecycle.MutableLiveData;
 
 import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE_CONFIG;
+import static com.dream.dreamtv.utils.Constants.PARAM_COMPLETED;
 import static com.dream.dreamtv.utils.Constants.PARAM_EMAIL;
 import static com.dream.dreamtv.utils.Constants.PARAM_INTERFACE_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_INTERFACE_MODE;
 import static com.dream.dreamtv.utils.Constants.PARAM_LANG_CODE;
 import static com.dream.dreamtv.utils.Constants.PARAM_PAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_PASSWORD;
+import static com.dream.dreamtv.utils.Constants.PARAM_RATING;
+import static com.dream.dreamtv.utils.Constants.PARAM_REASON_CODE;
 import static com.dream.dreamtv.utils.Constants.PARAM_SUB_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_SUB_LANGUAGE_CONFIG;
+import static com.dream.dreamtv.utils.Constants.PARAM_SUB_POSITION;
 import static com.dream.dreamtv.utils.Constants.PARAM_SUB_VERSION;
 import static com.dream.dreamtv.utils.Constants.PARAM_TASK_ID;
+import static com.dream.dreamtv.utils.Constants.PARAM_TIME_WATCHED;
 import static com.dream.dreamtv.utils.Constants.PARAM_TYPE;
 import static com.dream.dreamtv.utils.Constants.PARAM_VERSION;
 import static com.dream.dreamtv.utils.Constants.PARAM_VIDEO_ID;
@@ -65,6 +71,7 @@ public class NetworkDataSource {
     private static final String URL_BASE = "http://www.dreamproject.pjwstk.edu.pl/api/";     // Facu Produccion
     private static final int TIMEOUT_MS = 60000; //60 segundos
 
+
     // For Singleton instantiation
     private static NetworkDataSource INSTANCE;
 
@@ -81,7 +88,7 @@ public class NetworkDataSource {
     private MutableLiveData<Resource<Boolean>> responseFromRemoveFromListTasks;
     private MutableLiveData<Resource<User>> responseFromUserUpdate;
     private MutableLiveData<Resource<SubtitleResponse>> responseFromFetchSubtitle;
-    private MutableLiveData<Resource<UserTask>> responseFromFetchUserTaskErrorDetails;
+    private MutableLiveData<Resource<UserTask>> responseFromFetchUserTask;
     private MutableLiveData<Resource<UserTask>> responseFromCreateUserTask;
     private int currentPage = 1;
 
@@ -99,7 +106,7 @@ public class NetworkDataSource {
         responseFromFetchTestTasks = new MutableLiveData<>();
         responseFromFetchAllTasks = new MutableLiveData<>();
         responseFromFetchContinueTasks = new MutableLiveData<>();
-        responseFromFetchUserTaskErrorDetails = new MutableLiveData<>();
+        responseFromFetchUserTask = new MutableLiveData<>();
         responseFromCreateUserTask = new MutableLiveData<>();
         responseFromAddToListTasks = new MutableLiveData<>();
         responseFromRemoveFromListTasks = new MutableLiveData<>();
@@ -244,7 +251,8 @@ public class NetworkDataSource {
 
         Uri loginUri = Uri.parse(URL_BASE.concat(Urls.LOGIN.value)).buildUpon().build();
 
-        Log.d(TAG, "login() Request URL: " + loginUri.toString() + " Paramaters: email=>" + email + "; password=>" + password);
+        Log.d(TAG, "login() Request URL: " + loginUri.toString() + " Paramaters: email=>" + email
+                + "; password=>" + password);
 
         ResponseListener responseListener = new ResponseListener(mContext, false, false, "") {
             @Override
@@ -295,7 +303,8 @@ public class NetworkDataSource {
         params.put(PARAM_PASSWORD, password);
         Uri registerUri = Uri.parse(URL_BASE.concat(Urls.REGISTER.value)).buildUpon().build();
 
-        Log.d(TAG, "register() Request URL: " + registerUri.toString() + " Paramaters: email=>" + email + "; password=>" + password);
+        Log.d(TAG, "register() Request URL: " + registerUri.toString() + " Paramaters: email=>" + email
+                + "; password=>" + password);
 
         ResponseListener responseListener = new ResponseListener(mContext, false, false, "") {
             @Override
@@ -390,7 +399,9 @@ public class NetworkDataSource {
                 .build();
 
         Log.d(TAG, "updateUser() Request URL: " + userUri.toString() + " Params: interfaceMode=>" + user.interfaceMode
-                + "; interfaceLanguage=>" + user.interfaceLanguage + "; subLanguage=>" + user.subLanguage + "; audioLanguage=>" + user.audioLanguage);
+                + "; interfaceLanguage=>" + user.interfaceLanguage
+                + "; subLanguage=>" + user.subLanguage
+                + "; audioLanguage=>" + user.audioLanguage);
 
         ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
@@ -526,8 +537,9 @@ public class NetworkDataSource {
                     .appendQueryParameter(PARAM_LANG_CODE, languageCode)
                     .build();
 
-        Log.d(TAG, "fetchSubtitle() Request URL: " + subtitleUri.toString() + " Params: " + PARAM_VIDEO_ID +
-                "=>" + videoId + "; " + PARAM_LANG_CODE + "=>" + languageCode + "; " + PARAM_VERSION + "=>" + version);
+        Log.d(TAG, "fetchSubtitle() Request URL: " + subtitleUri.toString() + " Params: " + PARAM_VIDEO_ID + "=>" + videoId
+                + "; " + PARAM_LANG_CODE + "=>" + languageCode
+                + "; " + PARAM_VERSION + "=>" + version);
 
 
         ResponseListener responseListener = new ResponseListener(mContext, false,
@@ -583,8 +595,8 @@ public class NetworkDataSource {
                 .appendQueryParameter(PARAM_TYPE, paramType)
                 .build();
 
-        Log.d(TAG, "fetchTasksByCategory() Request URL: " + tasksUri.toString() + " Params: " + PARAM_PAGE +
-                "=>" + page + "; " + PARAM_TYPE + "=>" + paramType);
+        Log.d(TAG, "fetchTasksByCategory() Request URL: " + tasksUri.toString() + " Params: " + PARAM_PAGE + "=>" + page
+                + "; " + PARAM_TYPE + "=>" + paramType);
 
 
         ResponseListener responseListener = new ResponseListener(mContext, false,
@@ -701,10 +713,10 @@ public class NetworkDataSource {
         params.put(PARAM_TASK_ID, String.valueOf(taskId));
         params.put(PARAM_SUB_VERSION, String.valueOf(mSubtitleVersion));
 
-        Uri taskErrorsUri = Uri.parse(URL_BASE.concat(Urls.USER_TASKS.value)).buildUpon().build();
+        Uri userTaskUri = Uri.parse(URL_BASE.concat(Urls.USER_TASKS.value)).buildUpon().build();
 
-        Log.d(TAG, "createUserTask() Request URL: " + taskErrorsUri.toString() + " Params: " + PARAM_TASK_ID +
-                "=>" + taskId + "; " + PARAM_SUB_VERSION + " => " + mSubtitleVersion);
+        Log.d(TAG, "createUserTask() Request URL: " + userTaskUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + taskId
+                + "; " + PARAM_SUB_VERSION + " => " + mSubtitleVersion);
 
 
         ResponseListener responseListener = new ResponseListener(mContext, false,
@@ -735,7 +747,7 @@ public class NetworkDataSource {
         };
 
 
-        mExecutors.networkIO().execute(() -> requestString(Method.POST, taskErrorsUri.toString(), params, responseListener));
+        mExecutors.networkIO().execute(() -> requestString(Method.POST, userTaskUri.toString(), params, responseListener));
 
         return responseFromCreateUserTask;
     }
@@ -744,22 +756,21 @@ public class NetworkDataSource {
      * @param taskId
      */
     @SuppressWarnings("unchecked")
-    public MutableLiveData<Resource<UserTask>> fetchTaskErrorDetails(int taskId) {
-        responseFromFetchUserTaskErrorDetails.postValue(Resource.loading(null));
+    public MutableLiveData<Resource<UserTask>> fetchUserTask(int taskId) {
+        responseFromFetchUserTask.postValue(Resource.loading(null));
 
         Uri taskErrorsUri = Uri.parse(URL_BASE.concat(Urls.USER_TASKS_WITH_ERRORS.value)).buildUpon()
                 .appendQueryParameter(PARAM_TASK_ID, String.valueOf(taskId))
                 .build();
 
-        Log.d(TAG, "fetchTaskErrorDetails() Request URL: " + taskErrorsUri.toString() + " Params: " + PARAM_TASK_ID +
-                "=>" + taskId);
+        Log.d(TAG, "fetchUserTask() Request URL: " + taskErrorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + taskId);
 
 
         ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
             @Override
             protected void processResponse(String response) {
-                Log.d(TAG, "fetchTaskErrorDetails() Response JSON: " + response);
+                Log.d(TAG, "fetchUserTask() Response JSON: " + response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask>>() {
                 };
@@ -767,7 +778,7 @@ public class NetworkDataSource {
 
                 UserTask userTasks = jsonResponse.data;
 
-                responseFromFetchUserTaskErrorDetails.postValue(Resource.success(userTasks)); //post the value to live data
+                responseFromFetchUserTask.postValue(Resource.success(userTasks)); //post the value to live data
 
             }
 
@@ -776,16 +787,16 @@ public class NetworkDataSource {
                 super.processError(error);
 
                 //TODO do something error
-                responseFromFetchUserTaskErrorDetails.postValue(Resource.error(error.getMessage(), null));
+                responseFromFetchUserTask.postValue(Resource.error(error.getMessage(), null));
 
-                Log.d(TAG, "fetchTaskErrorDetails() Response Error: " + error.getMessage());
+                Log.d(TAG, "fetchUserTask() Response Error: " + error.getMessage());
             }
         };
 
 
         mExecutors.networkIO().execute(() -> requestString(Method.GET, taskErrorsUri.toString(), null, responseListener));
 
-        return responseFromFetchUserTaskErrorDetails;
+        return responseFromFetchUserTask;
     }
 
     /**
@@ -805,7 +816,8 @@ public class NetworkDataSource {
         params.put(PARAM_AUDIO_LANGUAGE_CONFIG, audioLanguageConfig);
 
         Log.d(TAG, "addTaskToList() Request URL: " + addToListUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + taskId
-                + "; " + PARAM_SUB_LANGUAGE_CONFIG + "=>" + subLanguageConfig + "; " + PARAM_AUDIO_LANGUAGE_CONFIG + "=>" + audioLanguageConfig);
+                + "; " + PARAM_SUB_LANGUAGE_CONFIG + "=>" + subLanguageConfig
+                + "; " + PARAM_AUDIO_LANGUAGE_CONFIG + "=>" + audioLanguageConfig);
 
         ResponseListener responseListener = new ResponseListener(mContext, false,
                 false, "") {
@@ -874,8 +886,81 @@ public class NetworkDataSource {
 
     }
 
+    public void updateUserTask(UserTask userTask) {
 
-//    private void saveReasons() {
+        Map<String, String> params = new HashMap<>();
+        params.put(PARAM_TASK_ID, String.valueOf(userTask.getTaskId()));
+        params.put(PARAM_SUB_VERSION, userTask.getSubtitleVersion());
+        params.put(PARAM_TIME_WATCHED, String.valueOf(userTask.getTimeWatched()));
+        params.put(PARAM_COMPLETED, String.valueOf(userTask.getCompleted()));
+        params.put(PARAM_RATING, String.valueOf(userTask.getRating()));
+
+        Uri userTaskUri = Uri.parse(URL_BASE.concat(Urls.USER_TASKS.value)).buildUpon().build();
+
+        Log.d(TAG, "updateUserTask() Request URL: " + userTaskUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + userTask.getTaskId()
+                + "; " + PARAM_SUB_VERSION + " => " + userTask.getSubtitleVersion());
+
+        ResponseListener responseListener = new ResponseListener(mContext, false,
+                false, "") {
+            @Override
+            protected void processResponse(String response) {
+
+                Log.d(TAG, "updateUserTask() Response JSON: " + response);
+
+
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+
+            }
+
+        };
+
+        mExecutors.networkIO().execute(() -> requestString(Method.PUT, userTaskUri.toString(), params, responseListener));
+
+    }
+
+
+    public void saveErrors(UserTaskError userTaskError) {
+
+        Map<String, String> params = new HashMap<>();
+        params.put(PARAM_TASK_ID, String.valueOf(userTaskError.getTaskId()));
+        params.put(PARAM_REASON_CODE, userTaskError.getReasonCode());
+        params.put(PARAM_SUB_POSITION, String.valueOf(userTaskError.getSubtitlePosition()));
+        params.put(PARAM_SUB_VERSION, String.valueOf(userTaskError.getSubtitleVersion()));
+
+        Uri errorsUri = Uri.parse(URL_BASE.concat(Urls.USER_ERRORS.value)).buildUpon().build();
+
+        Log.d(TAG, "saveErrors() Request URL: " + errorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + userTaskError.getTaskId()
+                + "; " + PARAM_SUB_VERSION + " => " + userTaskError.getSubtitleVersion()
+                + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
+                + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
+
+
+        ResponseListener responseListener = new ResponseListener(mContext, false,
+                false, "") {
+            @Override
+            protected void processResponse(String response) {
+
+                Log.d(TAG, "saveErrors() Response JSON: " + response);
+
+
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+
+            }
+
+        };
+
+        mExecutors.networkIO().execute(() -> requestString(Method.POST, errorsUri.toString(), params, responseListener));
+
+
+
 //        UserTask userTask = new UserTask();
 //        userTask.comments = voiceInput.getText().toString();
 //        userTask.subtitlePosition = currentSubtitlePosition;
@@ -918,7 +1003,9 @@ public class NetworkDataSource {
 //
 ////        NetworkDataSource.post(getActivity(), NetworkDataSource.Urls.USER_TASKS, null, jsonRequest, responseListener, this);
 //
-//    }
+    }
+
+
 
 
     /**
@@ -962,6 +1049,8 @@ public class NetworkDataSource {
     }
 
 
+
+
     /**
      *
      *
@@ -984,6 +1073,8 @@ public class NetworkDataSource {
         USER_TASKS("usertasks"),
 
         USER_TASKS_WITH_ERRORS("usertasks/details"),
+
+        USER_ERRORS("usertask/errors"),
 
         USER_TASK_MY_LIST("usertask/list"),
 
