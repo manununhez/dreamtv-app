@@ -1,4 +1,4 @@
-package com.dream.dreamtv.ui;
+package com.dream.dreamtv.ui.Welcome;
 
 import android.app.Activity;
 import android.content.Intent;

@@ -34,8 +34,8 @@ import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.VideoTests;
 import com.dream.dreamtv.presenter.DetailsDescriptionPresenter;
-import com.dream.dreamtv.ui.PlaybackVideoActivity;
-import com.dream.dreamtv.ui.PlaybackVideoYoutubeActivity;
+import com.dream.dreamtv.ui.PlayVideo.PlaybackVideoActivity;
+import com.dream.dreamtv.ui.PlayVideo.PlaybackVideoYoutubeActivity;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -64,9 +64,9 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_PROJECT_NAME;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN;
-import static com.dream.dreamtv.utils.Constants.INTENT_USER_DATA_SUBTITLE;
-import static com.dream.dreamtv.utils.Constants.INTENT_USER_DATA_TASK;
-import static com.dream.dreamtv.utils.Constants.INTENT_USER_DATA_TASK_ERRORS;
+import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
+import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
+import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
 import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_MY_LIST_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
@@ -92,9 +92,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private VideoDetailsViewModel mViewModel;
     private TaskEntity mSelectedTask;
     private SubtitleResponse mSubtitleResponse;
-    private UserTask mUserTaskErrorsDetails;
+    private UserTask mUserTask;
     private LiveData<Resource<SubtitleResponse>> fetchSubtitleLiveData;
-    private LiveData<Resource<UserTask>> fetchUserTaskErrorLiveData;
+    private LiveData<Resource<UserTask>> fetchUserTaskLiveData;
     private LiveData<Resource<UserTask>> createUserTaskLiveData;
     private LoadingDialog loadingDialog;
 
@@ -112,7 +112,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(Objects.requireNonNull(getActivity()));
 
-        mSelectedTask = getActivity().getIntent().getParcelableExtra(INTENT_USER_DATA_TASK);
+        mSelectedTask = getActivity().getIntent().getParcelableExtra(INTENT_TASK);
 
         if (mSelectedTask != null) {
             setupAdapter();
@@ -137,11 +137,11 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         if (fetchSubtitleLiveData != null)
             fetchSubtitleLiveData.removeObservers(getViewLifecycleOwner());
 
-        if (fetchUserTaskErrorLiveData != null)
-            fetchUserTaskErrorLiveData.removeObservers(getViewLifecycleOwner());
+        if (fetchUserTaskLiveData != null)
+            fetchUserTaskLiveData.removeObservers(getViewLifecycleOwner());
 
-        if (fetchUserTaskErrorLiveData != null)
-            fetchUserTaskErrorLiveData.removeObservers(getViewLifecycleOwner());
+        if (fetchUserTaskLiveData != null)
+            fetchUserTaskLiveData.removeObservers(getViewLifecycleOwner());
 
         if (createUserTaskLiveData != null)
             createUserTaskLiveData.removeObservers(getViewLifecycleOwner());
@@ -274,7 +274,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void goToPlayVideo() {
         if (mSubtitleResponse == null)
             Toast.makeText(getActivity(), "Subtitle not found.", Toast.LENGTH_SHORT).show();
-        else if (mUserTaskErrorsDetails == null) //the are not user tasks for this video, so we need to create a new one
+        else if (mUserTask == null) //the are not user tasks for this video, so we need to create a new one
             createUserTask();
         else
             playVideo();
@@ -290,9 +290,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             intent = new Intent(getActivity(), PlaybackVideoActivity.class);
 
 
-        intent.putExtra(INTENT_USER_DATA_TASK, mSelectedTask);
-        intent.putExtra(INTENT_USER_DATA_SUBTITLE, mSubtitleResponse); //TODO si no hay subtitulo, no deberia avanzar a la sgte pantalla
-        intent.putExtra(INTENT_USER_DATA_TASK_ERRORS, mUserTaskErrorsDetails); //@NULLABLE puede no tener errores ya marcados
+        intent.putExtra(INTENT_TASK, mSelectedTask);
+        intent.putExtra(INTENT_SUBTITLE, mSubtitleResponse); //TODO si no hay subtitulo, no deberia avanzar a la sgte pantalla
+        intent.putExtra(INTENT_USER_TASK, mUserTask); //@NULLABLE puede no tener errores ya marcados
         startActivity(intent);
 
         //Analytics Report Event
@@ -353,7 +353,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             if (userTaskResource.status.equals(Resource.Status.LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_preparing_task));
             else if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
-                mUserTaskErrorsDetails = userTaskResource.data;
+                mUserTask = userTaskResource.data;
 
                 goToPlayVideo();
 
@@ -382,16 +382,16 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
      */
     private void fetchUserTasks() {
         //        Request
-        fetchUserTaskErrorLiveData = mViewModel.fetchUserTaskErrorDetails(mSelectedTask.taskId);
+        fetchUserTaskLiveData = mViewModel.fetchUserTask(mSelectedTask.taskId);
 
         //        Response
-        fetchUserTaskErrorLiveData.removeObservers(getViewLifecycleOwner());
-        fetchUserTaskErrorLiveData.observe(getViewLifecycleOwner(), userTaskResource -> {
+        fetchUserTaskLiveData.removeObservers(getViewLifecycleOwner());
+        fetchUserTaskLiveData.observe(getViewLifecycleOwner(), userTaskResource -> {
 //            if (userTaskResource.status.equals(Resource.Status.LOADING))
 //                instantiateAndShowLoading(getString(R.string.title_loading_retrieve_tasks));
 //            else
             if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
-                mUserTaskErrorsDetails = userTaskResource.data;
+                mUserTask = userTaskResource.data;
 
                 Log.d(TAG, "responseFromFetchUserTaskErrorDetails response");
 //                dismissLoading();

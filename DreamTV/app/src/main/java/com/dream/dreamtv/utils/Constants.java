@@ -16,10 +16,11 @@ public class Constants {
     public static final String ARG_SUBTITLE_ORIGINAL_POSITION = "ARG_SUBTITLE_ORIGINAL_POSITION";
     public static final String ARG_SELECTED_TASK = "ARG_SELECTED_TASK";
     public static final String ARG_USER_TASK_ERROR = "ARG_USER_TASK_ERROR";
+    public static final String ARG_USER_TASK_ERROR_COMPLETE = "ARG_USER_TASK_ERROR_COMPLETE";
 
-    public static final String INTENT_USER_DATA_TASK = "INTENT_USER_DATA_TASK";
-    public static final String INTENT_USER_DATA_SUBTITLE = "INTENT_USER_DATA_SUBTITLE";
-    public static final String INTENT_USER_DATA_TASK_ERRORS = "INTENT_USER_DATA_TASK_ERRORS";
+    public static final String INTENT_TASK = "INTENT_TASK";
+    public static final String INTENT_SUBTITLE = "INTENT_SUBTITLE";
+    public static final String INTENT_USER_TASK = "INTENT_USER_TASK";
     public static final String INTENT_EXTRA_CALL_TASKS = "callTasks";
     public static final String INTENT_EXTRA_RESTART = "restart";
 
@@ -84,6 +85,11 @@ public class Constants {
     public static final String PARAM_SUB_LANGUAGE_CONFIG = "sub_language_config";
     public static final String PARAM_AUDIO_LANGUAGE_CONFIG = "audio_language_config";
     public static final String PARAM_SUB_VERSION = "subtitle_version";
+    public static final String PARAM_TIME_WATCHED = "time_watched";
+    public static final String PARAM_COMPLETED = "completed";
+    public static final String PARAM_RATING = "rating";
+    public static final String PARAM_SUB_POSITION = "subtitle_position";
+    public static final String PARAM_REASON_CODE = "reason_code";
 
 
     public static final String YOUTUBE_VIDEO_ID = "videoId";

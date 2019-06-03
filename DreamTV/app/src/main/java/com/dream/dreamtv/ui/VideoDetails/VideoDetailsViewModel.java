@@ -7,8 +7,6 @@ import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.repository.AppRepository;
 
-import java.util.Objects;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -44,7 +42,7 @@ class VideoDetailsViewModel extends ViewModel {
     }
 
     MutableLiveData<Resource<Boolean>> requestRemoveFromList(TaskEntity taskEntity) {
-        return mRepository.requestRemoveFromList(taskEntity.taskId, TASKS_MY_LIST_CAT);
+        return mRepository.requestRemoveFromList(taskEntity.taskId);
     }
 
     LiveData<Resource<SubtitleResponse>> fetchSubtitle(String videoId, String languageCode, int version) {
@@ -57,8 +55,8 @@ class VideoDetailsViewModel extends ViewModel {
         return mRepository.fetchSubtitle(videoId, languageCode, version);
     }
 
-    LiveData<Resource<UserTask>> fetchUserTaskErrorDetails(int taskId) {
-        return mRepository.fetchTaskErrorDetails(taskId);
+    LiveData<Resource<UserTask>> fetchUserTask(int taskId) {
+        return mRepository.fetchUserTask(taskId);
     }
 
     LiveData<Resource<UserTask>> createUserTask(TaskEntity taskEntity, int mSubtitleVersion) {
@@ -76,37 +74,37 @@ class VideoDetailsViewModel extends ViewModel {
     }
 
 
-    static class SubtitleId {
-        public final String videoId;
-        public final String languageCode;
-        int version;
-
-        SubtitleId(String videoId, String languageCode, int version) {
-            this.videoId = videoId == null ? null : videoId.trim();
-            this.languageCode = languageCode == null ? null : languageCode.trim();
-            this.version = version;
-        }
-
-        boolean isEmpty() {
-            return videoId == null || languageCode == null || videoId.length() == 0 || languageCode.length() == 0;
-        }
-
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SubtitleId that = (SubtitleId) o;
-            return version == that.version &&
-                    Objects.equals(videoId, that.videoId) &&
-                    Objects.equals(languageCode, that.languageCode);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(videoId, languageCode, version);
-        }
-    }
+//    static class SubtitleId {
+//        public final String videoId;
+//        public final String languageCode;
+//        int version;
+//
+//        SubtitleId(String videoId, String languageCode, int version) {
+//            this.videoId = videoId == null ? null : videoId.trim();
+//            this.languageCode = languageCode == null ? null : languageCode.trim();
+//            this.version = version;
+//        }
+//
+//        boolean isEmpty() {
+//            return videoId == null || languageCode == null || videoId.length() == 0 || languageCode.length() == 0;
+//        }
+//
+//
+//        @Override
+//        public boolean equals(Object o) {
+//            if (this == o) return true;
+//            if (o == null || getClass() != o.getClass()) return false;
+//            SubtitleId that = (SubtitleId) o;
+//            return version == that.version &&
+//                    Objects.equals(videoId, that.videoId) &&
+//                    Objects.equals(languageCode, that.languageCode);
+//        }
+//
+//        @Override
+//        public int hashCode() {
+//            return Objects.hash(videoId, languageCode, version);
+//        }
+//    }
 
 }
 

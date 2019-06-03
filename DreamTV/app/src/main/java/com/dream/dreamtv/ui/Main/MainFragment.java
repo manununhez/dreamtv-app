@@ -56,7 +56,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
-import static com.dream.dreamtv.utils.Constants.INTENT_USER_DATA_TASK;
+import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.SETTINGS_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_ALL_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
@@ -218,7 +218,7 @@ public class MainFragment extends BrowseSupportFragment {
                 dismissLoading();
             }
 
-            throw new RuntimeException("Get list sorted of continued tasks");
+//     TODO       throw new RuntimeException("Get list sorted of continued tasks");
 
         });
 
@@ -244,7 +244,7 @@ public class MainFragment extends BrowseSupportFragment {
                 dismissLoading();
             }
 
-            throw new RuntimeException("Get list sorted of finished tasks");
+//       TODO     throw new RuntimeException("Get list sorted of finished tasks");
 
         });
 
@@ -271,7 +271,7 @@ public class MainFragment extends BrowseSupportFragment {
                 dismissLoading();
             }
 
-            throw new RuntimeException("Get list sorted of my list tasks");
+//  TODO          throw new RuntimeException("Get list sorted of my list tasks");
 
         });
 
@@ -528,7 +528,7 @@ public class MainFragment extends BrowseSupportFragment {
                     TaskEntity taskEntity = value.getTaskEntity();
 
                     Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
-                    intent.putExtra(INTENT_USER_DATA_TASK, taskEntity);
+                    intent.putExtra(INTENT_TASK, taskEntity);
 
                     startActivity(intent);
                 }
