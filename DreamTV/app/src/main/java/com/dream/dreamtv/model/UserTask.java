@@ -31,23 +31,26 @@ public class UserTask implements Parcelable {
     @SerializedName("id")
     public int id;
     @SerializedName("user_id")
-    public int userId;
+    private int userId;
     @SerializedName("task_id")
-    public int taskId;
+    private int taskId;
     @SerializedName("subtitle_version")
-    public String subtitleVersion;
+    private String subtitleVersion;
     @SerializedName("completed")
-    public int completed;
+    private int completed;
     @SerializedName("rating")
-    public int rating;
+    private int rating;
     @SerializedName("user_task_errors")
-    public UserTaskError[] userTaskErrorList;
-    @SerializedName("created_at")
-    public String created_at;
-    @SerializedName("updated_at")
-    public String updated_at;
+    private UserTaskError[] userTaskErrorList;
     @SerializedName("time_watched")
     private int timeWatched;
+    @SerializedName("created_at")
+    private String created_at;
+    @SerializedName("updated_at")
+    private String updated_at;
+
+    public UserTask() {
+    }
 
     protected UserTask(Parcel in) {
         id = in.readInt();
@@ -78,13 +81,14 @@ public class UserTask implements Parcelable {
         this.timeWatched = timeWatched;
     }
 
-    public ArrayList<UserTaskError> getUserTaskErrorsForASpecificSubtitlePosition(Subtitle subtitle) {
+    public ArrayList<UserTaskError> getUserTaskErrorsForASpecificSubtitlePosition(int subtitlePosition) {
         ArrayList<UserTaskError> userTaskErrorList = new ArrayList<>();
 
         if (this.userTaskErrorList != null && this.userTaskErrorList.length > 0)
             for (UserTaskError userTaskError : this.userTaskErrorList) {
-                //TODO si los errores vienen ordenados por subtitle_position (en forma ascendente), se puede mejorar la busqueda.
-                if (userTaskError.subtitlePosition == subtitle.position) {
+                if((userTaskError.getSubtitlePosition() - 1) > subtitlePosition)
+                    break;
+                else if ((userTaskError.getSubtitlePosition() - 1) == subtitlePosition) {
                     userTaskErrorList.add(userTaskError);
                 }
             }
@@ -110,6 +114,72 @@ public class UserTask implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+
+    public int getCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(int completed) {
+        this.completed = completed;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public int getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(int taskId) {
+        this.taskId = taskId;
+    }
+
+    public String getSubtitleVersion() {
+        return subtitleVersion;
+    }
+
+    public void setSubtitleVersion(String subtitleVersion) {
+        this.subtitleVersion = subtitleVersion;
+    }
+
+    public UserTaskError[] getUserTaskErrorList() {
+        return userTaskErrorList;
+    }
+
+    public void setUserTaskErrorList(UserTaskError[] userTaskErrorList) {
+        this.userTaskErrorList = userTaskErrorList;
+    }
+
+    public String getCreated_at() {
+        return created_at;
+    }
+
+    public void setCreated_at(String created_at) {
+        this.created_at = created_at;
+    }
+
+    public String getUpdated_at() {
+        return updated_at;
+    }
+
+    public void setUpdated_at(String updated_at) {
+        this.updated_at = updated_at;
     }
 
     @Override
