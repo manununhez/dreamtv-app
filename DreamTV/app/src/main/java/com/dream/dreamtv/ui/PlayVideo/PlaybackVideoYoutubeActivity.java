@@ -559,7 +559,8 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     public void setRating(int rating) {
         mUserTask.setRating(rating);
 
-        //We call onBackPressed()->onStop() and then update user task values and finish the activity
-        onBackPressed();
+        //Update values and exit from the video
+        mViewModel.updateUserTask(mUserTask);
+        finish();
     }
 }

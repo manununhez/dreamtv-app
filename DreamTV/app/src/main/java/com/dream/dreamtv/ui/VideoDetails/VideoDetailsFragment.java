@@ -304,18 +304,21 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
 
     private void setupContinueAction() {
-//        if (mUserTask.getTimeWatchedInSecs() > 0) {
         if (mUserTask != null) {
-            String timeFormatted = String.format(Locale.getDefault(), "%d min, %d s",
-                    TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()),
-                    TimeUnit.MILLISECONDS.toSeconds(mUserTask.getTimeWatched()) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()))
-            );
+            if (mUserTask.getTimeWatchedInSecs() > 0) { //To avoid messages like "0 min, 0 secs"
+                String timeFormatted = String.format(Locale.getDefault(), "%d min, %d s",
+                        TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()),
+                        TimeUnit.MILLISECONDS.toSeconds(mUserTask.getTimeWatched()) -
+                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()))
+                );
 
-            setActionPanel(ACTION_PLAY_VIDEO,
-                    new Action(ACTION_CONTINUE_VIDEO, getString(R.string.btn_continue_watching, timeFormatted)),
-                    new Action(ACTION_PLAY_VIDEO_FROM_BEGGINING, getString(R.string.btn_no_from_beggining)));
-//        }
+                setActionPanel(ACTION_PLAY_VIDEO,
+                        new Action(ACTION_CONTINUE_VIDEO, getString(R.string.btn_continue_watching, timeFormatted)),
+                        new Action(ACTION_PLAY_VIDEO_FROM_BEGGINING, getString(R.string.btn_no_from_beggining)));
+            } else {
+                setActionPanel(new Action(ACTION_PLAY_VIDEO, getResources().getString(R.string.btn_play_video)),
+                        new Action(ACTION_ADD_MY_LIST, getResources().getString(R.string.btn_add_to_my_list)));
+            }
         } else {
             setActionPanel(new Action(ACTION_PLAY_VIDEO, getResources().getString(R.string.btn_play_video)),
                     new Action(ACTION_ADD_MY_LIST, getResources().getString(R.string.btn_add_to_my_list)));
@@ -453,8 +456,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 setupContinueAction();
 
 
-                if (mUserTask != null && mUserTask.getCompleted() == 1)
+                if (mUserTask != null && mUserTask.getCompleted() == 1) {
+                    mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //trying to keep continue_category always updated
                     mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT); //trying to keep finished_category always updated
+                }
 
                 dismissLoading();
 
