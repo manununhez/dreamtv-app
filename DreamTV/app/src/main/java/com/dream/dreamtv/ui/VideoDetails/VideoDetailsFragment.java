@@ -59,6 +59,7 @@ import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
 import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
+import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_MY_LIST_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
 
@@ -277,7 +278,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 bundle.putLong(FIREBASE_KEY_VIDEO_DURATION, mSelectedTask.video.getVideoDurationInMs());
                 break;
         }
-        
+
         mFirebaseAnalytics.logEvent(logEventName, bundle);
 
     }
@@ -450,6 +451,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 mUserTask = userTaskResource.data;
 
                 setupContinueAction();
+
+
+                if (mUserTask != null && mUserTask.getCompleted() == 1)
+                    mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT); //trying to keep finished_category always updated
 
                 dismissLoading();
 

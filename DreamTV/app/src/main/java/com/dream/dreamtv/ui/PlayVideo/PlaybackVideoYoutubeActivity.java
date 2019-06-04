@@ -60,6 +60,7 @@ import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
 import static com.dream.dreamtv.utils.Constants.STATE_ENDED;
 import static com.dream.dreamtv.utils.Constants.STATE_PAUSED;
 import static com.dream.dreamtv.utils.Constants.STATE_PLAY;
+import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
 import static com.dream.dreamtv.utils.Constants.YOUTUBE_AUTOPLAY;
 import static com.dream.dreamtv.utils.Constants.YOUTUBE_CLOSED_CAPTIONS;
 import static com.dream.dreamtv.utils.Constants.YOUTUBE_DEBUG;
@@ -217,7 +218,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 //                    dialog -> finish()).show();
 
 
-            //TODO update completed -> 1 y actualizar lista de finalizados
+
             mUserTask.setCompleted(1);
 
             showRatingDialog();
@@ -370,7 +371,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             //Updated value of the currentTime
             Log.d(TAG, "stopVideo() => Time (Youtube)" + currentTime);
 
-            //TODO update current time of the video
+            //Update current time of the video
             mUserTask.setTimeWatched(currentTime);
 
 
@@ -542,7 +543,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
         mViewModel.saveErrors(userTaskError);
 
-        // TODO UPDATE  mUserTask.userTaskErrorList
+        //TODO UPDATE  mUserTask.userTaskErrorList
 //        mUserTask.setUserTaskErrorList();
     }
 
@@ -556,9 +557,9 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public void setRating(int rating) {
-        //TODO complete with dialog
         mUserTask.setRating(rating);
 
+        //We call onBackPressed()->onStop() and then update user task values and finish the activity
         onBackPressed();
     }
 }

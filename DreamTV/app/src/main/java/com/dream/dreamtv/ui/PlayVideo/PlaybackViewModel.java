@@ -15,11 +15,11 @@ class PlaybackViewModel extends ViewModel {
     }
 
 
-    public void updateUserTask(UserTask userTask) {
+    void updateUserTask(UserTask userTask) {
         mRepository.updateUserTask(userTask);
     }
 
-    public void saveErrors(UserTaskError userTaskError) {
+    void saveErrors(UserTaskError userTaskError) {
         mRepository.saveErrors(userTaskError);
     }
 

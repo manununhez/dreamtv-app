@@ -118,6 +118,40 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     }
 
+    private void firebaseLoginEvents(String logEventName) {
+        Bundle bundle = new Bundle();
+
+        switch (logEventName) {
+            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY:
+            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE:
+            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP:
+            case FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS:
+            case FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO:
+            case FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO:
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T:
+                logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F:
+                logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
+                break;
+            default:
+                break;
+
+        }
+
+        mFirebaseAnalytics.logEvent(logEventName, bundle);
+
+    }
+
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(LocaleHelper.onAttach(base));
@@ -255,7 +289,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 //                        dialog -> finish()).show();
 
 
-                //TODO update completed -> 1 y actualizar lista de finalizados
                 mUserTask.setCompleted(1);
 
                 showRatingDialog();
@@ -329,41 +362,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE);
     }
 
-
-    private void firebaseLoginEvents(String logEventName) {
-        Bundle bundle = new Bundle();
-
-        switch (logEventName) {
-            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY:
-            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE:
-            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP:
-            case FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS:
-            case FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO:
-            case FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO:
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                break;
-            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T:
-                logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
-                break;
-            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F:
-                logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
-                break;
-            default:
-                break;
-
-        }
-
-        mFirebaseAnalytics.logEvent(logEventName, bundle);
-
-    }
-
     @Override
     public void stopVideo() {
         stopSyncSubtitle();
@@ -371,11 +369,13 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         if (mVideoView != null) {
 
             Log.d(TAG, "stopVideo() => Time" + mVideoView.getCurrentPosition());
-            //TODO update current time of the video
+
+            //Update current time of the video
             mUserTask.setTimeWatched(mVideoView.getCurrentPosition());
 
 
             mVideoView.stopPlayback();
+
             //Analytics Report Event
             firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP);
 
@@ -553,7 +553,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         mViewModel.saveErrors(userTaskError);
 
 
-        // TODO UPDATE  mUserTask.userTaskErrorList
+        //TODO UPDATE  mUserTask.userTaskErrorList
 //        mUserTask.setUserTaskErrorList();
     }
 
@@ -567,9 +567,9 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public void setRating(int rating) {
-        //TODO complete with dialog
         mUserTask.setRating(rating);
 
+        //We call onBackPressed()->onStop() and then update user task values and finish the activity
         onBackPressed();
     }
 }
