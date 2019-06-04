@@ -908,6 +908,15 @@ public class NetworkDataSource {
                 Log.d(TAG, "updateUserTask() Response JSON: " + response);
 
 
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask>>() {
+                };
+                JsonResponseBaseBean<UserTask> jsonResponse = getJsonResponse(response, type);
+
+                UserTask userTasks = jsonResponse.data;
+
+                responseFromFetchUserTask.postValue(Resource.success(userTasks)); //to update the userTask value in VideoDetailsFragment
+
+
             }
 
             @Override
