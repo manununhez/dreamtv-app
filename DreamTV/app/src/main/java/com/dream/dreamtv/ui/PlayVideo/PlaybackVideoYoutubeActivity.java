@@ -1,26 +1,3 @@
-/*
- * The MIT License (MIT)
- * <p/>
- * Copyright (c) 2016 Bertrand Martel
- * <p/>
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * <p/>
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * <p/>
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 package com.dream.dreamtv.ui.PlayVideo;
 
 import android.app.FragmentManager;
@@ -69,11 +46,13 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_STOP_VIDEO;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSED;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP;
 import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
@@ -104,6 +83,8 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     private static final int PAUSE = 1;
     private int lastSelectedUserTaskShown = -1;
     private int isPlayPauseAction = PAUSE;
+    private int currentTime;
+    private boolean mPlayFromBeginning;
     private RelativeLayout rlVideoPlayerInfo;
     private YoutubeTvView mYoutubeView;
     private TextView tvSubtitle;
@@ -119,8 +100,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     private SubtitleResponse mSubtitleResponse;
     private UserTask mUserTask;
     private PlaybackViewModel mViewModel;
-    private int currentTime;
-    private boolean mPlayFromBeginning;
 
 
     public void onCreate(Bundle savedInstanceState) {
@@ -145,6 +124,41 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         setupVideoPlayer();
+    }
+
+
+    private void firebaseLoginEvents(String logEventName) {
+        Bundle bundle = new Bundle();
+
+        switch (logEventName) {
+            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY:
+            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE:
+            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP:
+            case FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS:
+            case FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO:
+            case FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO:
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T:
+                logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F:
+                logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
+                break;
+            default:
+                break;
+
+        }
+
+        mFirebaseAnalytics.logEvent(logEventName, bundle);
+
     }
 
     @Override
@@ -231,8 +245,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        Bundle bundle = new Bundle();
-
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 Log.d(TAG, "KEYCODE_DPAD_LEFT");
@@ -241,9 +253,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                         Toast.LENGTH_SHORT).show();
 
                 //Analytics Report Event
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO, bundle);
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO);
                 return true;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 Log.d(TAG, "KEYCODE_DPAD_RIGHT");
@@ -252,9 +262,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                         Toast.LENGTH_SHORT).show();
 
                 //Analytics Report Event
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO, bundle);
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO);
                 return true;
 
             default:
@@ -295,18 +303,18 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public void setupVideoPlayer() {
-        Bundle bundle = new Bundle();
-        bundle.putString(YOUTUBE_VIDEO_ID, mSelectedTask.video.getVideoYoutubeId());
-        bundle.putBoolean(YOUTUBE_AUTOPLAY, false);
-        bundle.putBoolean(YOUTUBE_SHOW_RELATED_VIDEOS, false);
-        bundle.putBoolean(YOUTUBE_SHOW_VIDEO_INFO, false);
-        bundle.putBoolean(YOUTUBE_VIDEO_ANNOTATION, false);
-        bundle.putBoolean(YOUTUBE_DEBUG, false);
-        bundle.putBoolean(YOUTUBE_CLOSED_CAPTIONS, false);
+        Bundle youtubeOptions = new Bundle();
+        youtubeOptions.putString(YOUTUBE_VIDEO_ID, mSelectedTask.video.getVideoYoutubeId());
+        youtubeOptions.putBoolean(YOUTUBE_AUTOPLAY, false);
+        youtubeOptions.putBoolean(YOUTUBE_SHOW_RELATED_VIDEOS, false);
+        youtubeOptions.putBoolean(YOUTUBE_SHOW_VIDEO_INFO, false);
+        youtubeOptions.putBoolean(YOUTUBE_VIDEO_ANNOTATION, false);
+        youtubeOptions.putBoolean(YOUTUBE_DEBUG, false);
+        youtubeOptions.putBoolean(YOUTUBE_CLOSED_CAPTIONS, false);
 
         mYoutubeView = findViewById(R.id.video_1);
-        mYoutubeView.updateView(bundle);
-        mYoutubeView.playVideo(bundle.getString(YOUTUBE_VIDEO_ID, ""));
+        mYoutubeView.updateView(youtubeOptions);
+        mYoutubeView.playVideo(youtubeOptions.getString(YOUTUBE_VIDEO_ID, ""));
         mYoutubeView.addPlayerListener(this);
     }
 
@@ -329,10 +337,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         mYoutubeView.start();
 
         //Analytics Report Event
-        Bundle bundle = new Bundle();
-        bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-        bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY, bundle);
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY);
     }
 
 
@@ -349,10 +354,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
 
         //Analytics Report Event
-        Bundle bundle = new Bundle();
-        bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-        bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSED, bundle);
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE);
     }
 
     @Override
@@ -373,10 +375,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
 
             //Analytics Report Event
-            Bundle bundle = new Bundle();
-            bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-            bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-            mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_STOP_VIDEO, bundle);
+            firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP);
         }
     }
 
@@ -457,7 +456,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 FragmentTransaction transaction = fm.beginTransaction();
                 errorSelectionDialogFragment.show(transaction, "Sample Fragment");
             }
-//            }
         }
     }
 
@@ -474,7 +472,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 FragmentTransaction transaction = fm.beginTransaction();
                 errorSelectionDialogFragment.show(transaction, "Sample Fragment");
             }
-//            }
         }
     }
 
@@ -491,10 +488,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                     mUserTask);
 
         //Analytics Report Event
-        Bundle bundle = new Bundle();
-        bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-        bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS, bundle);
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS);
     }
 
     @Override
@@ -520,19 +514,11 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             }
 
             //Analytics Report Event
-            Bundle bundle = new Bundle();
-            bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-            bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-            bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
-            mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS, bundle);
+            firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T);
 
         } else { // None subtitle from the subtitle navigation was pressed. The video continues as it was.
             //Analytics Report Event
-            Bundle bundle = new Bundle();
-            bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-            bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-            bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
-            mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS, bundle);
+            firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F);
 
         }
 
@@ -565,9 +551,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     protected void onStop() {
         super.onStop();
 
-
         mViewModel.updateUserTask(mUserTask);
-
     }
 
     @Override

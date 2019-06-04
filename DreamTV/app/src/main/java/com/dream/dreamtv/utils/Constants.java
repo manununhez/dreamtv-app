@@ -60,13 +60,15 @@ public class Constants {
     public static final String FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN = "pressed_remove_video_my_list_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN = "pressed_save_settings_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN = "pressed_play_video_btn";
-    public static final String FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSED = "pressed_playback_video_pause_btn";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE = "pressed_playback_video_pause_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY = "pressed_playback_video_play_btn";
-    public static final String FIREBASE_LOG_EVENT_PRESSED_STOP_VIDEO = "pressed_playback_video_stop_btn";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP = "pressed_playback_video_stop_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO = "pressed_continue_video_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO = "pressed_restart_video_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS = "pressed_show_errors_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS = "pressed_dismiss_errors_btn";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T = "pressed_dismiss_errors_btn_t";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F = "pressed_dismiss_errors_btn_f";
     public static final String FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO = "pressed_playback_video_bwd_btn";//backward
     public static final String FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO = "pressed_playback_video_fwd_btn"; //forward
 

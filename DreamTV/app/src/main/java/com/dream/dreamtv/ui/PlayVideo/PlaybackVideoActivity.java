@@ -1,17 +1,3 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
-
 package com.dream.dreamtv.ui.PlayVideo;
 
 import android.app.FragmentManager;
@@ -56,11 +42,13 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_STOP_VIDEO;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSED;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP;
 import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
@@ -81,9 +69,10 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private static final int PLAY = 0;
     private static final int PAUSE = 1;
     private static final int POSITION_OFFSET_IN_MS = 7000;//7 secs in ms
-    private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
-    private int isPlayPauseAction = PAUSE;
     private int lastSelectedUserTaskShown = -1;
+    private int isPlayPauseAction = PAUSE;
+    private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
+    private boolean mPlayFromBeginning;
     private VideoView mVideoView;
     private TextView tvSubtitle;
     private TextView tvTime;
@@ -97,7 +86,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private SubtitleResponse mSubtitleResponse;
     private UserTask mUserTask;
     private PlaybackViewModel mViewModel;
-    private boolean mPlayFromBeginning;
 
 
     /**
@@ -164,8 +152,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        Bundle bundle = new Bundle();
-
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 Log.d(TAG, "KEYCODE_DPAD_LEFT");
@@ -175,9 +161,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                         Toast.LENGTH_SHORT).show();
 
                 //Analytics Report Event
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO, bundle);
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO);
+
                 return true;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 Log.d(TAG, "KEYCODE_DPAD_RIGHT");
@@ -187,9 +172,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                         Toast.LENGTH_SHORT).show();
 
                 //Analytics Report Event
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO, bundle);
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO);
 
                 return true;
 
@@ -324,10 +307,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         mVideoView.start();
 
         //Analytics Report Event
-        Bundle bundle = new Bundle();
-        bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-        bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY, bundle);
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY);
     }
 
     @Override
@@ -346,10 +326,42 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
 
         //Analytics Report Event
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE);
+    }
+
+
+    private void firebaseLoginEvents(String logEventName) {
         Bundle bundle = new Bundle();
-        bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-        bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSED, bundle);
+
+        switch (logEventName) {
+            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY:
+            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE:
+            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP:
+            case FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS:
+            case FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO:
+            case FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO:
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T:
+                logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F:
+                logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
+                break;
+            default:
+                break;
+
+        }
+
+        mFirebaseAnalytics.logEvent(logEventName, bundle);
+
     }
 
     @Override
@@ -365,10 +377,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
             mVideoView.stopPlayback();
             //Analytics Report Event
-            Bundle bundle = new Bundle();
-            bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-            bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-            mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_STOP_VIDEO, bundle);
+            firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP);
 
         }
     }
@@ -452,7 +461,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                 FragmentTransaction transaction = fm.beginTransaction();
                 errorSelectionDialogFragment.show(transaction, "Sample Fragment");
             }
-//            }
+
         }
     }
 
@@ -473,7 +482,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                 FragmentTransaction transaction = fm.beginTransaction();
                 errorSelectionDialogFragment.show(transaction, "Sample Fragment");
             }
-//            }
         }
     }
 
@@ -489,10 +497,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
 
         //Analytics Report Event
-        Bundle bundle = new Bundle();
-        bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-        bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS, bundle);
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS);
 
     }
 
@@ -519,20 +524,12 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             }
 
             //Analytics Report Event
-            Bundle bundle = new Bundle();
-            bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-            bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-            bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
-            mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS, bundle);
+            firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T);
 
         } else { // None subtitle from the subtitle navigation was pressed. The video continues as it was.
 
             //Analytics Report Event
-            Bundle bundle = new Bundle();
-            bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-            bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-            bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
-            mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS, bundle);
+            firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F);
 
         }
 
@@ -565,10 +562,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     protected void onStop() {
         super.onStop();
 
-
         mViewModel.updateUserTask(mUserTask);
-
-
     }
 
     @Override
