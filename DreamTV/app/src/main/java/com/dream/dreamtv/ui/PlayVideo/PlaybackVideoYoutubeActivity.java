@@ -26,7 +26,6 @@ package com.dream.dreamtv.ui.PlayVideo;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -54,7 +53,6 @@ import com.dream.dreamtv.model.UserTaskError;
 import com.dream.dreamtv.ui.PlayVideo.Dialogs.ErrorSelectionDialogFragment;
 import com.dream.dreamtv.ui.PlayVideo.Dialogs.RatingDialogFragment;
 import com.dream.dreamtv.utils.InjectorUtils;
-import com.dream.dreamtv.utils.LoadingDialog;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.Utils;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -70,18 +68,16 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGU
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_STOP_VIDEO;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSED;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY;
+import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
-import static com.dream.dreamtv.utils.Constants.STATE_BUFFERING;
 import static com.dream.dreamtv.utils.Constants.STATE_ENDED;
 import static com.dream.dreamtv.utils.Constants.STATE_PAUSED;
 import static com.dream.dreamtv.utils.Constants.STATE_PLAY;
@@ -124,6 +120,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     private UserTask mUserTask;
     private PlaybackViewModel mViewModel;
     private int currentTime;
+    private boolean mPlayFromBeginning;
 
 
     public void onCreate(Bundle savedInstanceState) {
@@ -142,6 +139,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         mSelectedTask = getIntent().getParcelableExtra(INTENT_TASK);
         mSubtitleResponse = getIntent().getParcelableExtra(INTENT_SUBTITLE);
         mUserTask = getIntent().getParcelableExtra(INTENT_USER_TASK);
+        mPlayFromBeginning = getIntent().getBooleanExtra(INTENT_PLAY_FROM_BEGINNING, true);
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -182,7 +180,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
         currentTime = (int) position;
 
-        Log.d(TAG, "POSITION : "+position);
+        Log.d(TAG, "POSITION : " + position);
         if (state.toString().equals(STATE_PLAY)) {
             Log.d(TAG, "State : " + STATE_PLAY);
 
@@ -314,27 +312,11 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public void playVideoMode() {
-        if (mUserTask.getTimeWatchedInSecs() > 0) {
-            Utils.getAlertDialogWithChoice(this, getString(R.string.title_alert_dialog), getString(R.string.title_continue_from_saved_point),
-                    getString(R.string.btn_continue_watching, String.valueOf(mUserTask.getTimeWatchedInMins())), (dialog, which) -> {
-                        playVideo(mUserTask.getTimeWatchedInSecs());
-                        //Analytics Report Event
-                        Bundle bundle = new Bundle();
-                        bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                        bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO, bundle);
-                    }, getString(R.string.btn_no_from_beggining), (dialog, which) -> {
-                        playVideo(null);
-                        dialog.dismiss();
-                        //Analytics Report Event
-                        Bundle bundle = new Bundle();
-                        bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                        bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO, bundle);
-                    }, DialogInterface::dismiss).show();
-        } else {
+        if (mPlayFromBeginning)
             playVideo(null);
-        }
+        else
+            playVideo(mUserTask.getTimeWatchedInSecs());
+
     }
 
     @Override
@@ -385,10 +367,9 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
             //Updated value of the currentTime
             Log.d(TAG, "stopVideo() => Time (Youtube)" + currentTime);
-            
+
             //TODO update current time of the video
             mUserTask.setTimeWatched(currentTime);
-
 
 
             //Analytics Report Event

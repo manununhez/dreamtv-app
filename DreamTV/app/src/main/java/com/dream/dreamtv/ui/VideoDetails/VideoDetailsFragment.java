@@ -1,17 +1,3 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
-
 package com.dream.dreamtv.ui.VideoDetails;
 
 import android.content.Intent;
@@ -21,6 +7,20 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.leanback.app.BackgroundManager;
+import androidx.leanback.app.DetailsSupportFragment;
+import androidx.leanback.widget.Action;
+import androidx.leanback.widget.ArrayObjectAdapter;
+import androidx.leanback.widget.ClassPresenterSelector;
+import androidx.leanback.widget.DetailsOverviewRow;
+import androidx.leanback.widget.FullWidthDetailsOverviewRowPresenter;
+import androidx.leanback.widget.SparseArrayObjectAdapter;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -41,29 +41,20 @@ import com.dream.dreamtv.utils.LoadingDialog;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.leanback.app.BackgroundManager;
-import androidx.leanback.app.DetailsSupportFragment;
-import androidx.leanback.widget.Action;
-import androidx.leanback.widget.ArrayObjectAdapter;
-import androidx.leanback.widget.ClassPresenterSelector;
-import androidx.leanback.widget.DetailsOverviewRow;
-import androidx.leanback.widget.FullWidthDetailsOverviewRowPresenter;
-import androidx.leanback.widget.SparseArrayObjectAdapter;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModelProviders;
+import java.util.concurrent.TimeUnit;
 
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_DURATION;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_PROJECT_NAME;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO;
+import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
@@ -77,26 +68,33 @@ import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
  * It shows a detailed view of video and its meta plus related videos.
  */
 public class VideoDetailsFragment extends DetailsSupportFragment {
-    private static final int ACTION_PLAY_VIDEO = 1;
-    private static final int ACTION_ADD_MY_LIST = 3;
-    private static final int ACTION_REMOVE_MY_LIST = 4;
+
     private static final String TAG = "VideoDetailsFragment";
-    LiveData<Resource<Boolean>> addToListLiveData;
-    LiveData<Resource<Boolean>> removeFromListLiveData;
-    private ArrayObjectAdapter mAdapter;
+    private static final int ACTION_PLAY_VIDEO = 1;
+    private static final int ACTION_CONTINUE_VIDEO = 2;
+    private static final int ACTION_PLAY_VIDEO_FROM_BEGGINING = 3;
+    private static final int ACTION_ADD_MY_LIST = 4;
+    private static final int ACTION_REMOVE_MY_LIST = 5;
+
     private BackgroundManager mBackgroundManager;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;
+    private ArrayObjectAdapter mAdapter;
     private DetailsOverviewRow rowPresenter;
+
     private FirebaseAnalytics mFirebaseAnalytics;
+
     private VideoDetailsViewModel mViewModel;
     private TaskEntity mSelectedTask;
     private SubtitleResponse mSubtitleResponse;
     private UserTask mUserTask;
+    private LoadingDialog loadingDialog;
+
+    private LiveData<Resource<Boolean>> addToListLiveData;
+    private LiveData<Resource<Boolean>> removeFromListLiveData;
     private LiveData<Resource<SubtitleResponse>> fetchSubtitleLiveData;
     private LiveData<Resource<UserTask>> fetchUserTaskLiveData;
     private LiveData<Resource<UserTask>> createUserTaskLiveData;
-    private LoadingDialog loadingDialog;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -108,27 +106,26 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         VideoDetailsViewModelFactory factory = InjectorUtils.provideVideoDetailsViewModelFactory(Objects.requireNonNull(getActivity()));
         mViewModel = ViewModelProviders.of(this, factory).get(VideoDetailsViewModel.class);
 
-
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(Objects.requireNonNull(getActivity()));
 
         mSelectedTask = getActivity().getIntent().getParcelableExtra(INTENT_TASK);
 
         if (mSelectedTask != null) {
-            setupAdapter();
-            setupDetailsOverviewRow();
-            updateBackground(mSelectedTask.video.thumbnail);
+            setupDetailsOverview();
             verifyIfVideoIsInMyList();
-            fetchSubtitle();
+            fetchUserTasks();
         } else {
             getActivity().finish(); //back to MainActivity
         }
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
+    private void setupDetailsOverview() {
+        setupAdapter();
+        setupDetailsOverviewRow();
+        updateBackground(mSelectedTask.video.thumbnail);
     }
+
 
     @Override
     public void onDestroyView() {
@@ -195,7 +192,14 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         detailsPresenter.setOnActionClickedListener(action -> {
             if (action.getId() == ACTION_PLAY_VIDEO) {
-                goToPlayVideo();
+                goToPlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN);
+
+            } else if (action.getId() == ACTION_PLAY_VIDEO_FROM_BEGGINING) {
+                goToPlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO);
+
+            } else if (action.getId() == ACTION_CONTINUE_VIDEO) {
+                goToPlayVideo(false, FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO);
+
             } else if (action.getId() == ACTION_ADD_MY_LIST) {
                 addVideoToMyList();
             } else if (action.getId() == ACTION_REMOVE_MY_LIST) {
@@ -208,6 +212,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         ClassPresenterSelector mPresenterSelector = new ClassPresenterSelector();
         mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
         mAdapter = new ArrayObjectAdapter(mPresenterSelector);
+        mAdapter.clear();
+
         setAdapter(mAdapter);
     }
 
@@ -232,14 +238,15 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                     }
                 });
 
-        SparseArrayObjectAdapter adapter = new SparseArrayObjectAdapter();
 
+        SparseArrayObjectAdapter adapter = new SparseArrayObjectAdapter();
+        adapter.clear();
 
         adapter.set(ACTION_PLAY_VIDEO, new Action(ACTION_PLAY_VIDEO, getResources().getString(R.string.btn_play_video)));
         adapter.set(ACTION_ADD_MY_LIST, new Action(ACTION_ADD_MY_LIST, getResources().getString(R.string.btn_add_to_my_list)));
 
-
         rowPresenter.setActionsAdapter(adapter);
+
         mAdapter.add(rowPresenter);
     }
 
@@ -253,6 +260,122 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void dismissLoading() {
         if (loadingDialog != null) loadingDialog.dismiss();
     }
+
+
+    private void firebaseLoginEvents(String logEventName) {
+        Bundle bundle = new Bundle();
+
+        switch (logEventName) {
+            case FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN:
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putString(FIREBASE_KEY_VIDEO_PROJECT_NAME, mSelectedTask.video.project);
+                bundle.putLong(FIREBASE_KEY_VIDEO_DURATION, mSelectedTask.video.getVideoDurationInMs());
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN:
+            case FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN:
+            case FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO:
+            case FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO:
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                break;
+            default: // FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putString(FIREBASE_KEY_VIDEO_PROJECT_NAME, mSelectedTask.video.project);
+                bundle.putLong(FIREBASE_KEY_VIDEO_DURATION, mSelectedTask.video.getVideoDurationInMs());
+                break;
+
+        }
+
+
+        mFirebaseAnalytics.logEvent(logEventName, bundle);
+
+    }
+
+    private void updateButtonPanel(int clearAction, Action... actions) {
+        SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
+        adapter.clear(clearAction);
+        for (Action action : actions)
+            adapter.set((int) action.getId(), action);
+
+    }
+
+
+    private void setupContinueButton() {
+        if (mUserTask.getTimeWatchedInSecs() > 0) {
+
+            String timeFormatted = String.format(Locale.getDefault(), "%d min, %d s",
+                    TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()),
+                    TimeUnit.MILLISECONDS.toSeconds(mUserTask.getTimeWatched()) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()))
+            );
+
+            updateButtonPanel(ACTION_PLAY_VIDEO,
+                    new Action(ACTION_CONTINUE_VIDEO, getString(R.string.btn_continue_watching, timeFormatted)),
+                    new Action(ACTION_PLAY_VIDEO_FROM_BEGGINING, getString(R.string.btn_no_from_beggining)));
+        }
+    }
+
+
+    private void goToPlayVideo(boolean playFromBeginning, String logEventName) {
+        //We retrieve subtitles first
+        fetchSubtitleLiveData = mViewModel.fetchSubtitle(mSelectedTask.video.videoId,
+                mSelectedTask.language, getSubtitleVersion());
+
+        fetchSubtitleLiveData.removeObservers(getViewLifecycleOwner());
+
+        fetchSubtitleLiveData.observe(getViewLifecycleOwner(), subtitleResponseResource -> {
+            if (subtitleResponseResource.status.equals(Resource.Status.LOADING))
+                instantiateAndShowLoading(getString(R.string.title_loading_retrieve_subtitle));
+
+            else if (subtitleResponseResource.status.equals(Resource.Status.SUCCESS)) {
+                Log.d(TAG, "Subtitle response");
+
+                mSubtitleResponse = subtitleResponseResource.data;
+
+                dismissLoading();
+
+                //PLAY VIDEO
+                if (mUserTask == null) //the are not user tasks for this video, so we need to create a new one
+                    createUserTask();
+                else playVideo(playFromBeginning, logEventName);
+
+
+            } else if (subtitleResponseResource.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (subtitleResponseResource.message != null)
+                    Log.d(TAG, subtitleResponseResource.message);
+                else
+                    Log.d(TAG, "Status ERROR");
+
+                dismissLoading();
+            }
+        });
+
+    }
+
+
+    private void playVideo(boolean playFromBeginning, String logEventName) {
+        Intent intent;
+
+        if (mSelectedTask.video.isUrlFromYoutube())
+            intent = new Intent(getActivity(), PlaybackVideoYoutubeActivity.class);
+        else
+            intent = new Intent(getActivity(), PlaybackVideoActivity.class);
+
+
+        intent.putExtra(INTENT_TASK, mSelectedTask);
+        intent.putExtra(INTENT_SUBTITLE, mSubtitleResponse); //TODO si no hay subtitulo, no deberia avanzar a la sgte pantalla
+        intent.putExtra(INTENT_USER_TASK, mUserTask); //@NULLABLE puede no tener errores ya marcados
+        intent.putExtra(INTENT_PLAY_FROM_BEGINNING, playFromBeginning);
+        startActivity(intent);
+
+
+        firebaseLoginEvents(logEventName);
+
+    }
+
 
     private int getSubtitleVersion() {
         int newestVersion = 0;
@@ -271,94 +394,23 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
 
-    private void goToPlayVideo() {
-        if (mSubtitleResponse == null)
-            Toast.makeText(getActivity(), "Subtitle not found.", Toast.LENGTH_SHORT).show();
-        else if (mUserTask == null) //the are not user tasks for this video, so we need to create a new one
-            createUserTask();
-        else
-            playVideo();
-    }
-
-
-    private void playVideo() {
-        Intent intent;
-
-        if (mSelectedTask.video.isUrlFromYoutube())
-            intent = new Intent(getActivity(), PlaybackVideoYoutubeActivity.class);
-        else
-            intent = new Intent(getActivity(), PlaybackVideoActivity.class);
-
-
-        intent.putExtra(INTENT_TASK, mSelectedTask);
-        intent.putExtra(INTENT_SUBTITLE, mSubtitleResponse); //TODO si no hay subtitulo, no deberia avanzar a la sgte pantalla
-        intent.putExtra(INTENT_USER_TASK, mUserTask); //@NULLABLE puede no tener errores ya marcados
-        startActivity(intent);
-
-        //Analytics Report Event
-        Bundle bundle = new Bundle();
-        bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-        bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-        bundle.putString(FIREBASE_KEY_VIDEO_PROJECT_NAME, mSelectedTask.video.project);
-        bundle.putLong(FIREBASE_KEY_VIDEO_DURATION, mSelectedTask.video.getVideoDurationInMs());
-        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN, bundle);
-    }
-
-
-    /**
-     *
-     */
-    private void fetchSubtitle() {
-        fetchSubtitleLiveData = mViewModel.fetchSubtitle(mSelectedTask.video.videoId, mSelectedTask.language, getSubtitleVersion());
-
-        fetchSubtitleLiveData.removeObservers(getViewLifecycleOwner());
-        fetchSubtitleLiveData.observe(getViewLifecycleOwner(), subtitleResponseResource -> {
-            if (subtitleResponseResource.status.equals(Resource.Status.LOADING))
-                instantiateAndShowLoading(getString(R.string.title_loading_retrieve_subtitle));
-
-            else if (subtitleResponseResource.status.equals(Resource.Status.SUCCESS)) {
-                mSubtitleResponse = subtitleResponseResource.data;
-
-                Log.d(TAG, "Subtitle response");
-
-                dismissLoading();
-                fetchUserTasks();
-
-            } else if (subtitleResponseResource.status.equals(Resource.Status.ERROR)) {
-                //TODO do something
-                if (subtitleResponseResource.message != null)
-                    Log.d(TAG, subtitleResponseResource.message);
-                else
-                    Log.d(TAG, "Status ERROR");
-
-                dismissLoading();
-            }
-
-
-        });
-
-    }
-
     /**
      *
      */
     private void createUserTask() {
-        //        Request
         createUserTaskLiveData = mViewModel.createUserTask(mSelectedTask, mSubtitleResponse.versionNumber);
 
-        //        Response
         createUserTaskLiveData.removeObservers(getViewLifecycleOwner());
 
         createUserTaskLiveData.observe(getViewLifecycleOwner(), userTaskResource -> {
             if (userTaskResource.status.equals(Resource.Status.LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_preparing_task));
             else if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
-                mUserTask = userTaskResource.data;
-
-                goToPlayVideo();
-
                 Log.d(TAG, "createUserTask() response");
 
+                mUserTask = userTaskResource.data;
+
+                goToPlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN);
 
                 mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //update category after a new task was added
 
@@ -381,20 +433,23 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
      * Verify if the current task has already data created. IF not, is call createTask()
      */
     private void fetchUserTasks() {
-        //        Request
         fetchUserTaskLiveData = mViewModel.fetchUserTask(mSelectedTask.taskId);
 
-        //        Response
         fetchUserTaskLiveData.removeObservers(getViewLifecycleOwner());
+
         fetchUserTaskLiveData.observe(getViewLifecycleOwner(), userTaskResource -> {
-//            if (userTaskResource.status.equals(Resource.Status.LOADING))
-//                instantiateAndShowLoading(getString(R.string.title_loading_retrieve_tasks));
-//            else
-            if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
+            if (userTaskResource.status.equals(Resource.Status.LOADING))
+                instantiateAndShowLoading(getString(R.string.title_loading_retrieve_user_tasks));
+            else if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
+                Log.d(TAG, "responseFromFetchUserTaskErrorDetails response");
+
                 mUserTask = userTaskResource.data;
 
-                Log.d(TAG, "responseFromFetchUserTaskErrorDetails response");
-//                dismissLoading();
+                if (mUserTask != null)
+                    setupContinueButton();
+
+                dismissLoading();
+
             } else if (userTaskResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
                 if (userTaskResource.message != null)
@@ -402,7 +457,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 else
                     Log.d(TAG, "Status ERROR");
 
-//                dismissLoading();
+
+                dismissLoading();
             }
         });
     }
@@ -411,28 +467,40 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     /**
      *
      */
+    private void verifyIfVideoIsInMyList() {
+        boolean result = mViewModel.verifyIfTaskIsInList(mSelectedTask);
+
+        if (result)
+            updateButtonPanel(ACTION_ADD_MY_LIST,
+                    new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
+        else
+            updateButtonPanel(ACTION_REMOVE_MY_LIST,
+                    new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
+
+    }
+
+    /**
+     *
+     */
     private void addVideoToMyList() {
         addToListLiveData = mViewModel.requestAddToList(mSelectedTask);
+
+        addToListLiveData.removeObservers(getViewLifecycleOwner());
 
         addToListLiveData.observe(getViewLifecycleOwner(), booleanResource -> {
             if (booleanResource.status.equals(Resource.Status.LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_add_to_list));
             else if (booleanResource.status.equals(Resource.Status.SUCCESS)) {
-
-                SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
-                adapter.clear(ACTION_ADD_MY_LIST);
-                adapter.set(ACTION_REMOVE_MY_LIST, new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
-
-
                 Log.d(TAG, "addVideoToMyList() response");
+
+                updateButtonPanel(ACTION_ADD_MY_LIST,
+                        new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
+
 
                 mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT); //update category after a new task was added
 
                 //Analytics Report Event
-                Bundle bundle = new Bundle();
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN, bundle);
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN);
 
 
                 dismissLoading();
@@ -455,27 +523,23 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void removeVideoFromMyList() {
         removeFromListLiveData = mViewModel.requestRemoveFromList(mSelectedTask);
 
+        removeFromListLiveData.removeObservers(getViewLifecycleOwner());
+
         removeFromListLiveData.observe(getViewLifecycleOwner(), booleanResource -> {
             if (booleanResource.status.equals(Resource.Status.LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_remove_from_list));
             else if (booleanResource.status.equals(Resource.Status.SUCCESS)) {
-
-                SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
-                adapter.clear(ACTION_REMOVE_MY_LIST);
-                adapter.set(ACTION_ADD_MY_LIST, new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
-
-
                 Log.d(TAG, "removeVideoFromMyList() response");
+
+                updateButtonPanel(ACTION_REMOVE_MY_LIST,
+                        new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
+
 
                 mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT); //update category after a task was removed
 
 
                 //Analytics Report Event
-                Bundle bundle = new Bundle();
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN, bundle);
-
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN);
 
                 dismissLoading();
             } else if (booleanResource.status.equals(Resource.Status.ERROR)) {
@@ -492,22 +556,5 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     }
 
-    /**
-     *
-     */
-    private void verifyIfVideoIsInMyList() {
-        boolean result = mViewModel.verifyIfTaskIsInList(mSelectedTask);
-
-        SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
-        if (result) {
-            adapter.clear(ACTION_ADD_MY_LIST);
-            adapter.set(ACTION_REMOVE_MY_LIST, new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
-        } else {
-            adapter.clear(ACTION_REMOVE_MY_LIST);
-            adapter.set(ACTION_ADD_MY_LIST, new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
-        }
-
-
-    }
 
 }

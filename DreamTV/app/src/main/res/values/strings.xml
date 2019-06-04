@@ -72,7 +72,7 @@
     <string name="btn_save_exit">Save and Exit</string>
     <string name="btn_ok">OK</string>
     <string name="btn_start_recording">Click the mic to record your comment</string>
-    <string name="btn_continue_watching">Resume:%1$s min</string>
+    <string name="btn_continue_watching">Resume: %1$s</string>
     <string name="btn_no_from_beggining">Play from beginning</string>
     <string name="btn_play_video">Play video</string>
     <string name="btn_add_to_my_list">+ Add to my list</string>

@@ -59,7 +59,7 @@
     <string name="btn_save_exit">Zapisz i wyjdź</string>
     <string name="btn_ok">OK</string>
     <string name="btn_start_recording">Kliknij na mikrofon żeby nagrać wiadomość</string>
-    <string name="btn_continue_watching">Wznów:%1$s min.</string>
+    <string name="btn_continue_watching">Wznów: %1$s</string>
     <string name="btn_no_from_beggining">Graj od początku</string>
     <string name="btn_play_video">Odtwórz film</string>
     <string name="btn_add_to_my_list">+ Dodaj do moich filmów</string>

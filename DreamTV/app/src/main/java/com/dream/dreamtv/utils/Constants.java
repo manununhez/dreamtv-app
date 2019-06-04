@@ -23,6 +23,8 @@ public class Constants {
     public static final String INTENT_USER_TASK = "INTENT_USER_TASK";
     public static final String INTENT_EXTRA_CALL_TASKS = "callTasks";
     public static final String INTENT_EXTRA_RESTART = "restart";
+    public static final String INTENT_PLAY_FROM_BEGINNING = "from_beginning";
+
 
     public static final String ABR_CHINESE = "zh";
     public static final String ABR_ENGLISH = "en";
