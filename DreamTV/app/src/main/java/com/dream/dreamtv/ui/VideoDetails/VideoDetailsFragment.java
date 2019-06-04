@@ -193,13 +193,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         detailsPresenter.setOnActionClickedListener(action -> {
             if (action.getId() == ACTION_PLAY_VIDEO) {
                 goToPlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN);
-
             } else if (action.getId() == ACTION_PLAY_VIDEO_FROM_BEGGINING) {
                 goToPlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO);
-
             } else if (action.getId() == ACTION_CONTINUE_VIDEO) {
                 goToPlayVideo(false, FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO);
-
             } else if (action.getId() == ACTION_ADD_MY_LIST) {
                 addVideoToMyList();
             } else if (action.getId() == ACTION_REMOVE_MY_LIST) {
@@ -239,15 +236,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 });
 
 
-        SparseArrayObjectAdapter adapter = new SparseArrayObjectAdapter();
-        adapter.clear();
+        setActionPanel(new Action(ACTION_PLAY_VIDEO, getResources().getString(R.string.btn_play_video)),
+                new Action(ACTION_ADD_MY_LIST, getResources().getString(R.string.btn_add_to_my_list)));
 
-        adapter.set(ACTION_PLAY_VIDEO, new Action(ACTION_PLAY_VIDEO, getResources().getString(R.string.btn_play_video)));
-        adapter.set(ACTION_ADD_MY_LIST, new Action(ACTION_ADD_MY_LIST, getResources().getString(R.string.btn_add_to_my_list)));
-
-        rowPresenter.setActionsAdapter(adapter);
-
-        mAdapter.add(rowPresenter);
     }
 
     private void instantiateAndShowLoading(String message) {
@@ -285,35 +276,48 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 bundle.putString(FIREBASE_KEY_VIDEO_PROJECT_NAME, mSelectedTask.video.project);
                 bundle.putLong(FIREBASE_KEY_VIDEO_DURATION, mSelectedTask.video.getVideoDurationInMs());
                 break;
-
         }
-
-
+        
         mFirebaseAnalytics.logEvent(logEventName, bundle);
 
     }
 
-    private void updateButtonPanel(int clearAction, Action... actions) {
+    private void setActionPanel(int clearAction, Action... actions) {
         SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
         adapter.clear(clearAction);
         for (Action action : actions)
             adapter.set((int) action.getId(), action);
+    }
 
+    private void setActionPanel(Action... actions) {
+        SparseArrayObjectAdapter adapter = new SparseArrayObjectAdapter();
+
+        for (Action action : actions)
+            adapter.set((int) action.getId(), action);
+
+
+        rowPresenter.setActionsAdapter(adapter);
+
+        mAdapter.add(rowPresenter);
     }
 
 
-    private void setupContinueButton() {
-        if (mUserTask.getTimeWatchedInSecs() > 0) {
-
+    private void setupContinueAction() {
+//        if (mUserTask.getTimeWatchedInSecs() > 0) {
+        if (mUserTask != null) {
             String timeFormatted = String.format(Locale.getDefault(), "%d min, %d s",
                     TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()),
                     TimeUnit.MILLISECONDS.toSeconds(mUserTask.getTimeWatched()) -
                             TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()))
             );
 
-            updateButtonPanel(ACTION_PLAY_VIDEO,
+            setActionPanel(ACTION_PLAY_VIDEO,
                     new Action(ACTION_CONTINUE_VIDEO, getString(R.string.btn_continue_watching, timeFormatted)),
                     new Action(ACTION_PLAY_VIDEO_FROM_BEGGINING, getString(R.string.btn_no_from_beggining)));
+//        }
+        } else {
+            setActionPanel(new Action(ACTION_PLAY_VIDEO, getResources().getString(R.string.btn_play_video)),
+                    new Action(ACTION_ADD_MY_LIST, getResources().getString(R.string.btn_add_to_my_list)));
         }
     }
 
@@ -445,8 +449,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                 mUserTask = userTaskResource.data;
 
-                if (mUserTask != null)
-                    setupContinueButton();
+                setupContinueAction();
 
                 dismissLoading();
 
@@ -471,10 +474,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         boolean result = mViewModel.verifyIfTaskIsInList(mSelectedTask);
 
         if (result)
-            updateButtonPanel(ACTION_ADD_MY_LIST,
+            setActionPanel(ACTION_ADD_MY_LIST,
                     new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
         else
-            updateButtonPanel(ACTION_REMOVE_MY_LIST,
+            setActionPanel(ACTION_REMOVE_MY_LIST,
                     new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
 
     }
@@ -493,7 +496,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             else if (booleanResource.status.equals(Resource.Status.SUCCESS)) {
                 Log.d(TAG, "addVideoToMyList() response");
 
-                updateButtonPanel(ACTION_ADD_MY_LIST,
+                setActionPanel(ACTION_ADD_MY_LIST,
                         new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
 
 
@@ -531,7 +534,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             else if (booleanResource.status.equals(Resource.Status.SUCCESS)) {
                 Log.d(TAG, "removeVideoFromMyList() response");
 
-                updateButtonPanel(ACTION_REMOVE_MY_LIST,
+                setActionPanel(ACTION_REMOVE_MY_LIST,
                         new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
 
 
