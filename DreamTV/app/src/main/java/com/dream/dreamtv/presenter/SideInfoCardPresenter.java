@@ -85,7 +85,7 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
                     .priority(Priority.HIGH);
 
             Glide.with(getContext())
-                    .load(card.getTaskEntity().video.thumbnail)
+                    .load(card.getTask().video.thumbnail)
                     .apply(options)
                     .into(imageView);
         }

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -22,9 +23,9 @@ import com.dream.dreamtv.R;
 import com.dream.dreamtv.common.IPlayBackVideoListener;
 import com.dream.dreamtv.common.IReasonsDialogListener;
 import com.dream.dreamtv.common.ISubtitlePlayBackListener;
-import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.model.Subtitle;
 import com.dream.dreamtv.model.SubtitleResponse;
+import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.UserTaskError;
 import com.dream.dreamtv.ui.PlayVideo.Dialogs.ErrorSelectionDialogFragment;
@@ -49,6 +50,7 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP;
+import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
@@ -82,10 +84,11 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private LoadingDialog loadingDialog;
     private ArrayList<UserTaskError> userTaskErrorListForSttlPos;
     private FirebaseAnalytics mFirebaseAnalytics;
-    private TaskEntity mSelectedTask;
+    private Task mSelectedTask;
     private SubtitleResponse mSubtitleResponse;
     private UserTask mUserTask;
     private PlaybackViewModel mViewModel;
+    private String mSelectedCategory;
 
 
     /**
@@ -104,6 +107,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
 
         mSelectedTask = getIntent().getParcelableExtra(INTENT_TASK);
+        mSelectedCategory = getIntent().getStringExtra(INTENT_CATEGORY);
         mSubtitleResponse = getIntent().getParcelableExtra(INTENT_SUBTITLE);
         mUserTask = getIntent().getParcelableExtra(INTENT_USER_TASK);
         mPlayFromBeginning = getIntent().getBooleanExtra(INTENT_PLAY_FROM_BEGINNING, true);
@@ -453,7 +457,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
             dismissLoading(); //in case the loading is still visible
 
-//            if (!mSelectedTask.category.equals(TASKS_MY_LIST_CAT)) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+//            if (!mSelectedCategory.equals(TASKS_MY_LIST_CAT)) { //For now, we dont show the popup in my list category . This category is just to see saved video
             ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(mSubtitleResponse,
                     subtitle.position, mSelectedTask, userTask);
             if (!isFinishing()) {
@@ -473,7 +477,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         if (subtitle != null) { //only shows the popup when exist an subtitle
             dismissLoading(); //in case the loading is still visible
 
-//            if (!mSelectedTask.category.equals(TASKS_MY_LIST_CAT)) { //For now, we dont show the popup in my list category . This category is just to see saved videos
+//            if (!mSelectedCategory.equals(TASKS_MY_LIST_CAT)) { //For now, we dont show the popup in my list category . This category is just to see saved video
             ErrorSelectionDialogFragment errorSelectionDialogFragment =
                     ErrorSelectionDialogFragment.newInstance(mSubtitleResponse,
                             subtitle.position, mSelectedTask, userTask, userTaskErrorList);
@@ -553,7 +557,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         mViewModel.saveErrors(userTaskError);
 
 
-        //TODO UPDATE  mUserTask.userTaskErrorList
+        //TODO UPDATE  mUserTask.userTaskErrorList and UserTask value in VideoDetails
 //        mUserTask.setUserTaskErrorList();
     }
 

@@ -38,10 +38,10 @@ import androidx.core.content.ContextCompat;
 
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.model.ErrorReason;
 import com.dream.dreamtv.model.Subtitle;
 import com.dream.dreamtv.model.SubtitleResponse;
+import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.UserTaskError;
@@ -64,14 +64,6 @@ import static com.dream.dreamtv.utils.Constants.BEGINNER_INTERFACE_MODE;
 
 public class ErrorSelectionDialogFragment extends DialogFragment {
     private static final String TAG = ErrorSelectionDialogFragment.class.getSimpleName();
-
-    // Container Activity must implement this interface
-    public interface OnListener {
-        void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition);
-
-        void onSaveReasons(UserTaskError userTaskError);
-    }
-
     private static final int REQ_CODE_SPEECH_INPUT = 100;
     private static final String SPEECH_NOT_SUPPORTED = "speech_not_supported";
     private LinearLayout llComments;
@@ -91,19 +83,17 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private ScrollView scrollViewAdvanced;
     private ScrollView scrollViewBeginner;
     private Subtitle selectedSubtitle;
-    private TaskEntity mSelectedTask;
+    private Task mSelectedTask;
     private OnListener mCallback;
     private List<String> selectedReasons = new ArrayList<>();
     private List<ErrorReason> errorReasonList;
     private int subtitleOriginalPosition;
-
-
     public ErrorSelectionDialogFragment() {
         // Required empty public constructor
     }
 
     public static ErrorSelectionDialogFragment newInstance(SubtitleResponse mSubtitleResponse, int subtitlePosition,
-                                                           TaskEntity mSelectedTask,
+                                                           Task mSelectedTask,
                                                            UserTask userTask,
                                                            ArrayList<UserTaskError> userTaskErrorList) {
         ErrorSelectionDialogFragment f = new ErrorSelectionDialogFragment();
@@ -120,7 +110,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     }
 
     public static ErrorSelectionDialogFragment newInstance(SubtitleResponse mSubtitleResponse,
-                                                           int subtitlePosition, TaskEntity mSelectedTask,
+                                                           int subtitlePosition, Task mSelectedTask,
                                                            UserTask userTask) {
         ErrorSelectionDialogFragment f = new ErrorSelectionDialogFragment();
 
@@ -191,7 +181,8 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
     @Override
     public void onResume() {
-        Objects.requireNonNull(getDialog().getWindow()).setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        Objects.requireNonNull(getDialog().getWindow()).setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
 
         getDialog().setOnKeyListener((dialog, keyCode, event) -> {
             switch (keyCode) {
@@ -230,27 +221,20 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case REQ_CODE_SPEECH_INPUT: {
-                if (resultCode == Activity.RESULT_OK && null != data) {
-                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    voiceInput.setText(result.get(0));
-                }
-                break;
+        if (requestCode == REQ_CODE_SPEECH_INPUT) {
+            if (resultCode == Activity.RESULT_OK && null != data) {
+                ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                voiceInput.setText(result.get(0));
             }
-
         }
     }
 
     private void setupEventsListener() {
         btnCancel.setOnClickListener(view -> dismiss());
         btnOk.setOnClickListener(view -> dismiss());
-        btnSave.setOnClickListener(view -> {
-            saveReasons();
-        });
+        btnSave.setOnClickListener(view -> saveReasons());
 
     }
-
 
     private DreamTVApp getApplication() {
         return ((DreamTVApp) getActivity().getApplication());
@@ -297,7 +281,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         });
 
     }
-
 
     private void setupAudioRecord() {
         llComments = viewRoot.findViewById(R.id.llComments);
@@ -427,7 +410,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         }
     }
 
-
     private void repopulateFormWithUserTaskData(int position) {
         ArrayList<UserTaskError> errors = userTask.getUserTaskErrorsForASpecificSubtitlePosition(position);
         Log.d(TAG, "repopulateFormWithUserTaskData()");
@@ -551,7 +533,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         dismiss();
     }
 
-
     public String selectedErrorsListJson(List<String> selectedReasons) {
         List<ErrorReason> tempList = new ArrayList<>();
 
@@ -566,6 +547,12 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     }
 
 
+    // Container Activity must implement this interface
+    public interface OnListener {
+        void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition);
+
+        void onSaveReasons(UserTaskError userTaskError);
+    }
 
     public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
 

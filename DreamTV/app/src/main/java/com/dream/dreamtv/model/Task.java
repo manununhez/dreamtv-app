@@ -3,8 +3,6 @@ package com.dream.dreamtv.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.dream.dreamtv.db.entity.TaskEntity;
-import com.dream.dreamtv.utils.Utils;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -31,7 +29,7 @@ public class Task implements Parcelable {
     @SerializedName("updated_at")
     public String updated_at;
     @SerializedName("videos")
-    public Video videos;
+    public Video video;
 
 
     public static final Creator<Task> CREATOR = new Creator<Task>() {
@@ -56,15 +54,9 @@ public class Task implements Parcelable {
         completed = in.readString();
         created_at = in.readString();
         updated_at = in.readString();
-        videos = in.readParcelable(Video.class.getClassLoader());
+        video = in.readParcelable(Video.class.getClassLoader());
     }
 
-    public TaskEntity getEntity(String category) {
-        return new TaskEntity(taskId, language,
-                type, created, completed, modified, category, Utils.getUnixTimeNowInSecs(), new Video(videos.videoId, videos.primaryAudioLanguageCode,
-                videos.title, videos.description, videos.duration, videos.thumbnail, videos.team,
-                videos.project, videos.videoUrl));
-    }
 
     @Override
     public int describeContents() {
@@ -82,6 +74,6 @@ public class Task implements Parcelable {
         parcel.writeString(completed);
         parcel.writeString(created_at);
         parcel.writeString(updated_at);
-        parcel.writeParcelable(videos, i);
+        parcel.writeParcelable(video, i);
     }
 }

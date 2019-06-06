@@ -28,9 +28,9 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.SubtitleResponse;
+import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.VideoTests;
 import com.dream.dreamtv.presenter.DetailsDescriptionPresenter;
@@ -54,6 +54,7 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_CONTI
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO;
+import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
@@ -66,7 +67,7 @@ import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
 
 /*
  * LeanbackDetailsFragment extends DetailsSupportFragment, a Wrapper fragment for leanback details screens.
- * It shows a detailed view of video and its meta plus related videos.
+ * It shows a detailed view of video and its meta plus related video.
  */
 public class VideoDetailsFragment extends DetailsSupportFragment {
 
@@ -86,7 +87,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private FirebaseAnalytics mFirebaseAnalytics;
 
     private VideoDetailsViewModel mViewModel;
-    private TaskEntity mSelectedTask;
+    private Task mSelectedTask;
+    private String mSelectedCategory;
     private SubtitleResponse mSubtitleResponse;
     private UserTask mUserTask;
     private LoadingDialog loadingDialog;
@@ -112,9 +114,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         mSelectedTask = getActivity().getIntent().getParcelableExtra(INTENT_TASK);
 
+        mSelectedCategory = getActivity().getIntent().getStringExtra(INTENT_CATEGORY);
+
         if (mSelectedTask != null) {
             setupDetailsOverview();
-            verifyIfVideoIsInMyList();
             fetchUserTasks();
         } else {
             getActivity().finish(); //back to MainActivity
@@ -124,6 +127,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void setupDetailsOverview() {
         setupAdapter();
         setupDetailsOverviewRow();
+        initActionPanel();
         updateBackground(mSelectedTask.video.thumbnail);
     }
 
@@ -236,10 +240,48 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                     }
                 });
 
+    }
 
+    private void initActionPanel() {
         setActionPanel(new Action(ACTION_PLAY_VIDEO, getResources().getString(R.string.btn_play_video)),
                 new Action(ACTION_ADD_MY_LIST, getResources().getString(R.string.btn_add_to_my_list)));
 
+
+        verifyIfVideoIsInMyList();
+    }
+
+    /**
+     *
+     */
+    private void verifyIfVideoIsInMyList() {
+        boolean result = mViewModel.verifyIfTaskIsInList(mSelectedTask);
+
+        if (result)
+            setActionPanel(ACTION_ADD_MY_LIST,
+                    new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
+        else
+            setActionPanel(ACTION_REMOVE_MY_LIST,
+                    new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
+
+    }
+
+    private void setActionPanel(int clearAction, Action... actions) {
+        SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
+        adapter.clear(clearAction);
+        for (Action action : actions)
+            adapter.set((int) action.getId(), action);
+    }
+
+    private void setActionPanel(Action... actions) {
+        SparseArrayObjectAdapter adapter = new SparseArrayObjectAdapter();
+
+        for (Action action : actions)
+            adapter.set((int) action.getId(), action);
+
+
+        rowPresenter.setActionsAdapter(adapter);
+
+        mAdapter.add(rowPresenter);
     }
 
     private void instantiateAndShowLoading(String message) {
@@ -283,24 +325,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     }
 
-    private void setActionPanel(int clearAction, Action... actions) {
-        SparseArrayObjectAdapter adapter = (SparseArrayObjectAdapter) rowPresenter.getActionsAdapter();
-        adapter.clear(clearAction);
-        for (Action action : actions)
-            adapter.set((int) action.getId(), action);
-    }
-
-    private void setActionPanel(Action... actions) {
-        SparseArrayObjectAdapter adapter = new SparseArrayObjectAdapter();
-
-        for (Action action : actions)
-            adapter.set((int) action.getId(), action);
-
-
-        rowPresenter.setActionsAdapter(adapter);
-
-        mAdapter.add(rowPresenter);
-    }
 
 
     private void setupContinueAction() {
@@ -316,12 +340,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                         new Action(ACTION_CONTINUE_VIDEO, getString(R.string.btn_continue_watching, timeFormatted)),
                         new Action(ACTION_PLAY_VIDEO_FROM_BEGGINING, getString(R.string.btn_no_from_beggining)));
             } else {
-                setActionPanel(new Action(ACTION_PLAY_VIDEO, getResources().getString(R.string.btn_play_video)),
-                        new Action(ACTION_ADD_MY_LIST, getResources().getString(R.string.btn_add_to_my_list)));
+                initActionPanel();
             }
         } else {
-            setActionPanel(new Action(ACTION_PLAY_VIDEO, getResources().getString(R.string.btn_play_video)),
-                    new Action(ACTION_ADD_MY_LIST, getResources().getString(R.string.btn_add_to_my_list)));
+            initActionPanel();
         }
     }
 
@@ -374,6 +396,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
 
         intent.putExtra(INTENT_TASK, mSelectedTask);
+        intent.putExtra(INTENT_CATEGORY, mSelectedCategory);
         intent.putExtra(INTENT_SUBTITLE, mSubtitleResponse); //TODO si no hay subtitulo, no deberia avanzar a la sgte pantalla
         intent.putExtra(INTENT_USER_TASK, mUserTask); //@NULLABLE puede no tener errores ya marcados
         intent.putExtra(INTENT_PLAY_FROM_BEGINNING, playFromBeginning);
@@ -390,7 +413,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         DreamTVApp dreamTVApp = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
         List<VideoTests> videoTestsList = dreamTVApp.getVideoTests();
 
-        if (mSelectedTask.category.equals(TASKS_TEST_CAT)) {
+        if (mSelectedCategory.equals(TASKS_TEST_CAT)) {
             //We find the version of the video test
             for (VideoTests videoTests : videoTestsList)
                 if (videoTests.videoId.equals(mSelectedTask.video.videoId)) {
@@ -476,21 +499,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         });
     }
 
-
-    /**
-     *
-     */
-    private void verifyIfVideoIsInMyList() {
-        boolean result = mViewModel.verifyIfTaskIsInList(mSelectedTask);
-
-        if (result)
-            setActionPanel(ACTION_ADD_MY_LIST,
-                    new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
-        else
-            setActionPanel(ACTION_REMOVE_MY_LIST,
-                    new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
-
-    }
 
     /**
      *

@@ -14,22 +14,19 @@
 
 package com.dream.dreamtv.presenter;
 
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.db.entity.TaskEntity;
+import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.Video;
 
 import androidx.core.content.ContextCompat;
-import androidx.leanback.widget.ImageCardView;
 import androidx.leanback.widget.Presenter;
 
 
@@ -78,7 +75,7 @@ public class VideoCardPresenter extends Presenter {
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
-        Video video = ((TaskEntity) item).video;
+        Video video = ((Task) item).video;
         ImageCardViewCustom cardView = (ImageCardViewCustom) viewHolder.view;
 
         Log.d(TAG, "onBindViewHolder");

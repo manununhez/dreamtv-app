@@ -18,8 +18,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
 
-import com.dream.dreamtv.db.entity.TaskEntity;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -29,6 +27,7 @@ import java.net.URISyntaxException;
  */
 public class Card {
 
+    private String mCategory;
     private String mTitle = "";
     private String mDescription = "";
     private String mExtraText = "";
@@ -41,28 +40,30 @@ public class Card {
     private int mId;
     private int mWidth;
     private int mHeight;
-    private TaskEntity mTaskEntity;
+    private Task mTask;
 
     public Card() {
 
     }
 
-    public Card(TaskEntity taskEntity) {
-        this.mType = Type.SIDE_INFO;
-        this.mTitle = taskEntity.video.title;
-        this.mDescription = taskEntity.video.project;
-        this.mExtraText = taskEntity.video.description;
-        this.mImageUrl = taskEntity.video.thumbnail;
-        this.mTaskEntity = taskEntity;
+    public Card(Task task, String category) {
+        mType = Type.SIDE_INFO;
+        mTitle = task.video.title;
+        mDescription = task.video.project;
+        mExtraText = task.video.description;
+        mImageUrl = task.video.thumbnail;
+        mTask = task;
+        mCategory = category;
+
 
     }
 
-    public TaskEntity getTaskEntity() {
-        return mTaskEntity;
+    public Task getTask() {
+        return mTask;
     }
 
-    public void setTaskEntity(TaskEntity mTaskEntity) {
-        this.mTaskEntity = mTaskEntity;
+    public void setTaskEntity(Task mTask) {
+        this.mTask = mTask;
     }
 
     public String getTitle() {
@@ -185,6 +186,10 @@ public class Card {
 
     public String getFooterLocalImageResourceName() {
         return mFooterResource;
+    }
+
+    public String getCategory() {
+        return mCategory;
     }
 
 

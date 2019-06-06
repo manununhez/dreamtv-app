@@ -15,7 +15,7 @@
 package com.dream.dreamtv.presenter;
 
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.db.entity.TaskEntity;
+import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.Video;
 
 
@@ -23,13 +23,13 @@ public class DetailsDescriptionPresenter extends CustomAbstractDetailsDescriptio
 
     @Override
     protected void onBindDescription(ViewHolder viewHolder, Object item) {
-        TaskEntity taskEntity = ((TaskEntity) item);
-        Video video = taskEntity.video;
+        Task task = ((Task) item);
+        Video video = task.video;
 
         if (video != null) {
             viewHolder.getTitle().setText(video.title);
             viewHolder.getSubtitle().setText(viewHolder.view.getContext().getString(R.string.title_video_details, video.project,
-                    video.primaryAudioLanguageCode, taskEntity.language, (video.duration / 60)));
+                    video.primaryAudioLanguageCode, task.language, (video.duration / 60)));
             viewHolder.getBody().setText(video.description);
         }
     }

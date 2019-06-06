@@ -13,13 +13,12 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.db.entity.TaskEntity;
 import com.dream.dreamtv.model.ErrorReason;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.model.TaskResponse;
+import com.dream.dreamtv.model.TasksList;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.UserTaskError;
@@ -79,11 +78,11 @@ public class NetworkDataSource {
     private final AppExecutors mExecutors;
     // Volley requestQueue
     private RequestQueue mRequestQueue;
-    private MutableLiveData<Resource<TaskEntity[]>> responseFromFetchAllTasks;
-    private MutableLiveData<Resource<TaskEntity[]>> responseFromFetchContinueTasks;
-    private MutableLiveData<Resource<TaskEntity[]>> responseFromFetchTestTasks;
-    private MutableLiveData<Resource<TaskEntity[]>> responseFromFetchFinishedTasks;
-    private MutableLiveData<Resource<TaskEntity[]>> responseFromFetchMyListTasks;
+    private MutableLiveData<Resource<TasksList>> responseFromFetchAllTasks;
+    private MutableLiveData<Resource<TasksList>> responseFromFetchContinueTasks;
+    private MutableLiveData<Resource<TasksList>> responseFromFetchTestTasks;
+    private MutableLiveData<Resource<TasksList>> responseFromFetchFinishedTasks;
+    private MutableLiveData<Resource<TasksList>> responseFromFetchMyListTasks;
     private MutableLiveData<Resource<Boolean>> responseFromAddToListTasks;
     private MutableLiveData<Resource<Boolean>> responseFromRemoveFromListTasks;
     private MutableLiveData<Resource<User>> responseFromUserUpdate;
@@ -583,7 +582,7 @@ public class NetworkDataSource {
      * @param page            Pagination value
      */
     @SuppressWarnings("unchecked")
-    private void fetchTasksByCategory(final String paramType, final MutableLiveData<Resource<TaskEntity[]>> responseMutable, int page) {
+    private void fetchTasksByCategory(final String paramType, final MutableLiveData<Resource<TasksList>> responseMutable, int page) {
 
         responseMutable.setValue(Resource.loading(null));
 
@@ -603,22 +602,23 @@ public class NetworkDataSource {
                 false, "") {
             @Override
             protected void processResponse(String response) {
-                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskResponse>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<TasksList>>() {
                 };
-                JsonResponseBaseBean<TaskResponse> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<TasksList> jsonResponse = getJsonResponse(response, type);
 
                 Log.d(TAG, "fetchTasksByCategory() Response JSON: " + response);
 
-                TaskResponse taskResponse = jsonResponse.data;
+                TasksList taskResponse = jsonResponse.data;
+                taskResponse.category = TASKS_ALL_CAT;
 
-                TaskEntity[] taskEntities = new TaskEntity[taskResponse.data.length];
+//                Task[] taskEntities = new Task[taskResponse.data.length];
 
-                for (int i = 0; i < taskResponse.data.length; i++) {
-                    taskEntities[i] = taskResponse.data[i].getEntity(TASKS_ALL_CAT);
-                }
+//                for (int i = 0; i < taskResponse.data.length; i++) {
+//                    taskEntities[i] = taskResponse.data[i].getEntity(TASKS_ALL_CAT);
+//                }
 
 
-                responseMutable.postValue(Resource.success(taskEntities)); //post the value to live data
+                responseMutable.postValue(Resource.success(taskResponse)); //post the value to live data
 
 
                 if (taskResponse.current_page < taskResponse.last_page) //Pagination
@@ -651,7 +651,7 @@ public class NetworkDataSource {
      * @param responseMutable Reference to MutableLiveData
      */
     @SuppressWarnings("unchecked")
-    private void fetchTasksByCategory(final String paramType, final MutableLiveData<Resource<TaskEntity[]>> responseMutable) {
+    private void fetchTasksByCategory(final String paramType, final MutableLiveData<Resource<TasksList>> responseMutable) {
 
         responseMutable.setValue(Resource.loading(null));
 
@@ -671,17 +671,21 @@ public class NetworkDataSource {
 
                 Log.d(TAG, paramType + "fetchTasksByCategory() Response JSON: " + response);
 
-                Task[] taskResponse = jsonResponse.data;
+                Task[] tasks = jsonResponse.data;
+
+                TasksList tasksList = new TasksList();
+                tasksList.data = tasks;
+                tasksList.category = paramType;
 
 //                if (taskResponse.length > 0) {//If the response data if not empty
-                TaskEntity[] taskEntities = new TaskEntity[taskResponse.length];
+//                Task[] taskEntities = new Task[taskResponse.length];
+//
+//                for (int i = 0; i < taskResponse.length; i++) {
+//                    taskEntities[i] = taskResponse[i].getEntity(paramType);
+//                }
 
-                for (int i = 0; i < taskResponse.length; i++) {
-                    taskEntities[i] = taskResponse[i].getEntity(paramType);
-                }
 
-
-                responseMutable.postValue(Resource.success(taskEntities)); //post the value to live data
+                responseMutable.postValue(Resource.success(tasksList)); //post the value to live data
 //                }
 
             }
@@ -1022,14 +1026,14 @@ public class NetworkDataSource {
      *
      * @return {@link LiveData} representing the response of the request requestCurrentWeathersByCityIDs()
      */
-    public LiveData<Resource<TaskEntity[]>> responseFromFetchAllTasks() {
+    public LiveData<Resource<TasksList>> responseFromFetchAllTasks() {
         return responseFromFetchAllTasks;
     }
 
     /**
      *
      */
-    public LiveData<Resource<TaskEntity[]>> responseFromFetchContinueTasks() {
+    public LiveData<Resource<TasksList>> responseFromFetchContinueTasks() {
         return responseFromFetchContinueTasks;
     }
 
@@ -1037,7 +1041,7 @@ public class NetworkDataSource {
      *
      *
      */
-    public LiveData<Resource<TaskEntity[]>> responseFromFetchTestTasks() {
+    public LiveData<Resource<TasksList>> responseFromFetchTestTasks() {
         return responseFromFetchTestTasks;
     }
 
@@ -1045,7 +1049,7 @@ public class NetworkDataSource {
      *
      *
      */
-    public LiveData<Resource<TaskEntity[]>> responseFromFetchFinishedTasks() {
+    public LiveData<Resource<TasksList>> responseFromFetchFinishedTasks() {
         return responseFromFetchFinishedTasks;
     }
 
@@ -1053,7 +1057,7 @@ public class NetworkDataSource {
      *
      *
      */
-    public LiveData<Resource<TaskEntity[]>> responseFromFetchMyListTasks() {
+    public LiveData<Resource<TasksList>> responseFromFetchMyListTasks() {
         return responseFromFetchMyListTasks;
     }
 

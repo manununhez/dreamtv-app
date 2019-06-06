@@ -24,6 +24,7 @@ public class Constants {
     public static final String INTENT_EXTRA_CALL_TASKS = "callTasks";
     public static final String INTENT_EXTRA_RESTART = "restart";
     public static final String INTENT_PLAY_FROM_BEGINNING = "from_beginning";
+    public static final String INTENT_CATEGORY = "INTENT_CATEGORY";
 
 
     public static final String ABR_CHINESE = "zh";
@@ -43,7 +44,7 @@ public class Constants {
 
     public static final int BACKGROUND_UPDATE_DELAY = 300;
 
-//    FIREBASE LOG EVENTS
+    //    FIREBASE LOG EVENTS
 //    KEYS
     public static final String FIREBASE_KEY_SUBTITLE_NAVEGATION = "subtitle_navigation";
     public static final String FIREBASE_KEY_TESTING_MODE = "testing_mode";
@@ -55,7 +56,7 @@ public class Constants {
     public static final String FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE = "primary_audio_language";
     public static final String FIREBASE_KEY_VIDEO_PROJECT_NAME = "project";
     public static final String FIREBASE_KEY_VIDEO_DURATION = "duration";
-//    LOG EVENT NAMES
+    //    LOG EVENT NAMES
     public static final String FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN = "pressed_add_video_my_list_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN = "pressed_remove_video_my_list_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN = "pressed_save_settings_btn";

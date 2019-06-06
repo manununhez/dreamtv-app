@@ -1,11 +1,11 @@
 package com.dream.dreamtv.ui.Main;
 
 
-import com.dream.dreamtv.repository.AppRepository;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.dream.dreamtv.repository.AppRepository;
 
 /**
  * Factory method that allows us to create a ViewModel with a constructor that takes a

@@ -21,25 +21,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.dream.dreamtv.DreamTVApp;
-import com.dream.dreamtv.R;
-import com.dream.dreamtv.db.entity.TaskEntity;
-import com.dream.dreamtv.model.Card;
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.User;
-import com.dream.dreamtv.presenter.IconCardPresenter;
-import com.dream.dreamtv.presenter.SideInfoCardPresenter;
-import com.dream.dreamtv.ui.Settings.SettingsActivity;
-import com.dream.dreamtv.ui.VideoDetails.VideoDetailsActivity;
-import com.dream.dreamtv.utils.InjectorUtils;
-import com.dream.dreamtv.utils.LoadingDialog;
-import com.google.android.gms.common.AccountPicker;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BrowseSupportFragment;
@@ -55,6 +36,27 @@ import androidx.leanback.widget.RowPresenter;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.dream.dreamtv.DreamTVApp;
+import com.dream.dreamtv.R;
+import com.dream.dreamtv.model.Card;
+import com.dream.dreamtv.model.Resource;
+import com.dream.dreamtv.model.Task;
+import com.dream.dreamtv.model.TasksList;
+import com.dream.dreamtv.model.User;
+import com.dream.dreamtv.presenter.IconCardCustomPresenter;
+import com.dream.dreamtv.presenter.SideInfoCardPresenter;
+import com.dream.dreamtv.ui.Settings.SettingsActivity;
+import com.dream.dreamtv.ui.VideoDetails.VideoDetailsActivity;
+import com.dream.dreamtv.utils.InjectorUtils;
+import com.dream.dreamtv.utils.LoadingDialog;
+import com.google.android.gms.common.AccountPicker;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
+import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.SETTINGS_CAT;
@@ -80,11 +82,11 @@ public class MainFragment extends BrowseSupportFragment {
     private ListRow rowFinishedTasks;
     private ListRow rowContinueTasks;
     private ListRow rowTestTasks;
-    private LiveData<Resource<TaskEntity[]>> allTaskLiveData;
-    private LiveData<Resource<TaskEntity[]>> continueTaskLiveData;
-    private LiveData<Resource<TaskEntity[]>> finishedTaskLiveData;
-    private LiveData<Resource<TaskEntity[]>> myListTaskLiveData;
-    private LiveData<Resource<TaskEntity[]>> testTaskLiveData;
+    private LiveData<Resource<TasksList>> allTaskLiveData;
+    private LiveData<Resource<TasksList>> continueTaskLiveData;
+    private LiveData<Resource<TasksList>> finishedTaskLiveData;
+    private LiveData<Resource<TasksList>> myListTaskLiveData;
+    private LiveData<Resource<TasksList>> testTaskLiveData;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -113,7 +115,7 @@ public class MainFragment extends BrowseSupportFragment {
     private void initSettingsRow() {
         HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
 
-        IconCardPresenter mIconCardPresenter = new IconCardPresenter(getActivity());
+        IconCardCustomPresenter mIconCardPresenter = new IconCardCustomPresenter(getActivity());
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mIconCardPresenter);
         Card settingsCard = new Card();
         settingsCard.setType(Card.Type.ICON);
@@ -138,7 +140,6 @@ public class MainFragment extends BrowseSupportFragment {
 //        showLoading();
         mViewModel.login(email, "com.google"); //TODO change password
     }
-
 
 
     @Override
@@ -171,22 +172,25 @@ public class MainFragment extends BrowseSupportFragment {
 
         allTaskLiveData = mViewModel.requestTasksByCategory(TASKS_ALL_CAT);
         allTaskLiveData.removeObservers(getViewLifecycleOwner());
-        allTaskLiveData.observe(getViewLifecycleOwner(), taskEntities -> {
+        allTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
 
-            if (taskEntities.status.equals(Resource.Status.LOADING))
+            if (tasksListResource.status.equals(Resource.Status.LOADING))
                 showLoading();
-            else if (taskEntities.status.equals(Resource.Status.SUCCESS)) {
-                if (taskEntities.data != null && taskEntities.data.length > 0)
-                    loadVideos(taskEntities.data);
-                else verifyRowExistenceAndRemove(rowAllTasks);
+
+            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
+                if (tasksListResource.data != null) {
+                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
+                        loadVideos(tasksListResource.data);
+                    else verifyRowExistenceAndRemove(rowAllTasks);
+                }
 
                 Log.d(TAG, "task response");
 
                 dismissLoading();
-            } else if (taskEntities.status.equals(Resource.Status.ERROR)) {
+            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
-                if (taskEntities.message != null)
-                    Log.d(TAG, taskEntities.message);
+                if (tasksListResource.message != null)
+                    Log.d(TAG, tasksListResource.message);
                 else
                     Log.d(TAG, "Status ERROR");
 
@@ -197,21 +201,23 @@ public class MainFragment extends BrowseSupportFragment {
 
         continueTaskLiveData = mViewModel.requestTasksByCategory(TASKS_CONTINUE_CAT);
         continueTaskLiveData.removeObservers(getViewLifecycleOwner());
-        continueTaskLiveData.observe(getViewLifecycleOwner(), taskEntities -> {
-            if (taskEntities.status.equals(Resource.Status.LOADING))
+        continueTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
+            if (tasksListResource.status.equals(Resource.Status.LOADING))
                 showLoading();
-            else if (taskEntities.status.equals(Resource.Status.SUCCESS)) {
-                if (taskEntities.data != null && taskEntities.data.length > 0)
-                    loadVideos(taskEntities.data);
-                else verifyRowExistenceAndRemove(rowContinueTasks);
+            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
+                if (tasksListResource.data != null) {
+                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
+                        loadVideos(tasksListResource.data);
+                    else verifyRowExistenceAndRemove(rowContinueTasks);
+                }
 
                 Log.d(TAG, "task response");
 
                 dismissLoading();
-            } else if (taskEntities.status.equals(Resource.Status.ERROR)) {
+            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
-                if (taskEntities.message != null)
-                    Log.d(TAG, taskEntities.message);
+                if (tasksListResource.message != null)
+                    Log.d(TAG, tasksListResource.message);
                 else
                     Log.d(TAG, "Status ERROR");
 
@@ -224,20 +230,22 @@ public class MainFragment extends BrowseSupportFragment {
 
         finishedTaskLiveData = mViewModel.requestTasksByCategory(TASKS_FINISHED_CAT);
         finishedTaskLiveData.removeObservers(getViewLifecycleOwner());
-        finishedTaskLiveData.observe(getViewLifecycleOwner(), taskEntities -> {
-            if (taskEntities.status.equals(Resource.Status.LOADING))
+        finishedTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
+            if (tasksListResource.status.equals(Resource.Status.LOADING))
                 showLoading();
-            else if (taskEntities.status.equals(Resource.Status.SUCCESS)) {
-                if (taskEntities.data != null && taskEntities.data.length > 0)
-                    loadVideos(taskEntities.data);
-                else verifyRowExistenceAndRemove(rowFinishedTasks);
+            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
+                if (tasksListResource.data != null) {
+                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
+                        loadVideos(tasksListResource.data);
+                    else verifyRowExistenceAndRemove(rowFinishedTasks);
+                }
 
                 Log.d(TAG, "task response");
                 dismissLoading();
-            } else if (taskEntities.status.equals(Resource.Status.ERROR)) {
+            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
-                if (taskEntities.message != null)
-                    Log.d(TAG, taskEntities.message);
+                if (tasksListResource.message != null)
+                    Log.d(TAG, tasksListResource.message);
                 else
                     Log.d(TAG, "Status ERROR");
 
@@ -250,21 +258,23 @@ public class MainFragment extends BrowseSupportFragment {
 
         myListTaskLiveData = mViewModel.requestTasksByCategory(TASKS_MY_LIST_CAT);
         myListTaskLiveData.removeObservers(getViewLifecycleOwner());
-        myListTaskLiveData.observe(getViewLifecycleOwner(), taskEntities -> {
-            if (taskEntities.status.equals(Resource.Status.LOADING))
+        myListTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
+            if (tasksListResource.status.equals(Resource.Status.LOADING))
                 showLoading();
-            else if (taskEntities.status.equals(Resource.Status.SUCCESS)) {
-                if (taskEntities.data != null && taskEntities.data.length > 0) {
-                    Log.d(TAG, "task response My list:[" + taskEntities.data.length + "]" + Arrays.toString(taskEntities.data));
+            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
+                if (tasksListResource.data != null) {
+                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0) {
+                        Log.d(TAG, "task response My list:[" + tasksListResource.data.data.length + "]" + Arrays.toString(tasksListResource.data.data));
 
-                    loadVideos(taskEntities.data);
-                } else verifyRowExistenceAndRemove(rowMyListTasks);
+                        loadVideos(tasksListResource.data);
+                    } else verifyRowExistenceAndRemove(rowMyListTasks);
+                }
 
                 dismissLoading();
-            } else if (taskEntities.status.equals(Resource.Status.ERROR)) {
+            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
-                if (taskEntities.message != null)
-                    Log.d(TAG, taskEntities.message);
+                if (tasksListResource.message != null)
+                    Log.d(TAG, tasksListResource.message);
                 else
                     Log.d(TAG, "Status ERROR");
 
@@ -283,21 +293,23 @@ public class MainFragment extends BrowseSupportFragment {
     private void callTestTasks() {
         testTaskLiveData = mViewModel.requestTasksByCategory(TASKS_TEST_CAT);
         testTaskLiveData.removeObservers(getViewLifecycleOwner());
-        testTaskLiveData.observe(getViewLifecycleOwner(), taskEntities -> {
-            if (taskEntities.status.equals(Resource.Status.LOADING))
+        testTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
+            if (tasksListResource.status.equals(Resource.Status.LOADING))
                 showLoading();
-            else if (taskEntities.status.equals(Resource.Status.SUCCESS)) {
-                if (taskEntities.data != null && taskEntities.data.length > 0)
-                    loadVideos(taskEntities.data);
-                else verifyRowExistenceAndRemove(rowTestTasks);
+            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
+                if (tasksListResource.data != null) {
+                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
+                        loadVideos(tasksListResource.data);
+                    else verifyRowExistenceAndRemove(rowTestTasks);
+                }
 
                 Log.d(TAG, "task response");
 
                 dismissLoading();
-            } else if (taskEntities.status.equals(Resource.Status.ERROR)) {
+            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
-                if (taskEntities.message != null)
-                    Log.d(TAG, taskEntities.message);
+                if (tasksListResource.message != null)
+                    Log.d(TAG, tasksListResource.message);
                 else
                     Log.d(TAG, "Status ERROR");
 
@@ -343,28 +355,28 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
 
-    private void loadVideos(TaskEntity[] tasks) {
+    private void loadVideos(TasksList tasksList) {
 
-        String category = tasks[0].category;
+        String category = tasksList.category;
 
-        Log.d(TAG, "Loading videos => Category:" + category);
+        Log.d(TAG, "Loading video => Category:" + category);
 
         List<Card> cards = new ArrayList<>();
 
-        for (TaskEntity task : tasks) {
-            cards.add(new Card(task));
+        for (Task task : tasksList.data) {
+            cards.add(new Card(task, tasksList.category));
         }
 
 
         DiffCallback<Card> diffCallback = new DiffCallback<Card>() {
             @Override
             public boolean areItemsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
-                return oldItem.getTaskEntity().id == newItem.getTaskEntity().id;
+                return oldItem.getTask().taskId == newItem.getTask().taskId;
             }
 
             @Override
             public boolean areContentsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
-                return oldItem.getTaskEntity().equals(newItem.getTaskEntity());
+                return Objects.equals(oldItem.getTask(), newItem.getTask());
             }
         };
 
@@ -525,10 +537,11 @@ public class MainFragment extends BrowseSupportFragment {
                     Intent intent = new Intent(getActivity(), SettingsActivity.class);
                     startActivityForResult(intent, REQUEST_SETTINGS);
                 } else {
-                    TaskEntity taskEntity = value.getTaskEntity();
+                    Task task = value.getTask();
 
                     Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
-                    intent.putExtra(INTENT_TASK, taskEntity);
+                    intent.putExtra(INTENT_TASK, task);
+                    intent.putExtra(INTENT_CATEGORY, value.getCategory());
 
                     startActivity(intent);
                 }

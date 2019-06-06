@@ -1,15 +1,12 @@
 package com.dream.dreamtv.ui.Main;
 
 
-import com.dream.dreamtv.db.entity.TaskEntity;
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.repository.AppRepository;
-import com.dream.dreamtv.utils.AbsentLiveData;
-
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
+
+import com.dream.dreamtv.model.Resource;
+import com.dream.dreamtv.model.TasksList;
+import com.dream.dreamtv.repository.AppRepository;
 
 class MainViewModel extends ViewModel {
 
@@ -30,7 +27,7 @@ class MainViewModel extends ViewModel {
         mRepository.initializeSyncData();
     }
 
-    LiveData<Resource<TaskEntity[]>> requestTasksByCategory(String category) {
+    LiveData<Resource<TasksList>> requestTasksByCategory(String category) {
         //TODO should this change with Transformations after login or user update?
         return mRepository.requestTaskByCategory(category);
     }

@@ -17,11 +17,11 @@ package com.dream.dreamtv.ui.Main;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.dream.dreamtv.R;
-import com.dream.dreamtv.utils.LocaleHelper;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+
+import com.dream.dreamtv.R;
+import com.dream.dreamtv.utils.LocaleHelper;
 
 
 /*

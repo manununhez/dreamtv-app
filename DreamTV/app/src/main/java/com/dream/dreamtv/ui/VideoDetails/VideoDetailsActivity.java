@@ -14,15 +14,13 @@
 
 package com.dream.dreamtv.ui.VideoDetails;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.fragment.app.FragmentActivity;
 
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.utils.LocaleHelper;
-
-import androidx.fragment.app.FragmentActivity;
 
 
 /*
