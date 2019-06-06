@@ -30,7 +30,23 @@ public class Task implements Parcelable {
     public String updated_at;
     @SerializedName("videos")
     public Video video;
+    @SerializedName("user_tasks")
+    public UserTask[] userTasks;
 
+
+    protected Task(Parcel in) {
+        taskId = in.readInt();
+        videoId = in.readString();
+        language = in.readString();
+        type = in.readString();
+        created = in.readString();
+        modified = in.readString();
+        completed = in.readString();
+        created_at = in.readString();
+        updated_at = in.readString();
+        video = in.readParcelable(Video.class.getClassLoader());
+        userTasks = in.createTypedArray(UserTask.CREATOR);
+    }
 
     public static final Creator<Task> CREATOR = new Creator<Task>() {
         @Override
@@ -44,36 +60,23 @@ public class Task implements Parcelable {
         }
     };
 
-    protected Task(Parcel in) {
-        taskId = in.readInt();
-        videoId = in.readString();
-        language = in.readString();
-        type = in.readString();
-        created = in.readString();
-        modified = in.readString();
-        completed = in.readString();
-        created_at = in.readString();
-        updated_at = in.readString();
-        video = in.readParcelable(Video.class.getClassLoader());
-    }
-
-
     @Override
     public int describeContents() {
         return 0;
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(taskId);
-        parcel.writeString(videoId);
-        parcel.writeString(language);
-        parcel.writeString(type);
-        parcel.writeString(created);
-        parcel.writeString(modified);
-        parcel.writeString(completed);
-        parcel.writeString(created_at);
-        parcel.writeString(updated_at);
-        parcel.writeParcelable(video, i);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(taskId);
+        dest.writeString(videoId);
+        dest.writeString(language);
+        dest.writeString(type);
+        dest.writeString(created);
+        dest.writeString(modified);
+        dest.writeString(completed);
+        dest.writeString(created_at);
+        dest.writeString(updated_at);
+        dest.writeParcelable(video, flags);
+        dest.writeTypedArray(userTasks, flags);
     }
 }

@@ -174,8 +174,8 @@ public class AppRepository {
         return mNetworkDataSource.fetchSubtitle(videoId, languageCode, version);
     }
 
-    public LiveData<Resource<UserTask>> fetchUserTask(int taskId) {
-        return mNetworkDataSource.fetchUserTask(taskId);
+    public LiveData<Resource<UserTask>> fetchUserTask() {
+        return mNetworkDataSource.fetchUserTask();
     }
 
 

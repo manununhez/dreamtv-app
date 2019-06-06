@@ -116,8 +116,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         mSelectedCategory = getActivity().getIntent().getStringExtra(INTENT_CATEGORY);
 
+
         if (mSelectedTask != null) {
+            mUserTask = mSelectedTask.userTasks[0]; //TODO what happened is there are more than one UserTask
+
+
             setupDetailsOverview();
+            setupContinueAction();
             fetchUserTasks();
         } else {
             getActivity().finish(); //back to MainActivity
@@ -326,7 +331,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
 
-
     private void setupContinueAction() {
         if (mUserTask != null) {
             if (mUserTask.getTimeWatchedInSecs() > 0) { //To avoid messages like "0 min, 0 secs"
@@ -464,14 +468,15 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
      * Verify if the current task has already data created. IF not, is call createTask()
      */
     private void fetchUserTasks() {
-        fetchUserTaskLiveData = mViewModel.fetchUserTask(mSelectedTask.taskId);
+        fetchUserTaskLiveData = mViewModel.fetchUserTask();
 
         fetchUserTaskLiveData.removeObservers(getViewLifecycleOwner());
 
         fetchUserTaskLiveData.observe(getViewLifecycleOwner(), userTaskResource -> {
-            if (userTaskResource.status.equals(Resource.Status.LOADING))
-                instantiateAndShowLoading(getString(R.string.title_loading_retrieve_user_tasks));
-            else if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
+//            if (userTaskResource.status.equals(Resource.Status.LOADING))
+//                instantiateAndShowLoading(getString(R.string.title_loading_retrieve_user_tasks));
+//            else
+            if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
                 Log.d(TAG, "responseFromFetchUserTaskErrorDetails response");
 
                 mUserTask = userTaskResource.data;
@@ -484,7 +489,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                     mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT); //trying to keep finished_category always updated
                 }
 
-                dismissLoading();
+//                dismissLoading();
 
             } else if (userTaskResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
@@ -494,7 +499,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                     Log.d(TAG, "Status ERROR");
 
 
-                dismissLoading();
+//                dismissLoading();
             }
         });
     }

@@ -32,8 +32,8 @@ class VideoDetailsViewModel extends ViewModel {
         return mRepository.fetchSubtitle(videoId, languageCode, version);
     }
 
-    LiveData<Resource<UserTask>> fetchUserTask(int taskId) {
-        return mRepository.fetchUserTask(taskId);
+    LiveData<Resource<UserTask>> fetchUserTask() {
+        return mRepository.fetchUserTask();
     }
 
     LiveData<Resource<UserTask>> createUserTask(Task task, int mSubtitleVersion) {
