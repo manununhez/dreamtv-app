@@ -21,22 +21,20 @@ import com.bumptech.glide.Glide;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Card;
 
-import androidx.leanback.widget.ImageCardView;
 
+public class ImageCardViewCustomPresenter extends AbstractCardPresenter<ImageCardViewCustom> {
 
-public class ImageCardViewPresenter extends AbstractCardPresenter<ImageCardView> {
-
-    public ImageCardViewPresenter(Context context, int cardThemeResId) {
+    public ImageCardViewCustomPresenter(Context context, int cardThemeResId) {
         super(new ContextThemeWrapper(context, cardThemeResId));
     }
 
-    public ImageCardViewPresenter(Context context) {
+    public ImageCardViewCustomPresenter(Context context) {
         this(context, R.style.DefaultCardThemeCustom);
     }
 
     @Override
-    protected ImageCardView onCreateView() {
-        ImageCardView imageCardView = new ImageCardView(getContext());
+    protected ImageCardViewCustom onCreateView() {
+        ImageCardViewCustom imageCardView = new ImageCardViewCustom(getContext());
 //        imageCardView.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
@@ -47,7 +45,7 @@ public class ImageCardViewPresenter extends AbstractCardPresenter<ImageCardView>
     }
 
     @Override
-    public void onBindViewHolder(Card card, final ImageCardView cardView) {
+    public void onBindViewHolder(Card card, final ImageCardViewCustom cardView) {
         cardView.setTag(card);
         cardView.setTitleText(card.getTitle());
         cardView.setContentText(card.getDescription());

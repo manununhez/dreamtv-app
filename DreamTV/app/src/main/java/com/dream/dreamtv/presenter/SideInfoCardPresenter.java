@@ -16,8 +16,13 @@ package com.dream.dreamtv.presenter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RatingBar;
 import android.widget.TextView;
+
+import androidx.leanback.widget.BaseCardView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
@@ -25,8 +30,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Card;
-
-import androidx.leanback.widget.BaseCardView;
 
 /**
  * This Presenter will display a card consisting of an image on the left side of the card followed
@@ -94,10 +97,39 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
         primaryText.setText(card.getTitle());
 
         TextView secondaryText = cardView.findViewById(R.id.secondary_text);
-        secondaryText.setText(card.getDescription());
+//        secondaryText.setText(card.getDescription());
+        secondaryText.setText(getContext().getString(R.string.title_video_details, card.getTask().video.project,
+                card.getTask().video.primaryAudioLanguageCode, card.getTask().language, (card.getTask().video.duration / 60)));
 
         TextView extraText = cardView.findViewById(R.id.extra_text);
         extraText.setText(card.getExtraText());
+
+        TextView errors = cardView.findViewById(R.id.tvErrorsSelected);
+
+        if (card.getTask().userTasks.length > 0 && card.getTask().userTasks[0].getUserTaskErrorList().length > 0) //TODO what happened if we have more than one userTask, e.g same tasks, different subtVersions???
+            errors.setText("Selected " + card.getTask().userTasks[0].getUserTaskErrorList().length + " errors");
+        else
+            errors.setVisibility(View.GONE);
+
+
+
+        ProgressBar pbContinueWatching = cardView.findViewById(R.id.pbContinueWatching);
+
+        if (card.getTask().userTasks.length > 0 && card.getTask().userTasks[0].getTimeWatched() > 0)  //TODO what happened if we have more than one userTask, e.g same tasks, different subtVersions???
+            pbContinueWatching.setProgress((int) (((float) card.getTask().userTasks[0].getTimeWatched() / (float) card.getTask().video.getVideoDurationInMs()) * 100));
+        else
+            pbContinueWatching.setVisibility(View.GONE);
+
+
+
+
+        RatingBar rbTask = cardView.findViewById(R.id.rbTask);
+
+        if (card.getTask().userTasks.length > 0 && card.getTask().userTasks[0].getRating() > 0)
+            rbTask.setRating(card.getTask().userTasks[0].getRating());
+        else
+            rbTask.setVisibility(View.GONE);
+
     }
 
 }

@@ -756,52 +756,56 @@ public class NetworkDataSource {
         return responseFromCreateUserTask;
     }
 
-    /**
-     * @param taskId
-     */
-    @SuppressWarnings("unchecked")
-    public MutableLiveData<Resource<UserTask>> fetchUserTask(int taskId) {
-        responseFromFetchUserTask.postValue(Resource.loading(null));
-
-        Uri taskErrorsUri = Uri.parse(URL_BASE.concat(Urls.USER_TASKS_WITH_ERRORS.value)).buildUpon()
-                .appendQueryParameter(PARAM_TASK_ID, String.valueOf(taskId))
-                .build();
-
-        Log.d(TAG, "fetchUserTask() Request URL: " + taskErrorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + taskId);
-
-
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
-            @Override
-            protected void processResponse(String response) {
-                Log.d(TAG, "fetchUserTask() Response JSON: " + response);
-
-                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask>>() {
-                };
-                JsonResponseBaseBean<UserTask> jsonResponse = getJsonResponse(response, type);
-
-                UserTask userTasks = jsonResponse.data;
-
-                responseFromFetchUserTask.postValue(Resource.success(userTasks)); //post the value to live data
-
-            }
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-
-                //TODO do something error
-                responseFromFetchUserTask.postValue(Resource.error(error.getMessage(), null));
-
-                Log.d(TAG, "fetchUserTask() Response Error: " + error.getMessage());
-            }
-        };
-
-
-        mExecutors.networkIO().execute(() -> requestString(Method.GET, taskErrorsUri.toString(), null, responseListener));
-
+    public MutableLiveData<Resource<UserTask>> fetchUserTask() {
         return responseFromFetchUserTask;
+
     }
+//    /**
+//     * @param taskId
+//     */
+//    @SuppressWarnings("unchecked")
+//    public MutableLiveData<Resource<UserTask>> fetchUserTask(int taskId) {
+//        responseFromFetchUserTask.postValue(Resource.loading(null));
+//
+//        Uri taskErrorsUri = Uri.parse(URL_BASE.concat(Urls.USER_TASKS_WITH_ERRORS.value)).buildUpon()
+//                .appendQueryParameter(PARAM_TASK_ID, String.valueOf(taskId))
+//                .build();
+//
+//        Log.d(TAG, "fetchUserTask() Request URL: " + taskErrorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + taskId);
+//
+//
+//        ResponseListener responseListener = new ResponseListener(mContext, false,
+//                false, "") {
+//            @Override
+//            protected void processResponse(String response) {
+//                Log.d(TAG, "fetchUserTask() Response JSON: " + response);
+//
+//                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask>>() {
+//                };
+//                JsonResponseBaseBean<UserTask> jsonResponse = getJsonResponse(response, type);
+//
+//                UserTask userTasks = jsonResponse.data;
+//
+//                responseFromFetchUserTask.postValue(Resource.success(userTasks)); //post the value to live data
+//
+//            }
+//
+//            @Override
+//            public void processError(VolleyError error) {
+//                super.processError(error);
+//
+//                //TODO do something error
+//                responseFromFetchUserTask.postValue(Resource.error(error.getMessage(), null));
+//
+//                Log.d(TAG, "fetchUserTask() Response Error: " + error.getMessage());
+//            }
+//        };
+//
+//
+//        mExecutors.networkIO().execute(() -> requestString(Method.GET, taskErrorsUri.toString(), null, responseListener));
+//
+//        return responseFromFetchUserTask;
+//    }
 
     /**
      * @param taskId

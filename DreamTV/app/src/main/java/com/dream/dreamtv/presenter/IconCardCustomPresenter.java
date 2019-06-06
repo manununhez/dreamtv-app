@@ -29,25 +29,20 @@ import androidx.leanback.widget.ImageCardView;
  * surrounding circle when the card is focused. AndroidTV uses these cards for entering settings
  * menu.
  */
-public class IconCardPresenter extends ImageCardViewPresenter {
+public class IconCardCustomPresenter extends ImageCardViewCustomPresenter {
     private static final int ANIMATION_DURATION = 200;
 
-    public IconCardPresenter(Context context) {
+    public IconCardCustomPresenter(Context context) {
         super(context, R.style.IconCardThemeCustom);
     }
 
     @Override
-    protected ImageCardView onCreateView() {
-        final ImageCardView imageCardView = super.onCreateView();
+    protected ImageCardViewCustom onCreateView() {
+        final ImageCardViewCustom imageCardView = super.onCreateView();
         final ImageView image = imageCardView.getMainImageView();
         image.setBackgroundResource(R.drawable.icon_focused);
         image.getBackground().setAlpha(0);
-        imageCardView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                animateIconBackground(image.getBackground(), hasFocus);
-            }
-        });
+        imageCardView.setOnFocusChangeListener((v, hasFocus) -> animateIconBackground(image.getBackground(), hasFocus));
         return imageCardView;
     }
 
