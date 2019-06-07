@@ -49,6 +49,7 @@ import com.dream.dreamtv.utils.Constants;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -68,14 +69,15 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private static final String SPEECH_NOT_SUPPORTED = "speech_not_supported";
     private LinearLayout llComments;
     private LinearLayout llReasons;
-    private LinearLayout llButtonsOptions1;
-    private LinearLayout llButtonsOptions2;
+    //    private LinearLayout llButtonsOptions1;
+//    private LinearLayout llButtonsOptions2;
     private RadioGroup rgReasons;
     private UserTask userTask;
     private ImageButton btnRecord;
-    private Button btnOk;
+    //    private Button btnOk;
     private Button btnSave;
     private Button btnCancel;
+    private Button btnSaveChanges;
     private TextView voiceInput;
     private TextView tvTitle;
     private Dialog viewRoot;
@@ -88,6 +90,8 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private List<String> selectedReasons = new ArrayList<>();
     private List<ErrorReason> errorReasonList;
     private int subtitleOriginalPosition;
+    private TextView tvOtherSelected;
+
     public ErrorSelectionDialogFragment() {
         // Required empty public constructor
     }
@@ -151,12 +155,11 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         viewRoot = new Dialog(getActivity(), R.style.DefaultDialogFragmentStyle);
         viewRoot.setContentView(R.layout.fragment_reasons_dialog);
 
-        llButtonsOptions1 = viewRoot.findViewById(R.id.llButtonsOptions1);
-        llButtonsOptions2 = viewRoot.findViewById(R.id.llButtonsOptions2);
         tvTitle = viewRoot.findViewById(R.id.tvTitle);
+        tvOtherSelected = viewRoot.findViewById(R.id.tvOtherSelected);
         btnCancel = viewRoot.findViewById(R.id.btnCancel);
         btnSave = viewRoot.findViewById(R.id.btnSave);
-        btnOk = viewRoot.findViewById(R.id.btnOk);
+        btnSaveChanges = viewRoot.findViewById(R.id.btnSaveChanges);
 
         scrollViewAdvanced = viewRoot.findViewById(R.id.scrollViewAdvanced);
         scrollViewBeginner = viewRoot.findViewById(R.id.scrollViewBeginner);
@@ -231,10 +234,17 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
     private void setupEventsListener() {
         btnCancel.setOnClickListener(view -> dismiss());
-        btnOk.setOnClickListener(view -> dismiss());
-        btnSave.setOnClickListener(view -> saveReasons());
+        btnSave.setOnClickListener(view -> {
+            mCallback.onSaveReasons(prepareReasonsToSave());
+            dismiss();
+        });
+        btnSaveChanges.setOnClickListener(view -> {
+            mCallback.onUpdateReasons(prepareReasonsToSave());
+            dismiss();
+        });
 
     }
+
 
     private DreamTVApp getApplication() {
         return ((DreamTVApp) getActivity().getApplication());
@@ -384,9 +394,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
         rgReasons.removeAllViews();
 
-        rgReasons.setOnCheckedChangeListener((radioGroup, i) -> {
-            btnSave.requestFocus(); //Nos posicionamos en el boton guardar
-        });
+//        rgReasons.setOnCheckedChangeListener((radioGroup, i) -> {
+//            btnSave.requestFocus(); //Nos posicionamos en el boton guardar
+//        });
 
         for (int i = 0; i < errorReasonList.size(); i++) {
             ErrorReason errorReason = errorReasonList.get(i);
@@ -411,46 +421,56 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     }
 
     private void repopulateFormWithUserTaskData(int position) {
+        rgReasons.clearCheck(); //clear all previous checks to get the animation correctly
+
         ArrayList<UserTaskError> errors = userTask.getUserTaskErrorsForASpecificSubtitlePosition(position);
         Log.d(TAG, "repopulateFormWithUserTaskData()");
 
         if (errors.size() > 0) { //if at least there are one error
 
             tvTitle.setText(getString(R.string.title_reasons_dialog_2));
-//            llButtonsOptions1.setVisibility(View.VISIBLE);
-//            llButtonsOptions2.setVisibility(View.GONE);
-
-            voiceInput.setText(errors.get(0).getComment()); //repopulate comments
+            btnSave.setVisibility(View.GONE);
+            btnSaveChanges.setVisibility(View.VISIBLE);
 
             //Interface mode settings
             User user = getApplication().getUser();
-            if (user.interfaceMode.equals(BEGINNER_INTERFACE_MODE)) { //BEGINNER MODE
-                for (int i = 0; i < rgReasons.getChildCount(); i++) {
-                    RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
-//                    radioButton.setEnabled(false);
-//                    radioButton.setFocusable(false);
-//                    radioButton.setFocusableInTouchMode(false);
+            if (user.interfaceMode.equals(BEGINNER_INTERFACE_MODE)) { //BEGINNER_INTERFACE_MODE
+                if (errors.size() == 1) {
+                    for (int i = 0; i < rgReasons.getChildCount(); i++) {
+                        RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
 
-                    for (UserTaskError userTaskError : errors)
-                        if (userTaskError.getReasonCode().contentEquals(radioButton.getContentDescription()))
+                        if (Objects.equals(radioButton.getContentDescription(), errors.get(0).getReasonCode())) {
                             radioButton.setChecked(true);
+                            break;
+                        }
+                    }
+
+                    tvOtherSelected.setVisibility(View.GONE);
+                } else {
+                    //If we have multiple errors selected, it is not possible to check more than one radiobutton. Instead, we show the selected errors in text. If the user want to change, next time an error is selected, will overwrite this
+                    StringBuilder sb = new StringBuilder();
+                    Iterator<UserTaskError> iterator = errors.iterator();
+                    if (iterator.hasNext()) {
+                        sb.append(iterator.next().getReasonCode());
+                        while (iterator.hasNext()) {
+                            sb.append(", ").append(iterator.next().getReasonCode());
+                        }
+                    }
+
+                    tvOtherSelected.setText(getString(R.string.title_reasons_others_selected, sb));
+                    tvOtherSelected.setVisibility(View.VISIBLE);
                 }
+
+
             } else { //ADVANCED MODE
-//                llComments.setEnabled(false);
-//                llComments.setFocusable(false);
-//                llComments.setFocusableInTouchMode(false);
-//                btnRecord.setFocusable(false);
-//                btnRecord.setEnabled(false);
-//                btnRecord.setFocusableInTouchMode(false);
+                tvOtherSelected.setVisibility(View.GONE);
+                voiceInput.setText(errors.get(0).getComment()); //repopulate comments
+
                 //re-select the reasons id
                 for (int i = 0; i < llReasons.getChildCount(); i++) {
                     LinearLayout childAt = (LinearLayout) llReasons.getChildAt(i);
                     CheckBox checkBox = (CheckBox) childAt.getChildAt(0); //0 -> checkbox, 1->Tooglebutton
                     ToggleButton toggleButton = (ToggleButton) childAt.getChildAt(1); //0 -> checkbox, 1->Tooglebutton
-//                    checkBox.setEnabled(false);
-//                    toggleButton.setEnabled(false);
-//                    toggleButton.setFocusable(false);
-//                    toggleButton.setFocusableInTouchMode(false);
 
                     for (UserTaskError userTaskError : errors)
                         if (userTaskError.getReasonCode().contentEquals(toggleButton.getContentDescription())) {
@@ -459,46 +479,28 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                         }
                 }
             }
-
-
-//            btnOk.requestFocus(); //Nos posicionamos en este boton
         } else {
             //Clear screen
-
             tvTitle.setText(getString(R.string.title_reasons_dialog));
-//            llButtonsOptions1.setVisibility(View.GONE);
-//            llButtonsOptions2.setVisibility(View.VISIBLE);
-
-            voiceInput.setText(""); //repopulate comments
+            btnSave.setVisibility(View.VISIBLE);
+            btnSaveChanges.setVisibility(View.GONE);
 
             //Interface mode settings
             User user = getApplication().getUser();
             if (user.interfaceMode.equals(BEGINNER_INTERFACE_MODE)) { //BEGINNER MODE
                 for (int i = 0; i < rgReasons.getChildCount(); i++) {
                     RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
-//                    radioButton.setEnabled(true);
-//                    radioButton.setFocusable(true);
-//                    radioButton.setFocusableInTouchMode(true);
-
                     radioButton.setChecked(false);
 
                 }
             } else { //ADVANCED MODE
-                llComments.setEnabled(true);
-                llComments.setFocusable(true);
-                llComments.setFocusableInTouchMode(true);
-                btnRecord.setFocusable(true);
-                btnRecord.setEnabled(true);
-                btnRecord.setFocusableInTouchMode(true);
+                voiceInput.setText(""); //repopulate comments
+
                 //re-select the reasons id
                 for (int i = 0; i < llReasons.getChildCount(); i++) {
                     LinearLayout childAt = (LinearLayout) llReasons.getChildAt(i);
                     CheckBox checkBox = (CheckBox) childAt.getChildAt(0); //0 -> checkbox, 1->Tooglebutton
                     ToggleButton toggleButton = (ToggleButton) childAt.getChildAt(1); //0 -> checkbox, 1->Tooglebutton
-//                    checkBox.setEnabled(true);
-//                    toggleButton.setEnabled(true);
-//                    toggleButton.setFocusable(true);
-//                    toggleButton.setFocusableInTouchMode(true);
 
                     toggleButton.setChecked(false);
                     checkBox.setChecked(false);
@@ -507,7 +509,11 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         }
     }
 
-    private void saveReasons() {
+    private void updateReasons() {
+
+    }
+
+    private UserTaskError prepareReasonsToSave() {
         //Interface mode settings. We retrieve the selected value. The advanced mode is already in selectedReasons
         User user = ((DreamTVApp) getActivity().getApplication()).getUser();
         if (user.interfaceMode.equals(Constants.BEGINNER_INTERFACE_MODE)) {
@@ -526,11 +532,10 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                 selectedSubtitle.position, voiceInput.getText().toString());
 
 
-        Toast.makeText(getActivity(), getString(R.string.title_confirmation_saved_data), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(), getString(R.string.title_confirmation_saved_data), Toast.LENGTH_SHORT).show();
 
-        mCallback.onSaveReasons(userTaskError);
 
-        dismiss();
+        return userTaskError;
     }
 
     public String selectedErrorsListJson(List<String> selectedReasons) {
@@ -552,6 +557,8 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition);
 
         void onSaveReasons(UserTaskError userTaskError);
+
+        void onUpdateReasons(UserTaskError userTaskError);
     }
 
     public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {

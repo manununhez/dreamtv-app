@@ -92,6 +92,7 @@
             android:textColor="@color/white"
             android:textSize="18sp" />
 
+
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
@@ -119,16 +120,18 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical" />
             </ScrollView>
+
+            <TextView
+                android:id="@+id/tvOtherSelected"
+                android:layout_below="@id/scrollViewBeginner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:visibility="gone"
+                android:layout_marginBottom="5dp"
+                android:textColor="@color/white"
+                android:textSize="15sp" />
         </RelativeLayout>
-        <!--<TextView-->
-        <!--android:id="@+id/titleComents"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_below="@+id/scrollView"-->
-        <!--android:layout_marginTop="25dp"-->
-        <!--android:text="Send some comments (voice):"-->
-        <!--android:textColor="@color/white"-->
-        <!--android:textSize="18sp" />-->
 
         <LinearLayout
             android:id="@+id/llComments"
@@ -162,27 +165,27 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/llButtonsOptions1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="25dp"
-            android:gravity="center"
-            android:visibility="gone">
+        <!--<LinearLayout-->
+            <!--android:id="@+id/llButtonsOptions1"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginBottom="10dp"-->
+            <!--android:layout_marginTop="25dp"-->
+            <!--android:gravity="center"-->
+            <!--android:visibility="gone">-->
 
-            <Button
-                android:id="@+id/btnOk"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="@drawable/button_focusable"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:padding="10dp"
-                android:text="@string/btn_ok"
-                android:textColor="@color/white" />
-        </LinearLayout>
+            <!--<Button-->
+                <!--android:id="@+id/btnOk"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center"-->
+                <!--android:background="@drawable/button_focusable"-->
+                <!--android:focusable="true"-->
+                <!--android:focusableInTouchMode="true"-->
+                <!--android:padding="10dp"-->
+                <!--android:text="@string/btn_ok"-->
+                <!--android:textColor="@color/white" />-->
+        <!--</LinearLayout>-->
 
         <LinearLayout
             android:id="@+id/llButtonsOptions2"
@@ -216,6 +219,20 @@
                 android:focusableInTouchMode="true"
                 android:padding="10dp"
                 android:text="@string/btn_save"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnSaveChanges"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button_focusable"
+                android:focusable="true"
+                android:visibility="gone"
+                android:layout_marginStart="20dp"
+                android:focusableInTouchMode="true"
+                android:padding="10dp"
+                android:text="@string/btn_save_changes"
                 android:textColor="@color/white" />
 
 

@@ -62,12 +62,15 @@
     <string name="title_video_forward">+ %1$d secs</string>
     <string name="title_video_backward">- %1$d secs</string>
     <string name="title_search">Search…</string>
+    <string name="title_reasons_others_selected">Selected in advanced mode: %1$s</string>
+
 
     <!--buttons-->
     <string name="btn_subtitle">Subtitles</string>
     <string name="btn_audio">Audio</string>
     <string name="btn_save_settings">Save settings</string>
     <string name="btn_save">Save</string>
+    <string name="btn_save_changes">Save changes</string>
     <string name="btn_cancel">Cancel</string>
     <string name="btn_save_exit">Save and Exit</string>
     <string name="btn_ok">OK</string>
