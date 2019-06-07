@@ -68,8 +68,9 @@
 
             <RatingBar
                 android:id="@+id/rtBar"
-                android:rating="4"
+                android:rating="1"
                 android:stepSize="1"
+                android:max="5"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 

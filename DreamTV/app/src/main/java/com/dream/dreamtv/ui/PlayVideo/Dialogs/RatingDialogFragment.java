@@ -47,6 +47,12 @@ public class RatingDialogFragment extends DialogFragment {
         btnSaveAndExit = viewRoot.findViewById(R.id.btnSaveAndExit);
         rtBar = viewRoot.findViewById(R.id.rtBar);
 
+        //set rating bar value min to 1
+        rtBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
+            if (rating < 1.0f)
+                ratingBar.setRating(1.0f);
+        });
+
         rtBar.requestFocus();
 
         btnSaveAndExit.setOnClickListener(v -> dismiss());
