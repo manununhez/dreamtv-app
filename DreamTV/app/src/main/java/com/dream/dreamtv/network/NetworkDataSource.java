@@ -4,6 +4,9 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
@@ -32,9 +35,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE_CONFIG;
@@ -232,7 +232,7 @@ public class NetworkDataSource {
         fetchTasksByCategory(TASKS_FINISHED_CAT, responseFromFetchFinishedTasks);
     }
 
-    public void updateTestTaskCategory(){
+    public void updateTestTaskCategory() {
         fetchTasksByCategory(TASKS_TEST_CAT, responseFromFetchTestTasks);
     }
 
@@ -940,6 +940,9 @@ public class NetworkDataSource {
     }
 
 
+    /**
+     * @param userTaskError
+     */
     public void saveErrors(UserTaskError userTaskError) {
 
         Map<String, String> params = new HashMap<>();
@@ -975,54 +978,44 @@ public class NetworkDataSource {
         };
 
         mExecutors.networkIO().execute(() -> requestString(Method.POST, errorsUri.toString(), params, responseListener));
-
-
-
-//        UserTask userTask = new UserTask();
-//        userTask.comments = voiceInput.getText().toString();
-//        userTask.subtitlePosition = currentSubtitlePosition;
-//        userTask.subtitleVersion = String.valueOf(subtitle.versionNumber);
-//        userTask.taskId = idTask;
-//        //Interface mode settings
-//        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
-//        if (user.interfaceMode.equals(Constants.BEGINNER_INTERFACE_MODE)) { //We add the selected radio button
-//            List<Integer> tempList = new ArrayList<>();
-//            tempList.add(rgReasons.getCheckedRadioButtonId());
-//            userTask.reasonList = tempList.toString();
-//        } else //we add the selected checkbox ADVANCED
-//            userTask.reasonList = selectedReasons.toString();
-//
-//        final String jsonRequest = JsonUtils.getJsonRequest(getActivity(), userTask);
-//
-//        ResponseListener responseListener = new ResponseListener(getActivity(), true, true, getString(R.string.title_loading_saving_reasons)) {
-//
-//            @Override
-//            public void processResponse(String response) {
-//                Gson gson = new Gson();
-//                Log.d(TAG, response);
-//
-//                dismiss();
-//
-//            }
-//
-//            @Override
-//            public void processError(VolleyError error) {
-//                super.processError(error);
-//                Log.d(TAG, error.getMessage());
-//            }
-//
-//            @Override
-//            public void processError(JsonResponseBaseBean jsonResponse) {
-//                super.processError(jsonResponse);
-//                Log.d(TAG, jsonResponse.toString());
-//            }
-//        };
-//
-////        NetworkDataSource.post(getActivity(), NetworkDataSource.Urls.USER_TASKS, null, jsonRequest, responseListener, this);
-//
     }
 
 
+    public void updateErrors(UserTaskError userTaskError) {
+        Map<String, String> params = new HashMap<>();
+        params.put(PARAM_TASK_ID, String.valueOf(userTaskError.getTaskId()));
+        params.put(PARAM_REASON_CODE, userTaskError.getReasonCode());
+        params.put(PARAM_SUB_POSITION, String.valueOf(userTaskError.getSubtitlePosition()));
+        params.put(PARAM_SUB_VERSION, String.valueOf(userTaskError.getSubtitleVersion()));
+
+        Uri errorsUri = Uri.parse(URL_BASE.concat(Urls.USER_ERRORS.value)).buildUpon().build();
+
+        Log.d(TAG, "updateErrors() Request URL: " + errorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + userTaskError.getTaskId()
+                + "; " + PARAM_SUB_VERSION + " => " + userTaskError.getSubtitleVersion()
+                + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
+                + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
+
+
+        ResponseListener responseListener = new ResponseListener(mContext, false,
+                false, "") {
+            @Override
+            protected void processResponse(String response) {
+
+                Log.d(TAG, "updateErrors() Response JSON: " + response);
+
+
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+
+            }
+
+        };
+
+        mExecutors.networkIO().execute(() -> requestString(Method.POST, errorsUri.toString(), params, responseListener));
+    }
 
 
     /**
@@ -1043,14 +1036,12 @@ public class NetworkDataSource {
 
     /**
      *
-     *
      */
     public LiveData<Resource<TasksList>> responseFromFetchTestTasks() {
         return responseFromFetchTestTasks;
     }
 
     /**
-     *
      *
      */
     public LiveData<Resource<TasksList>> responseFromFetchFinishedTasks() {
@@ -1059,17 +1050,13 @@ public class NetworkDataSource {
 
     /**
      *
-     *
      */
     public LiveData<Resource<TasksList>> responseFromFetchMyListTasks() {
         return responseFromFetchMyListTasks;
     }
 
 
-
-
     /**
-     *
      *
      */
 

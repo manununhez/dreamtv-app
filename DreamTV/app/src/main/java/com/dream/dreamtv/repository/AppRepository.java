@@ -200,4 +200,8 @@ public class AppRepository {
     public void saveErrors(UserTaskError userTaskError) {
         mNetworkDataSource.saveErrors(userTaskError);
     }
+
+    public void updateErrors(UserTaskError userTaskError) {
+        mNetworkDataSource.updateErrors(userTaskError);
+    }
 }

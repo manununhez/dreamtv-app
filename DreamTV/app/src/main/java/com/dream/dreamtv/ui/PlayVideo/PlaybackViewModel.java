@@ -23,5 +23,8 @@ class PlaybackViewModel extends ViewModel {
         mRepository.saveErrors(userTaskError);
     }
 
+    public void updateErrors(UserTaskError userTaskError) {
+        mRepository.updateErrors(userTaskError);
+    }
 }
 
