@@ -2,6 +2,7 @@ package com.dream.dreamtv.ui.VideoDetails;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.dream.dreamtv.model.Resource;
@@ -9,13 +10,25 @@ import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.repository.AppRepository;
+import com.dream.dreamtv.utils.AbsentLiveData;
 
 class VideoDetailsViewModel extends ViewModel {
 
     private final AppRepository mRepository;
+    private final MutableLiveData<Integer> userTaskMutableLiveData;
+    private final LiveData<Resource<UserTask>> userTask;
 
     VideoDetailsViewModel(AppRepository appRepository) {
         mRepository = appRepository;
+
+        userTaskMutableLiveData = new MutableLiveData<>();
+
+        userTask = Transformations.switchMap(userTaskMutableLiveData, input -> {
+            if (input == null) {
+                return AbsentLiveData.create();
+            }
+            return mRepository.fetchUserTask();
+        });
 
     }
 
@@ -32,8 +45,10 @@ class VideoDetailsViewModel extends ViewModel {
         return mRepository.fetchSubtitle(videoId, languageCode, version);
     }
 
-    LiveData<Resource<UserTask>> fetchUserTask() {
-        return mRepository.fetchUserTask();
+    LiveData<Resource<UserTask>> fetchUserTask(int taskId) {
+        userTaskMutableLiveData.setValue(taskId);
+        return userTask;
+//        return mRepository.fetchUserTask();
     }
 
     LiveData<Resource<UserTask>> createUserTask(Task task, int mSubtitleVersion) {
