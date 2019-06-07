@@ -118,7 +118,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
 
         if (mSelectedTask != null) {
-            mUserTask = mSelectedTask.userTasks[0]; //TODO what happened is there are more than one UserTask
+            if (mSelectedTask.userTasks.length > 0)
+                mUserTask = mSelectedTask.userTasks[0]; //TODO what happened is there are more than one UserTask
 
 
             setupDetailsOverview();
@@ -468,7 +469,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
      * Verify if the current task has already data created. IF not, is call createTask()
      */
     private void fetchUserTasks() {
-        fetchUserTaskLiveData = mViewModel.fetchUserTask();
+        fetchUserTaskLiveData = mViewModel.fetchUserTask(mSelectedTask.taskId);
 
         fetchUserTaskLiveData.removeObservers(getViewLifecycleOwner());
 
