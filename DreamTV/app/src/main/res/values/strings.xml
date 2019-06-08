@@ -112,7 +112,7 @@
     <string name="language_polish">Polish</string>
     <string name="time_format">%02d:%02d</string>
     <string name="alert_title_video_terminated">Completed!</string>
-    <string name="alert_msg_video_terminated">Thanks for watching the video. Please rate the video :)</string>
+    <string name="alert_msg_video_terminated">How did you like the video?</string>
     <string name="text_pause">PAUSE</string>
 
 </resources>

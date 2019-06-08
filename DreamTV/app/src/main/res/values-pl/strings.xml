@@ -98,7 +98,7 @@
     <string name="language_polish">Polski</string>
     <string name="time_format">%02d:%02d</string>
     <string name="alert_title_video_terminated">Zakończony!</string>
-    <string name="alert_msg_video_terminated">Dzięki za obejrzenie filmu. Wróć do wyboru wideo.</string>
+    <string name="alert_msg_video_terminated">Jak ci się podobało wideo?</string>
     <string name="text_pause">PAUZA</string>
 
 </resources>
