@@ -45,11 +45,15 @@
     <string name="rb_option_text_beginner">Prosty</string>
     <string name="hint_voice_google_input">Nagraj wiadomość</string>
     <string name="title_current_time_video">%1$s / %2$s</string>
-    <string name="title_video_details">%1$s | Audio: %2$s | Napisy: %3$s | Długość: %4$d min</string>
+    <string name="title_video_details">%1$s | Audio: %2$s | Napisy: %3$s | Długość: %4$s | Tryb interfejsu: %5$s</string>
     <string name="title_video_forward">+ %1$d s</string>
     <string name="title_video_backward">- %1$d s</string>
     <string name="title_search">Szukaj…</string>
     <string name="title_reasons_others_selected">Wybrane w trybie zaawansowanym: %1$s</string>
+    <string name="errors_found_finished">Znalazłeś %1$d błąd</string>
+    <string name="errors_found_finished_plural">Znalazłeś %1$d błędy</string>
+    <string name="errors_found_continue">Dotychczas %1$d błąd</string>
+    <string name="errors_found_continue_plural">Do tej pory %1$d błędy</string>
 
 
     <!--buttons-->

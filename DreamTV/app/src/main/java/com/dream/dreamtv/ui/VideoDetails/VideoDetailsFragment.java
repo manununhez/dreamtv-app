@@ -38,6 +38,7 @@ import com.dream.dreamtv.ui.PlayVideo.PlaybackVideoActivity;
 import com.dream.dreamtv.ui.PlayVideo.PlaybackVideoYoutubeActivity;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
+import com.dream.dreamtv.utils.Utils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.List;
@@ -335,11 +336,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void setupContinueAction() {
         if (mUserTask != null) {
             if (mUserTask.getTimeWatchedInSecs() > 0) { //To avoid messages like "0 min, 0 secs"
-                String timeFormatted = String.format(Locale.getDefault(), "%d min, %d s",
-                        TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()),
-                        TimeUnit.MILLISECONDS.toSeconds(mUserTask.getTimeWatched()) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()))
-                );
+//                String timeFormatted = String.format(Locale.getDefault(), "%d min, %d s",
+//                        TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()),
+//                        TimeUnit.MILLISECONDS.toSeconds(mUserTask.getTimeWatched()) -
+//                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()))
+//                );
+
+                String timeFormatted = Utils.getTimeFormatMinSecs(mUserTask.getTimeWatched());
 
                 setActionPanel(ACTION_PLAY_VIDEO,
                         new Action(ACTION_CONTINUE_VIDEO, getString(R.string.btn_continue_watching, timeFormatted)),

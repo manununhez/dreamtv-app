@@ -14,9 +14,15 @@
 
 package com.dream.dreamtv.presenter;
 
+import android.app.Activity;
+import android.content.Context;
+
+import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Task;
+import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.Video;
+import com.dream.dreamtv.utils.Utils;
 
 
 public class DetailsDescriptionPresenter extends CustomAbstractDetailsDescriptionPresenter {
@@ -26,10 +32,16 @@ public class DetailsDescriptionPresenter extends CustomAbstractDetailsDescriptio
         Task task = ((Task) item);
         Video video = task.video;
 
+        Context context = viewHolder.view.getContext();
+
+        User user = ((DreamTVApp) ((Activity) context).getApplication()).getUser();
+
         if (video != null) {
+            String timeFormatted = Utils.getTimeFormatMinSecs(video.duration * 1000);
+
             viewHolder.getTitle().setText(video.title);
-            viewHolder.getSubtitle().setText(viewHolder.view.getContext().getString(R.string.title_video_details, video.project,
-                    video.primaryAudioLanguageCode, task.language, (video.duration / 60)));
+            viewHolder.getSubtitle().setText(context.getString(R.string.title_video_details, video.project,
+                    video.primaryAudioLanguageCode, task.language, timeFormatted, user.interfaceMode));
             viewHolder.getBody().setText(video.description);
         }
     }

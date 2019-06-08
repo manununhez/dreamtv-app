@@ -17,12 +17,14 @@ package com.dream.dreamtv.utils;
 import android.content.Context;
 import android.content.DialogInterface;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.view.ContextThemeWrapper;
+
 import com.dream.dreamtv.R;
 
 import java.util.Date;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.view.ContextThemeWrapper;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -77,16 +79,22 @@ public class Utils {
     }
 
 
-    public static String getTimeFormat(Context context,  long millis) {
+    public static String getTimeFormat(Context context, long millis) {
         return String.format(context.getString(R.string.time_format), MILLISECONDS.toMinutes(millis) % HOURS.toMinutes(1),
                 MILLISECONDS.toSeconds(millis) % MINUTES.toSeconds(1));
     }
 
 
-
-    public static long getUnixTimeNowInSecs(){
-        return  new Date(System.currentTimeMillis() / 1000L).getTime();
+    public static long getUnixTimeNowInSecs() {
+        return new Date(System.currentTimeMillis() / 1000L).getTime();
 
     }
 
+    public static String getTimeFormatMinSecs(long millis) {
+        return String.format(Locale.getDefault(), "%d min, %d s",
+                TimeUnit.MILLISECONDS.toMinutes(millis),
+                TimeUnit.MILLISECONDS.toSeconds(millis) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
+        );
+    }
 }
