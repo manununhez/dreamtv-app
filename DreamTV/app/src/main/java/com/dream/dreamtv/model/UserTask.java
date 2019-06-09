@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by manuel on 7/20/17.
@@ -164,6 +165,13 @@ public class UserTask implements Parcelable {
 
     public void setUserTaskErrorList(UserTaskError[] userTaskErrorList) {
         this.userTaskErrorList = userTaskErrorList;
+    }
+
+    public void addUserTaskErrorToList(UserTaskError[] newUserTaskErrors) {
+        List<UserTaskError> userTaskErrors = new ArrayList<>(Arrays.asList(userTaskErrorList)); //mutable list
+        List<UserTaskError> userTaskErrorsList = Arrays.asList(newUserTaskErrors);//inmutable list
+        userTaskErrors.addAll(userTaskErrorsList);
+        this.userTaskErrorList = userTaskErrors.toArray(this.userTaskErrorList);
     }
 
     public String getCreated_at() {

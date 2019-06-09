@@ -89,6 +89,7 @@ public class NetworkDataSource {
     private MutableLiveData<Resource<SubtitleResponse>> responseFromFetchSubtitle;
     private MutableLiveData<Resource<UserTask>> responseFromFetchUserTask;
     private MutableLiveData<Resource<UserTask>> responseFromCreateUserTask;
+    private MutableLiveData<Resource<UserTaskError[]>> responseFromErrorsUpdate;
     private int currentPage = 1;
 
     private NetworkDataSource(Context context, AppExecutors executors) {
@@ -109,6 +110,7 @@ public class NetworkDataSource {
         responseFromCreateUserTask = new MutableLiveData<>();
         responseFromAddToListTasks = new MutableLiveData<>();
         responseFromRemoveFromListTasks = new MutableLiveData<>();
+        responseFromErrorsUpdate = new MutableLiveData<>();
 
     }
 
@@ -943,20 +945,34 @@ public class NetworkDataSource {
     /**
      * @param userTaskError
      */
-    public void saveErrors(UserTaskError userTaskError) {
+    public MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(UserTaskError userTaskError, boolean saveError) {
+        responseFromErrorsUpdate.postValue(Resource.loading(null));
 
+        Uri saveErrorsUri = Uri.parse(URL_BASE.concat(Urls.USER_ERRORS.value)).buildUpon().build();
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_TASK_ID, String.valueOf(userTaskError.getTaskId()));
         params.put(PARAM_REASON_CODE, userTaskError.getReasonCode());
         params.put(PARAM_SUB_POSITION, String.valueOf(userTaskError.getSubtitlePosition()));
         params.put(PARAM_SUB_VERSION, String.valueOf(userTaskError.getSubtitleVersion()));
 
-        Uri errorsUri = Uri.parse(URL_BASE.concat(Urls.USER_ERRORS.value)).buildUpon().build();
 
-        Log.d(TAG, "saveErrors() Request URL: " + errorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + userTaskError.getTaskId()
-                + "; " + PARAM_SUB_VERSION + " => " + userTaskError.getSubtitleVersion()
-                + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
-                + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
+        Uri updateUri = Uri.parse(URL_BASE.concat(Urls.USER_ERRORS.value)).buildUpon()
+                .appendQueryParameter(PARAM_TASK_ID, String.valueOf(userTaskError.getTaskId()))
+                .appendQueryParameter(PARAM_REASON_CODE, userTaskError.getReasonCode())
+                .appendQueryParameter(PARAM_SUB_POSITION, String.valueOf(userTaskError.getSubtitlePosition()))
+                .appendQueryParameter(PARAM_SUB_VERSION, String.valueOf(userTaskError.getSubtitleVersion()))
+                .build();
+
+        if (saveError)
+            Log.d(TAG, "saveErrors() Request URL: " + saveErrorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + userTaskError.getTaskId()
+                    + "; " + PARAM_SUB_VERSION + " => " + userTaskError.getSubtitleVersion()
+                    + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
+                    + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
+        else
+            Log.d(TAG, "updateErrors() Request URL: " + saveErrorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + userTaskError.getTaskId()
+                    + "; " + PARAM_SUB_VERSION + " => " + userTaskError.getSubtitleVersion()
+                    + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
+                    + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
 
 
         ResponseListener responseListener = new ResponseListener(mContext, false,
@@ -964,7 +980,21 @@ public class NetworkDataSource {
             @Override
             protected void processResponse(String response) {
 
-                Log.d(TAG, "saveErrors() Response JSON: " + response);
+
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTaskError[]>>() {
+                };
+                JsonResponseBaseBean<UserTaskError[]> jsonResponse = getJsonResponse(response, type);
+
+                if (saveError)
+                    Log.d(TAG, "saveErrors() Response JSON: " + response);
+                else
+                    Log.d(TAG, "updateErrors() Response JSON: " + response);
+
+
+
+                UserTaskError[] userTaskErrors = jsonResponse.data;
+
+                responseFromErrorsUpdate.postValue(Resource.success(userTaskErrors));
 
 
             }
@@ -973,53 +1003,23 @@ public class NetworkDataSource {
             public void processError(VolleyError error) {
                 super.processError(error);
 
-            }
-
-        };
-
-        mExecutors.networkIO().execute(() -> requestString(Method.POST, errorsUri.toString(), params, responseListener));
-    }
-
-
-    public void updateErrors(UserTaskError userTaskError) {
-        Map<String, String> params = new HashMap<>();
-        params.put(PARAM_TASK_ID, String.valueOf(userTaskError.getTaskId()));
-        params.put(PARAM_REASON_CODE, userTaskError.getReasonCode());
-        params.put(PARAM_SUB_POSITION, String.valueOf(userTaskError.getSubtitlePosition()));
-        params.put(PARAM_SUB_VERSION, String.valueOf(userTaskError.getSubtitleVersion()));
-
-        Uri errorsUri = Uri.parse(URL_BASE.concat(Urls.USER_ERRORS.value)).buildUpon().build();
-
-        Log.d(TAG, "updateErrors() Request URL: " + errorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + userTaskError.getTaskId()
-                + "; " + PARAM_SUB_VERSION + " => " + userTaskError.getSubtitleVersion()
-                + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
-                + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
-
-
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
-            @Override
-            protected void processResponse(String response) {
-
-                Log.d(TAG, "updateErrors() Response JSON: " + response);
-
-
-            }
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
+                responseFromErrorsUpdate.postValue(Resource.error(error.getMessage(), null));
 
             }
 
         };
 
-        mExecutors.networkIO().execute(() -> requestString(Method.POST, errorsUri.toString(), params, responseListener));
+        if (saveError)
+            mExecutors.networkIO().execute(() -> requestString(Method.POST, saveErrorsUri.toString(), params, responseListener));
+        else //update Error
+            mExecutors.networkIO().execute(() -> requestString(Method.PUT, saveErrorsUri.toString(), params, responseListener));
+
+
+        return responseFromErrorsUpdate;
     }
 
 
     /**
-     * Get the current weather of a list of cities ID.
      *
      * @return {@link LiveData} representing the response of the request requestCurrentWeathersByCityIDs()
      */

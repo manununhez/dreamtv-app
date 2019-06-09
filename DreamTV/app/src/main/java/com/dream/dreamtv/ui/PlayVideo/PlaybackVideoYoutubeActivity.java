@@ -5,7 +5,6 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.os.SystemClock;
 import android.text.Html;
 import android.util.Log;
@@ -16,13 +15,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.common.IPlayBackVideoListener;
 import com.dream.dreamtv.common.IReasonsDialogListener;
 import com.dream.dreamtv.common.ISubtitlePlayBackListener;
+import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.Subtitle;
 import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.Task;
@@ -108,7 +110,22 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.d(TAG, "$$ onCreate()");
+
         setContentView(R.layout.activity_playback_videos_youtube);
+
+
+        if (savedInstanceState != null) {
+            mSelectedTask = savedInstanceState.getParcelable(INTENT_TASK);
+            mSelectedCategory = savedInstanceState.getString(INTENT_CATEGORY);
+            mSubtitleResponse = savedInstanceState.getParcelable(INTENT_SUBTITLE);
+            mUserTask = savedInstanceState.getParcelable(INTENT_USER_TASK);
+        } else {
+            mSelectedTask = getIntent().getParcelableExtra(INTENT_TASK);
+            mSelectedCategory = getIntent().getStringExtra(INTENT_CATEGORY);
+            mSubtitleResponse = getIntent().getParcelableExtra(INTENT_SUBTITLE);
+            mUserTask = getIntent().getParcelableExtra(INTENT_USER_TASK);
+        }
 
         PlaybackViewModelFactory factory = InjectorUtils.providePlaybackViewModelFactory(this);
         mViewModel = ViewModelProviders.of(this, factory).get(PlaybackViewModel.class);
@@ -118,10 +135,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         tvSubtitle = findViewById(R.id.tvSubtitle); // initiate a chronometer
         rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
 
-        mSelectedTask = getIntent().getParcelableExtra(INTENT_TASK);
-        mSelectedCategory = getIntent().getStringExtra(INTENT_CATEGORY);
-        mSubtitleResponse = getIntent().getParcelableExtra(INTENT_SUBTITLE);
-        mUserTask = getIntent().getParcelableExtra(INTENT_USER_TASK);
         mPlayFromBeginning = getIntent().getBooleanExtra(INTENT_PLAY_FROM_BEGINNING, true);
 
         // Obtain the FirebaseAnalytics instance.
@@ -130,6 +143,27 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         setupVideoPlayer();
     }
 
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(INTENT_TASK, mSelectedTask);
+        outState.putString(INTENT_CATEGORY, mSelectedCategory);
+        outState.putParcelable(INTENT_SUBTITLE, mSubtitleResponse);
+        outState.putParcelable(INTENT_USER_TASK, mUserTask);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mSelectedTask = savedInstanceState.getParcelable(INTENT_TASK);
+        mSelectedCategory = savedInstanceState.getString(INTENT_CATEGORY);
+        mSubtitleResponse = savedInstanceState.getParcelable(INTENT_SUBTITLE);
+        mUserTask = savedInstanceState.getParcelable(INTENT_USER_TASK);
+    }
 
     private void firebaseLoginEvents(String logEventName) {
         Bundle bundle = new Bundle();
@@ -170,18 +204,13 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        stopVideo();
-        mYoutubeView.closePlayer();
-    }
-
 
     @Override
     public void onPause() {
         super.onPause();
+
+        Log.d(TAG, "$$ onPause()");
+
         if (mYoutubeView.isPlaying()) {
             if (!requestVisibleBehind(true)) {
                 // Try to play behind launcher, but if it fails, stop playback.
@@ -198,7 +227,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
         currentTime = (int) position;
 
-        Log.d(TAG, "POSITION : " + position);
+//        Log.d(TAG, "POSITION : " + position);
         if (state.toString().equals(STATE_PLAY)) {
             Log.d(TAG, "State : " + STATE_PLAY);
 
@@ -219,7 +248,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 //            Utils.getAlertDialog(PlaybackVideoYoutubeActivity.this, getString(R.string.alert_title_video_terminated),
 //                    getString(R.string.alert_msg_video_terminated), getString(R.string.btn_ok),
 //                    dialog -> finish()).show();
-
 
 
             mUserTask.setCompleted(1);
@@ -269,36 +297,48 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO);
                 return true;
 
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                if (isPlayPauseAction == PLAY) { //Pause
+                    isPlayPauseAction = PAUSE;
+                    timeStoppedTemp = chronometer.getBase();
+
+                    mYoutubeView.pause();
+
+                } else { //Play
+                    playVideoMode();
+                }
+                Log.d(TAG, "KEYCODE_DPAD_CENTER - dispatchKeyEvent");
+                return true;
             default:
                 return super.onKeyUp(keyCode, event);
         }
     }
 
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-
-        int action = event.getAction();
-        int keyCode = event.getKeyCode();
-
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-                if (action == KeyEvent.ACTION_UP) {
-                    if (isPlayPauseAction == PLAY) { //Pause
-                        isPlayPauseAction = PAUSE;
-                        timeStoppedTemp = chronometer.getBase();
-
-                        mYoutubeView.pause();
-
-                    } else { //Play
-                        playVideoMode();
-                    }
-                    Log.d(TAG, "KEYCODE_DPAD_CENTER - dispatchKeyEvent");
-                    return true;
-                }
-            default:
-                return super.dispatchKeyEvent(event);
-        }
-    }
+//    @Override
+//    public boolean dispatchKeyEvent(KeyEvent event) {
+//
+//        int action = event.getAction();
+//        int keyCode = event.getKeyCode();
+//
+//        switch (keyCode) {
+//            case KeyEvent.KEYCODE_DPAD_CENTER:
+//                if (action == KeyEvent.ACTION_UP) {
+//                    if (isPlayPauseAction == PLAY) { //Pause
+//                        isPlayPauseAction = PAUSE;
+//                        timeStoppedTemp = chronometer.getBase();
+//
+//                        mYoutubeView.pause();
+//
+//                    } else { //Play
+//                        playVideoMode();
+//                    }
+//                    Log.d(TAG, "KEYCODE_DPAD_CENTER - dispatchKeyEvent");
+//                    return true;
+//                }
+//            default:
+//                return super.dispatchKeyEvent(event);
+//        }
+//    }
 
     @Override
     public void onVisibleBehindCanceled() {
@@ -371,11 +411,14 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             mYoutubeView.stopVideo();
 
 
-            //Updated value of the currentTime
-            Log.d(TAG, "stopVideo() => Time (Youtube)" + currentTime);
-
+            int time = (int) (mYoutubeView.getCurrentPosition() * 1000);
             //Update current time of the video
-            mUserTask.setTimeWatched(currentTime);
+            if (time > 0) { //For some reason, youtube player sometimes restart with the current time in 0, after the correct current time was saved
+                Log.d(TAG, "stopVideo() => Time (mYoutubeView)" + time);
+                mUserTask.setTimeWatched(time);
+
+                mViewModel.updateUserTask(mUserTask);
+            }
 
 
             //Analytics Report Event
@@ -394,7 +437,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 Subtitle selectedSubtitle = mSubtitleResponse.getSyncSubtitleText(elapsedRealtimeTemp - timeStoppedTemp);
 
                 if (selectedSubtitle != null) { //if subtitle == null, there is not subtitle in the time selected
-                    Log.d(TAG, "Selected subtitle: #" + selectedSubtitle.position + " - " + selectedSubtitle.text);
+//                    Log.d(TAG, "Selected subtitle: #" + selectedSubtitle.position + " - " + selectedSubtitle.text);
 
 
                     userTaskErrorListForSttlPos = mUserTask.getUserTaskErrorsForASpecificSubtitlePosition(selectedSubtitle.position);
@@ -534,6 +577,18 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     public void onBackPressed() {
         super.onBackPressed();
 
+        Log.d(TAG, "$$ onBackPressed()");
+
+        stopVideo();
+        mYoutubeView.closePlayer();
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "$$ onDestroy()");
+
         stopVideo();
         mYoutubeView.closePlayer();
 
@@ -544,19 +599,59 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     public void onSaveReasons(UserTaskError userTaskError) {
         Log.d(TAG, "onSaveReasons() =>" + userTaskError.toString());
 
-        mViewModel.saveErrors(userTaskError);
+        LiveData<Resource<UserTaskError[]>> saveErrorsLiveData = mViewModel.errorsUpdate(userTaskError, true);
 
-        //TODO UPDATE  mUserTask.userTaskErrorList and UserTask value in VideoDetails
-//        mUserTask.setUserTaskErrorList();
+        saveErrorsLiveData.removeObservers(this);
+
+        saveErrorsLiveData.observe(this, errorsResource -> {
+            if (errorsResource.status.equals(Resource.Status.SUCCESS)) {
+                Log.d(TAG, "errorsUpdate response");
+
+//                mUserTask.addUserTaskErrorToList(errorsResource.data);
+                mUserTask.setUserTaskErrorList(errorsResource.data);
+
+            } else if (errorsResource.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (errorsResource.message != null)
+                    Log.d(TAG, errorsResource.message);
+                else
+                    Log.d(TAG, "Status ERROR");
+
+
+//                dismissLoading();
+            }
+        });
+
     }
-
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    public void onUpdateReasons(UserTaskError userTaskError) {
+        Log.d(TAG, "onUpdateReasons() =>" + userTaskError.toString());
 
-        mViewModel.updateUserTask(mUserTask);
+        LiveData<Resource<UserTaskError[]>> updateErrorsLiveData = mViewModel.errorsUpdate(userTaskError, false);
+
+        updateErrorsLiveData.removeObservers(this);
+
+        updateErrorsLiveData.observe(this, errorsResource -> {
+            if (errorsResource.status.equals(Resource.Status.SUCCESS)) {
+                Log.d(TAG, "errorsUpdate response");
+
+//                mUserTask.addUserTaskErrorToList(errorsResource.data);
+                mUserTask.setUserTaskErrorList(errorsResource.data);
+
+            } else if (errorsResource.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (errorsResource.message != null)
+                    Log.d(TAG, errorsResource.message);
+                else
+                    Log.d(TAG, "Status ERROR");
+
+
+//                dismissLoading();
+            }
+        });
     }
+
 
     @Override
     public void setRating(int rating) {
@@ -564,6 +659,5 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
         //Update values and exit from the video
         mViewModel.updateUserTask(mUserTask);
-        finish();
     }
 }

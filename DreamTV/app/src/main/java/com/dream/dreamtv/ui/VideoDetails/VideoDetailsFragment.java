@@ -336,12 +336,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void setupContinueAction() {
         if (mUserTask != null) {
             if (mUserTask.getTimeWatchedInSecs() > 0) { //To avoid messages like "0 min, 0 secs"
-//                String timeFormatted = String.format(Locale.getDefault(), "%d min, %d s",
-//                        TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()),
-//                        TimeUnit.MILLISECONDS.toSeconds(mUserTask.getTimeWatched()) -
-//                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(mUserTask.getTimeWatched()))
-//                );
-
                 String timeFormatted = Utils.getTimeFormatMinSecs(mUserTask.getTimeWatched());
 
                 setActionPanel(ACTION_PLAY_VIDEO,

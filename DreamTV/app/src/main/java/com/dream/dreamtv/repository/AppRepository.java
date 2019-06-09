@@ -193,15 +193,12 @@ public class AppRepository {
     }
 
 
+    public MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(UserTaskError userTaskError, boolean saveError) {
+        return mNetworkDataSource.errorsUpdate(userTaskError, saveError);
+    }
+
     public void updateUserTask(UserTask userTask) {
         mNetworkDataSource.updateUserTask(userTask);
     }
 
-    public void saveErrors(UserTaskError userTaskError) {
-        mNetworkDataSource.saveErrors(userTaskError);
-    }
-
-    public void updateErrors(UserTaskError userTaskError) {
-        mNetworkDataSource.updateErrors(userTaskError);
-    }
 }

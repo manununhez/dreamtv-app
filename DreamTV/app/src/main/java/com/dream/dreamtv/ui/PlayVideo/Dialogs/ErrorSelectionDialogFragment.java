@@ -85,6 +85,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private ScrollView scrollViewAdvanced;
     private ScrollView scrollViewBeginner;
     private Subtitle selectedSubtitle;
+    private Subtitle goToThisSelectedSubtitle;
     private Task mSelectedTask;
     private OnListener mCallback;
     private List<String> selectedReasons = new ArrayList<>();
@@ -177,6 +178,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         repopulateFormWithUserTaskData(subtitleOriginalPosition); //To verify if we receive usertask, to repopulate the dialog
 
 
+        //This is used to select one subtitle from the navigation list, and move the video forward or backward accorded to it
+        goToThisSelectedSubtitle = subtitle.subtitles.get(subtitleOriginalPosition - 1); //subtitleOriginalPosition is the subtitle order, and the index starts in 1. To get a specific subtitle from the list, the index start in 0.
+        //This is used to know which subtitle from the navigation list are we on, in order to perform save or update errors
         selectedSubtitle = subtitle.subtitles.get(subtitleOriginalPosition - 1); //subtitleOriginalPosition is the subtitle order, and the index starts in 1. To get a specific subtitle from the list, the index start in 0.
 
         return viewRoot;
@@ -214,7 +218,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        mCallback.onDialogClosed(selectedSubtitle, subtitleOriginalPosition);
+        mCallback.onDialogClosed(goToThisSelectedSubtitle, subtitleOriginalPosition);
     }
 
     /**
@@ -235,8 +239,12 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private void setupEventsListener() {
         btnCancel.setOnClickListener(view -> dismiss());
         btnSave.setOnClickListener(view -> {
-            mCallback.onSaveReasons(prepareReasonsToSave());
-            dismiss();
+            if (selectedReasons.size() > 0) {
+                mCallback.onSaveReasons(prepareReasonsToSave());
+                dismiss();
+            } else {
+                Toast.makeText(getActivity(), "Please, select some options to save.", Toast.LENGTH_SHORT).show();
+            }
         });
         btnSaveChanges.setOnClickListener(view -> {
             mCallback.onUpdateReasons(prepareReasonsToSave());
@@ -267,20 +275,24 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             mListView.setSelectionFromTop(subtitlePosition - 1, 280);
         }
 
-        mListView.setOnItemClickListener((adapterView, view, i, l) -> {
-            selectedSubtitle = (Subtitle) adapterView.getItemAtPosition(i);
+        mListView.setOnItemClickListener((adapterView, view, position, l) -> {
+            goToThisSelectedSubtitle = (Subtitle) adapterView.getItemAtPosition(position);
             Log.d(TAG, "CPRCurrentPosition: " + subtitleOriginalPosition);
-            Log.d(TAG, "CPRNewPosition: " + (i + 1));
+            Log.d(TAG, "CPRNewPosition: " + (position + 1));
 //            currentSubtitlePosition = i + 1;
 
-            setupSubtitleNavigationListView(i + 1);
+            setupSubtitleNavigationListView(position + 1);
+
+            repopulateFormWithUserTaskData(position);
 
         });
 
         mListView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 Log.d(TAG, "OnItemSelected - Position: " + position);
+                selectedSubtitle = (Subtitle) adapterView.getItemAtPosition(position);
+
                 repopulateFormWithUserTaskData(position);
             }
 
@@ -421,7 +433,8 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     }
 
     private void repopulateFormWithUserTaskData(int position) {
-        rgReasons.clearCheck(); //clear all previous checks to get the animation correctly
+        rgReasons.clearCheck(); //clear all previous checks in radio buttons to get the animation correctly
+        selectedReasons.clear(); //clear all previous selected reasons in checks
 
         ArrayList<UserTaskError> errors = userTask.getUserTaskErrorsForASpecificSubtitlePosition(position);
         Log.d(TAG, "repopulateFormWithUserTaskData()");
@@ -469,13 +482,14 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                 //re-select the reasons id
                 for (int i = 0; i < llReasons.getChildCount(); i++) {
                     LinearLayout childAt = (LinearLayout) llReasons.getChildAt(i);
-                    CheckBox checkBox = (CheckBox) childAt.getChildAt(0); //0 -> checkbox, 1->Tooglebutton
+//                    CheckBox checkBox = (CheckBox) childAt.getChildAt(0); //0 -> checkbox, 1->Tooglebutton
                     ToggleButton toggleButton = (ToggleButton) childAt.getChildAt(1); //0 -> checkbox, 1->Tooglebutton
 
                     for (UserTaskError userTaskError : errors)
                         if (userTaskError.getReasonCode().contentEquals(toggleButton.getContentDescription())) {
-                            toggleButton.setChecked(true);
-                            checkBox.setChecked(true);
+//                            toggleButton.setChecked(true);
+//                            checkBox.setChecked(true);
+                            toggleButton.performClick();
                         }
                 }
             }
@@ -509,9 +523,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         }
     }
 
-    private void updateReasons() {
-
-    }
 
     private UserTaskError prepareReasonsToSave() {
         //Interface mode settings. We retrieve the selected value. The advanced mode is already in selectedReasons
@@ -527,15 +538,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
         }
 
-        UserTaskError userTaskError = new UserTaskError(mSelectedTask.taskId,
+        return new UserTaskError(mSelectedTask.taskId,
                 selectedErrorsListJson(selectedReasons), subtitle.versionNumber,
                 selectedSubtitle.position, voiceInput.getText().toString());
-
-
-//        Toast.makeText(getActivity(), getString(R.string.title_confirmation_saved_data), Toast.LENGTH_SHORT).show();
-
-
-        return userTaskError;
     }
 
     public String selectedErrorsListJson(List<String> selectedReasons) {
