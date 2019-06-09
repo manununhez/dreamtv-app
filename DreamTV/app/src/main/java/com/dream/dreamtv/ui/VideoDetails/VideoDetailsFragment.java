@@ -60,6 +60,7 @@ import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
+import static com.dream.dreamtv.utils.Constants.TASKS_ALL_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_MY_LIST_CAT;
@@ -482,9 +483,12 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 setupContinueAction();
 
 
-                if (mUserTask != null && mUserTask.getCompleted() == 1) {
+                if (mUserTask != null && mUserTask.getCompleted() == 1) { //TODO improve this calls
                     mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //trying to keep continue_category always updated
                     mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT); //trying to keep finished_category always updated
+                    mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT); //trying to keep mylist_category always updated
+                    mViewModel.updateTaskByCategory(TASKS_ALL_CAT); //trying to keep all_category always updated
+                    mViewModel.updateTaskByCategory(TASKS_TEST_CAT); //trying to keep test_category always updated
                 }
 
 //                dismissLoading();
