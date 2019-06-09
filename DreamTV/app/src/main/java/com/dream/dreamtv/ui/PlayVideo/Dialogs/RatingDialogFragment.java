@@ -41,7 +41,14 @@ public class RatingDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        viewRoot = new Dialog(getActivity(), R.style.DefaultDialogFragmentStyle);
+
+        viewRoot = new Dialog(getActivity(), R.style.DefaultDialogFragmentStyle) {
+            @Override
+            public void onBackPressed() {
+                //do nothing. We disable onBackPressed
+            }
+        };
+
         viewRoot.setContentView(R.layout.fragment_rating_dialog);
 
         btnSaveAndExit = viewRoot.findViewById(R.id.btnSaveAndExit);
