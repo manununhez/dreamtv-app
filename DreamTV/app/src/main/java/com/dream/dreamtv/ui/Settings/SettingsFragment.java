@@ -11,7 +11,12 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
@@ -26,10 +31,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModelProviders;
 
 import static android.app.Activity.RESULT_OK;
 import static com.dream.dreamtv.utils.Constants.ABR_ARABIC;
@@ -46,6 +47,7 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_MODE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUB_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TESTING_MODE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN;
+import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_CALL_TASKS;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
 import static com.dream.dreamtv.utils.Constants.LANGUAGE_ENGLISH;
 import static com.dream.dreamtv.utils.Constants.LANGUAGE_POLISH;
@@ -79,6 +81,11 @@ public class SettingsFragment extends Fragment {
     private LinearLayout llVideosSettings;
     private SettingsViewModel mViewModel;
     private LiveData<Resource<User>> updateUserLiveData;
+    private RadioGroup rgVideoDuration;
+    private RadioButton rbDurationAll;
+    private RadioButton rbDurationSG;
+    private RadioButton rbDurationFG;
+    private RadioButton rbDurationTG;
 
 
     @Override
@@ -90,6 +97,12 @@ public class SettingsFragment extends Fragment {
 
         llVideosSettings = view.findViewById(R.id.llVideosSettings);
         llBodyLanguages = view.findViewById(R.id.llBodyLanguages);
+
+        rgVideoDuration = view.findViewById(R.id.rgVideoDuration);
+        rbDurationAll = view.findViewById(R.id.rbDurationAll);
+        rbDurationFG = view.findViewById(R.id.rbDurationFG);
+        rbDurationSG = view.findViewById(R.id.rbDurationSG);
+        rbDurationTG = view.findViewById(R.id.rbDurationTG);
 
         rbEnglish = view.findViewById(R.id.rbEnglish);
         rbPolish = view.findViewById(R.id.rbPolish);
@@ -129,15 +142,39 @@ public class SettingsFragment extends Fragment {
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
 
         instantiateLoading();
-        interfaceLanguageSettings();
-        interfaceModeSettings();
-        testingModeSettings();
+        setupInterfaceLanguage();
+        setupInterfaceMode();
+        setupTestingMode();
+        setupVideoDuration();
         initializeLanguagesList();
         setupListView();
 
         setupEventsListener();
 
         Log.d(TAG, "OnCreateSettingsActivity");
+
+    }
+
+    private void setupVideoDuration() {
+        int videoDurationMin = Integer.parseInt(getApplication().getVideoDurationMin());
+
+        switch (videoDurationMin) {
+            case -1:
+                rbDurationAll.setChecked(true);
+                break;
+            case 0:
+                rbDurationFG.setChecked(true);
+                break;
+            case 5 * 60:
+                rbDurationSG.setChecked(true);
+                break;
+            case 10 * 60:
+                rbDurationTG.setChecked(true);
+                break;
+            default:
+                rbDurationAll.setChecked(true);
+                break;
+        }
 
     }
 
@@ -199,7 +236,7 @@ public class SettingsFragment extends Fragment {
     }
 
 
-    private void testingModeSettings() {
+    private void setupTestingMode() {
         String mode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getTestingMode();
 
         if (mode.equals(getString(R.string.text_no_option)))
@@ -236,7 +273,7 @@ public class SettingsFragment extends Fragment {
 
     }
 
-    private void interfaceLanguageSettings() {
+    private void setupInterfaceLanguage() {
         User user = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getUser();
         if (user != null)
             if (user.interfaceLanguage.equals(LANGUAGE_ENGLISH))
@@ -245,7 +282,7 @@ public class SettingsFragment extends Fragment {
                 rbPolish.setChecked(true);
     }
 
-    private void interfaceModeSettings() {
+    private void setupInterfaceMode() {
         User user = getApplication().getUser();
         if (user != null)
             if (user.interfaceMode.equals(BEGINNER_INTERFACE_MODE))
@@ -280,22 +317,48 @@ public class SettingsFragment extends Fragment {
             getApplication().setTestingMode(getString(R.string.text_no_option));
 
 
+        //Video duration
+        int minDurationOld = Integer.parseInt(getApplication().getVideoDurationMin());
+        switch (rgVideoDuration.getCheckedRadioButtonId()) {
+            case R.id.rbDurationAll:
+                getApplication().setVideoDurationMin(-1);
+                getApplication().setVideoDurationMax(-1);
+                break;
+            case R.id.rbDurationFG:
+                getApplication().setVideoDurationMin(0);
+                getApplication().setVideoDurationMax(5 * 60);
+                break;
+            case R.id.rbDurationSG:
+                getApplication().setVideoDurationMin(5 * 60);
+                getApplication().setVideoDurationMax(10 * 60);
+                break;
+            case R.id.rbDurationTG:
+                getApplication().setVideoDurationMin(10 * 60);
+                getApplication().setVideoDurationMax(-1);
+                break;
+            default:
+                getApplication().setVideoDurationMin(-1);
+                getApplication().setVideoDurationMax(-1);
+        }
+
+        int minDurationNew = Integer.parseInt(getApplication().getVideoDurationMin());
+
+        boolean callAllTaskAgain = minDurationOld != minDurationNew;
+        //App interface language
         boolean restart = !userCached.interfaceLanguage.equals(userUpdated.interfaceLanguage)
                 || !selectedAudioLanguageCode.equals(userCached.audioLanguage)
                 || !selectedSubtitleLanguageCode.equals(userCached.subLanguage);
-//        boolean callAllTaskAgain = !selectedAudioLanguageCode.equals(userCached.audioLanguage) || !selectedSubtitleLanguageCode.equals(userCached.subLanguage);
-
 
         if (!userCached.interfaceLanguage.equals(userUpdated.interfaceLanguage))
             LocaleHelper.setLocale(getActivity(), userUpdated.interfaceLanguage);
 
 
-        updateUser(userUpdated, restart);
+        updateUser(userUpdated, restart, callAllTaskAgain);
 
     }
 
 
-    private void updateUser(User userUpdated, boolean restart) {
+    private void updateUser(User userUpdated, boolean restart, boolean callAllTaskAgain) {
         updateUserLiveData = mViewModel.updateUser(userUpdated);
 
         updateUserLiveData.observe(getViewLifecycleOwner(), response -> {
@@ -310,7 +373,7 @@ public class SettingsFragment extends Fragment {
 
                     Intent returnIntent = new Intent();
                     returnIntent.putExtra(INTENT_EXTRA_RESTART, restart);
-//                        returnIntent.putExtra(INTENT_EXTRA_CALL_TASKS, callAllTaskAgain);
+                    returnIntent.putExtra(INTENT_EXTRA_CALL_TASKS, callAllTaskAgain);
                     Objects.requireNonNull(getActivity()).setResult(RESULT_OK, returnIntent);
                     Objects.requireNonNull(getActivity()).finish();
 
@@ -331,10 +394,6 @@ public class SettingsFragment extends Fragment {
         });
     }
 
-
-    private boolean isChangesAudioSubVerified() {
-        return false;
-    }
 
     private void firebaseAnalyticsReportEvent(User user) {
         String mode = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getTestingMode();

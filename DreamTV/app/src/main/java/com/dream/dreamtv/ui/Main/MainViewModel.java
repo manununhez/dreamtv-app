@@ -33,5 +33,10 @@ class MainViewModel extends ViewModel {
     }
 
 
+    void updateTaskByCategory(String category) {
+        mRepository.updateTasksCategory(category);
+    }
+
+
 }
 

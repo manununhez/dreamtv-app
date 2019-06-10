@@ -75,6 +75,8 @@ public class Constants {
 
 
     //Network parameters
+    public static final String PARAM_MIN_VIDEO_DURATION = "min_duration";
+    public static final String PARAM_MAX_VIDEO_DURATION = "max_duration";
     public static final String PARAM_PAGE = "page";
     public static final String PARAM_TYPE = "type";
     public static final String PARAM_VIDEO_ID = "video_id";

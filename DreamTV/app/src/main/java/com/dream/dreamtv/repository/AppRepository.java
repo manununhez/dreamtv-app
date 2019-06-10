@@ -142,24 +142,25 @@ public class AppRepository {
     }
 
     public void updateTasksCategory(String category) {
+
         switch (category) {
             case TASKS_MY_LIST_CAT:
-                mNetworkDataSource.updateMyListTaskCategory();
+                mNetworkDataSource.fetchMyListTaskCategory();
                 break;
             case TASKS_FINISHED_CAT:
-                mNetworkDataSource.updateFinishedTaskCategory();
+                mNetworkDataSource.fetchFinishedTaskCategory();
                 break;
             case TASKS_CONTINUE_CAT:
-                mNetworkDataSource.updateContinueTaskCategory();
+                mNetworkDataSource.fetchContinueTaskCategory();
                 break;
             case TASKS_ALL_CAT:
-                mNetworkDataSource.updateAllTaskCategory();
+                mNetworkDataSource.fetchAllTaskCategory();
                 break;
             case TASKS_TEST_CAT:
-                mNetworkDataSource.updateTestTaskCategory();
+                mNetworkDataSource.fetchTestTaskCategory();
                 break;
             default:
-                mNetworkDataSource.updateAllTaskCategory();
+                mNetworkDataSource.fetchAllTaskCategory();
                 break;
         }
     }

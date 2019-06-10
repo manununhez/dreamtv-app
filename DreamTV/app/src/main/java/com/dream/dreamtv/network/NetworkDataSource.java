@@ -43,6 +43,8 @@ import static com.dream.dreamtv.utils.Constants.PARAM_EMAIL;
 import static com.dream.dreamtv.utils.Constants.PARAM_INTERFACE_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_INTERFACE_MODE;
 import static com.dream.dreamtv.utils.Constants.PARAM_LANG_CODE;
+import static com.dream.dreamtv.utils.Constants.PARAM_MAX_VIDEO_DURATION;
+import static com.dream.dreamtv.utils.Constants.PARAM_MIN_VIDEO_DURATION;
 import static com.dream.dreamtv.utils.Constants.PARAM_PAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_PASSWORD;
 import static com.dream.dreamtv.utils.Constants.PARAM_RATING;
@@ -203,13 +205,14 @@ public class NetworkDataSource {
      */
     public void syncData() {
         Log.d(TAG, "synchronizing data ...");
-        //We start by calling allTasks() -> continueTasks()->MyList()->Reasons()->videoTestsDetails
 
-        updateAllTaskCategory();
-        updateContinueTaskCategory();
-        updateMyListTaskCategory();
-        updateFinishedTaskCategory();
-        updateTestTaskCategory();
+        fetchAllTaskCategory();
+        fetchContinueTaskCategory();
+        fetchMyListTaskCategory();
+        fetchFinishedTaskCategory();
+
+        if (getApplication().getTestingMode().equals(mContext.getString(R.string.text_yes_option)))
+            fetchTestTaskCategory();
 
         fetchReasons();
 
@@ -218,23 +221,24 @@ public class NetworkDataSource {
 
     }
 
-    public void updateAllTaskCategory() {
+
+    public void fetchAllTaskCategory() {
         fetchTasksByCategory(TASKS_ALL_CAT, responseFromFetchAllTasks, 1);
     }
 
-    public void updateContinueTaskCategory() {
+    public void fetchContinueTaskCategory() {
         fetchTasksByCategory(TASKS_CONTINUE_CAT, responseFromFetchContinueTasks);
     }
 
-    public void updateMyListTaskCategory() {
+    public void fetchMyListTaskCategory() {
         fetchTasksByCategory(TASKS_MY_LIST_CAT, responseFromFetchMyListTasks);
     }
 
-    public void updateFinishedTaskCategory() {
+    public void fetchFinishedTaskCategory() {
         fetchTasksByCategory(TASKS_FINISHED_CAT, responseFromFetchFinishedTasks);
     }
 
-    public void updateTestTaskCategory() {
+    public void fetchTestTaskCategory() {
         fetchTasksByCategory(TASKS_TEST_CAT, responseFromFetchTestTasks);
     }
 
@@ -255,7 +259,7 @@ public class NetworkDataSource {
         Log.d(TAG, "login() Request URL: " + loginUri.toString() + " Paramaters: email=>" + email
                 + "; password=>" + password);
 
-        ResponseListener responseListener = new ResponseListener(mContext, false, false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "login() Response JSON: " + response);
@@ -307,7 +311,7 @@ public class NetworkDataSource {
         Log.d(TAG, "register() Request URL: " + registerUri.toString() + " Paramaters: email=>" + email
                 + "; password=>" + password);
 
-        ResponseListener responseListener = new ResponseListener(mContext, false, false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "register() Response JSON: " + response);
@@ -344,8 +348,7 @@ public class NetworkDataSource {
 
         Log.d(TAG, "fetchUserDetails() Request URL: " + userDetailsUri.toString());
 
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "fetchUserDetails() Response JSON: " + response);
@@ -404,8 +407,7 @@ public class NetworkDataSource {
                 + "; subLanguage=>" + user.subLanguage
                 + "; audioLanguage=>" + user.audioLanguage);
 
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "updateUser() Response JSON: " + response);
@@ -453,8 +455,7 @@ public class NetworkDataSource {
         Log.d(TAG, "fetchReasons() Request URL: " + errorsUri.toString());
 
 
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "fetchReasons() Response JSON: " + response);
@@ -488,8 +489,7 @@ public class NetworkDataSource {
         Log.d(TAG, "fetchVideoTestsDetails() Request URL: " + videoTestsUri.toString());
 
 
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "fetchVideoTestsDetails() Response JSON: " + response);
@@ -543,8 +543,7 @@ public class NetworkDataSource {
                 + "; " + PARAM_VERSION + "=>" + version);
 
 
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "fetchSubtitle() Response JSON: " + response);
@@ -591,17 +590,14 @@ public class NetworkDataSource {
         if (page == -1) return;
 
 
-        Uri tasksUri = Uri.parse(URL_BASE.concat(Urls.TASKS_BY_CATEGORY.value)).buildUpon()
-                .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
-                .appendQueryParameter(PARAM_TYPE, paramType)
-                .build();
+        Uri tasksUri = taskUrlFormatter(URL_BASE.concat(Urls.TASKS_BY_CATEGORY.value), paramType, page);
+
 
         Log.d(TAG, "fetchTasksByCategory() Request URL: " + tasksUri.toString() + " Params: " + PARAM_PAGE + "=>" + page
                 + "; " + PARAM_TYPE + "=>" + paramType);
 
 
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 TypeToken type = new TypeToken<JsonResponseBaseBean<TasksList>>() {
@@ -646,6 +642,78 @@ public class NetworkDataSource {
         mExecutors.networkIO().execute(() -> requestString(Method.GET, tasksUri.toString(), null, responseListener));
     }
 
+
+    private Uri taskUrlFormatter(String uriString, String paramType) {
+        int minDuration = Integer.parseInt(getApplication().getVideoDurationMin());
+        int maxDuration = Integer.parseInt(getApplication().getVideoDurationMax());
+
+        Uri uri;
+
+        if (minDuration > 0 && maxDuration > 0)
+            uri = Uri.parse(uriString).buildUpon()
+                    .appendQueryParameter(PARAM_TYPE, paramType)
+                    .appendQueryParameter(PARAM_MIN_VIDEO_DURATION, String.valueOf(minDuration))
+                    .appendQueryParameter(PARAM_MAX_VIDEO_DURATION, String.valueOf(maxDuration))
+                    .build();
+
+        else if (minDuration > 0)
+            uri = Uri.parse(uriString).buildUpon()
+                    .appendQueryParameter(PARAM_TYPE, paramType)
+                    .appendQueryParameter(PARAM_MIN_VIDEO_DURATION, String.valueOf(minDuration))
+                    .build();
+
+        else if (maxDuration > 0)
+            uri = Uri.parse(uriString).buildUpon()
+                    .appendQueryParameter(PARAM_TYPE, paramType)
+                    .appendQueryParameter(PARAM_MAX_VIDEO_DURATION, String.valueOf(maxDuration))
+                    .build();
+
+        else
+            uri = Uri.parse(uriString).buildUpon()
+                    .appendQueryParameter(PARAM_TYPE, paramType)
+                    .build();
+
+
+        return uri;
+    }
+
+    private Uri taskUrlFormatter(String uriString, String paramType, int page) {
+        int minDuration = Integer.parseInt(getApplication().getVideoDurationMin());
+        int maxDuration = Integer.parseInt(getApplication().getVideoDurationMax());
+
+        Uri uri;
+
+        if (minDuration > 0 && maxDuration > 0)
+            uri = Uri.parse(uriString).buildUpon()
+                    .appendQueryParameter(PARAM_TYPE, paramType)
+                    .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
+                    .appendQueryParameter(PARAM_MIN_VIDEO_DURATION, String.valueOf(minDuration))
+                    .appendQueryParameter(PARAM_MAX_VIDEO_DURATION, String.valueOf(maxDuration))
+                    .build();
+
+        else if (minDuration > 0)
+            uri = Uri.parse(uriString).buildUpon()
+                    .appendQueryParameter(PARAM_TYPE, paramType)
+                    .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
+                    .appendQueryParameter(PARAM_MIN_VIDEO_DURATION, String.valueOf(minDuration))
+                    .build();
+
+        else if (maxDuration > 0)
+            uri = Uri.parse(uriString).buildUpon()
+                    .appendQueryParameter(PARAM_TYPE, paramType)
+                    .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
+                    .appendQueryParameter(PARAM_MAX_VIDEO_DURATION, String.valueOf(maxDuration))
+                    .build();
+
+        else
+            uri = Uri.parse(uriString).buildUpon()
+                    .appendQueryParameter(PARAM_TYPE, paramType)
+                    .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
+                    .build();
+
+        return uri;
+    }
+
     /**
      * fetchTasksByCategory used to get Tasks by categories
      *
@@ -657,14 +725,12 @@ public class NetworkDataSource {
 
         responseMutable.setValue(Resource.loading(null));
 
-        Uri tasksUri = Uri.parse(URL_BASE.concat(Urls.TASKS_BY_CATEGORY.value)).buildUpon()
-                .appendQueryParameter(PARAM_TYPE, paramType)
-                .build();
+        Uri tasksUri = taskUrlFormatter(URL_BASE.concat(Urls.TASKS_BY_CATEGORY.value), paramType);
+
 
         Log.d(TAG, "fetchTasksByCategory() Request URL: " + tasksUri.toString() + " Params: " + PARAM_TYPE + "=>" + paramType);
 
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
@@ -725,8 +791,7 @@ public class NetworkDataSource {
                 + "; " + PARAM_SUB_VERSION + " => " + mSubtitleVersion);
 
 
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "createUserTask() Response JSON: " + response);
@@ -829,8 +894,7 @@ public class NetworkDataSource {
                 + "; " + PARAM_SUB_LANGUAGE_CONFIG + "=>" + subLanguageConfig
                 + "; " + PARAM_AUDIO_LANGUAGE_CONFIG + "=>" + audioLanguageConfig);
 
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
 
@@ -867,8 +931,7 @@ public class NetworkDataSource {
 
         Log.d(TAG, "removeTaskFromList() Request URL: " + removeFromListUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + taskId);
 
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
 
@@ -910,8 +973,7 @@ public class NetworkDataSource {
         Log.d(TAG, "updateUserTask() Request URL: " + userTaskUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + userTask.getTaskId()
                 + "; " + PARAM_SUB_VERSION + " => " + userTask.getSubtitleVersion());
 
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
 
@@ -975,8 +1037,7 @@ public class NetworkDataSource {
                     + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
 
 
-        ResponseListener responseListener = new ResponseListener(mContext, false,
-                false, "") {
+        ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
 
@@ -989,7 +1050,6 @@ public class NetworkDataSource {
                     Log.d(TAG, "saveErrors() Response JSON: " + response);
                 else
                     Log.d(TAG, "updateErrors() Response JSON: " + response);
-
 
 
                 UserTaskError[] userTaskErrors = jsonResponse.data;
@@ -1020,7 +1080,6 @@ public class NetworkDataSource {
 
 
     /**
-     *
      * @return {@link LiveData} representing the response of the request requestCurrentWeathersByCityIDs()
      */
     public LiveData<Resource<TasksList>> responseFromFetchAllTasks() {

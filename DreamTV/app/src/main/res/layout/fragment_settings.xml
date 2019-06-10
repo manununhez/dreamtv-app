@@ -80,61 +80,92 @@
                 android:layout_marginTop="10dp"
                 android:background="@color/white" />
 
-            <!--<LinearLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:baselineAligned="false"-->
-            <!--android:orientation="horizontal"-->
-            <!--android:weightSum="1">-->
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_weight="0.5"
-                android:orientation="vertical">
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:weightSum="1">
 
-                <TextView
-                    android:id="@+id/tvReasonDialogInterfaceTitle"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/title_reason_dialog_interface_settings"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <RadioGroup
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
+                    android:layout_weight="0.5"
                     android:orientation="vertical">
 
-                    <RadioButton
-                        android:id="@+id/rbAdvanced"
-                        android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/tvReasonDialogInterfaceTitle"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/rb_option_text_advanced"
-                        android:textColor="@color/white" />
+                        android:text="@string/title_reason_dialog_interface_settings"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
 
-                    <RadioButton
-                        android:id="@+id/rbBeginner"
-                        android:layout_width="wrap_content"
+                    <RadioGroup
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/rb_option_text_beginner"
-                        android:textColor="@color/white" />
-                </RadioGroup>
+                        android:layout_marginTop="5dp"
+                        android:orientation="vertical">
+
+                        <RadioButton
+                            android:id="@+id/rbAdvanced"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/rb_option_text_advanced"
+                            android:textColor="@color/white" />
+
+                        <RadioButton
+                            android:id="@+id/rbBeginner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/rb_option_text_beginner"
+                            android:textColor="@color/white" />
+                    </RadioGroup>
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_weight="0.5"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvTestingModeTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_testing_mode_settings"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <RadioGroup
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:orientation="vertical">
+
+                        <RadioButton
+                            android:id="@+id/rbYes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/rb_option_text_yes"
+                            android:textColor="@color/white" />
+
+                        <RadioButton
+                            android:id="@+id/rbNot"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/rb_option_text_not"
+                            android:textColor="@color/white" />
+                    </RadioGroup>
+                </LinearLayout>
             </LinearLayout>
-
-
-            <!--<View-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="1dp"-->
-            <!--android:layout_marginTop="25dp"-->
-            <!--android:layout_marginBottom="5dp"-->
-            <!--android:background="@color/white" />-->
-
-
-            <!--</LinearLayout>-->
 
             <View
                 android:layout_width="match_parent"
@@ -144,38 +175,57 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_marginTop="5dp"
                 android:layout_weight="0.5"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tvTestingModeTitle"
+                    android:id="@+id/tvVideoDurationTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/title_testing_mode_settings"
+                    android:text="@string/title_video_duration_settings"
                     android:textColor="@color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <RadioGroup
-                    android:layout_width="wrap_content"
+                    android:id="@+id/rgVideoDuration"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
 
                     <RadioButton
-                        android:id="@+id/rbYes"
+                        android:id="@+id/rbDurationAll"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/rb_option_text_yes"
+                        android:checked="true"
+                        android:text="all"
                         android:textColor="@color/white" />
 
                     <RadioButton
-                        android:id="@+id/rbNot"
+                        android:id="@+id/rbDurationFG"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/rb_option_text_not"
+                        android:layout_marginStart="3dp"
+                        android:text="0 - 5 min"
+                        android:textColor="@color/white" />
+
+                    <RadioButton
+                        android:id="@+id/rbDurationSG"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="3dp"
+                        android:text="5 - 10 min"
+                        android:textColor="@color/white" />
+
+                    <RadioButton
+                        android:id="@+id/rbDurationTG"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="3dp"
+                        android:text="10+ min"
                         android:textColor="@color/white" />
                 </RadioGroup>
             </LinearLayout>

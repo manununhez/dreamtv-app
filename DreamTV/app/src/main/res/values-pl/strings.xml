@@ -20,9 +20,10 @@
     <string name="title_audio">Dźwięk: </string>
     <string name="title_subtitle">Napisy: </string>
     <string name="title_video_settings">Ustawienia filmu</string>
-    <string name="title_text_language_settings">Język aplikacji</string>
+    <string name="title_text_language_settings">Język app</string>
     <string name="title_reason_dialog_interface_settings">Interfejs</string>
     <string name="title_testing_mode_settings">Tryb testowy</string>
+    <string name="title_video_duration_settings">Czas trwania wideo</string>
     <string name="title_share_mode_settings">Sprawdź błędy znalezione przez innych</string>
     <string name="title_video_languages_settings">Języki wideo</string>
     <string name="title_reasons_dialog">Co tu jest nie tak?</string>

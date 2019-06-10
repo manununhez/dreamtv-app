@@ -21,11 +21,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
-import androidx.leanback.widget.DiffCallback;
 import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.ListRowPresenter;
@@ -57,6 +55,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
+import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_CALL_TASKS;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.SETTINGS_CAT;
@@ -169,7 +168,6 @@ public class MainFragment extends BrowseSupportFragment {
 
         reorderRowSettings();
 
-
         allTaskLiveData = mViewModel.requestTasksByCategory(TASKS_ALL_CAT);
         allTaskLiveData.removeObservers(getViewLifecycleOwner());
         allTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
@@ -224,7 +222,7 @@ public class MainFragment extends BrowseSupportFragment {
                 dismissLoading();
             }
 
-//     TODO       throw new RuntimeException("Get list sorted of continued tasks");
+            // TODO throw new RuntimeException("Get list sorted of continued tasks");
 
         });
 
@@ -252,7 +250,7 @@ public class MainFragment extends BrowseSupportFragment {
                 dismissLoading();
             }
 
-//       TODO     throw new RuntimeException("Get list sorted of finished tasks");
+            // TODO throw new RuntimeException("Get list sorted of finished tasks");
 
         });
 
@@ -281,16 +279,10 @@ public class MainFragment extends BrowseSupportFragment {
                 dismissLoading();
             }
 
-//  TODO          throw new RuntimeException("Get list sorted of my list tasks");
+            //  TODO throw new RuntimeException("Get list sorted of my list tasks");
 
         });
 
-        if (getApplication().getTestingMode().equals(getString(R.string.text_yes_option)))
-            callTestTasks();
-
-    }
-
-    private void callTestTasks() {
         testTaskLiveData = mViewModel.requestTasksByCategory(TASKS_TEST_CAT);
         testTaskLiveData.removeObservers(getViewLifecycleOwner());
         testTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
@@ -317,6 +309,7 @@ public class MainFragment extends BrowseSupportFragment {
             }
 
         });
+
     }
 
 
@@ -368,17 +361,17 @@ public class MainFragment extends BrowseSupportFragment {
         }
 
 
-        DiffCallback<Card> diffCallback = new DiffCallback<Card>() {
-            @Override
-            public boolean areItemsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
-                return oldItem.getTask().taskId == newItem.getTask().taskId;
-            }
-
-            @Override
-            public boolean areContentsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
-                return Objects.equals(oldItem.getTask(), newItem.getTask());
-            }
-        };
+//        DiffCallback<Card> diffCallback = new DiffCallback<Card>() {
+//            @Override
+//            public boolean areItemsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
+//                return oldItem.getTask().taskId == newItem.getTask().taskId;
+//            }
+//
+//            @Override
+//            public boolean areContentsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
+//                return Objects.equals(oldItem.getTask(), newItem.getTask());
+//            }
+//        };
 
 
         ListRow listRow;
@@ -404,20 +397,20 @@ public class MainFragment extends BrowseSupportFragment {
         }
 
 
-        int indexOfRow = mRowsAdapter.indexOf(listRow);
+//        int indexOfRow = mRowsAdapter.indexOf(listRow);
 
         ArrayObjectAdapter arrayObjectAdapter = ((ArrayObjectAdapter) listRow.getAdapter());
 
-        if (indexOfRow != -1)
-            arrayObjectAdapter.setItems(cards, diffCallback);
-        else {
+//        if (indexOfRow != -1)
+//            arrayObjectAdapter.setItems(cards, diffCallback);
+//        else {
 
-            arrayObjectAdapter.clear(); //clear row before add new ones
+        arrayObjectAdapter.clear(); //clear row before add new ones
 
-            arrayObjectAdapter.addAll(arrayObjectAdapter.size(), cards);
+        arrayObjectAdapter.addAll(arrayObjectAdapter.size(), cards);
 
-            mRowsAdapter.add(0, listRow);
-        }
+        mRowsAdapter.add(0, listRow);
+//        }
 
         setAdapter(mRowsAdapter);
 
@@ -490,20 +483,25 @@ public class MainFragment extends BrowseSupportFragment {
                     Log.d(TAG, "REQUEST_SETTINGS - Different language. Updating screen.");
                 } else {
 
-//                    boolean callTasks = data.getBooleanExtra(INTENT_EXTRA_CALL_TASKS, false);
-//                    if (callTasks) {
-//                        populateScreen();
-//                        Log.d(TAG, "REQUEST_SETTINGS - Call all Tasks again.");
-//                    } else {
-                    //we check is we are not in testing mode. If the language screen does not recreate the activity,
-                    // we manually delete the row testing
-                    if (getApplication().getTestingMode().equals(getString(R.string.text_no_option)))
-                        verifyRowExistenceAndRemove(rowTestTasks);
-                    else {
-                        callTestTasks();
-                        Log.d(TAG, "REQUEST_SETTINGS - Call only test Tasks again.");
+                    boolean callAllCategoriesTasks = data.getBooleanExtra(INTENT_EXTRA_CALL_TASKS, false);
+                    if (callAllCategoriesTasks) {
+                        mViewModel.updateTaskByCategory(TASKS_ALL_CAT);
+                        mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT);
+                        mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT);
+                        mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT);
+                        mViewModel.updateTaskByCategory(TASKS_TEST_CAT);
+                        Log.d(TAG, "REQUEST_SETTINGS - Call all Tasks again.");
+                    } else {
+                        //we check is we are not in testing mode. If the language screen does not recreate the activity,
+                        // we manually delete the row testing
+                        if (getApplication().getTestingMode().equals(getString(R.string.text_no_option)))
+                            verifyRowExistenceAndRemove(rowTestTasks);
+                        else {
+//                            callTestTasks();
+                            mViewModel.updateTaskByCategory(TASKS_TEST_CAT);
+                            Log.d(TAG, "REQUEST_SETTINGS - Call only test Tasks again.");
+                        }
                     }
-//                    }
                 }
             }
         }

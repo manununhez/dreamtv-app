@@ -37,7 +37,7 @@ public class Video implements Parcelable {
     @SerializedName("description")
     public String description;
     @SerializedName("duration")
-    public int duration;
+    public int duration; //secs
     @SerializedName("thumbnail")
     public String thumbnail;
     @SerializedName("team")

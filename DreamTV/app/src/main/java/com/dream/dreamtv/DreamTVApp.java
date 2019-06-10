@@ -106,4 +106,20 @@ public class DreamTVApp extends Application {
         String videoTests = gson.toJson(Arrays.asList(videoTestsList));
         SharedPreferenceUtils.save(this, getString(R.string.video_tests_preferences), videoTests);
     }
+
+    public String getVideoDurationMin() {
+        return SharedPreferenceUtils.getValue(this, getString(R.string.video_duration_min_preferences), "-1");
+    }
+
+    public void setVideoDurationMin(int minDuration) {
+        SharedPreferenceUtils.save(this, getString(R.string.video_duration_min_preferences), String.valueOf(minDuration));
+    }
+
+    public String getVideoDurationMax() {
+        return SharedPreferenceUtils.getValue(this, getString(R.string.video_duration_max_preferences), "-1");
+    }
+
+    public void setVideoDurationMax(int maxDuration) {
+        SharedPreferenceUtils.save(this, getString(R.string.video_duration_max_preferences), String.valueOf(maxDuration));
+    }
 }

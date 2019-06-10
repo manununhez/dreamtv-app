@@ -27,15 +27,17 @@
     <string name="reasons_preferences" translatable="false">reasons_preferences</string>
     <string name="testing_mode_preferences" translatable="false">testing_mode_preferences</string>
     <string name="video_tests_preferences" translatable="false">video_tests_preferences</string>
-
+    <string name="video_duration_min_preferences" translatable="false">video_duration_min_preferences</string>
+    <string name="video_duration_max_preferences" translatable="false">video_duration_max_preferences</string>
 
     <!--titles-->
     <string name="title_audio">Audio: </string>
     <string name="title_subtitle">Subtitles: </string>
     <string name="title_video_settings">Video Settings</string>
-    <string name="title_text_language_settings">Application language</string>
+    <string name="title_text_language_settings">App language</string>
     <string name="title_reason_dialog_interface_settings">Interface</string>
     <string name="title_testing_mode_settings">Testing mode</string>
+    <string name="title_video_duration_settings">Video duration</string>
     <string name="title_share_mode_settings">Verify mistakes found by others</string>
     <string name="title_video_languages_settings">Video languages</string>
     <string name="title_reasons_dialog">What is wrong here?</string>
