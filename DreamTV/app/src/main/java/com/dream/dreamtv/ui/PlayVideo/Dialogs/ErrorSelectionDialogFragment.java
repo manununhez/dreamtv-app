@@ -60,7 +60,7 @@ import static com.dream.dreamtv.utils.Constants.ARG_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.ARG_SUBTITLE_ORIGINAL_POSITION;
 import static com.dream.dreamtv.utils.Constants.ARG_USER_TASK_ERROR;
 import static com.dream.dreamtv.utils.Constants.ARG_USER_TASK_ERROR_COMPLETE;
-import static com.dream.dreamtv.utils.Constants.BEGINNER_INTERFACE_MODE;
+import static com.dream.dreamtv.utils.Constants.PREF_BEGINNER_INTERFACE_MODE;
 
 
 public class ErrorSelectionDialogFragment extends DialogFragment {
@@ -338,10 +338,10 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
         Log.d(TAG, errorReasonList.toString());
 
-        //Interface mode settings
+        //Interface mode preferences
         User user = getApplication().getUser();
 
-        if (user.interfaceMode.equals(BEGINNER_INTERFACE_MODE))
+        if (user.interfaceMode.equals(PREF_BEGINNER_INTERFACE_MODE))
             setupReasonsRadioGroup();
         else
             setupReasonsCheck();
@@ -445,9 +445,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             btnSave.setVisibility(View.GONE);
             btnSaveChanges.setVisibility(View.VISIBLE);
 
-            //Interface mode settings
+            //Interface mode preferences
             User user = getApplication().getUser();
-            if (user.interfaceMode.equals(BEGINNER_INTERFACE_MODE)) { //BEGINNER_INTERFACE_MODE
+            if (user.interfaceMode.equals(PREF_BEGINNER_INTERFACE_MODE)) { //PREF_BEGINNER_INTERFACE_MODE
                 if (errors.size() == 1) {
                     for (int i = 0; i < rgReasons.getChildCount(); i++) {
                         RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
@@ -499,9 +499,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             btnSave.setVisibility(View.VISIBLE);
             btnSaveChanges.setVisibility(View.GONE);
 
-            //Interface mode settings
+            //Interface mode preferences
             User user = getApplication().getUser();
-            if (user.interfaceMode.equals(BEGINNER_INTERFACE_MODE)) { //BEGINNER MODE
+            if (user.interfaceMode.equals(PREF_BEGINNER_INTERFACE_MODE)) { //BEGINNER MODE
                 for (int i = 0; i < rgReasons.getChildCount(); i++) {
                     RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
                     radioButton.setChecked(false);
@@ -525,9 +525,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
 
     private UserTaskError prepareReasonsToSave() {
-        //Interface mode settings. We retrieve the selected value. The advanced mode is already in selectedReasons
+        //Interface mode preferences. We retrieve the selected value. The advanced mode is already in selectedReasons
         User user = ((DreamTVApp) getActivity().getApplication()).getUser();
-        if (user.interfaceMode.equals(Constants.BEGINNER_INTERFACE_MODE)) {
+        if (user.interfaceMode.equals(Constants.PREF_BEGINNER_INTERFACE_MODE)) {
             for (int i = 0; i < rgReasons.getChildCount(); i++) {
                 RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
 
@@ -622,7 +622,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             holder.tvText.setText(Html.fromHtml(values.get(position).text));
 
 
-//            if (userInterfaceMode.equals(Constants.ADVANCED_INTERFACE_MODE)) { //Advanced MODE
+//            if (userInterfaceMode.equals(Constants.PREF_ADVANCED_INTERFACE_MODE)) { //Advanced MODE
 //                holder.tvTime.setText(videoCurrentReadVeloc(values.get(position).text, (values.get(position).getEnd() - values.get(position).getStart())));
 //
 //            }

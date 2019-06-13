@@ -5,12 +5,23 @@ package com.dream.dreamtv.utils;
  */
 
 public class Constants {
-    public static final String LANGUAGE_ENGLISH = "en";
-    public static final String LANGUAGE_POLISH = "pl";
+    public static final String PREF_BEGINNER_INTERFACE_MODE = "beginner";
+    public static final String PREF_ADVANCED_INTERFACE_MODE = "advanced";
+    public static final String PREF_ABR_CHINESE = "zh";
+    public static final String PREF_ABR_ENGLISH = "en";
+    public static final String PREF_ABR_SPANISH = "es";
+    public static final String PREF_ABR_ARABIC = "ar";
+    public static final String PREF_ABR_FRENCH = "fr";
+    public static final String PREF_ABR_POLISH = "pl";
+    public static final String PREF_NONE_OPTIONS_CODE = "NN";
+    public static final String PREF_SUBTITLE_SMALL_SIZE = "25";
+    public static final String PREF_SUBTITLE_MEDIUM_SIZE = "30";
+    public static final String PREF_SUBTITLE_LARGE_SIZE = "40";
+    public static final String PREF_VIDEO_DURATION_ALL = "-1";
+    public static final String PREF_VIDEO_DURATION_MIN_0 = "0";
+    public static final String PREF_VIDEO_DURATION_MIN_5 = "300";
+    public static final String PREF_VIDEO_DURATION_MIN_10 = "600";
 
-    public static final String NONE_OPTIONS_CODE = "NN";
-    public static final String BEGINNER_INTERFACE_MODE = "beginner";
-    public static final String ADVANCED_INTERFACE_MODE = "advanced";
 
     public static final String ARG_SUBTITLE = "ARG_SUBTITLE";
     public static final String ARG_SUBTITLE_ORIGINAL_POSITION = "ARG_SUBTITLE_ORIGINAL_POSITION";
@@ -21,18 +32,11 @@ public class Constants {
     public static final String INTENT_TASK = "INTENT_TASK";
     public static final String INTENT_SUBTITLE = "INTENT_SUBTITLE";
     public static final String INTENT_USER_TASK = "INTENT_USER_TASK";
-    public static final String INTENT_EXTRA_CALL_TASKS = "callTasks";
+    public static final String INTENT_EXTRA_CALL_TASKS = "INTENT_EXTRA_CALL_TASKS";
+    public static final String INTENT_EXTRA_USER_UPDATED = "INTENT_EXTRA_USER_UPDATED";
     public static final String INTENT_EXTRA_RESTART = "restart";
     public static final String INTENT_PLAY_FROM_BEGINNING = "from_beginning";
     public static final String INTENT_CATEGORY = "INTENT_CATEGORY";
-
-
-    public static final String ABR_CHINESE = "zh";
-    public static final String ABR_ENGLISH = "en";
-    public static final String ABR_SPANISH = "es";
-    public static final String ABR_ARABIC = "ar";
-    public static final String ABR_FRENCH = "fr";
-    public static final String ABR_POLISH = "pl";
 
     //Types of tasks and categories
     public static final String TASKS_ALL_CAT = "all";
@@ -40,7 +44,7 @@ public class Constants {
     public static final String TASKS_FINISHED_CAT = "finished";
     public static final String TASKS_MY_LIST_CAT = "myList";
     public static final String TASKS_TEST_CAT = "test";
-    public static final String SETTINGS_CAT = "settings";
+    public static final String SETTINGS_CAT = "preferences";
 
     public static final int BACKGROUND_UPDATE_DELAY = 300;
 

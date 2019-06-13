@@ -33,6 +33,7 @@ import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.preference.PreferenceManager;
 
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
@@ -43,20 +44,28 @@ import com.dream.dreamtv.model.TasksList;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.presenter.IconCardCustomPresenter;
 import com.dream.dreamtv.presenter.SideInfoCardPresenter;
-import com.dream.dreamtv.ui.Settings.SettingsActivity;
+import com.dream.dreamtv.ui.Preferences.PreferencesActivity;
 import com.dream.dreamtv.ui.VideoDetails.VideoDetailsActivity;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.google.android.gms.common.AccountPicker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_AUDIO_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_MODE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUB_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TESTING_MODE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN;
 import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_CALL_TASKS;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
+import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_USER_UPDATED;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.SETTINGS_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_ALL_CAT;
@@ -86,6 +95,8 @@ public class MainFragment extends BrowseSupportFragment {
     private LiveData<Resource<TasksList>> finishedTaskLiveData;
     private LiveData<Resource<TasksList>> myListTaskLiveData;
     private LiveData<Resource<TasksList>> testTaskLiveData;
+    private FirebaseAnalytics mFirebaseAnalytics;
+    private LiveData<Resource<User>> updateUserLiveData;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -95,6 +106,9 @@ public class MainFragment extends BrowseSupportFragment {
 //        // Get the ViewModel from the factory
         MainViewModelFactory factory = InjectorUtils.provideMainViewModelFactory(Objects.requireNonNull(getActivity()));
         mViewModel = ViewModelProviders.of(this, factory).get(MainViewModel.class);
+
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
 
         setupUIElements();
 
@@ -140,7 +154,6 @@ public class MainFragment extends BrowseSupportFragment {
         mViewModel.login(email, "com.google"); //TODO change password
     }
 
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -161,6 +174,8 @@ public class MainFragment extends BrowseSupportFragment {
         if (testTaskLiveData != null)
             testTaskLiveData.removeObservers(getViewLifecycleOwner());
 
+        if (updateUserLiveData != null)
+            updateUserLiveData.removeObservers(getViewLifecycleOwner());
 
     }
 
@@ -421,7 +436,7 @@ public class MainFragment extends BrowseSupportFragment {
 
         int lastIndexOf = mRowsAdapter.indexOf(rowSettings);
 
-        if (lastIndexOf == -1) //If settings already exists, first we remove it and then add it to the end of the list
+        if (lastIndexOf == -1) //If preferences already exists, first we remove it and then add it to the end of the list
             mRowsAdapter.add(rowSettings);
 
         setAdapter(mRowsAdapter);
@@ -462,6 +477,48 @@ public class MainFragment extends BrowseSupportFragment {
         setOnItemViewClickedListener(new ItemViewClickedListener());
     }
 
+    private void firebaseAnalyticsSettingsReportEvent(User user) {
+        boolean testingMode = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()))
+                .getBoolean(getActivity().getString(R.string.pref_key_testing_mode), false);
+
+        Bundle bundle = new Bundle();
+
+        if (testingMode)
+            bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, true);
+        else
+            bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, false);
+
+        //User Settings Saved - Analytics Report Event
+        bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
+        bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
+        bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
+        bundle.putString(FIREBASE_KEY_INTERFACE_LANGUAGE, user.interfaceLanguage);
+        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN, bundle);
+    }
+
+    private void updateUser(User userUpdated) {
+        updateUserLiveData = mViewModel.updateUser(userUpdated);
+
+        updateUserLiveData.observe(getViewLifecycleOwner(), response -> {
+            if (response.status.equals(Resource.Status.SUCCESS)) {
+                Log.d(TAG, "Response from userUpdate");
+                if (response.data != null) {
+                    Log.d(TAG, response.data.toString());
+
+                    firebaseAnalyticsSettingsReportEvent(userUpdated);
+                }
+            } else if (response.status.equals(Resource.Status.ERROR)) {
+                //TODO do something error
+                if (response.message != null)
+                    Log.d(TAG, response.message);
+                else
+                    Log.d(TAG, "Status ERROR");
+            }
+
+
+        });
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -475,6 +532,8 @@ public class MainFragment extends BrowseSupportFragment {
                 requestLogin(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
 
             } else if (requestCode == REQUEST_SETTINGS) {
+                updateUser(data.getParcelableExtra(INTENT_EXTRA_USER_UPDATED));
+
                 boolean restart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
 
                 if (restart) {
@@ -494,7 +553,10 @@ public class MainFragment extends BrowseSupportFragment {
                     } else {
                         //we check is we are not in testing mode. If the language screen does not recreate the activity,
                         // we manually delete the row testing
-                        if (getApplication().getTestingMode().equals(getString(R.string.text_no_option)))
+                        boolean testingMode = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()))
+                                .getBoolean(getActivity().getString(R.string.pref_key_testing_mode), false);
+
+                        if (!testingMode)
                             verifyRowExistenceAndRemove(rowTestTasks);
                         else {
 //                            callTestTasks();
@@ -524,6 +586,7 @@ public class MainFragment extends BrowseSupportFragment {
         loadingDialog.show();
     }
 
+
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
@@ -532,8 +595,10 @@ public class MainFragment extends BrowseSupportFragment {
             if (item instanceof Card) {
                 Card value = (Card) item;
                 if (value.getTitle().equals(SETTINGS_CAT)) {
-                    Intent intent = new Intent(getActivity(), SettingsActivity.class);
+//                    Intent intent = new Intent(getActivity(), SettingsActivity.class);
+                    Intent intent = new Intent(getActivity(), PreferencesActivity.class);
                     startActivityForResult(intent, REQUEST_SETTINGS);
+//                    startActivity(intent);
                 } else {
                     Task task = value.getTask();
 

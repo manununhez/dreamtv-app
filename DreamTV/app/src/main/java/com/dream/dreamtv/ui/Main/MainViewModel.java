@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.TasksList;
+import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.repository.AppRepository;
 
 class MainViewModel extends ViewModel {
@@ -16,7 +17,6 @@ class MainViewModel extends ViewModel {
         mRepository = appRepository;
 
     }
-
 
     void login(String email, String password) {
         //TODO login and transformation according to user data and call initialize syncData
@@ -37,6 +37,9 @@ class MainViewModel extends ViewModel {
         mRepository.updateTasksCategory(category);
     }
 
+    LiveData<Resource<User>> updateUser(User userData) {
+        return mRepository.updateUser(userData);
+    }
 
 }
 

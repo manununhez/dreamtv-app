@@ -21,6 +21,22 @@ public class SharedPreferenceUtils {
         editor.apply();
     }
 
+    public static void save(Context context, String key, int value) {
+        SharedPreferences preferences = context.getSharedPreferences(context.getPackageName(),
+                MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(key, value);
+        editor.apply();
+    }
+
+    public static void save(Context context, String key, boolean value) {
+        SharedPreferences preferences = context.getSharedPreferences(context.getPackageName(),
+                MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(key, value);
+        editor.apply();
+    }
+
     public static String getValue(Context context, String key) {
         SharedPreferences preferences = context.getSharedPreferences(context.getPackageName(),
                 MODE_PRIVATE);
@@ -31,6 +47,12 @@ public class SharedPreferenceUtils {
         SharedPreferences preferences = context.getSharedPreferences(context.getPackageName(),
                 MODE_PRIVATE);
         return preferences.getString(key, defaultValue);
+    }
+
+    public static boolean getValue(Context context, String key, boolean defaultValue) {
+        SharedPreferences preferences = context.getSharedPreferences(context.getPackageName(),
+                MODE_PRIVATE);
+        return preferences.getBoolean(key, defaultValue);
     }
 
     public static void clearSharedPreference(Context context) {

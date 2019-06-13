@@ -15,6 +15,7 @@
     <color name="black_light_2">#0f414141</color>
     <color name="white">#FFFFFF</color>
     <color name="default_background">#3d3d3d</color>
+    <color name="settings_background">#00695C</color>
 
 
 </resources>

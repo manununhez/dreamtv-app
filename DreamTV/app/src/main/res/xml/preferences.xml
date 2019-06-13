@@ -1,0 +1,75 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:title="Settings">
+
+    <PreferenceCategory android:title="@string/pref_title_app_settings">
+
+        <ListPreference
+            android:defaultValue="pl"
+            android:dialogTitle="@string/pref_title_app_language_dialog"
+            android:entries="@array/listAppLanguages"
+            android:entryValues="@array/listAppLanguagesValues"
+            android:key="@string/pref_key_list_app_languages"
+            android:title="@string/pref_title_text_language_settings"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="beginner"
+            android:dialogTitle="@string/pref_title_interface_mode_dialog"
+            android:entries="@array/listInterfaceMode"
+            android:entryValues="@array/listInterfaceModeValues"
+            android:key="@string/pref_key_list_interface_mode"
+            android:title="@string/pref_title_reason_dialog_interface_settings"
+            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreference
+            android:key="@string/pref_key_testing_mode"
+            android:summary="@string/pref_title_testing_mode_settings_description"
+            android:title="@string/pref_title_testing_mode_settings" />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory android:title="@string/pref_title_video_settings">
+
+        <ListPreference
+            android:defaultValue="pl"
+            android:dialogTitle="@string/pref_title_audio_language_dialog"
+            android:entries="@array/listAudioLanguages"
+            android:entryValues="@array/listAudioLanguagesValues"
+            android:key="@string/pref_key_list_audio_languages"
+            android:title="@string/pref_title_audio"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="en"
+            android:dialogTitle="@string/pref_title_subtitle_language_dialog"
+            android:entries="@array/listSubtitleLanguages"
+            android:entryValues="@array/listSubtitleLanguagesValues"
+            android:key="@string/pref_key_list_subtitle_languages"
+            android:title="@string/pref_title_subtitle"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="all"
+            android:dialogTitle="@string/pref_title_video_duration_dialog"
+            android:entries="@array/listVideoDuration"
+            android:entryValues="@array/listVideoDurationValues"
+            android:key="@string/pref_key_video_duration"
+            android:title="@string/pref_title_video_duration_settings"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_title_subtitle_settings">
+
+        <ListPreference
+            android:defaultValue="25"
+            android:dialogTitle="@string/pref_title_subtitle_size_dialog"
+            android:entries="@array/listSubtitleSize"
+            android:entryValues="@array/listSubtitleSizeValues"
+            android:key="@string/pref_key_subtitle_size"
+            android:title="@string/pref_title_subtitle_size"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

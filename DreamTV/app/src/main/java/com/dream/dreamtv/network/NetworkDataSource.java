@@ -6,6 +6,7 @@ import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.preference.PreferenceManager;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -27,7 +28,6 @@ import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.UserTaskError;
 import com.dream.dreamtv.model.VideoTests;
 import com.dream.dreamtv.ui.Main.MainFragment;
-import com.dream.dreamtv.ui.Settings.SettingsFragment;
 import com.dream.dreamtv.utils.AppExecutors;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
@@ -58,6 +58,10 @@ import static com.dream.dreamtv.utils.Constants.PARAM_TIME_WATCHED;
 import static com.dream.dreamtv.utils.Constants.PARAM_TYPE;
 import static com.dream.dreamtv.utils.Constants.PARAM_VERSION;
 import static com.dream.dreamtv.utils.Constants.PARAM_VIDEO_ID;
+import static com.dream.dreamtv.utils.Constants.PREF_VIDEO_DURATION_ALL;
+import static com.dream.dreamtv.utils.Constants.PREF_VIDEO_DURATION_MIN_0;
+import static com.dream.dreamtv.utils.Constants.PREF_VIDEO_DURATION_MIN_10;
+import static com.dream.dreamtv.utils.Constants.PREF_VIDEO_DURATION_MIN_5;
 import static com.dream.dreamtv.utils.Constants.TASKS_ALL_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
@@ -211,7 +215,10 @@ public class NetworkDataSource {
         fetchMyListTaskCategory();
         fetchFinishedTaskCategory();
 
-        if (getApplication().getTestingMode().equals(mContext.getString(R.string.text_yes_option)))
+        boolean testingMode = PreferenceManager.getDefaultSharedPreferences(mContext)
+                .getBoolean(mContext.getString(R.string.pref_key_testing_mode), false);
+
+        if (testingMode)
             fetchTestTaskCategory();
 
         fetchReasons();
@@ -644,8 +651,37 @@ public class NetworkDataSource {
 
 
     private Uri taskUrlFormatter(String uriString, String paramType) {
-        int minDuration = Integer.parseInt(getApplication().getVideoDurationMin());
-        int maxDuration = Integer.parseInt(getApplication().getVideoDurationMax());
+        String videoDuration = PreferenceManager.getDefaultSharedPreferences(mContext)
+                .getString(mContext.getString(R.string.pref_key_video_duration), PREF_VIDEO_DURATION_ALL);
+
+
+        int minDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+        int maxDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+
+        if (videoDuration != null) {
+            switch (videoDuration) {
+                case PREF_VIDEO_DURATION_ALL:
+                    minDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+                    maxDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+                    break;
+                case PREF_VIDEO_DURATION_MIN_0:
+                    minDuration = Integer.parseInt(PREF_VIDEO_DURATION_MIN_0);
+                    maxDuration = Integer.parseInt(PREF_VIDEO_DURATION_MIN_5);
+                    break;
+
+                case PREF_VIDEO_DURATION_MIN_5:
+                    minDuration = Integer.parseInt(PREF_VIDEO_DURATION_MIN_5);
+                    maxDuration = Integer.parseInt(PREF_VIDEO_DURATION_MIN_10);
+                    break;
+                case PREF_VIDEO_DURATION_MIN_10:
+                    minDuration = Integer.parseInt(PREF_VIDEO_DURATION_MIN_10);
+                    maxDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+                    break;
+                default:
+                    minDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+                    maxDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+            }
+        }
 
         Uri uri;
 
@@ -678,8 +714,36 @@ public class NetworkDataSource {
     }
 
     private Uri taskUrlFormatter(String uriString, String paramType, int page) {
-        int minDuration = Integer.parseInt(getApplication().getVideoDurationMin());
-        int maxDuration = Integer.parseInt(getApplication().getVideoDurationMax());
+        String videoDuration = PreferenceManager.getDefaultSharedPreferences(mContext)
+                .getString(mContext.getString(R.string.pref_key_video_duration), PREF_VIDEO_DURATION_ALL);
+
+        int minDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+        int maxDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+
+        if (videoDuration != null) {
+            switch (videoDuration) {
+                case PREF_VIDEO_DURATION_ALL:
+                    minDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+                    maxDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+                    break;
+                case PREF_VIDEO_DURATION_MIN_0:
+                    minDuration = Integer.parseInt(PREF_VIDEO_DURATION_MIN_0);
+                    maxDuration = Integer.parseInt(PREF_VIDEO_DURATION_MIN_5);
+                    break;
+
+                case PREF_VIDEO_DURATION_MIN_5:
+                    minDuration = Integer.parseInt(PREF_VIDEO_DURATION_MIN_5);
+                    maxDuration = Integer.parseInt(PREF_VIDEO_DURATION_MIN_10);
+                    break;
+                case PREF_VIDEO_DURATION_MIN_10:
+                    minDuration = Integer.parseInt(PREF_VIDEO_DURATION_MIN_10);
+                    maxDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+                    break;
+                default:
+                    minDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+                    maxDuration = Integer.parseInt(PREF_VIDEO_DURATION_ALL);
+            }
+        }
 
         Uri uri;
 

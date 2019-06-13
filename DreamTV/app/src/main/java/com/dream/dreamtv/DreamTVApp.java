@@ -7,6 +7,7 @@ import android.util.Log;
 import com.dream.dreamtv.model.ErrorReason;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.VideoTests;
+import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.Gson;
@@ -61,13 +62,6 @@ public class DreamTVApp extends Application {
 
     }
 
-    public String getTestingMode() {
-        return SharedPreferenceUtils.getValue(this, getString(R.string.testing_mode_preferences), getString(R.string.text_no_option));
-    }
-
-    public void setTestingMode(String mode) {
-        SharedPreferenceUtils.save(this, getString(R.string.testing_mode_preferences), mode);
-    }
 
     public List<ErrorReason> getReasons() {
         String errorReasonList = SharedPreferenceUtils.getValue(this, getString(R.string.reasons_preferences));
@@ -107,19 +101,4 @@ public class DreamTVApp extends Application {
         SharedPreferenceUtils.save(this, getString(R.string.video_tests_preferences), videoTests);
     }
 
-    public String getVideoDurationMin() {
-        return SharedPreferenceUtils.getValue(this, getString(R.string.video_duration_min_preferences), "-1");
-    }
-
-    public void setVideoDurationMin(int minDuration) {
-        SharedPreferenceUtils.save(this, getString(R.string.video_duration_min_preferences), String.valueOf(minDuration));
-    }
-
-    public String getVideoDurationMax() {
-        return SharedPreferenceUtils.getValue(this, getString(R.string.video_duration_max_preferences), "-1");
-    }
-
-    public void setVideoDurationMax(int maxDuration) {
-        SharedPreferenceUtils.save(this, getString(R.string.video_duration_max_preferences), String.valueOf(maxDuration));
-    }
 }

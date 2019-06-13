@@ -6,7 +6,6 @@ import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.repository.AppRepository;
 import com.dream.dreamtv.ui.Main.MainViewModelFactory;
 import com.dream.dreamtv.ui.PlayVideo.PlaybackViewModelFactory;
-import com.dream.dreamtv.ui.Settings.SettingsViewModelFactory;
 import com.dream.dreamtv.ui.VideoDetails.VideoDetailsViewModelFactory;
 
 /**
@@ -15,10 +14,9 @@ import com.dream.dreamtv.ui.VideoDetails.VideoDetailsViewModelFactory;
 public class InjectorUtils {
 
     public static AppRepository provideRepository(Context context) {
-//        AppRoomDatabase database = AppRoomDatabase.getInstance(context.getApplicationContext());
         AppExecutors executors = AppExecutors.getInstance();
         NetworkDataSource networkDataSource = NetworkDataSource.getInstance(context.getApplicationContext(), executors);
-        return AppRepository.getInstance(/*database.taskDao(), */networkDataSource, executors);
+        return AppRepository.getInstance(networkDataSource, executors);
     }
 
     public static MainViewModelFactory provideMainViewModelFactory(Context context) {
@@ -26,10 +24,6 @@ public class InjectorUtils {
         return new MainViewModelFactory(repository);
     }
 
-    public static SettingsViewModelFactory provideSettingsViewModelFactory(Context context) {
-        AppRepository repository = provideRepository(context.getApplicationContext());
-        return new SettingsViewModelFactory(repository);
-    }
 
     public static VideoDetailsViewModelFactory provideVideoDetailsViewModelFactory(Context context) {
         AppRepository repository = provideRepository(context.getApplicationContext());

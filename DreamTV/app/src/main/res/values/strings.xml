@@ -3,8 +3,6 @@
     <!--NON-TRANSLATABLE-->
     <string name="app_name" translatable="false">DreamTV</string>
     <string name="browse_title" translatable="false"><![CDATA[DreamTV]]></string>
-    <string name="text_yes_option" translatable="false">Y</string>
-    <string name="text_no_option" translatable="false">N</string>
 
     <!-- Error messages -->
     <string name="video_error_media_load_timeout">Media loading timed out</string>
@@ -25,19 +23,9 @@
     <string name="dreamTVApp_token" translatable="false">dreamTVApp_token</string>
     <string name="user_preferences" translatable="false">user_preferences</string>
     <string name="reasons_preferences" translatable="false">reasons_preferences</string>
-    <string name="testing_mode_preferences" translatable="false">testing_mode_preferences</string>
     <string name="video_tests_preferences" translatable="false">video_tests_preferences</string>
-    <string name="video_duration_min_preferences" translatable="false">video_duration_min_preferences</string>
-    <string name="video_duration_max_preferences" translatable="false">video_duration_max_preferences</string>
 
     <!--titles-->
-    <string name="title_audio">Audio: </string>
-    <string name="title_subtitle">Subtitles: </string>
-    <string name="title_video_settings">Video Settings</string>
-    <string name="title_text_language_settings">App language</string>
-    <string name="title_reason_dialog_interface_settings">Interface</string>
-    <string name="title_testing_mode_settings">Testing mode</string>
-    <string name="title_video_duration_settings">Video duration</string>
     <string name="title_share_mode_settings">Verify mistakes found by others</string>
     <string name="title_video_languages_settings">Video languages</string>
     <string name="title_reasons_dialog">What is wrong here?</string>
@@ -116,5 +104,123 @@
     <string name="alert_title_video_terminated">Completed!</string>
     <string name="alert_msg_video_terminated">How did you like the video?</string>
     <string name="text_pause">PAUSE</string>
+
+
+    <!--PREFERENCES-->
+    <string name="pref_title_settings">Settings</string>
+    <string name="pref_title_app_settings">App settings</string>
+    <string name="pref_title_subtitle_settings">Subtitle settings</string>
+    <string name="pref_title_subtitle_size">Text Size</string>
+    <string name="pref_title_app_language_dialog">Select language</string>
+    <string name="pref_title_interface_mode_dialog">Select mode</string>
+    <string name="pref_title_video_duration_dialog">Select video duration</string>
+    <string name="pref_title_subtitle_size_dialog">Select subtitle size</string>
+    <string name="pref_title_audio_language_dialog">Select audio language</string>
+    <string name="pref_title_subtitle_language_dialog">Select subtitle language</string>
+    <string name="pref_title_audio">Audio</string>
+    <string name="pref_title_subtitle">Subtitles</string>
+    <string name="pref_title_video_settings">Video Settings</string>
+    <string name="pref_title_text_language_settings">App language</string>
+    <string name="pref_title_reason_dialog_interface_settings">Interface</string>
+    <string name="pref_title_testing_mode_settings">Testing mode</string>
+    <string name="pref_title_testing_mode_settings_description">Display videos for testing</string>
+    <string name="pref_title_video_duration_settings">Video duration</string>
+
+    <!--PREFERENCES KEYS-->
+    <string name="pref_key_list_app_languages" translatable="false">listAppLanguage</string>
+    <string name="pref_key_list_interface_mode" translatable="false">listInterfaceMode</string>
+    <string name="pref_key_testing_mode" translatable="false">testingMode</string>
+    <string name="pref_key_list_audio_languages" translatable="false">listAudioLanguage</string>
+    <string name="pref_key_list_subtitle_languages" translatable="false">listSubtitleLanguage</string>
+    <string name="pref_key_video_duration" translatable="false">listVideoDuration</string>
+    <string name="pref_key_subtitle_size" translatable="false">listSubtitleSize</string>
+
+    <!--DATA FOR SETTINGS-->
+    <string-array name="listAudioLanguages">
+        <item>Chinese, Yue</item>
+        <item>English</item>
+        <item>Spanish</item>
+        <item>Arabic</item>
+        <item>French</item>
+        <item>Polish</item>
+        <item>All languages</item>
+    </string-array>
+
+    <string-array name="listAudioLanguagesValues">
+        <item>zh</item>
+        <item>en</item>
+        <item>es</item>
+        <item>ar</item>
+        <item>fr</item>
+        <item>pl</item>
+        <item>NN</item>
+    </string-array>
+
+
+    <string-array name="listSubtitleLanguages">
+        <item>Chinese, Yue</item>
+        <item>English</item>
+        <item>Spanish</item>
+        <item>Arabic</item>
+        <item>French</item>
+        <item>Polish</item>
+    </string-array>
+
+    <string-array name="listSubtitleLanguagesValues">
+        <item>zh</item>
+        <item>en</item>
+        <item>es</item>
+        <item>ar</item>
+        <item>fr</item>
+        <item>pl</item>
+    </string-array>
+
+    <string-array name="listSubtitleSize">
+        <item>Small</item>
+        <item>Medium</item>
+        <item>Large</item>
+    </string-array>
+
+    <string-array name="listSubtitleSizeValues">
+        <item>25</item>
+        <item>30</item>
+        <item>40</item>
+    </string-array>
+
+
+    <string-array name="listAppLanguages">
+        <item>Polish</item>
+        <item>English</item>
+    </string-array>
+
+    <string-array name="listAppLanguagesValues">
+        <item>pl</item>
+        <item>en</item>
+    </string-array>
+
+    <string-array name="listInterfaceMode">
+        <item>Beginner</item>
+        <item>Advanced</item>
+    </string-array>
+
+    <string-array name="listInterfaceModeValues">
+        <item>beginner</item>
+        <item>advanced</item>
+    </string-array>
+
+
+    <string-array name="listVideoDuration">
+        <item>all</item>
+        <item>0 – 5 min</item>
+        <item>5 – 10 min</item>
+        <item>10+ min</item>
+    </string-array>
+
+    <string-array name="listVideoDurationValues">
+        <item>-1</item>
+        <item>0</item>
+        <item>300</item>
+        <item>600</item>
+    </string-array>
 
 </resources>

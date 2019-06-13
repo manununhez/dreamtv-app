@@ -3,9 +3,11 @@ package com.dream.dreamtv.ui.PlayVideo;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -38,6 +40,7 @@ import com.dream.dreamtv.utils.Utils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import fr.bmartel.youtubetv.YoutubeTvView;
 import fr.bmartel.youtubetv.listener.IPlayerListener;
@@ -61,6 +64,7 @@ import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
+import static com.dream.dreamtv.utils.Constants.PREF_SUBTITLE_SMALL_SIZE;
 import static com.dream.dreamtv.utils.Constants.STATE_ENDED;
 import static com.dream.dreamtv.utils.Constants.STATE_PAUSED;
 import static com.dream.dreamtv.utils.Constants.STATE_PLAY;
@@ -130,9 +134,13 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         PlaybackViewModelFactory factory = InjectorUtils.providePlaybackViewModelFactory(this);
         mViewModel = ViewModelProviders.of(this, factory).get(PlaybackViewModel.class);
 
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        tvSubtitle = findViewById(R.id.tvSubtitle);
+        tvSubtitle.setTextSize(Integer.parseInt(Objects.requireNonNull(sharedPreferences.getString(getString(R.string.pref_key_subtitle_size), PREF_SUBTITLE_SMALL_SIZE))));
+
         chronometer = new Chronometer(this); // initiate a chronometer
         tvTime = findViewById(R.id.tvTime);
-        tvSubtitle = findViewById(R.id.tvSubtitle); // initiate a chronometer
         rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
 
         mPlayFromBeginning = getIntent().getBooleanExtra(INTENT_PLAY_FROM_BEGINNING, true);
