@@ -109,8 +109,8 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
         User user = ((DreamTVApp) ((Activity) getContext()).getApplication()).getUser();
         String timeFormatted = Utils.getTimeFormatMinSecs(task.video.duration * 1000);
         TextView secondaryText = cardView.findViewById(R.id.secondary_text);
-        secondaryText.setText(getContext().getString(R.string.title_video_details, task.video.project,
-                task.video.primaryAudioLanguageCode, task.language, timeFormatted, user.interfaceMode));
+        secondaryText.setText(getContext().getString(R.string.title_video_details_main, task.video.project,
+                task.video.primaryAudioLanguageCode, task.language, timeFormatted));
 
 
         TextView extraText = cardView.findViewById(R.id.extra_text);

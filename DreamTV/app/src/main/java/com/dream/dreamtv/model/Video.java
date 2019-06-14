@@ -6,25 +6,13 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-import androidx.room.Ignore;
-
 /**
  * Created by manuel on 6/12/17.
  */
 
 public class Video implements Parcelable {
 
-    public static final Creator<Video> CREATOR = new Creator<Video>() {
-        @Override
-        public Video createFromParcel(Parcel in) {
-            return new Video(in);
-        }
 
-        @Override
-        public Video[] newArray(int size) {
-            return new Video[size];
-        }
-    };
     private static final String YOUTUBE_COM = "youtube.com";
     private static final String QUERY_PARAMETER = "v";
 
@@ -32,6 +20,8 @@ public class Video implements Parcelable {
     public String videoId;
     @SerializedName("primary_audio_language_code")
     public String primaryAudioLanguageCode;
+    @SerializedName("speaker_name")
+    public String speakerName;
     @SerializedName("title")
     public String title;
     @SerializedName("description")
@@ -51,28 +41,11 @@ public class Video implements Parcelable {
     @SerializedName("updated_at")
     public String updated_at;
 
-    @Ignore
-    public Video() {
-
-    }
-
-    public Video(String videoId, String primaryAudioLanguageCode,
-                 String title, String description, int duration, String thumbnail,
-                 String team, String project, String videoUrl) {
-        this.videoId = videoId;
-        this.primaryAudioLanguageCode = primaryAudioLanguageCode;
-        this.title = title;
-        this.description = description;
-        this.duration = duration;
-        this.thumbnail = thumbnail;
-        this.team = team;
-        this.project = project;
-        this.videoUrl = videoUrl;
-    }
 
     protected Video(Parcel in) {
         videoId = in.readString();
         primaryAudioLanguageCode = in.readString();
+        speakerName = in.readString();
         title = in.readString();
         description = in.readString();
         duration = in.readInt();
@@ -84,26 +57,17 @@ public class Video implements Parcelable {
         updated_at = in.readString();
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(videoId);
-        dest.writeString(primaryAudioLanguageCode);
-        dest.writeString(title);
-        dest.writeString(description);
-        dest.writeInt(duration);
-        dest.writeString(thumbnail);
-        dest.writeString(team);
-        dest.writeString(project);
-        dest.writeString(videoUrl);
-        dest.writeString(created_at);
-        dest.writeString(updated_at);
-    }
+    public static final Creator<Video> CREATOR = new Creator<Video>() {
+        @Override
+        public Video createFromParcel(Parcel in) {
+            return new Video(in);
+        }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
+        @Override
+        public Video[] newArray(int size) {
+            return new Video[size];
+        }
+    };
 
     public boolean isUrlFromYoutube() {
         return this.videoUrl.contains(YOUTUBE_COM);
@@ -121,4 +85,24 @@ public class Video implements Parcelable {
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(videoId);
+        dest.writeString(primaryAudioLanguageCode);
+        dest.writeString(speakerName);
+        dest.writeString(title);
+        dest.writeString(description);
+        dest.writeInt(duration);
+        dest.writeString(thumbnail);
+        dest.writeString(team);
+        dest.writeString(project);
+        dest.writeString(videoUrl);
+        dest.writeString(created_at);
+        dest.writeString(updated_at);
+    }
 }
