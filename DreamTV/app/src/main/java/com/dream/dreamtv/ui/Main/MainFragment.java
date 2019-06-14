@@ -21,9 +21,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
+import androidx.leanback.widget.DiffCallback;
 import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.ListRowPresenter;
@@ -35,6 +37,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.preference.PreferenceManager;
 
+import com.dream.dreamtv.BuildConfig;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Card;
@@ -81,6 +84,7 @@ public class MainFragment extends BrowseSupportFragment {
     private static final String EMPTY_ITEM = "Some item";
     private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
     private static final int REQUEST_SETTINGS = 45686;
+    private static final boolean DEBUG = BuildConfig.DEBUG;
     private ArrayObjectAdapter mRowsAdapter;
     private MainViewModel mViewModel;
     private LoadingDialog loadingDialog;
@@ -149,7 +153,7 @@ public class MainFragment extends BrowseSupportFragment {
 
 
     private void requestLogin(String email) {
-        Log.d(TAG, ">>>>>>>>>>>>>>>>>>>REQUEST LOGIN");
+        if (DEBUG) Log.d(TAG, ">>>>>>>>>>>>>>>>>>>REQUEST LOGIN");
 //        showLoading();
         mViewModel.login(email, "com.google"); //TODO change password
     }
@@ -157,7 +161,7 @@ public class MainFragment extends BrowseSupportFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Log.d(TAG, "onDestroyView");
+        if (DEBUG) Log.d(TAG, "onDestroyView");
 
         if (allTaskLiveData != null)
             allTaskLiveData.removeObservers(getViewLifecycleOwner());
@@ -197,15 +201,14 @@ public class MainFragment extends BrowseSupportFragment {
                     else verifyRowExistenceAndRemove(rowAllTasks);
                 }
 
-                Log.d(TAG, "task response");
+                if (DEBUG) Log.d(TAG, "task response");
 
                 dismissLoading();
             } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
                 if (tasksListResource.message != null)
-                    Log.d(TAG, tasksListResource.message);
-                else
-                    Log.d(TAG, "Status ERROR");
+                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                    else if (DEBUG) Log.d(TAG, "Status ERROR");
 
                 dismissLoading();
             }
@@ -224,15 +227,14 @@ public class MainFragment extends BrowseSupportFragment {
                     else verifyRowExistenceAndRemove(rowContinueTasks);
                 }
 
-                Log.d(TAG, "task response");
+                if (DEBUG) Log.d(TAG, "task response");
 
                 dismissLoading();
             } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
                 if (tasksListResource.message != null)
-                    Log.d(TAG, tasksListResource.message);
-                else
-                    Log.d(TAG, "Status ERROR");
+                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                    else if (DEBUG) Log.d(TAG, "Status ERROR");
 
                 dismissLoading();
             }
@@ -253,14 +255,13 @@ public class MainFragment extends BrowseSupportFragment {
                     else verifyRowExistenceAndRemove(rowFinishedTasks);
                 }
 
-                Log.d(TAG, "task response");
+                if (DEBUG) Log.d(TAG, "task response");
                 dismissLoading();
             } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
                 if (tasksListResource.message != null)
-                    Log.d(TAG, tasksListResource.message);
-                else
-                    Log.d(TAG, "Status ERROR");
+                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                    else if (DEBUG) Log.d(TAG, "Status ERROR");
 
                 dismissLoading();
             }
@@ -277,7 +278,8 @@ public class MainFragment extends BrowseSupportFragment {
             else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
                 if (tasksListResource.data != null) {
                     if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0) {
-                        Log.d(TAG, "task response My list:[" + tasksListResource.data.data.length + "]" + Arrays.toString(tasksListResource.data.data));
+                        if (DEBUG)
+                            Log.d(TAG, "task response My list:[" + tasksListResource.data.data.length + "]" + Arrays.toString(tasksListResource.data.data));
 
                         loadVideos(tasksListResource.data);
                     } else verifyRowExistenceAndRemove(rowMyListTasks);
@@ -287,9 +289,8 @@ public class MainFragment extends BrowseSupportFragment {
             } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
                 if (tasksListResource.message != null)
-                    Log.d(TAG, tasksListResource.message);
-                else
-                    Log.d(TAG, "Status ERROR");
+                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                    else if (DEBUG) Log.d(TAG, "Status ERROR");
 
                 dismissLoading();
             }
@@ -310,15 +311,14 @@ public class MainFragment extends BrowseSupportFragment {
                     else verifyRowExistenceAndRemove(rowTestTasks);
                 }
 
-                Log.d(TAG, "task response");
+                if (DEBUG) Log.d(TAG, "task response");
 
                 dismissLoading();
             } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
                 if (tasksListResource.message != null)
-                    Log.d(TAG, tasksListResource.message);
-                else
-                    Log.d(TAG, "Status ERROR");
+                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                    else if (DEBUG) Log.d(TAG, "Status ERROR");
 
                 dismissLoading();
             }
@@ -334,7 +334,7 @@ public class MainFragment extends BrowseSupportFragment {
 
     private void userRegistration() {
 
-        Log.d(TAG, "userRegistration()");
+        if (DEBUG) Log.d(TAG, "userRegistration()");
         String token = getApplication().getToken();
         User user = ((DreamTVApp) getActivity().getApplication()).getUser();
         if (token == null || user == null) //first time the app is initiated. The user has to select an account
@@ -346,7 +346,7 @@ public class MainFragment extends BrowseSupportFragment {
 
 
     private void pickUserAccount() {
-        Log.d(TAG, "pickUserAccount()");
+        if (DEBUG) Log.d(TAG, "pickUserAccount()");
 
         /*This will list all available accounts on device without any filtering*/
 
@@ -358,7 +358,7 @@ public class MainFragment extends BrowseSupportFragment {
 
 
     private void setupVideosList() {
-        Log.d(TAG, "New mRowsAdapter()");
+        if (DEBUG) Log.d(TAG, "New mRowsAdapter()");
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
     }
 
@@ -367,7 +367,7 @@ public class MainFragment extends BrowseSupportFragment {
 
         String category = tasksList.category;
 
-        Log.d(TAG, "Loading video => Category:" + category);
+        if (DEBUG) Log.d(TAG, "Loading video => Category:" + category);
 
         List<Card> cards = new ArrayList<>();
 
@@ -376,17 +376,17 @@ public class MainFragment extends BrowseSupportFragment {
         }
 
 
-//        DiffCallback<Card> diffCallback = new DiffCallback<Card>() {
-//            @Override
-//            public boolean areItemsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
-//                return oldItem.getTask().taskId == newItem.getTask().taskId;
-//            }
-//
-//            @Override
-//            public boolean areContentsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
-//                return Objects.equals(oldItem.getTask(), newItem.getTask());
-//            }
-//        };
+        DiffCallback<Card> diffCallback = new DiffCallback<Card>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
+                return oldItem.getTask().taskId == newItem.getTask().taskId;
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
+                return Objects.equals(oldItem.getTask(), newItem.getTask());
+            }
+        };
 
 
         ListRow listRow;
@@ -412,20 +412,20 @@ public class MainFragment extends BrowseSupportFragment {
         }
 
 
-//        int indexOfRow = mRowsAdapter.indexOf(listRow);
+        int indexOfRow = mRowsAdapter.indexOf(listRow);
 
         ArrayObjectAdapter arrayObjectAdapter = ((ArrayObjectAdapter) listRow.getAdapter());
 
-//        if (indexOfRow != -1)
-//            arrayObjectAdapter.setItems(cards, diffCallback);
-//        else {
+        if (indexOfRow != -1)
+            arrayObjectAdapter.setItems(cards, diffCallback);
+        else {
 
-        arrayObjectAdapter.clear(); //clear row before add new ones
+            arrayObjectAdapter.clear(); //clear row before add new ones
 
-        arrayObjectAdapter.addAll(arrayObjectAdapter.size(), cards);
+            arrayObjectAdapter.addAll(arrayObjectAdapter.size(), cards);
 
-        mRowsAdapter.add(0, listRow);
-//        }
+            mRowsAdapter.add(0, listRow);
+        }
 
         setAdapter(mRowsAdapter);
 
@@ -501,18 +501,17 @@ public class MainFragment extends BrowseSupportFragment {
 
         updateUserLiveData.observe(getViewLifecycleOwner(), response -> {
             if (response.status.equals(Resource.Status.SUCCESS)) {
-                Log.d(TAG, "Response from userUpdate");
+                if (DEBUG) Log.d(TAG, "Response from userUpdate");
                 if (response.data != null) {
-                    Log.d(TAG, response.data.toString());
+                    if (DEBUG) Log.d(TAG, response.data.toString());
 
                     firebaseAnalyticsSettingsReportEvent(userUpdated);
                 }
             } else if (response.status.equals(Resource.Status.ERROR)) {
                 //TODO do something error
                 if (response.message != null)
-                    Log.d(TAG, response.message);
-                else
-                    Log.d(TAG, "Status ERROR");
+                    if (DEBUG) Log.d(TAG, response.message);
+                    else if (DEBUG) Log.d(TAG, "Status ERROR");
             }
 
 
@@ -526,7 +525,7 @@ public class MainFragment extends BrowseSupportFragment {
 
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
-                Log.d(TAG, "onActivityResult() - Result from pickAccount()");
+                if (DEBUG) Log.d(TAG, "onActivityResult() - Result from pickAccount()");
 
                 // Receiving a result from the AccountPicker
                 requestLogin(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
@@ -539,7 +538,8 @@ public class MainFragment extends BrowseSupportFragment {
                 if (restart) {
                     //To update screen language
                     Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
-                    Log.d(TAG, "REQUEST_SETTINGS - Different language. Updating screen.");
+                    if (DEBUG)
+                        Log.d(TAG, "REQUEST_SETTINGS - Different language. Updating screen.");
                 } else {
 
                     boolean callAllCategoriesTasks = data.getBooleanExtra(INTENT_EXTRA_CALL_TASKS, false);
@@ -549,7 +549,7 @@ public class MainFragment extends BrowseSupportFragment {
                         mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT);
                         mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT);
                         mViewModel.updateTaskByCategory(TASKS_TEST_CAT);
-                        Log.d(TAG, "REQUEST_SETTINGS - Call all Tasks again.");
+                        if (DEBUG) Log.d(TAG, "REQUEST_SETTINGS - Call all Tasks again.");
                     } else {
                         //we check is we are not in testing mode. If the language screen does not recreate the activity,
                         // we manually delete the row testing
@@ -561,7 +561,7 @@ public class MainFragment extends BrowseSupportFragment {
                         else {
 //                            callTestTasks();
                             mViewModel.updateTaskByCategory(TASKS_TEST_CAT);
-                            Log.d(TAG, "REQUEST_SETTINGS - Call only test Tasks again.");
+                            if (DEBUG) Log.d(TAG, "REQUEST_SETTINGS - Call only test Tasks again.");
                         }
                     }
                 }
