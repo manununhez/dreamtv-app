@@ -47,6 +47,7 @@ import fr.bmartel.youtubetv.listener.IPlayerListener;
 import fr.bmartel.youtubetv.model.VideoInfo;
 import fr.bmartel.youtubetv.model.VideoState;
 
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_LANGUAGE_CODE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
@@ -64,6 +65,7 @@ import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
+import static com.dream.dreamtv.utils.Constants.PREF_ABR_POLISH;
 import static com.dream.dreamtv.utils.Constants.PREF_SUBTITLE_SMALL_SIZE;
 import static com.dream.dreamtv.utils.Constants.STATE_ENDED;
 import static com.dream.dreamtv.utils.Constants.STATE_PAUSED;
@@ -209,7 +211,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(LocaleHelper.onAttach(base));
+        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
     }
 
 

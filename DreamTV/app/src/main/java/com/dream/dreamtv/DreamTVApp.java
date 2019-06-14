@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.dream.dreamtv.utils.Constants.PREF_ABR_POLISH;
+
 
 /**
  * Created by manunez on 13/10/2015.
@@ -29,7 +31,7 @@ public class DreamTVApp extends Application {
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(LocaleHelper.onAttach(base));
+        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
     }
 
 

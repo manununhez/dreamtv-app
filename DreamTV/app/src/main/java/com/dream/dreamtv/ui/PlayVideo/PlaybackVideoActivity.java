@@ -43,6 +43,8 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import static com.dream.dreamtv.utils.Constants.*;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_LANGUAGE_CODE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
@@ -200,7 +202,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(LocaleHelper.onAttach(base));
+        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
     }
 
 

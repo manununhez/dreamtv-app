@@ -54,7 +54,7 @@ public class PreferencesActivity extends FragmentActivity implements SharedPrefe
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(LocaleHelper.onAttach(base));
+        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
     }
 
 

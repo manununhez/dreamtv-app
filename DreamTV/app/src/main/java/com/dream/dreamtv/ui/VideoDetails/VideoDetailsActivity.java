@@ -22,6 +22,8 @@ import androidx.fragment.app.FragmentActivity;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.utils.LocaleHelper;
 
+import static com.dream.dreamtv.utils.Constants.PREF_ABR_POLISH;
+
 
 /*
  * Details activity class that loads LeanbackDetailsFragment class
@@ -40,6 +42,6 @@ public class VideoDetailsActivity extends FragmentActivity {
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(LocaleHelper.onAttach(base));
+        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
     }
 }
