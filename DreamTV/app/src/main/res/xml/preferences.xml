@@ -41,7 +41,7 @@
             app:useSimpleSummaryProvider="true" />
 
         <ListPreference
-            android:defaultValue="en"
+            android:defaultValue="pl"
             android:dialogTitle="@string/pref_title_subtitle_language_dialog"
             android:entries="@array/listSubtitleLanguages"
             android:entryValues="@array/listSubtitleLanguagesValues"
@@ -50,7 +50,7 @@
             app:useSimpleSummaryProvider="true" />
 
         <ListPreference
-            android:defaultValue="all"
+            android:defaultValue="-1"
             android:dialogTitle="@string/pref_title_video_duration_dialog"
             android:entries="@array/listVideoDuration"
             android:entryValues="@array/listVideoDurationValues"
