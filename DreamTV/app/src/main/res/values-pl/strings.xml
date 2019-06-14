@@ -50,6 +50,9 @@
     <string name="errors_found_continue">Dotychczas %1$d błąd</string>
     <string name="errors_found_continue_plural">Do tej pory %1$d błędy</string>
 
+    <!--search-->
+    <string name="search_results">Search results for \'%1$s\'</string>
+    <string name="no_search_results">No search results found for \'%1$s\'</string>
 
     <!--buttons-->
     <string name="btn_subtitle">Napisy</string>

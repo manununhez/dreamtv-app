@@ -26,6 +26,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Leanback">
+
         <activity
             android:name=".ui.Welcome.SplashScreenActivity"
             android:banner="@drawable/logo_tv"
@@ -48,10 +49,11 @@
         <activity
             android:name=".ui.PlayVideo.PlaybackVideoYoutubeActivity"
             android:label="@string/app_name" />
-        <activity android:name=".ui.Settings.SettingsActivity" />
-        <activity android:name=".ui.Preferences.PreferencesActivity"
+        <activity
+            android:name=".ui.Preferences.PreferencesActivity"
             android:exported="true"
-            android:theme="@style/LeanbackPreferences"/>
+            android:theme="@style/LeanbackPreferences" />
+        <activity android:name=".ui.Search.SearchActivity" />
     </application>
 
 </manifest>

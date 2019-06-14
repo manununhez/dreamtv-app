@@ -202,4 +202,7 @@ public class AppRepository {
         mNetworkDataSource.updateUserTask(userTask);
     }
 
+    public MutableLiveData<Resource<Task[]>> search(String query) {
+        return mNetworkDataSource.search(query);
+    }
 }

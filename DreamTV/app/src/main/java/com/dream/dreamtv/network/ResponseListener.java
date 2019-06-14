@@ -33,8 +33,9 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
         Log.d(TAG, "Response: onErrorResponse() " + error.getMessage());
 
         String errorMessage = VolleyErrorHelper.getMessage(error, context);
-        Log.d(TAG, errorMessage);
+
         if (errorMessage != null && !errorMessage.isEmpty()) {
+            Log.d(TAG, errorMessage);
             Toast.makeText(context.getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
         }
 

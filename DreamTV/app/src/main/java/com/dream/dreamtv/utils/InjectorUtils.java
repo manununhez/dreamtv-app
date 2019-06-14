@@ -6,6 +6,7 @@ import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.repository.AppRepository;
 import com.dream.dreamtv.ui.Main.MainViewModelFactory;
 import com.dream.dreamtv.ui.PlayVideo.PlaybackViewModelFactory;
+import com.dream.dreamtv.ui.Search.SearchViewModelFactory;
 import com.dream.dreamtv.ui.VideoDetails.VideoDetailsViewModelFactory;
 
 /**
@@ -33,6 +34,11 @@ public class InjectorUtils {
     public static PlaybackViewModelFactory providePlaybackViewModelFactory(Context context) {
         AppRepository repository = provideRepository(context.getApplicationContext());
         return new PlaybackViewModelFactory(repository);
+    }
+
+    public static SearchViewModelFactory provideSearchViewModelFactory(Context context) {
+        AppRepository repository = provideRepository(context.getApplicationContext());
+        return new SearchViewModelFactory(repository);
     }
 
 

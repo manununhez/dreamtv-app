@@ -58,6 +58,15 @@ public class Card {
 
     }
 
+    public Card(Task task) {
+        mType = Type.SIDE_INFO;
+        mTitle = task.video.title;
+        mDescription = task.video.project;
+        mExtraText = task.video.description;
+        mImageUrl = task.video.thumbnail;
+        mTask = task;
+    }
+
     public Task getTask() {
         return mTask;
     }

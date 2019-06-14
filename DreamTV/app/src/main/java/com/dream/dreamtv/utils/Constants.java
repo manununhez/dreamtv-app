@@ -101,6 +101,7 @@ public class Constants {
     public static final String PARAM_RATING = "rating";
     public static final String PARAM_SUB_POSITION = "subtitle_position";
     public static final String PARAM_REASON_CODE = "reason_code";
+    public static final String PARAM_QUERY = "query";
 
 
     public static final String YOUTUBE_VIDEO_ID = "videoId";

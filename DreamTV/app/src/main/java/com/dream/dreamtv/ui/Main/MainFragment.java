@@ -48,6 +48,7 @@ import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.presenter.IconCardCustomPresenter;
 import com.dream.dreamtv.presenter.SideInfoCardPresenter;
 import com.dream.dreamtv.ui.Preferences.PreferencesActivity;
+import com.dream.dreamtv.ui.Search.SearchActivity;
 import com.dream.dreamtv.ui.VideoDetails.VideoDetailsActivity;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
@@ -470,8 +471,10 @@ public class MainFragment extends BrowseSupportFragment {
 
 
     private void setupEventListeners() {
-        setOnSearchClickedListener(view ->
-                Toast.makeText(getActivity(), getString(R.string.title_search), Toast.LENGTH_SHORT).show()
+        setOnSearchClickedListener(view -> {
+                    Intent intent = new Intent(getActivity(), SearchActivity.class);
+                    startActivity(intent);
+                }
         );
 
         setOnItemViewClickedListener(new ItemViewClickedListener());
@@ -587,7 +590,7 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
 
-    private final class ItemViewClickedListener implements OnItemViewClickedListener {
+    public  final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {

@@ -47,6 +47,7 @@ import static com.dream.dreamtv.utils.Constants.PARAM_MAX_VIDEO_DURATION;
 import static com.dream.dreamtv.utils.Constants.PARAM_MIN_VIDEO_DURATION;
 import static com.dream.dreamtv.utils.Constants.PARAM_PAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_PASSWORD;
+import static com.dream.dreamtv.utils.Constants.PARAM_QUERY;
 import static com.dream.dreamtv.utils.Constants.PARAM_RATING;
 import static com.dream.dreamtv.utils.Constants.PARAM_REASON_CODE;
 import static com.dream.dreamtv.utils.Constants.PARAM_SUB_LANGUAGE;
@@ -89,6 +90,7 @@ public class NetworkDataSource {
     private MutableLiveData<Resource<TasksList>> responseFromFetchTestTasks;
     private MutableLiveData<Resource<TasksList>> responseFromFetchFinishedTasks;
     private MutableLiveData<Resource<TasksList>> responseFromFetchMyListTasks;
+    private MutableLiveData<Resource<Task[]>> responseFromSearch;
     private MutableLiveData<Resource<Boolean>> responseFromAddToListTasks;
     private MutableLiveData<Resource<Boolean>> responseFromRemoveFromListTasks;
     private MutableLiveData<Resource<User>> responseFromUserUpdate;
@@ -104,6 +106,7 @@ public class NetworkDataSource {
 
         mExecutors = executors;
 
+        responseFromSearch = new MutableLiveData<>();
         responseFromUserUpdate = new MutableLiveData<>();
         responseFromFetchSubtitle = new MutableLiveData<>();
         //TODO si se decide hacer sincrono, solo existiria una variable que agrupe los tasks y que luego insertaria en BD todo de una sola vez
@@ -779,6 +782,63 @@ public class NetworkDataSource {
     }
 
     /**
+     *
+     * @param query
+     * @return
+     */
+    public MutableLiveData<Resource<Task[]>> search(String query) {
+
+        responseFromSearch.setValue(Resource.loading(null));
+
+        Uri searchUri = Uri.parse(URL_BASE.concat(Urls.TASKS_SEARCH.value)).buildUpon()
+                .appendQueryParameter(PARAM_QUERY, query)
+                .build();
+
+        Log.d(TAG, "search() Request URL: " + searchUri.toString() + " Params: " + PARAM_QUERY + "=>" + query);
+
+        ResponseListener responseListener = new ResponseListener(mContext) {
+            @Override
+            protected void processResponse(String response) {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
+                };
+                JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
+
+                Log.d(TAG, "search() Response JSON: " + response);
+
+                Task[] tasks = jsonResponse.data;
+
+
+//                if (taskResponse.length > 0) {//If the response data if not empty
+//                Task[] taskEntities = new Task[taskResponse.length];
+//
+//                for (int i = 0; i < taskResponse.length; i++) {
+//                    taskEntities[i] = taskResponse[i].getEntity(paramType);
+//                }
+
+
+                responseFromSearch.postValue(Resource.success(tasks)); //post the value to live data
+//                }
+
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+
+                //TODO do something error
+                responseFromSearch.postValue(Resource.error(error.getMessage(), null));
+
+                Log.d(TAG, "search() Response Error: " + error.getMessage());
+            }
+        };
+
+        mExecutors.networkIO().execute(() -> requestString(Method.GET, searchUri.toString(), null, responseListener));
+
+        return responseFromSearch;
+    }
+
+
+    /**
      * fetchTasksByCategory used to get Tasks by categories
      *
      * @param paramType       Type of category
@@ -1196,6 +1256,8 @@ public class NetworkDataSource {
         USER_DETAILS("details"),
 
         TASKS_BY_CATEGORY("tasks/categories"),
+
+        TASKS_SEARCH("tasks/search"),
 
         USER_TASKS("usertasks"),
 
