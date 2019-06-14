@@ -48,8 +48,6 @@ public class VolleyErrorHelper {
             return context.getResources().getString(R.string.auth_failed);
         } else if (error instanceof NetworkError) {
             return context.getResources().getString(R.string.no_internet);
-        } else if (error instanceof NoConnectionError) {
-            return context.getResources().getString(R.string.no_network_connection);
         } else if (error instanceof ParseError) {
             return context.getResources().getString(R.string.parsing_failed);
         }

@@ -394,7 +394,7 @@ public class NetworkDataSource {
 
 
     /**
-     * Used in {@link SettingsFragment}
+     * Used in {@link MainFragment}
      *
      * @param user User
      */

@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import static com.dream.dreamtv.utils.Constants.*;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_LANGUAGE_CODE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;

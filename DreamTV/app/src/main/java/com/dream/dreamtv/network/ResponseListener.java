@@ -30,7 +30,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        Log.d(TAG, "Response: " + error.getMessage());
+        Log.d(TAG, "Response: onErrorResponse() " + error.getMessage());
 
         String errorMessage = VolleyErrorHelper.getMessage(error, context);
         Log.d(TAG, errorMessage);
@@ -43,7 +43,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
 
     @Override
     public void onResponse(String response) {
-        Log.d(TAG, "Response: " + response);
+        Log.d(TAG, "Response: onResponse() " + response);
 //
         TypeToken typeToken = new TypeToken<JsonResponseBaseBean>() {
         };

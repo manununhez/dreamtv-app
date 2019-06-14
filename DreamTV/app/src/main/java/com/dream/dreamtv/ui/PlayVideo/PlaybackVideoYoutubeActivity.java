@@ -47,7 +47,6 @@ import fr.bmartel.youtubetv.listener.IPlayerListener;
 import fr.bmartel.youtubetv.model.VideoInfo;
 import fr.bmartel.youtubetv.model.VideoState;
 
-import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_LANGUAGE_CODE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;

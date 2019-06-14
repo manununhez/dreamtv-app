@@ -42,9 +42,7 @@ import com.dream.dreamtv.utils.Utils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_DURATION;
