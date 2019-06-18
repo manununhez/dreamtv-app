@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.dream.dreamtv.presenter;
+package com.dream.dreamtv.presenter.DetailsPresenter;
 
 import android.app.Activity;
 import android.content.Context;

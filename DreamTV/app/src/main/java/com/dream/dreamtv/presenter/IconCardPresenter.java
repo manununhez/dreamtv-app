@@ -17,28 +17,25 @@ package com.dream.dreamtv.presenter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.view.View;
 import android.widget.ImageView;
 
 import com.dream.dreamtv.R;
-
-import androidx.leanback.widget.ImageCardView;
 
 /**
  * This Presenter will display cards which consists of a single icon which will be highlighted by a
  * surrounding circle when the card is focused. AndroidTV uses these cards for entering settings
  * menu.
  */
-public class IconCardCustomPresenter extends ImageCardViewCustomPresenter {
+public class IconCardPresenter extends ImageCardViewPresenter {
     private static final int ANIMATION_DURATION = 200;
 
-    public IconCardCustomPresenter(Context context) {
+    public IconCardPresenter(Context context) {
         super(context, R.style.IconCardThemeCustom);
     }
 
     @Override
-    protected ImageCardViewCustom onCreateView() {
-        final ImageCardViewCustom imageCardView = super.onCreateView();
+    protected ImageCardView onCreateView() {
+        final ImageCardView imageCardView = super.onCreateView();
         final ImageView image = imageCardView.getMainImageView();
         image.setBackgroundResource(R.drawable.icon_focused);
         image.getBackground().setAlpha(0);

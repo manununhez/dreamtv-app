@@ -43,7 +43,7 @@ public class VideoCardPresenter extends Presenter {
     private static int sDefaultBackgroundColor;
     private Drawable mDefaultCardImage;
 
-    private static void updateCardBackgroundColor(ImageCardViewCustom view, boolean selected) {
+    private static void updateCardBackgroundColor(ImageCardView view, boolean selected) {
         int color = selected ? sSelectedBackgroundColor : sDefaultBackgroundColor;
         // Both background colors should be set because the view's background is temporarily visible
         // during animations.
@@ -59,7 +59,7 @@ public class VideoCardPresenter extends Presenter {
         sSelectedBackgroundColor = ContextCompat.getColor(parent.getContext(), R.color.selected_background);
         mDefaultCardImage = parent.getResources().getDrawable(R.drawable.movie, null);
 
-        ImageCardViewCustom cardView = new ImageCardViewCustom(parent.getContext()) {
+        ImageCardView cardView = new ImageCardView(parent.getContext()) {
             @Override
             public void setSelected(boolean selected) {
                 updateCardBackgroundColor(this, selected);
@@ -76,7 +76,7 @@ public class VideoCardPresenter extends Presenter {
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
         Video video = ((Task) item).video;
-        ImageCardViewCustom cardView = (ImageCardViewCustom) viewHolder.view;
+        ImageCardView cardView = (ImageCardView) viewHolder.view;
 
         Log.d(TAG, "onBindViewHolder");
 //        String videoTypeTitle = video.video_type != null ? ("[" + video.video_type.toLowerCase() + "] ") : "";
@@ -105,7 +105,7 @@ public class VideoCardPresenter extends Presenter {
     @Override
     public void onUnbindViewHolder(ViewHolder viewHolder) {
         Log.d(TAG, "onUnbindViewHolder");
-        ImageCardViewCustom cardView = (ImageCardViewCustom) viewHolder.view;
+        ImageCardView cardView = (ImageCardView) viewHolder.view;
         // Remove references to images so that the garbage collector can free up memory
         cardView.setBadgeImage(null);
         cardView.setMainImage(null);

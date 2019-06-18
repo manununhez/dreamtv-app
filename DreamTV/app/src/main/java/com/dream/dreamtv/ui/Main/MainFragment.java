@@ -41,12 +41,15 @@ import com.dream.dreamtv.BuildConfig;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Card;
+import com.dream.dreamtv.model.Category;
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.TasksList;
 import com.dream.dreamtv.model.User;
-import com.dream.dreamtv.presenter.IconCardCustomPresenter;
-import com.dream.dreamtv.presenter.SideInfoCardPresenter;
+import com.dream.dreamtv.presenter.IconCardPresenter;
+import com.dream.dreamtv.presenter.SideInfoPresenter.SideInfoCardPresenter;
+import com.dream.dreamtv.presenter.SingleLineCardPresenter;
+import com.dream.dreamtv.ui.Categories.CategoryActivity;
 import com.dream.dreamtv.ui.Preferences.PreferencesActivity;
 import com.dream.dreamtv.ui.Search.SearchActivity;
 import com.dream.dreamtv.ui.VideoDetails.VideoDetailsActivity;
@@ -60,6 +63,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static com.dream.dreamtv.utils.Constants.EMPTY_ITEM;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_MODE;
@@ -69,6 +73,7 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SAVE_
 import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_CALL_TASKS;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
+import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_TOPIC_NAME;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_USER_UPDATED;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.SETTINGS_CAT;
@@ -82,7 +87,6 @@ import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
 public class MainFragment extends BrowseSupportFragment {
     private static final String TAG = MainFragment.class.getSimpleName();
 
-    private static final String EMPTY_ITEM = "Some item";
     private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
     private static final int REQUEST_SETTINGS = 45686;
     private static final boolean DEBUG = BuildConfig.DEBUG;
@@ -95,11 +99,13 @@ public class MainFragment extends BrowseSupportFragment {
     private ListRow rowFinishedTasks;
     private ListRow rowContinueTasks;
     private ListRow rowTestTasks;
+    private ListRow rowCategories;
     private LiveData<Resource<TasksList>> allTaskLiveData;
     private LiveData<Resource<TasksList>> continueTaskLiveData;
     private LiveData<Resource<TasksList>> finishedTaskLiveData;
     private LiveData<Resource<TasksList>> myListTaskLiveData;
     private LiveData<Resource<TasksList>> testTaskLiveData;
+    private LiveData<Resource<Category[]>> categoriesLiveData;
     private FirebaseAnalytics mFirebaseAnalytics;
     private LiveData<Resource<User>> updateUserLiveData;
 
@@ -133,15 +139,18 @@ public class MainFragment extends BrowseSupportFragment {
     private void initSettingsRow() {
         HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
 
-        IconCardCustomPresenter mIconCardPresenter = new IconCardCustomPresenter(getActivity());
+        IconCardPresenter mIconCardPresenter = new IconCardPresenter(getActivity());
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mIconCardPresenter);
         Card settingsCard = new Card();
         settingsCard.setType(Card.Type.ICON);
-        settingsCard.setTitle(SETTINGS_CAT);
+//        settingsCard.setTitle(SETTINGS_CAT);
         settingsCard.setLocalImageResource("ic_settings_settings");
         gridRowAdapter.add(settingsCard);
 
         rowSettings = new ListRow(gridHeader, gridRowAdapter);
+
+
+        rowCategories = new ListRow(new HeaderItem(getString(R.string.title_topics_category)), new ArrayObjectAdapter(new SingleLineCardPresenter(getActivity())));
 
 
         rowAllTasks = new ListRow(new HeaderItem(getString(R.string.title_check_new_tasks_category)), new ArrayObjectAdapter(new SideInfoCardPresenter(getActivity())));
@@ -186,7 +195,32 @@ public class MainFragment extends BrowseSupportFragment {
 
     private void populateScreen() {
 
+
         reorderRowSettings();
+
+
+        categoriesLiveData = mViewModel.fetchCategories();
+        categoriesLiveData.removeObservers(getViewLifecycleOwner());
+        categoriesLiveData.observe(getViewLifecycleOwner(), resource -> {
+            if (resource.status.equals(Resource.Status.LOADING)) {
+                if (DEBUG) Log.d(TAG, "loading");
+
+            } else if (resource.status.equals(Resource.Status.SUCCESS)) {
+                if (resource.data != null)
+                    categoriesRowSettings(resource.data);
+                else verifyRowExistenceAndRemove(rowCategories);
+
+
+                if (DEBUG) Log.d(TAG, "task response");
+            } else if (resource.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (resource.message != null) {
+                    if (DEBUG) Log.d(TAG, resource.message);
+                } else if (DEBUG) Log.d(TAG, "Status ERROR");
+
+//                dismissLoading();
+            }
+        });
 
         allTaskLiveData = mViewModel.requestTasksByCategory(TASKS_ALL_CAT);
         allTaskLiveData.removeObservers(getViewLifecycleOwner());
@@ -207,9 +241,9 @@ public class MainFragment extends BrowseSupportFragment {
                 dismissLoading();
             } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
-                if (tasksListResource.message != null)
+                if (tasksListResource.message != null) {
                     if (DEBUG) Log.d(TAG, tasksListResource.message);
-                    else if (DEBUG) Log.d(TAG, "Status ERROR");
+                } else if (DEBUG) Log.d(TAG, "Status ERROR");
 
                 dismissLoading();
             }
@@ -233,9 +267,9 @@ public class MainFragment extends BrowseSupportFragment {
                 dismissLoading();
             } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
-                if (tasksListResource.message != null)
+                if (tasksListResource.message != null) {
                     if (DEBUG) Log.d(TAG, tasksListResource.message);
-                    else if (DEBUG) Log.d(TAG, "Status ERROR");
+                } else if (DEBUG) Log.d(TAG, "Status ERROR");
 
                 dismissLoading();
             }
@@ -260,9 +294,9 @@ public class MainFragment extends BrowseSupportFragment {
                 dismissLoading();
             } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
-                if (tasksListResource.message != null)
+                if (tasksListResource.message != null) {
                     if (DEBUG) Log.d(TAG, tasksListResource.message);
-                    else if (DEBUG) Log.d(TAG, "Status ERROR");
+                } else if (DEBUG) Log.d(TAG, "Status ERROR");
 
                 dismissLoading();
             }
@@ -289,9 +323,9 @@ public class MainFragment extends BrowseSupportFragment {
                 dismissLoading();
             } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
-                if (tasksListResource.message != null)
+                if (tasksListResource.message != null) {
                     if (DEBUG) Log.d(TAG, tasksListResource.message);
-                    else if (DEBUG) Log.d(TAG, "Status ERROR");
+                } else if (DEBUG) Log.d(TAG, "Status ERROR");
 
                 dismissLoading();
             }
@@ -317,9 +351,9 @@ public class MainFragment extends BrowseSupportFragment {
                 dismissLoading();
             } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
-                if (tasksListResource.message != null)
+                if (tasksListResource.message != null) {
                     if (DEBUG) Log.d(TAG, tasksListResource.message);
-                    else if (DEBUG) Log.d(TAG, "Status ERROR");
+                } else if (DEBUG) Log.d(TAG, "Status ERROR");
 
                 dismissLoading();
             }
@@ -337,7 +371,7 @@ public class MainFragment extends BrowseSupportFragment {
 
         if (DEBUG) Log.d(TAG, "userRegistration()");
         String token = getApplication().getToken();
-        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
+        User user = getApplication().getUser();
         if (token == null || user == null) //first time the app is initiated. The user has to select an account
             pickUserAccount();
         else
@@ -427,6 +461,51 @@ public class MainFragment extends BrowseSupportFragment {
 
             mRowsAdapter.add(0, listRow);
         }
+
+        setAdapter(mRowsAdapter);
+
+    }
+
+    private void categoriesRowSettings(Category[] categories) {
+        List<Card> cards = new ArrayList<>();
+
+
+        DiffCallback<Card> diffCallback = new DiffCallback<Card>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
+                return oldItem.getTitle().equals(newItem.getTitle());
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
+                return Objects.equals(oldItem, newItem);
+            }
+        };
+
+
+        for (Category category : categories) {
+            Card card = new Card();
+            card.setTitle(category.name);
+//            card.setFooterColor("#c51162");
+            card.setLocalImageResource("category_animation");
+            cards.add(card);
+        }
+
+        int indexOfRow = mRowsAdapter.indexOf(rowCategories);
+
+        ArrayObjectAdapter arrayObjectAdapter = ((ArrayObjectAdapter) rowCategories.getAdapter());
+
+        if (indexOfRow != -1)
+            arrayObjectAdapter.setItems(cards, diffCallback);
+        else {
+
+            arrayObjectAdapter.clear(); //clear row before add new ones
+
+            arrayObjectAdapter.addAll(arrayObjectAdapter.size(), cards);
+
+            mRowsAdapter.add(0, rowCategories);
+        }
+
 
         setAdapter(mRowsAdapter);
 
@@ -590,24 +669,26 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
 
-    public  final class ItemViewClickedListener implements OnItemViewClickedListener {
+    public final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
             if (item instanceof Card) {
-                Card value = (Card) item;
-                if (value.getTitle().equals(SETTINGS_CAT)) {
-//                    Intent intent = new Intent(getActivity(), SettingsActivity.class);
+                Card card = (Card) item;
+                if (row.getHeaderItem().getName().equals(getString(R.string.title_preferences_category))) {
                     Intent intent = new Intent(getActivity(), PreferencesActivity.class);
                     startActivityForResult(intent, REQUEST_SETTINGS);
-//                    startActivity(intent);
+                } else if (row.getHeaderItem().getName().equals(getString(R.string.title_topics_category))) {
+                    Intent intent = new Intent(getActivity(), CategoryActivity.class);
+                    intent.putExtra(INTENT_EXTRA_TOPIC_NAME, card.getTitle());
+                    startActivity(intent);
                 } else {
-                    Task task = value.getTask();
+                    Task task = card.getTask();
 
                     Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
                     intent.putExtra(INTENT_TASK, task);
-                    intent.putExtra(INTENT_CATEGORY, value.getCategory());
+                    intent.putExtra(INTENT_CATEGORY, card.getCategory());
 
                     startActivity(intent);
                 }

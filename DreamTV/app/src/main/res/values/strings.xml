@@ -23,6 +23,7 @@
     <string name="dreamTVApp_token" translatable="false">dreamTVApp_token</string>
     <string name="user_preferences" translatable="false">user_preferences</string>
     <string name="reasons_preferences" translatable="false">reasons_preferences</string>
+    <string name="categories_preferences" translatable="false">categories_preferences</string>
     <string name="video_tests_preferences" translatable="false">video_tests_preferences</string>
 
     <!--titles-->
@@ -39,6 +40,7 @@
     <string name="title_see_more_videos_category">See more videos</string>
     <string name="title_continue_watching_category">Continue watching</string>
     <string name="title_see_all_category">All videos</string>
+    <string name="title_topics_category">Topics</string>
     <string name="title_check_new_tasks_category">New releases</string>
     <string name="rb_option_text_english">English</string>
     <string name="rb_option_text_polish">Polish</string>

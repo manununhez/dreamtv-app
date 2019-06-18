@@ -19,7 +19,7 @@ import androidx.annotation.ColorInt;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.leanback.widget.BaseCardView;
 
-public class ImageCardViewCustom extends BaseCardView{
+public class ImageCardView extends BaseCardView{
 
         public static final int CARD_TYPE_FLAG_IMAGE_ONLY = 0;
         public static final int CARD_TYPE_FLAG_TITLE = 1;
@@ -52,14 +52,14 @@ public class ImageCardViewCustom extends BaseCardView{
          * return new ImageCardViewCustom(wrapper);
          */
         @Deprecated
-        public ImageCardViewCustom(Context context, int themeResId) {
+        public ImageCardView(Context context, int themeResId) {
             this(new ContextThemeWrapper(context, themeResId));
         }
 
         /**
          * @see View#View(Context, AttributeSet, int)
          */
-        public ImageCardViewCustom(Context context, AttributeSet attrs, int defStyleAttr) {
+        public ImageCardView(Context context, AttributeSet attrs, int defStyleAttr) {
             super(context, attrs, defStyleAttr);
             buildImageCardViewCustom(attrs, defStyleAttr, R.style.Widget_Leanback_ImageCardView);
         }
@@ -100,13 +100,13 @@ public class ImageCardViewCustom extends BaseCardView{
             }
             // Create children
             if (hasTitle) {
-                mTitleView = (TextView) inflater.inflate(R.layout.lb_image_card_view_themed_title_custom,
+                mTitleView = (TextView) inflater.inflate(R.layout.lb_image_card_view_themed_title,
                         mInfoArea, false);
                 mInfoArea.addView(mTitleView);
             }
 
             if (hasContent) {
-                mContentView = (TextView) inflater.inflate(R.layout.lb_image_card_view_themed_content_custom,
+                mContentView = (TextView) inflater.inflate(R.layout.lb_image_card_view_themed_content,
                         mInfoArea, false);
                 mInfoArea.addView(mContentView);
             }
@@ -183,14 +183,14 @@ public class ImageCardViewCustom extends BaseCardView{
         /**
          * @see View#View(Context)
          */
-        public ImageCardViewCustom(Context context) {
+        public ImageCardView(Context context) {
             this(context, null);
         }
 
         /**
          * @see View#View(Context, AttributeSet)
          */
-        public ImageCardViewCustom(Context context, AttributeSet attrs) {
+        public ImageCardView(Context context, AttributeSet attrs) {
             this(context, attrs, R.attr.imageCardViewStyle);
         }
 

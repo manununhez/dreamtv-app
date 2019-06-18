@@ -18,6 +18,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -28,14 +30,18 @@ import java.net.URISyntaxException;
 public class Card {
 
     private String mCategory;
+    @SerializedName("title")
     private String mTitle = "";
     private String mDescription = "";
     private String mExtraText = "";
     private String mImageUrl;
+    @SerializedName("footerColor")
     private String mFooterColor = null;
     private String mSelectedColor = null;
+    @SerializedName("localImageResource")
     private String mLocalImageResource = null;
     private String mFooterResource = null;
+    @SerializedName("type")
     private Card.Type mType;
     private int mId;
     private int mWidth;

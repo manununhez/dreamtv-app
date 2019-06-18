@@ -1,5 +1,6 @@
 package com.dream.dreamtv.ui.PlayVideo;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -20,7 +21,7 @@ class PlaybackViewModel extends ViewModel {
         mRepository.updateUserTask(userTask);
     }
 
-    MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(UserTaskError userTaskError, boolean saveError) {
+    LiveData<Resource<UserTaskError[]>> errorsUpdate(UserTaskError userTaskError, boolean saveError) {
         return mRepository.errorsUpdate(userTaskError, saveError);
     }
 

@@ -12,9 +12,8 @@
  * the License.
  */
 
-package com.dream.dreamtv.presenter;
+package com.dream.dreamtv.presenter.SideInfoPresenter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,11 +28,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Card;
 import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.utils.Utils;
 
 /**
@@ -106,7 +103,7 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
         primaryText.setText(card.getTitle());
 
 //        secondaryText.setText(card.getDescription());
-        User user = ((DreamTVApp) ((Activity) getContext()).getApplication()).getUser();
+        //User user = ((DreamTVApp) ((Activity) getContext()).getApplication()).getUser();
         String timeFormatted = Utils.getTimeFormatMinSecs(task.video.duration * 1000);
         TextView secondaryText = cardView.findViewById(R.id.secondary_text);
         secondaryText.setText(getContext().getString(R.string.title_video_details_main, task.video.project,

@@ -17,6 +17,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.model.Category;
 import com.dream.dreamtv.model.ErrorReason;
 import com.dream.dreamtv.model.JsonResponseBaseBean;
 import com.dream.dreamtv.model.Resource;
@@ -29,6 +30,7 @@ import com.dream.dreamtv.model.UserTaskError;
 import com.dream.dreamtv.model.VideoTests;
 import com.dream.dreamtv.ui.Main.MainFragment;
 import com.dream.dreamtv.utils.AppExecutors;
+import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.reflect.TypeToken;
@@ -38,10 +40,12 @@ import java.util.Map;
 
 import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE_CONFIG;
+import static com.dream.dreamtv.utils.Constants.PARAM_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.PARAM_COMPLETED;
 import static com.dream.dreamtv.utils.Constants.PARAM_EMAIL;
 import static com.dream.dreamtv.utils.Constants.PARAM_INTERFACE_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_INTERFACE_MODE;
+import static com.dream.dreamtv.utils.Constants.PARAM_LANG;
 import static com.dream.dreamtv.utils.Constants.PARAM_LANG_CODE;
 import static com.dream.dreamtv.utils.Constants.PARAM_MAX_VIDEO_DURATION;
 import static com.dream.dreamtv.utils.Constants.PARAM_MIN_VIDEO_DURATION;
@@ -91,6 +95,7 @@ public class NetworkDataSource {
     private MutableLiveData<Resource<TasksList>> responseFromFetchFinishedTasks;
     private MutableLiveData<Resource<TasksList>> responseFromFetchMyListTasks;
     private MutableLiveData<Resource<Task[]>> responseFromSearch;
+    private MutableLiveData<Resource<Task[]>> responseFromSearchByKeywordCategory;
     private MutableLiveData<Resource<Boolean>> responseFromAddToListTasks;
     private MutableLiveData<Resource<Boolean>> responseFromRemoveFromListTasks;
     private MutableLiveData<Resource<User>> responseFromUserUpdate;
@@ -98,6 +103,7 @@ public class NetworkDataSource {
     private MutableLiveData<Resource<UserTask>> responseFromFetchUserTask;
     private MutableLiveData<Resource<UserTask>> responseFromCreateUserTask;
     private MutableLiveData<Resource<UserTaskError[]>> responseFromErrorsUpdate;
+    private MutableLiveData<Resource<Category[]>> responseFromCategories;
     private int currentPage = 1;
 
     private NetworkDataSource(Context context, AppExecutors executors) {
@@ -106,6 +112,8 @@ public class NetworkDataSource {
 
         mExecutors = executors;
 
+        responseFromSearchByKeywordCategory = new MutableLiveData<>();
+        responseFromCategories = new MutableLiveData<>();
         responseFromSearch = new MutableLiveData<>();
         responseFromUserUpdate = new MutableLiveData<>();
         responseFromFetchSubtitle = new MutableLiveData<>();
@@ -225,6 +233,8 @@ public class NetworkDataSource {
             fetchTestTaskCategory();
 
         fetchReasons();
+
+        fetchCategories();
 
         fetchVideoTestsDetails();
 
@@ -487,6 +497,54 @@ public class NetworkDataSource {
 
 
         mExecutors.networkIO().execute(() -> requestString(Method.GET, errorsUri.toString(), null, responseListener));
+    }
+
+    /**
+     *
+     */
+    @SuppressWarnings("unchecked")
+    public MutableLiveData<Resource<Category[]>> fetchCategories() {
+        responseFromCategories.setValue(Resource.loading(null));
+
+        Uri categoriesUri = Uri.parse(URL_BASE.concat(Urls.CATEGORIES.value)).buildUpon()
+                .appendQueryParameter(PARAM_LANG, PreferenceManager.getDefaultSharedPreferences(mContext)
+                        .getString(mContext.getString(R.string.pref_key_list_app_languages), Constants.PREF_ABR_POLISH))
+                .build();
+
+        Log.d(TAG, "fetchCategories() Request URL: " + categoriesUri.toString());
+
+
+        ResponseListener responseListener = new ResponseListener(mContext) {
+            @Override
+            protected void processResponse(String response) {
+                Log.d(TAG, "fetchCategories() Response JSON: " + response);
+
+                TypeToken type = new TypeToken<JsonResponseBaseBean<Category[]>>() {
+                };
+                JsonResponseBaseBean<Category[]> jsonResponse = getJsonResponse(response, type);
+
+                Category[] categories = jsonResponse.data;
+
+                responseFromCategories.postValue(Resource.success(categories));
+
+
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+
+                //TODO do something error
+                responseFromCategories.postValue(Resource.error(error.getMessage(), null));
+
+                Log.d(TAG, "fetchCategories() Response Error: " + error.getMessage());
+            }
+        };
+
+
+        mExecutors.networkIO().execute(() -> requestString(Method.GET, categoriesUri.toString(), null, responseListener));
+
+        return responseFromCategories;
     }
 
     /**
@@ -782,7 +840,62 @@ public class NetworkDataSource {
     }
 
     /**
-     *
+     * @param category
+     * @return
+     */
+    public MutableLiveData<Resource<Task[]>> searchByKeywordCategory(String category) {
+
+        responseFromSearchByKeywordCategory.setValue(Resource.loading(null));
+
+        Uri searchUri = Uri.parse(URL_BASE.concat(Urls.TASKS_BY_KEYWORD_CATEGORIES.value)).buildUpon()
+                .appendQueryParameter(PARAM_CATEGORY, category)
+                .build();
+
+        Log.d(TAG, "searchByKeywordCategory() Request URL: " + searchUri.toString()
+                + " Params: " + PARAM_CATEGORY + "=>" + category);
+
+        ResponseListener responseListener = new ResponseListener(mContext) {
+            @Override
+            protected void processResponse(String response) {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
+                };
+                JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
+
+                Log.d(TAG, "searchByKeywordCategory() Response JSON: " + response);
+
+                Task[] tasks = jsonResponse.data;
+
+
+//                if (taskResponse.length > 0) {//If the response data if not empty
+//                Task[] taskEntities = new Task[taskResponse.length];
+//
+//                for (int i = 0; i < taskResponse.length; i++) {
+//                    taskEntities[i] = taskResponse[i].getEntity(paramType);
+//                }
+
+
+                responseFromSearchByKeywordCategory.postValue(Resource.success(tasks)); //post the value to live data
+//                }
+
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+
+                //TODO do something error
+                responseFromSearchByKeywordCategory.postValue(Resource.error(error.getMessage(), null));
+
+                Log.d(TAG, "searchByKeywordCategory() Response Error: " + error.getMessage());
+            }
+        };
+
+        mExecutors.networkIO().execute(() -> requestString(Method.GET, searchUri.toString(), null, responseListener));
+
+        return responseFromSearchByKeywordCategory;
+    }
+
+    /**
      * @param query
      * @return
      */
@@ -1255,6 +1368,8 @@ public class NetworkDataSource {
 
         USER_DETAILS("details"),
 
+        TASKS_BY_KEYWORD_CATEGORIES("tasks/search/category"),
+
         TASKS_BY_CATEGORY("tasks/categories"),
 
         TASKS_SEARCH("tasks/search"),
@@ -1268,6 +1383,8 @@ public class NetworkDataSource {
         USER_TASK_MY_LIST("usertask/list"),
 
         VIDEO_TESTS("videotests"),
+
+        CATEGORIES("categories"),
 
         REASON_ERRORS("errors"),
 

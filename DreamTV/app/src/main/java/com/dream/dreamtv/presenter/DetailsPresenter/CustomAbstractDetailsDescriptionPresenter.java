@@ -1,4 +1,4 @@
-package com.dream.dreamtv.presenter;
+package com.dream.dreamtv.presenter.DetailsPresenter;
 
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;

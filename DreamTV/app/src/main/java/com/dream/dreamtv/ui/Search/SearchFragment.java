@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
-import android.speech.RecognizerIntent;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -23,7 +21,7 @@ import androidx.leanback.widget.OnItemViewClickedListener;
 import androidx.leanback.widget.Presenter;
 import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.dream.dreamtv.BuildConfig;
@@ -31,7 +29,7 @@ import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Card;
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.presenter.SideInfoCardPresenter;
+import com.dream.dreamtv.presenter.SideInfoPresenter.SideInfoCardPresenter;
 import com.dream.dreamtv.ui.VideoDetails.VideoDetailsActivity;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
@@ -42,7 +40,6 @@ import java.util.Objects;
 
 import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
-import static com.dream.dreamtv.utils.Constants.PREF_ABR_POLISH;
 
 /*
  * This class demonstrates how to do in-app search
@@ -59,7 +56,7 @@ public class SearchFragment extends SearchSupportFragment
     private String mQuery;
     private boolean mResultsFound = false;
     private SearchViewModel mViewModel;
-    private MutableLiveData<Resource<Task[]>> searchLiveData;
+    private LiveData<Resource<Task[]>> searchLiveData;
     private LoadingDialog loadingDialog;
 
     @Override
@@ -100,23 +97,17 @@ public class SearchFragment extends SearchSupportFragment
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_SPEECH:
-                switch (resultCode) {
-                    case Activity.RESULT_OK:
-                        setSearchQuery(data, true);
-                        break;
-                    default:
-                        // If recognizer is canceled or failed, keep focus on the search orb
-                        if (FINISH_ON_RECOGNIZER_CANCELED) {
-                            if (!hasResults()) {
-                                if (DEBUG) Log.v(TAG, "Voice search canceled");
-                                getView().findViewById(R.id.lb_search_bar_speech_orb).requestFocus();
-                            }
-                        }
-                        break;
+        if (requestCode == REQUEST_SPEECH) {
+            if (resultCode == Activity.RESULT_OK) {
+                setSearchQuery(data, true);
+            } else {// If recognizer is canceled or failed, keep focus on the search orb
+                if (FINISH_ON_RECOGNIZER_CANCELED) {
+                    if (!hasResults()) {
+                        if (DEBUG) Log.v(TAG, "Voice search canceled");
+                        getView().findViewById(R.id.lb_search_bar_speech_orb).requestFocus();
+                    }
                 }
-                break;
+            }
         }
     }
 
@@ -245,6 +236,4 @@ public class SearchFragment extends SearchSupportFragment
 
         }
     }
-
-
 }

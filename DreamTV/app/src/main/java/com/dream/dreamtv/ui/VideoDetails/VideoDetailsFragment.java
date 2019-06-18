@@ -33,7 +33,7 @@ import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.VideoTests;
-import com.dream.dreamtv.presenter.DetailsDescriptionPresenter;
+import com.dream.dreamtv.presenter.DetailsPresenter.DetailsDescriptionPresenter;
 import com.dream.dreamtv.ui.PlayVideo.PlaybackVideoActivity;
 import com.dream.dreamtv.ui.PlayVideo.PlaybackVideoYoutubeActivity;
 import com.dream.dreamtv.utils.InjectorUtils;

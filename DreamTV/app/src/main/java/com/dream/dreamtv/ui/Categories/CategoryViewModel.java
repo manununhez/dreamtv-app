@@ -1,4 +1,4 @@
-package com.dream.dreamtv.ui.Search;
+package com.dream.dreamtv.ui.Categories;
 
 
 import androidx.lifecycle.LiveData;
@@ -9,19 +9,18 @@ import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.repository.AppRepository;
 
-class SearchViewModel extends ViewModel {
+class CategoryViewModel extends ViewModel {
 
     private final AppRepository mRepository;
 
-    SearchViewModel(AppRepository appRepository) {
+    CategoryViewModel(AppRepository appRepository) {
         mRepository = appRepository;
 
     }
 
-    LiveData<Resource<Task[]>> search(String query) {
-        return mRepository.search(query);
+    LiveData<Resource<Task[]>> searchByKeywordCateory(String category){
+        return mRepository.searchByKeywordCategory(category);
     }
-
 
 }
 

@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.dream.dreamtv.model.Category;
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.SubtitleResponse;
 import com.dream.dreamtv.model.Task;
@@ -204,5 +205,13 @@ public class AppRepository {
 
     public MutableLiveData<Resource<Task[]>> search(String query) {
         return mNetworkDataSource.search(query);
+    }
+
+    public MutableLiveData<Resource<Category[]>> fetchCategories(){
+        return mNetworkDataSource.fetchCategories();
+    }
+
+    public MutableLiveData<Resource<Task[]>> searchByKeywordCategory(String category){
+        return mNetworkDataSource.searchByKeywordCategory(category);
     }
 }

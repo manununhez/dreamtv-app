@@ -22,6 +22,8 @@ import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.dream.dreamtv.R;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -96,5 +98,23 @@ public class Utils {
                 TimeUnit.MILLISECONDS.toSeconds(millis) -
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
         );
+    }
+
+    /**
+     * Will read the content from a given {@link InputStream} and return it as a String.
+     *
+     * @param inputStream The {@link InputStream} which should be read.
+     * @return Returns <code>null</code> if the the {@link InputStream} could not be read. Else
+     * returns the content of the {@link InputStream} as String.
+     */
+    public static String inputStreamToString(InputStream inputStream) {
+        try {
+            byte[] bytes = new byte[inputStream.available()];
+            inputStream.read(bytes, 0, bytes.length);
+            String json = new String(bytes);
+            return json;
+        } catch (IOException e) {
+            return null;
+        }
     }
 }

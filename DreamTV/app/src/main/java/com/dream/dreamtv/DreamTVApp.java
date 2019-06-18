@@ -7,7 +7,6 @@ import android.util.Log;
 import com.dream.dreamtv.model.ErrorReason;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.VideoTests;
-import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.SharedPreferenceUtils;
 import com.google.gson.Gson;
@@ -79,6 +78,7 @@ public class DreamTVApp extends Application {
         SharedPreferenceUtils.save(this, getString(R.string.reasons_preferences), reasons);
     }
 
+
     private List<ErrorReason> getReasonsByLanguage(List<ErrorReason> list) {
         User user = getUser();
         List<ErrorReason> newList = new ArrayList<>();
@@ -102,5 +102,6 @@ public class DreamTVApp extends Application {
         String videoTests = gson.toJson(Arrays.asList(videoTestsList));
         SharedPreferenceUtils.save(this, getString(R.string.video_tests_preferences), videoTests);
     }
+
 
 }

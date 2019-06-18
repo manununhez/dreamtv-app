@@ -5,7 +5,6 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,7 +35,7 @@ public class SubtitleResponse implements Parcelable {
         subFormat = in.readString();
         subtitles = in.createTypedArrayList(Subtitle.CREATOR);
     }
-    
+
 
     public Subtitle getSyncSubtitleText(long l) {
         Subtitle subtitle = null;

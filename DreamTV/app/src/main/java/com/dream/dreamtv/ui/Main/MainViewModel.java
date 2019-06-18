@@ -4,6 +4,7 @@ package com.dream.dreamtv.ui.Main;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.dream.dreamtv.model.Category;
 import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.TasksList;
 import com.dream.dreamtv.model.User;
@@ -32,6 +33,9 @@ class MainViewModel extends ViewModel {
         return mRepository.requestTaskByCategory(category);
     }
 
+    LiveData<Resource<Category[]>> fetchCategories(){
+        return mRepository.fetchCategories();
+    }
 
     void updateTaskByCategory(String category) {
         mRepository.updateTasksCategory(category);

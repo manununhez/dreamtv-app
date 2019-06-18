@@ -35,8 +35,12 @@ public class Constants {
     public static final String INTENT_EXTRA_CALL_TASKS = "INTENT_EXTRA_CALL_TASKS";
     public static final String INTENT_EXTRA_USER_UPDATED = "INTENT_EXTRA_USER_UPDATED";
     public static final String INTENT_EXTRA_RESTART = "restart";
+    public static final String INTENT_EXTRA_TOPIC_NAME = "CategoryName";
     public static final String INTENT_PLAY_FROM_BEGINNING = "from_beginning";
     public static final String INTENT_CATEGORY = "INTENT_CATEGORY";
+
+    public static final String EMPTY_ITEM = "Some item";
+
 
     //Types of tasks and categories
     public static final String TASKS_ALL_CAT = "all";
@@ -85,6 +89,7 @@ public class Constants {
     public static final String PARAM_TYPE = "type";
     public static final String PARAM_VIDEO_ID = "video_id";
     public static final String PARAM_LANG_CODE = "language_code";
+    public static final String PARAM_LANG = "language";
     public static final String PARAM_VERSION = "version";
     public static final String PARAM_TASK_ID = "task_id";
     public static final String PARAM_INTERFACE_MODE = "interface_mode";
@@ -102,6 +107,7 @@ public class Constants {
     public static final String PARAM_SUB_POSITION = "subtitle_position";
     public static final String PARAM_REASON_CODE = "reason_code";
     public static final String PARAM_QUERY = "query";
+    public static final String PARAM_CATEGORY = "category";
 
 
     public static final String YOUTUBE_VIDEO_ID = "videoId";

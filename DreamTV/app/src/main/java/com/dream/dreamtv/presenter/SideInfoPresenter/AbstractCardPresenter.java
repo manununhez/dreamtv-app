@@ -1,4 +1,4 @@
-package com.dream.dreamtv.presenter;
+package com.dream.dreamtv.presenter.SideInfoPresenter;
 
 import android.content.Context;
 import android.view.ViewGroup;
