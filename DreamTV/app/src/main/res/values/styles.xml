@@ -27,12 +27,6 @@
         <item name="imageCardViewInfoAreaStyle">@style/IconCardInfoAreaStyle</item>
     </style>
 
-    <style name="SettingIconCardTheme" parent="Theme.Leanback">
-        <item name="imageCardViewTitleStyle">@style/IconCardTitleStyle</item>
-        <item name="imageCardViewImageStyle">@style/IconCardImageStyle</item>
-        <item name="imageCardViewInfoAreaStyle">@style/IconCardInfoAreaStyle</item>
-    </style>
-
 
     <!-- Icon card style with custom focus handler. Used in cards example. -->
     <style name="IconCardViewStyle" parent="DefaultCardStyle">
@@ -105,32 +99,6 @@
         <item name="colorControlNormal">@color/white</item>
     </style>
 
-
-    <style name="imageCardViewTitleStyle">
-        <item name="android:id">@id/content_text</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_alignParentStart">true</item>
-        <item name="android:layout_below">@+id/title_text</item>
-        <item name="android:maxLines">4</item>
-        <item name="android:textAlignment">viewStart</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:textAppearance">@style/TextAppearance.Leanback.ImageCardView.Content
-        </item>
-    </style>
-
-    <style name="imageCardViewContentStyle">
-        <item name="android:id">@id/content_text</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_alignParentStart">true</item>
-        <item name="android:layout_below">@+id/title_text</item>
-        <item name="android:maxLines">2</item>
-        <item name="android:textAlignment">viewStart</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:textAppearance">@style/TextAppearance.Leanback.ImageCardView.Content
-        </item>
-    </style>
 
     <style name="LeanbackPreferences" parent="Theme.Leanback">
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Leanback</item>

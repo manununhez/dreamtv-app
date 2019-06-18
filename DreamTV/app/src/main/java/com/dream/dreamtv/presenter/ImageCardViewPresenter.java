@@ -20,7 +20,7 @@ import android.view.ContextThemeWrapper;
 import com.bumptech.glide.Glide;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Card;
-import com.dream.dreamtv.presenter.SideInfoPresenter.AbstractCardPresenter;
+import com.dream.dreamtv.presenter.sideInfoPresenter.AbstractCardPresenter;
 
 
 public class ImageCardViewPresenter extends AbstractCardPresenter<ImageCardView> {
@@ -35,14 +35,7 @@ public class ImageCardViewPresenter extends AbstractCardPresenter<ImageCardView>
 
     @Override
     protected ImageCardView onCreateView() {
-        ImageCardView imageCardView = new ImageCardView(getContext());
-//        imageCardView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(getContext(), "Clicked on ImageCardView", Toast.LENGTH_SHORT).show();
-//            }
-//        });
-        return imageCardView;
+        return new ImageCardView(getContext());
     }
 
     @Override

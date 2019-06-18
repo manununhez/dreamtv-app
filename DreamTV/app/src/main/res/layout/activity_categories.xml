@@ -5,7 +5,7 @@
 
     <fragment
         android:id="@+id/cardsFragment"
-        android:name="com.dream.dreamtv.ui.Categories.CategoryFragment"
+        android:name="com.dream.dreamtv.ui.categories.CategoryFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </RelativeLayout>

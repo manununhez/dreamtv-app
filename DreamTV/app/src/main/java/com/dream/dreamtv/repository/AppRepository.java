@@ -32,7 +32,7 @@ public class AppRepository {
     private boolean mInitialized = false;
     private AppExecutors mExecutors;
 
-    private AppRepository(NetworkDataSource networkDataSource, AppExecutors executors) {
+    private AppRepository(NetworkDataSource networkDataSource) {
         mNetworkDataSource = networkDataSource;
 
     }
@@ -44,7 +44,7 @@ public class AppRepository {
         Log.d(TAG, "Getting the repository");
         if (INSTANCE == null) {
             synchronized (AppRepository.class) {
-                INSTANCE = new AppRepository(/*taskDao, */networkDataSource, executors);
+                INSTANCE = new AppRepository(/*taskDao, */networkDataSource);
                 Log.d(TAG, "Made new repository");
             }
         }

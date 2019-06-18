@@ -28,7 +28,7 @@ import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.UserTaskError;
 import com.dream.dreamtv.model.VideoTests;
-import com.dream.dreamtv.ui.Main.MainFragment;
+import com.dream.dreamtv.ui.main.MainFragment;
 import com.dream.dreamtv.utils.AppExecutors;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
@@ -160,6 +160,7 @@ public class NetworkDataSource {
         return mRequestQueue;
     }
 
+    @SuppressWarnings("unchecked")
     private <T> void addToRequestQueue(Request<T> req, Object tag) {
         // set the default tag if tag is empty
         req.setTag(tag == null ? TAG : tag);
@@ -840,9 +841,10 @@ public class NetworkDataSource {
     }
 
     /**
-     * @param category
-     * @return
+     * @param category category
+     * @return responseFromSearchByKeywordCategory
      */
+    @SuppressWarnings("unchecked")
     public MutableLiveData<Resource<Task[]>> searchByKeywordCategory(String category) {
 
         responseFromSearchByKeywordCategory.setValue(Resource.loading(null));
@@ -896,9 +898,10 @@ public class NetworkDataSource {
     }
 
     /**
-     * @param query
-     * @return
+     * @param query query
+     * @return responseFromSearch
      */
+    @SuppressWarnings("unchecked")
     public MutableLiveData<Resource<Task[]>> search(String query) {
 
         responseFromSearch.setValue(Resource.loading(null));
@@ -1011,8 +1014,8 @@ public class NetworkDataSource {
 
 
     /**
-     * @param taskId
-     * @param mSubtitleVersion
+     * @param taskId taskId
+     * @param mSubtitleVersion mSubtitleVersion
      */
     @SuppressWarnings("unchecked")
     public MutableLiveData<Resource<UserTask>> createUserTask(int taskId, int mSubtitleVersion) {
@@ -1112,11 +1115,10 @@ public class NetworkDataSource {
 //    }
 
     /**
-     * @param taskId
-     * @param subLanguageConfig
-     * @param audioLanguageConfig
+     * @param taskId taskId
+     * @param subLanguageConfig subLanguageConfig
+     * @param audioLanguageConfig audioLanguageConfig
      */
-    @SuppressWarnings("unchecked")
     public MutableLiveData<Resource<Boolean>> addTaskToList(int taskId, String subLanguageConfig, String audioLanguageConfig) {
 
         Uri addToListUri = Uri.parse(URL_BASE.concat(Urls.USER_TASK_MY_LIST.value)).buildUpon().build();
@@ -1158,9 +1160,8 @@ public class NetworkDataSource {
     }
 
     /**
-     * @param taskId
+     * @param taskId taskId
      */
-    @SuppressWarnings("unchecked")
     public MutableLiveData<Resource<Boolean>> removeTaskFromList(int taskId) {
         Uri removeFromListUri = Uri.parse(URL_BASE.concat(Urls.USER_TASK_MY_LIST.value)).buildUpon()
                 .appendQueryParameter(PARAM_TASK_ID, String.valueOf(taskId))
@@ -1196,6 +1197,7 @@ public class NetworkDataSource {
 
     }
 
+    @SuppressWarnings("unchecked")
     public void updateUserTask(UserTask userTask) {
 
         Map<String, String> params = new HashMap<>();
@@ -1242,8 +1244,9 @@ public class NetworkDataSource {
 
 
     /**
-     * @param userTaskError
+     * @param userTaskError userTaskError
      */
+    @SuppressWarnings("unchecked")
     public MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(UserTaskError userTaskError, boolean saveError) {
         responseFromErrorsUpdate.postValue(Resource.loading(null));
 
@@ -1254,13 +1257,6 @@ public class NetworkDataSource {
         params.put(PARAM_SUB_POSITION, String.valueOf(userTaskError.getSubtitlePosition()));
         params.put(PARAM_SUB_VERSION, String.valueOf(userTaskError.getSubtitleVersion()));
 
-
-        Uri updateUri = Uri.parse(URL_BASE.concat(Urls.USER_ERRORS.value)).buildUpon()
-                .appendQueryParameter(PARAM_TASK_ID, String.valueOf(userTaskError.getTaskId()))
-                .appendQueryParameter(PARAM_REASON_CODE, userTaskError.getReasonCode())
-                .appendQueryParameter(PARAM_SUB_POSITION, String.valueOf(userTaskError.getSubtitlePosition()))
-                .appendQueryParameter(PARAM_SUB_VERSION, String.valueOf(userTaskError.getSubtitleVersion()))
-                .build();
 
         if (saveError)
             Log.d(TAG, "saveErrors() Request URL: " + saveErrorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + userTaskError.getTaskId()
@@ -1375,8 +1371,6 @@ public class NetworkDataSource {
         TASKS_SEARCH("tasks/search"),
 
         USER_TASKS("usertasks"),
-
-        USER_TASKS_WITH_ERRORS("usertasks/details"),
 
         USER_ERRORS("usertask/errors"),
 

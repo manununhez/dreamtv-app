@@ -2,9 +2,9 @@
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/search_fragment"
-    android:name="com.dream.dreamtv.ui.Search.SearchFragment"
+    android:name="com.dream.dreamtv.ui.search.SearchFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.Search.SearchActivity"
+    tools:context=".ui.search.SearchActivity"
     tools:deviceIds="tv"
     tools:ignore="MergeRootFrame" />

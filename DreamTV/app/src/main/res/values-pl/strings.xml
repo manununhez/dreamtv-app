@@ -4,10 +4,8 @@
     <string name="video_error_media_load_timeout">Ładowanie multimediów zostało przekroczone</string>
     <string name="video_error_server_inaccessible">Serwer mediów nie był dostępny</string>
     <string name="video_error_unknown_error">Nie udało się wczytać filmu</string>
-    <string name="error_subtitle_not_found">Niestety, nie można znaleźć napisów dla tego filmu</string>
 
     <!--ERROR NETWORK MESSAGES-->
-    <string name="no_network_connection">Nie znaleziono połączenia sieciowego</string>
     <string name="generic_server_down">Serwer nie działa</string>
     <string name="generic_server_timeout">Limit czasu serwera</string>
     <string name="generic_error">Brak internetu</string>
@@ -17,48 +15,40 @@
 
 
     <!--titles-->
-    <string name="title_share_mode_settings">Sprawdź błędy znalezione przez innych</string>
-    <string name="title_video_languages_settings">Języki wideo</string>
     <string name="title_reasons_dialog">Co tu jest nie tak?</string>
     <string name="title_reasons_dialog_2">Edytuj to, co wybrałeś:</string>
-    <string name="title_confirmation_user_saved_data">Dane użytkownika zostały zapisane poprawnie</string>
-    <string name="title_confirmation_saved_data">Dziękujemy za pomoc</string>
     <string name="title_my_list_category">Moje filmy</string>
     <string name="title_finished_category">Oglądać jeszcze raz</string>
     <string name="title_test_category">Tylko do testowania</string>
     <string name="title_preferences_category">Ustawienia</string>
-    <string name="title_see_more_videos_category">Zobacz więcej filmów</string>
     <string name="title_continue_watching_category">Kontynuuj oglądanie</string>
-    <string name="title_see_all_category">Wszystkie filmy</string>
     <string name="title_topics_category">Tematy</string>
     <string name="title_check_new_tasks_category">Ostatnio dodane filmy</string>
-    <string name="rb_option_text_english">Angielski</string>
-    <string name="rb_option_text_polish">Polski</string>
-    <string name="rb_option_text_yes">Tak</string>
-    <string name="rb_option_text_not">Nie</string>
-    <string name="rb_option_text_advanced">Zaawansowany</string>
-    <string name="rb_option_text_beginner">Prosty</string>
     <string name="hint_voice_google_input">Nagraj wiadomość</string>
     <string name="title_current_time_video">%1$s / %2$s</string>
     <string name="title_video_details">%1$s | Audio: %2$s | Napisy: %3$s | Długość: %4$s | Tryb interfejsu: %5$s</string>
     <string name="title_video_details_main">%1$s | Audio: %2$s | Napisy: %3$s | %4$s</string>
     <string name="title_video_forward">+ %1$d s</string>
     <string name="title_video_backward">- %1$d s</string>
-    <string name="title_search">Szukaj…</string>
     <string name="title_reasons_others_selected">Wybrane w trybie zaawansowanym: %1$s</string>
-    <string name="errors_found_finished">Znalazłeś %1$d błąd</string>
-    <string name="errors_found_finished_plural">Znalazłeś %1$d błędy</string>
-    <string name="errors_found_continue">Dotychczas %1$d błąd</string>
-    <string name="errors_found_continue_plural">Do tej pory %1$d błędy</string>
+    <plurals name="errors_found_finished">
+        <item quantity="one">Znalazłeś %1$d błąd</item>
+        <item quantity="few">Znalazłeś %1$d błędy</item>
+        <item quantity="many">Znalazłeś %1$d błędy</item>
+        <item quantity="other">Znalazłeś %1$d błędy</item>
+    </plurals>
+    <plurals name="errors_found_continue">
+        <item quantity="one">Dotychczas %1$d błąd</item>
+        <item quantity="few">Do tej pory %1$d błędy</item>
+        <item quantity="many">Do tej pory %1$d błędy</item>
+        <item quantity="other">Do tej pory %1$d błędy</item>
+    </plurals>
 
     <!--search-->
     <string name="search_results">Search results for \'%1$s\'</string>
     <string name="no_search_results">No search results found for \'%1$s\'</string>
 
     <!--buttons-->
-    <string name="btn_subtitle">Napisy</string>
-    <string name="btn_audio">Dzwiek</string>
-    <string name="btn_save_settings">Zapisz ustawienia</string>
     <string name="btn_save">Zapisz</string>
     <string name="btn_save_changes">Zapisz zmiany</string>
     <string name="btn_cancel">Anuluj</string>
@@ -72,36 +62,21 @@
     <string name="btn_remove_to_my_list">- Usuń z mojej filmów</string>
 
     <!--alertDialog-->
-    <string name="title_alert_dialog">Witamy ponownie</string>
-    <string name="title_continue_from_saved_point">Czy chcesz:</string>
 
     <!--loadingDialog-->
     <string name="title_loading_buffering">Buforowanie…</string>
-    <string name="title_loading_saving_data">Zapisywanie danych użytkownika…</string>
     <string name="title_loading_retrieve_subtitle">Pobieranie napisów…</string>
-    <string name="title_loading_retrieve_user_tasks">Odzyskiwanie zadań użytkowników…</string>
     <string name="title_loading_retrieve_tasks">Pobieranie zadań…</string>
-    <string name="title_loading_saving_reasons">Zapisywanie…</string>
-    <string name="title_loading_retrieve_options">Synchronizacja opcji…</string>
     <string name="title_loading_add_to_list">Dodawanie wideo do listy…</string>
     <string name="title_loading_preparing_task">Przygotowanie zadania…</string>
     <string name="title_loading_remove_from_list">Usuwanie wideo z listy…</string>
 
     <!--Languages-->
-    <string name="all_languages">Wszystkie języki</string>
-    <string name="language_chinese">Chiński, Yue</string>
-    <string name="language_english">Angielski</string>
-    <string name="language_spanish">Hiszpański</string>
-    <string name="language_arabic">Arabski</string>
-    <string name="language_french">Francuski</string>
-    <string name="language_polish">Polski</string>
     <string name="time_format">%02d:%02d</string>
-    <string name="alert_title_video_terminated">Zakończony!</string>
     <string name="alert_msg_video_terminated">Jak ci się podobało wideo?</string>
     <string name="text_pause">PAUZA</string>
 
     <!--PREFERENCES-->
-    <string name="pref_title_settings">Ustawienia</string>
     <string name="pref_title_app_settings">Ustawienia aplikacji</string>
     <string name="pref_title_subtitle_settings">Ustawienia napisów</string>
     <string name="pref_title_subtitle_size">Rozmiar czcionki</string>
@@ -119,7 +94,7 @@
     <string name="pref_title_testing_mode_settings">Tryb testowy</string>
     <string name="pref_title_testing_mode_settings_description">Wyświetl filmy do testowania</string>
     <string name="pref_title_video_duration_settings">Czas trwania wideo</string>
-
+    <string name="pref_title_settings">Ustawienia</string>
 
     <!--DATA FOR SETTINGS-->
     <string-array name="listAudioLanguages">

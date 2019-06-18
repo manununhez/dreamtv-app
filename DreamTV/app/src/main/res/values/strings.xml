@@ -2,16 +2,13 @@
 
     <!--NON-TRANSLATABLE-->
     <string name="app_name" translatable="false">DreamTV</string>
-    <string name="browse_title" translatable="false"><![CDATA[DreamTV]]></string>
 
     <!-- Error messages -->
     <string name="video_error_media_load_timeout">Media loading timed out</string>
     <string name="video_error_server_inaccessible">Media server was not reachable</string>
     <string name="video_error_unknown_error">Failed to load video</string>
-    <string name="error_subtitle_not_found">Sorry, we could not find subtitles for this video</string>
 
     <!--ERROR NETWORK MESSAGES-->
-    <string name="no_network_connection">No network connection found</string>
     <string name="generic_server_down">Server down</string>
     <string name="generic_server_timeout">Server Timeout</string>
     <string name="generic_error">No internet</string>
@@ -23,52 +20,39 @@
     <string name="dreamTVApp_token" translatable="false">dreamTVApp_token</string>
     <string name="user_preferences" translatable="false">user_preferences</string>
     <string name="reasons_preferences" translatable="false">reasons_preferences</string>
-    <string name="categories_preferences" translatable="false">categories_preferences</string>
     <string name="video_tests_preferences" translatable="false">video_tests_preferences</string>
 
     <!--titles-->
-    <string name="title_share_mode_settings">Verify mistakes found by others</string>
-    <string name="title_video_languages_settings">Video languages</string>
     <string name="title_reasons_dialog">What is wrong here?</string>
     <string name="title_reasons_dialog_2">Edit what have you chosen:</string>
-    <string name="title_confirmation_user_saved_data">User data saved correctly</string>
-    <string name="title_confirmation_saved_data">Thank you for your help</string>
     <string name="title_my_list_category">My List</string>
     <string name="title_finished_category">Watch again</string>
     <string name="title_test_category">Only for testing</string>
     <string name="title_preferences_category">Settings</string>
-    <string name="title_see_more_videos_category">See more videos</string>
     <string name="title_continue_watching_category">Continue watching</string>
-    <string name="title_see_all_category">All videos</string>
     <string name="title_topics_category">Topics</string>
     <string name="title_check_new_tasks_category">New releases</string>
-    <string name="rb_option_text_english">English</string>
-    <string name="rb_option_text_polish">Polish</string>
-    <string name="rb_option_text_yes">Yes</string>
-    <string name="rb_option_text_not">No</string>
-    <string name="rb_option_text_advanced">Advanced</string>
-    <string name="rb_option_text_beginner">Simple</string>
     <string name="hint_voice_google_input">Please, say your comment</string>
     <string name="title_current_time_video">%1$s / %2$s</string>
     <string name="title_video_details">%1$s | Audio: %2$s | Subtitle: %3$s | Duration: %4$s | Interface mode: %5$s</string>
     <string name="title_video_details_main">%1$s | Audio: %2$s | Subtitle: %3$s | %4$s</string>
     <string name="title_video_forward">+ %1$d secs</string>
     <string name="title_video_backward">- %1$d secs</string>
-    <string name="title_search">Search…</string>
     <string name="title_reasons_others_selected">Selected in advanced mode: %1$s</string>
-    <string name="errors_found_finished">You found %1$d error</string>
-    <string name="errors_found_finished_plural">You found %1$d errors</string>
-    <string name="errors_found_continue">So far %1$d error</string>
-    <string name="errors_found_continue_plural">So far %1$d errors</string>
+    <plurals name="errors_found_finished">
+        <item quantity="one">You found %1$d error</item>
+        <item quantity="other">You found %1$d errors</item>
+    </plurals>
+    <plurals name="errors_found_continue">
+        <item quantity="one">So far %1$d error</item>
+        <item quantity="other">So far %1$d errors</item>
+    </plurals>
 
     <!--search-->
     <string name="search_results">Search results for \'%1$s\'</string>
     <string name="no_search_results">No search results found for \'%1$s\'</string>
 
     <!--buttons-->
-    <string name="btn_subtitle">Subtitles</string>
-    <string name="btn_audio">Audio</string>
-    <string name="btn_save_settings">Save settings</string>
     <string name="btn_save">Save</string>
     <string name="btn_save_changes">Save changes</string>
     <string name="btn_cancel">Cancel</string>
@@ -83,37 +67,22 @@
 
 
     <!--alertDialog-->
-    <string name="title_alert_dialog">Welcome back</string>
-    <string name="title_continue_from_saved_point">Do you want to:</string>
 
     <!--loadingDialog-->
     <string name="title_loading_buffering">Loading…</string>
-    <string name="title_loading_saving_data">Saving user data…</string>
     <string name="title_loading_retrieve_subtitle">Retrieving subtitles…</string>
-    <string name="title_loading_retrieve_user_tasks">Retrieving user tasks…</string>
     <string name="title_loading_retrieve_tasks">Retrieving tasks…</string>
-    <string name="title_loading_saving_reasons">Saving reasons…</string>
-    <string name="title_loading_retrieve_options">Retrieving options…</string>
     <string name="title_loading_add_to_list">Adding video to list…</string>
     <string name="title_loading_preparing_task">Preparing task…</string>
     <string name="title_loading_remove_from_list">Removing video from list…</string>
 
     <!--Languages-->
-    <string name="all_languages">All languages</string>
-    <string name="language_chinese">Chinese, Yue</string>
-    <string name="language_english">English</string>
-    <string name="language_spanish">Spanish</string>
-    <string name="language_arabic">Arabic</string>
-    <string name="language_french">French</string>
-    <string name="language_polish">Polish</string>
     <string name="time_format">%02d:%02d</string>
-    <string name="alert_title_video_terminated">Completed!</string>
     <string name="alert_msg_video_terminated">How did you like the video?</string>
     <string name="text_pause">PAUSE</string>
 
 
     <!--PREFERENCES-->
-    <string name="pref_title_settings">Settings</string>
     <string name="pref_title_app_settings">App settings</string>
     <string name="pref_title_subtitle_settings">Subtitle settings</string>
     <string name="pref_title_subtitle_size">Text Size</string>
@@ -131,6 +100,8 @@
     <string name="pref_title_testing_mode_settings">Testing mode</string>
     <string name="pref_title_testing_mode_settings_description">Display videos for testing</string>
     <string name="pref_title_video_duration_settings">Video duration</string>
+    <string name="pref_title_settings">Settings</string>
+
 
     <!--PREFERENCES KEYS-->
     <string name="pref_key_list_app_languages" translatable="false">listAppLanguage</string>

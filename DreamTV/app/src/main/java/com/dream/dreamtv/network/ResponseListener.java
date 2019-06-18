@@ -55,7 +55,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
             if (jsonResponse.success) {
                 processResponse(response);
             } else {
-                processError(jsonResponse);
+                processError();
             }
         } else {
             processResponse(response);
@@ -67,7 +67,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
     public void processError(VolleyError error) {
     }
 
-    public void processError(JsonResponseBaseBean jsonResponse) {
+    public void processError() {
     }
 
     @Override

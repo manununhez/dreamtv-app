@@ -48,13 +48,7 @@ public class Utils {
         dialog.setTitle(title);
         dialog.setMessage(message);
 
-        dialog.setPositiveButton(buttonPosstiveText, new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        dialog.setPositiveButton(buttonPosstiveText, (dialog1, which) -> dialog1.cancel());
 
 
         dialog.setOnCancelListener(listener);
@@ -111,8 +105,7 @@ public class Utils {
         try {
             byte[] bytes = new byte[inputStream.available()];
             inputStream.read(bytes, 0, bytes.length);
-            String json = new String(bytes);
-            return json;
+            return new String(bytes);
         } catch (IOException e) {
             return null;
         }

@@ -21,7 +21,7 @@ import androidx.leanback.widget.Presenter;
 import androidx.leanback.widget.PresenterSelector;
 
 import com.dream.dreamtv.model.Card;
-import com.dream.dreamtv.presenter.SideInfoPresenter.SideInfoCardPresenter;
+import com.dream.dreamtv.presenter.sideInfoPresenter.SideInfoCardPresenter;
 
 import java.util.HashMap;
 

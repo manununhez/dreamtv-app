@@ -3,8 +3,6 @@ package com.dream.dreamtv.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.room.Ignore;
-
 import com.google.gson.annotations.SerializedName;
 
 public class UserTaskError implements Parcelable {
@@ -16,9 +14,8 @@ public class UserTaskError implements Parcelable {
     private int subtitlePosition;
     @SerializedName("comment")
     private String comment;
-    @Ignore
+
     private int subtitleVersion;
-    @Ignore
     private int taskId;
 
     public UserTaskError(Parcel in) {

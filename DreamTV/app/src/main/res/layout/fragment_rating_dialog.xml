@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:layout_centerInParent="true"
     android:gravity="center"
-    tools:context="com.dream.dreamtv.ui.PlayVideo.Dialogs.ErrorSelectionDialogFragment">
+    tools:context="com.dream.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment">
 
 
     <LinearLayout
@@ -78,7 +78,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/llButtonsOptions1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
@@ -87,7 +86,6 @@
             android:visibility="gone">
 
             <Button
-                android:id="@+id/btnOk"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -100,7 +98,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/llButtonsOptions2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"

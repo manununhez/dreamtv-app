@@ -19,6 +19,8 @@ import androidx.annotation.ColorInt;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.leanback.widget.BaseCardView;
 
+import static com.dream.dreamtv.R.styleable.lbImageCardView;
+
 public class ImageCardView extends BaseCardView{
 
         public static final int CARD_TYPE_FLAG_IMAGE_ONLY = 0;
@@ -72,7 +74,7 @@ public class ImageCardView extends BaseCardView{
             LayoutInflater inflater = LayoutInflater.from(getContext());
             inflater.inflate(R.layout.lb_image_card_view, this);
             TypedArray cardAttrs = getContext().obtainStyledAttributes(attrs,
-                    R.styleable.lbImageCardView, defStyleAttr, defStyle);
+                    lbImageCardView, defStyleAttr, defStyle);
             int cardType = cardAttrs
                     .getInt(R.styleable.lbImageCardView_lbImageCardViewType, CARD_TYPE_FLAG_IMAGE_ONLY);
 

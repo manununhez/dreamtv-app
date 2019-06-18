@@ -4,11 +4,11 @@ import android.content.Context;
 
 import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.repository.AppRepository;
-import com.dream.dreamtv.ui.Categories.CategoryViewModelFactory;
-import com.dream.dreamtv.ui.Main.MainViewModelFactory;
-import com.dream.dreamtv.ui.PlayVideo.PlaybackViewModelFactory;
-import com.dream.dreamtv.ui.Search.SearchViewModelFactory;
-import com.dream.dreamtv.ui.VideoDetails.VideoDetailsViewModelFactory;
+import com.dream.dreamtv.ui.categories.CategoryViewModelFactory;
+import com.dream.dreamtv.ui.main.MainViewModelFactory;
+import com.dream.dreamtv.ui.playVideo.PlaybackViewModelFactory;
+import com.dream.dreamtv.ui.search.SearchViewModelFactory;
+import com.dream.dreamtv.ui.videoDetails.VideoDetailsViewModelFactory;
 
 /**
  * Provides static methods to inject the various classes needed for this weather application
