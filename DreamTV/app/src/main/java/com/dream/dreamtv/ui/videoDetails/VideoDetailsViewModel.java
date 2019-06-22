@@ -34,7 +34,7 @@ class VideoDetailsViewModel extends ViewModel {
 
 
     LiveData<Resource<Boolean>> requestAddToList(Task task) {
-        return mRepository.requestAddToList(task.taskId, task.language, task.video.primaryAudioLanguageCode);
+        return mRepository.requestAddToList(task.taskId, task.subLanguage, task.video.primaryAudioLanguageCode);
     }
 
     MutableLiveData<Resource<Boolean>> requestRemoveFromList(Task task) {

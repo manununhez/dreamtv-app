@@ -15,7 +15,7 @@ public class Task implements Parcelable {
     @SerializedName("video_id")
     public String videoId;
     @SerializedName("language")
-    public String language;
+    public String subLanguage;
     @SerializedName("type")
     public String type;
     @SerializedName("created")
@@ -37,7 +37,7 @@ public class Task implements Parcelable {
     protected Task(Parcel in) {
         taskId = in.readInt();
         videoId = in.readString();
-        language = in.readString();
+        subLanguage = in.readString();
         type = in.readString();
         created = in.readString();
         modified = in.readString();
@@ -69,7 +69,7 @@ public class Task implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(taskId);
         dest.writeString(videoId);
-        dest.writeString(language);
+        dest.writeString(subLanguage);
         dest.writeString(type);
         dest.writeString(created);
         dest.writeString(modified);
