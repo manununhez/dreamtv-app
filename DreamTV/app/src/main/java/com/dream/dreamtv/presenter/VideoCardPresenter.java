@@ -56,7 +56,7 @@ public class VideoCardPresenter extends Presenter {
         Log.d(TAG, "onCreateViewHolder");
 
         sDefaultBackgroundColor = ContextCompat.getColor(parent.getContext(), R.color.default_background);
-        sSelectedBackgroundColor = ContextCompat.getColor(parent.getContext(), R.color.selected_background);
+        sSelectedBackgroundColor = ContextCompat.getColor(parent.getContext(), R.color.default_background);
         mDefaultCardImage = parent.getResources().getDrawable(R.drawable.movie, null);
 
         ImageCardView cardView = new ImageCardView(parent.getContext()) {

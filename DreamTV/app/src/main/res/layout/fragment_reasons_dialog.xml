@@ -11,8 +11,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="@color/gray_transparent_2"
-        android:layout_toEndOf="@+id/llBody">
+        android:layout_toEndOf="@+id/llBody"
+        android:background="@color/colorPrimary">
 
         <ListView
             android:id="@+id/lv"
@@ -29,58 +29,10 @@
         android:id="@+id/llBody"
         android:layout_width="@dimen/popup_width_dialog"
         android:layout_height="@dimen/popup_height"
-        android:background="@color/gray_transparent"
+        android:background="@color/default_background"
         android:orientation="vertical"
-        android:paddingEnd="20dp"
-        android:paddingStart="20dp">
-
-
-        <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center_horizontal"-->
-            <!--android:layout_marginTop="15dp"-->
-            <!--android:background="@color/blue"-->
-            <!--android:gravity="center"-->
-            <!--android:padding="3dp"-->
-            <!--android:textColor="@color/white"-->
-            <!--android:textSize="14sp"-->
-            <!--android:visibility="gone"-->
-            <!--android:textStyle="italic" />-->
-
-        <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center_horizontal"-->
-            <!--android:layout_marginTop="20dp"-->
-            <!--android:background="@color/blue"-->
-            <!--android:gravity="center"-->
-            <!--android:padding="3dp"-->
-            <!--android:visibility="gone"-->
-            <!--android:textColor="@color/white"-->
-            <!--android:textSize="18sp" />-->
-
-        <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center_horizontal"-->
-            <!--android:layout_marginTop="20dp"-->
-            <!--android:background="@color/blue"-->
-            <!--android:gravity="center"-->
-            <!--android:padding="3dp"-->
-            <!--android:visibility="gone"-->
-            <!--android:textColor="@color/white"-->
-            <!--android:textSize="14sp"-->
-            <!--android:textStyle="italic" />-->
-        <!--<TextView-->
-        <!--android:id="@+id/titleReasons"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_below="@+id/tvSubtitle"-->
-        <!--android:layout_marginTop="25dp"-->
-        <!--android:text="Select some reasons:"-->
-        <!--android:textColor="@color/white"-->
-        <!--android:textSize="18sp" />-->
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
 
         <TextView
             android:id="@+id/tvTitle"
@@ -123,14 +75,14 @@
 
             <TextView
                 android:id="@+id/tvOtherSelected"
-                android:layout_below="@id/scrollViewBeginner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/scrollViewBeginner"
                 android:layout_marginTop="5dp"
-                android:visibility="gone"
                 android:layout_marginBottom="5dp"
                 android:textColor="@color/white"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                android:visibility="gone" />
         </RelativeLayout>
 
         <LinearLayout
@@ -146,11 +98,11 @@
                 android:id="@+id/btnRecord"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/button_focusable"
+                android:background="@drawable/button_focusable_selector"
+                android:contentDescription="@string/btn_start_recording"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:padding="4dp"
-                android:contentDescription="@string/btn_start_recording"
                 android:src="@drawable/ic_keyboard_voice"
                 android:textColor="@color/white" />
 
@@ -158,40 +110,18 @@
                 android:id="@+id/voiceInput"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
                 android:hint="@string/btn_start_recording"
+                android:padding="10dp"
                 android:textColor="@color/white"
                 android:textStyle="italic" />
 
         </LinearLayout>
 
-        <!--<LinearLayout-->
-            <!--android:id="@+id/llButtonsOptions1"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginBottom="10dp"-->
-            <!--android:layout_marginTop="25dp"-->
-            <!--android:gravity="center"-->
-            <!--android:visibility="gone">-->
-
-            <!--<Button-->
-                <!--android:id="@+id/btnOk"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_gravity="center"-->
-                <!--android:background="@drawable/button_focusable"-->
-                <!--android:focusable="true"-->
-                <!--android:focusableInTouchMode="true"-->
-                <!--android:padding="10dp"-->
-                <!--android:text="@string/btn_ok"-->
-                <!--android:textColor="@color/white" />-->
-        <!--</LinearLayout>-->
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:layout_marginTop="25dp"
+            android:layout_marginBottom="10dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -200,7 +130,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@drawable/button_focusable"
+                android:background="@drawable/button_focusable_selector"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:padding="10dp"
@@ -212,9 +142,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@drawable/button_focusable"
-                android:focusable="true"
                 android:layout_marginStart="20dp"
+                android:background="@drawable/button_focusable_selector"
+                android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:padding="10dp"
                 android:text="@string/btn_save"
@@ -225,20 +155,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@drawable/button_focusable"
-                android:focusable="true"
-                android:visibility="gone"
                 android:layout_marginStart="20dp"
+                android:background="@drawable/button_focusable_selector"
+                android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:padding="10dp"
                 android:text="@string/btn_save_changes"
-                android:textColor="@color/white" />
-
-
+                android:textColor="@color/white"
+                android:visibility="gone" />
         </LinearLayout>
-
-
     </LinearLayout>
-
-
 </RelativeLayout>

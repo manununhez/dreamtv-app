@@ -39,13 +39,15 @@
     <string name="title_video_forward">+ %1$d secs</string>
     <string name="title_video_backward">- %1$d secs</string>
     <string name="title_reasons_others_selected">Selected in advanced mode: %1$s</string>
+    <string name="select_errors_to_save">Please, select some options to save</string>
+
     <plurals name="errors_found_finished">
-        <item quantity="one">You found %1$d error</item>
-        <item quantity="other">You found %1$d errors</item>
+        <item quantity="one">You found %d error</item>
+        <item quantity="other">You found %d errors</item>
     </plurals>
     <plurals name="errors_found_continue">
-        <item quantity="one">So far %1$d error</item>
-        <item quantity="other">So far %1$d errors</item>
+        <item quantity="one">So far %d error</item>
+        <item quantity="other">So far %d errors</item>
     </plurals>
 
     <!--search-->
@@ -65,8 +67,6 @@
     <string name="btn_add_to_my_list">+ Add to my list</string>
     <string name="btn_remove_to_my_list">- Remove from my list</string>
 
-
-    <!--alertDialog-->
 
     <!--loadingDialog-->
     <string name="title_loading_buffering">Loading…</string>

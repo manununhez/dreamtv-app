@@ -1,9 +1,12 @@
 <resources>
 
-    <!--<style name="Theme.Example.Leanback.CustomTitle" parent="Theme.Example.LeanbackBrowse">-->
-    <!--<item name="browseTitleViewLayout">@layout/titleview</item>-->
-    <!--<item name="browseRowsMarginTop">120dp</item>-->
-    <!--</style>-->
+    <style name="Theme.Custom.Dark.Leanback" parent="Theme.Leanback">
+        <item name="android:windowBackground">@color/dark_grey</item>
+        <item name="android:colorPrimary">@color/colorPrimary</item>
+        <item name="android:colorAccent">@color/colorAccent</item>
+        <item name="defaultSearchColor">@color/colorAccent</item>
+        <!--<item name="preferenceTheme">@style/PreferenceThemeOverlay.v14</item>-->
+    </style>
 
 
 </resources>

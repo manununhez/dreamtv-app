@@ -4,8 +4,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,6 +21,10 @@ import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.ClassPresenterSelector;
 import androidx.leanback.widget.DetailsOverviewRow;
 import androidx.leanback.widget.FullWidthDetailsOverviewRowPresenter;
+import androidx.leanback.widget.FullWidthDetailsOverviewSharedElementHelper;
+import androidx.leanback.widget.ListRow;
+import androidx.leanback.widget.ListRowPresenter;
+import androidx.leanback.widget.RowPresenter;
 import androidx.leanback.widget.SparseArrayObjectAdapter;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
@@ -71,6 +78,7 @@ import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
  */
 public class VideoDetailsFragment extends DetailsSupportFragment {
 
+    private static final String TRANSITION_NAME = "t_for_transition";
     private static final String TAG = "VideoDetailsFragment";
     private static final int ACTION_PLAY_VIDEO = 1;
     private static final int ACTION_CONTINUE_VIDEO = 2;
@@ -190,13 +198,31 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void setupAdapter() {
+
         // Set detail background and style.
         FullWidthDetailsOverviewRowPresenter detailsPresenter =
-                new FullWidthDetailsOverviewRowPresenter(new DetailsDescriptionPresenter());
+                new FullWidthDetailsOverviewRowPresenter(new DetailsDescriptionPresenter()) {
+
+                    @Override
+                    protected RowPresenter.ViewHolder createRowViewHolder(ViewGroup parent) {
+                        // Customize Actionbar and Content by using custom colors.
+                        RowPresenter.ViewHolder viewHolder = super.createRowViewHolder(parent);
+
+                        View actionsView = viewHolder.view.
+                                findViewById(R.id.details_overview_actions_background);
+                        actionsView.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.detail_view_actionbar_background));
+
+                        View detailsView = viewHolder.view.findViewById(R.id.details_frame);
+                        detailsView.setBackgroundColor(
+                                ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.detail_view_background));
+                        return viewHolder;
+                    }
+                };
 
 
-        detailsPresenter.setBackgroundColor(
-                ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.selected_background));
+//        detailsPresenter.setBackgroundColor(
+//                ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.selected_background));
+
         detailsPresenter.setInitialState(FullWidthDetailsOverviewRowPresenter.STATE_HALF);
         detailsPresenter.setParticipatingEntranceTransition(false);
         prepareEntranceTransition();
@@ -219,10 +245,15 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         ClassPresenterSelector mPresenterSelector = new ClassPresenterSelector();
         mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
+        mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
+        mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
+
         mAdapter = new ArrayObjectAdapter(mPresenterSelector);
         mAdapter.clear();
 
         setAdapter(mAdapter);
+
+        new Handler().postDelayed(this::startEntranceTransition, 500);
     }
 
     private void setupDetailsOverviewRow() {
@@ -352,7 +383,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void goToPlayVideo(boolean playFromBeginning, String logEventName) {
         //We retrieve subtitles first
         fetchSubtitleLiveData = mViewModel.fetchSubtitle(mSelectedTask.video.videoId,
-                mSelectedTask.language, getSubtitleVersion());
+                mSelectedTask.subLanguage, getSubtitleVersion());
 
         fetchSubtitleLiveData.removeObservers(getViewLifecycleOwner());
 

@@ -31,17 +31,19 @@
     <string name="title_video_forward">+ %1$d s</string>
     <string name="title_video_backward">- %1$d s</string>
     <string name="title_reasons_others_selected">Wybrane w trybie zaawansowanym: %1$s</string>
+    <string name="select_errors_to_save">Wybierz opcje, aby zapisać</string>
+
     <plurals name="errors_found_finished">
-        <item quantity="one">Znalazłeś %1$d błąd</item>
-        <item quantity="few">Znalazłeś %1$d błędy</item>
-        <item quantity="many">Znalazłeś %1$d błędy</item>
-        <item quantity="other">Znalazłeś %1$d błędy</item>
+        <item quantity="one">Znalazłeś %d błąd</item>
+        <item quantity="few">Znalazłeś %d błędy</item>
+        <item quantity="many">Znalazłeś %d błędy</item>
+        <item quantity="other">Znalazłeś %d błędy</item>
     </plurals>
     <plurals name="errors_found_continue">
-        <item quantity="one">Dotychczas %1$d błąd</item>
-        <item quantity="few">Do tej pory %1$d błędy</item>
-        <item quantity="many">Do tej pory %1$d błędy</item>
-        <item quantity="other">Do tej pory %1$d błędy</item>
+        <item quantity="one">Dotychczas %d błąd</item>
+        <item quantity="few">Do tej pory %d błędy</item>
+        <item quantity="many">Do tej pory %d błędy</item>
+        <item quantity="other">Do tej pory %d błędy</item>
     </plurals>
 
     <!--search-->

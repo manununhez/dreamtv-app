@@ -18,13 +18,14 @@
     android:id="@+id/container"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:elevation="02dp"
     android:orientation="vertical">
 
 
     <TextView
         android:id="@+id/tvErrorsSelected"
         style="@style/Widget.Leanback.ImageCardView.TitleStyle"
-        android:background="@color/green"
+        android:background="@color/errors_found_report_background"
         android:fontFamily="sans-serif-condensed"
         android:maxLines="2"
         android:textAlignment="center"

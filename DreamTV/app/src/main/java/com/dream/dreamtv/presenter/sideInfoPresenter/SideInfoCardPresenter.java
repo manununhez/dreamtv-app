@@ -99,38 +99,45 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
         }
 
 
+        //-------------- VIDEO TITLE
         TextView primaryText = cardView.findViewById(R.id.primary_text);
         primaryText.setText(card.getTitle());
 
+        //-------------- VIDEO INFO
         String timeFormatted = Utils.getTimeFormatMinSecs(task.video.duration * 1000);
         TextView secondaryText = cardView.findViewById(R.id.secondary_text);
         secondaryText.setText(getContext().getString(R.string.title_video_details_main, task.video.project,
-                task.video.primaryAudioLanguageCode, task.language, timeFormatted));
+                task.video.primaryAudioLanguageCode, task.subLanguage, timeFormatted));
 
-
+        //-------------- VIDEO DESCRIPTION
         TextView extraText = cardView.findViewById(R.id.extra_text);
         extraText.setText(card.getExtraText());
 
-
+        //-------------- ERRORS REPORT
         TextView errors = cardView.findViewById(R.id.tvErrorsSelected);
         if (task.userTasks.length > 0 && task.userTasks[0].getUserTaskErrorList().length > 0) { //TODO what happened if we have more than one userTask, e.g same tasks, different subtVersions???
-            getContext().getResources().getQuantityString(R.plurals.errors_found_finished, task.userTasks[0].getUserTaskErrorList().length);
             if (task.userTasks[0].getCompleted() == 1)
-                errors.setText(getContext().getResources().getQuantityString(R.plurals.errors_found_finished, task.userTasks[0].getUserTaskErrorList().length));
+                errors.setText(getContext().getResources()
+                        .getQuantityString(R.plurals.errors_found_finished,
+                                task.userTasks[0].getUserTaskErrorList().length, task.userTasks[0].getUserTaskErrorList().length));
             else
-                errors.setText(getContext().getResources().getQuantityString(R.plurals.errors_found_continue, task.userTasks[0].getUserTaskErrorList().length));
+                errors.setText(getContext().getResources()
+                        .getQuantityString(R.plurals.errors_found_continue,
+                                task.userTasks[0].getUserTaskErrorList().length, task.userTasks[0].getUserTaskErrorList().length));
         } else
             errors.setVisibility(View.GONE);
 
 
+        //-------------- VIDEO PROGRESS
         ProgressBar pbContinueWatching = cardView.findViewById(R.id.pbContinueWatching);
 
-        if (task.userTasks.length > 0 && task.userTasks[0].getTimeWatched() > 0)  //TODO what happened if we have more than one userTask, e.g same tasks, different subtVersions???
-            pbContinueWatching.setProgress((int) (((float) task.userTasks[0].getTimeWatched() / (float) task.video.getVideoDurationInMs()) * 100));
-        else
+        if (task.userTasks.length > 0 && task.userTasks[0].getTimeWatched() > 0) {  //TODO what happened if we have more than one userTask, e.g same tasks, different subtVersions???
+            int videoProgress = (int) (((float) task.userTasks[0].getTimeWatched() / (float) task.video.getVideoDurationInMs()) * 100);
+            pbContinueWatching.setProgress(videoProgress);
+        } else
             pbContinueWatching.setVisibility(View.GONE);
 
-
+        //-------------- RATING
         RatingBar rbTask = cardView.findViewById(R.id.rbTask);
 
         if (task.userTasks.length > 0 && task.userTasks[0].getRating() > 0)

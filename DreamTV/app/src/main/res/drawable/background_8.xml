@@ -3,13 +3,13 @@
     <item>
         <shape>
             <corners android:radius="15dp" />
-            <solid android:color="@color/blue_opaque" />
+            <solid android:color="@color/button_focused_shape" />
             <padding
                 android:bottom="2dp"
                 android:top="2dp" />
             <stroke
                 android:width="1dp"
-                android:color="#000" />
+                android:color="#BB86FC" />
         </shape>
     </item>
 </layer-list>

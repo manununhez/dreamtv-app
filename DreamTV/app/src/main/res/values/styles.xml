@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <style name="AppTheme" parent="@style/Theme.Custom.Dark.Leanback">
+    </style>
 
     <!-- A default card style. Used in cards example. -->
 
@@ -89,8 +91,6 @@
         <item name="imageCardViewInfoAreaStyle">@style/SingleLineCardInfoAreaStyle</item>
     </style>
 
-
-
     <style name="DefaultDialogFragmentStyle" parent="Theme.AppCompat.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
@@ -99,13 +99,18 @@
         <item name="colorControlNormal">@color/white</item>
     </style>
 
-
     <style name="LeanbackPreferences" parent="Theme.Leanback">
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Leanback</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:colorPrimary">@color/settings_background</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlayCustom</item>
+    </style>
+
+    <style name="PreferenceThemeOverlayCustom" parent="PreferenceThemeOverlay.v14.Leanback">
+        <!-- settings title panel background color -->
+        <item name="android:windowBackground">@color/default_background</item>
+        <item name="android:colorPrimary">@color/colorPrimary</item>
+        <item name="android:colorAccent">@color/colorAccent</item>
     </style>
 
 
