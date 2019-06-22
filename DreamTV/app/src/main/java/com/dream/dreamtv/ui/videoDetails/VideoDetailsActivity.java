@@ -42,6 +42,7 @@ public class VideoDetailsActivity extends FragmentActivity {
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
+//        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
+        super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 }

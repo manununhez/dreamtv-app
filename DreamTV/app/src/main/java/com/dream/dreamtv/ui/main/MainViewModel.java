@@ -45,5 +45,9 @@ class MainViewModel extends ViewModel {
         return mRepository.updateUser(userData);
     }
 
+    LiveData<Resource<User>> fetchUserDetails() {
+        return mRepository.fetchUserDetails();
+    }
+
 }
 

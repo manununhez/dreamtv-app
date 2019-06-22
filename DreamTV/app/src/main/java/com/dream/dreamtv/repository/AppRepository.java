@@ -214,4 +214,8 @@ public class AppRepository {
     public MutableLiveData<Resource<Task[]>> searchByKeywordCategory(String category){
         return mNetworkDataSource.searchByKeywordCategory(category);
     }
+
+    public MutableLiveData<Resource<User>> fetchUserDetails(){
+        return mNetworkDataSource.fetchUserDetails();
+    }
 }

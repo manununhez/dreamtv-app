@@ -183,7 +183,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
+        super.attachBaseContext(LocaleHelper.onAttach(base));
+//        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
     }
 
 
@@ -318,8 +319,10 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
             mp.setOnCompletionListener(mediaPlayer -> {
                 mUserTask.setCompleted(1);
+                stopSyncSubtitle();
 
                 showRatingDialog();
+
             });
 
         });
@@ -658,6 +661,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
         //Update values and exit from the video
         mViewModel.updateUserTask(mUserTask);
-//        finish();
+
+        finish();
     }
 }

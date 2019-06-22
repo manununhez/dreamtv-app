@@ -209,7 +209,8 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
+        super.attachBaseContext(LocaleHelper.onAttach(base));
+//        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
     }
 
 
@@ -252,15 +253,17 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
         if (state.toString().equals(STATE_ENDED)) {//at this moment we are in the end of the video. Duration in ms
             Log.d(TAG, "State : " + STATE_ENDED);
-            stopVideo();
+//            stopVideo();
 //            Utils.getAlertDialog(PlaybackVideoYoutubeActivity.this, getString(R.string.alert_title_video_terminated),
 //                    getString(R.string.alert_msg_video_terminated), getString(R.string.btn_ok),
 //                    dialog -> finish()).show();
 
 
             mUserTask.setCompleted(1);
+            stopSyncSubtitle();
 
             showRatingDialog();
+
 
         }
 
@@ -667,5 +670,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
         //Update values and exit from the video
         mViewModel.updateUserTask(mUserTask);
+
+        finish();
     }
 }

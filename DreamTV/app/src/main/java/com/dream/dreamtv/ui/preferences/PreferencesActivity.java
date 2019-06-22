@@ -54,7 +54,8 @@ public class PreferencesActivity extends FragmentActivity implements SharedPrefe
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
+        super.attachBaseContext(LocaleHelper.onAttach(base));
+//        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
     }
 
 
@@ -62,7 +63,6 @@ public class PreferencesActivity extends FragmentActivity implements SharedPrefe
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_key_list_app_languages))) {
             LocaleHelper.setLocale(this, sharedPreferences.getString(key, PREF_ABR_POLISH));
-//            recreate();
 
         } else if (key.equals(getString(R.string.pref_key_video_duration))) {
 

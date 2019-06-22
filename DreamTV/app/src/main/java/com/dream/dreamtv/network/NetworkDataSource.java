@@ -98,6 +98,7 @@ public class NetworkDataSource {
     private MutableLiveData<Resource<Task[]>> responseFromSearchByKeywordCategory;
     private MutableLiveData<Resource<Boolean>> responseFromAddToListTasks;
     private MutableLiveData<Resource<Boolean>> responseFromRemoveFromListTasks;
+    private MutableLiveData<Resource<User>> responseFromFetchUser;
     private MutableLiveData<Resource<User>> responseFromUserUpdate;
     private MutableLiveData<Resource<SubtitleResponse>> responseFromFetchSubtitle;
     private MutableLiveData<Resource<UserTask>> responseFromFetchUserTask;
@@ -115,6 +116,7 @@ public class NetworkDataSource {
         responseFromSearchByKeywordCategory = new MutableLiveData<>();
         responseFromCategories = new MutableLiveData<>();
         responseFromSearch = new MutableLiveData<>();
+        responseFromFetchUser = new MutableLiveData<>();
         responseFromUserUpdate = new MutableLiveData<>();
         responseFromFetchSubtitle = new MutableLiveData<>();
         //TODO si se decide hacer sincrono, solo existiria una variable que agrupe los tasks y que luego insertaria en BD todo de una sola vez
@@ -364,7 +366,9 @@ public class NetworkDataSource {
      * UserDetails. Used in {@link MainFragment} to get user details
      */
     @SuppressWarnings("unchecked")
-    private void fetchUserDetails() {
+    public MutableLiveData<Resource<User>> fetchUserDetails() {
+        responseFromFetchUser.setValue(Resource.loading(null));
+
         Uri userDetailsUri = Uri.parse(URL_BASE.concat(Urls.USER_DETAILS.value)).buildUpon().build();
 
         Log.d(TAG, "fetchUserDetails() Request URL: " + userDetailsUri.toString());
@@ -386,10 +390,8 @@ public class NetworkDataSource {
 //                syncData();
 
 
-//                responseFromUserUpdate.postValue(resourceResponse); //post the value to live data
+                responseFromFetchUser.postValue(Resource.success(user)); //post the value to live data
 
-
-                syncData();
             }
 
             @Override
@@ -397,13 +399,15 @@ public class NetworkDataSource {
                 super.processError(error);
 
                 //TODO do something error
-//                responseFromUserUpdate.postValue(Resource.error(error.getMessage(), null));
+                responseFromFetchUser.postValue(Resource.error(error.getMessage(), null));
 
                 Log.d(TAG, "fetchUserDetails() Response Error: " + error.getMessage());
             }
         };
 
         mExecutors.networkIO().execute(() -> requestString(Method.GET, userDetailsUri.toString(), null, responseListener));
+
+        return responseFromFetchUser;
     }
 
 
@@ -445,8 +449,6 @@ public class NetworkDataSource {
 
                 responseFromUserUpdate.postValue(Resource.success(user)); //post the value to live data
 
-
-//                syncData();
             }
 
             @Override
@@ -605,6 +607,7 @@ public class NetworkDataSource {
             subtitleUri = Uri.parse(URL_BASE.concat(Urls.SUBTITLE.value)).buildUpon()
                     .appendQueryParameter(PARAM_VIDEO_ID, videoId)
                     .appendQueryParameter(PARAM_LANG_CODE, languageCode)
+                    .appendQueryParameter(PARAM_VERSION, "last")
                     .build();
 
         Log.d(TAG, "fetchSubtitle() Request URL: " + subtitleUri.toString() + " Params: " + PARAM_VIDEO_ID + "=>" + videoId
@@ -1014,7 +1017,7 @@ public class NetworkDataSource {
 
 
     /**
-     * @param taskId taskId
+     * @param taskId           taskId
      * @param mSubtitleVersion mSubtitleVersion
      */
     @SuppressWarnings("unchecked")
@@ -1115,8 +1118,8 @@ public class NetworkDataSource {
 //    }
 
     /**
-     * @param taskId taskId
-     * @param subLanguageConfig subLanguageConfig
+     * @param taskId              taskId
+     * @param subLanguageConfig   subLanguageConfig
      * @param audioLanguageConfig audioLanguageConfig
      */
     public MutableLiveData<Resource<Boolean>> addTaskToList(int taskId, String subLanguageConfig, String audioLanguageConfig) {

@@ -22,7 +22,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.DiffCallback;
@@ -55,6 +54,7 @@ import com.dream.dreamtv.ui.search.SearchActivity;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsActivity;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
+import com.dream.dreamtv.utils.LocaleHelper;
 import com.google.android.gms.common.AccountPicker;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -160,7 +160,7 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
 
-    private void requestLogin(String email) {
+    private void login(String email) {
         if (DEBUG) Log.d(TAG, ">>>>>>>>>>>>>>>>>>>REQUEST LOGIN");
 //        showLoading();
         mViewModel.login(email, "com.google"); //TODO change password
@@ -383,7 +383,25 @@ public class MainFragment extends BrowseSupportFragment {
         if (token == null || user == null) //first time the app is initiated. The user has to select an account
             pickUserAccount();
         else
-            requestLogin(user.email);
+            login(user.email);
+
+
+        LiveData<Resource<User>> userDetails = mViewModel.fetchUserDetails();
+        userDetails.observe(getViewLifecycleOwner(), userResource -> {
+            if (userResource.status.equals(Resource.Status.SUCCESS)) {
+
+                if (userResource.data != null) {
+                    if (!userResource.data.interfaceLanguage.equals(LocaleHelper.getLanguage(getActivity()))) {
+                        Log.d(TAG, "fetchUserDetails() response!: userResource.data.interfaceLanguage=" + userResource.data.interfaceLanguage + " LocaleHelper.getLanguage(getActivity()):" + LocaleHelper.getLanguage(getActivity()));
+                        LocaleHelper.setLocale(getActivity(), userResource.data.interfaceLanguage);
+                        Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
+//                        Log.d(TAG, "fetchUserDetails() response!");
+                    } else {
+                        mViewModel.initializeSyncData();
+                    }
+                }
+            }
+        });
 
     }
 
@@ -495,7 +513,7 @@ public class MainFragment extends BrowseSupportFragment {
             Card card = new Card();
             card.setTitle(category.name);
 //            card.setFooterColor("#c51162");
-            card.setLocalImageResource("category_animation");
+            card.setLocalImageResource(category.imageName);
             cards.add(card);
         }
 
@@ -549,10 +567,10 @@ public class MainFragment extends BrowseSupportFragment {
         setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(true);
 
-        // set fastLane (or headers) background color
-        setBrandColor(ContextCompat.getColor(getActivity(), R.color.default_background));
+//         set fastLane (or headers) background color
+//        setBrandColor(ContextCompat.getColor(getActivity(), R.color.accent));
         // set search icon color
-        setSearchAffordanceColor(ContextCompat.getColor(getActivity(), R.color.search_opaque));
+//        setSearchAffordanceColor(ContextCompat.getColor(getActivity(), R.color.search_opaque));
 
     }
 
@@ -620,7 +638,7 @@ public class MainFragment extends BrowseSupportFragment {
                 if (DEBUG) Log.d(TAG, "onActivityResult() - Result from pickAccount()");
 
                 // Receiving a result from the AccountPicker
-                requestLogin(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
+                login(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
 
             } else if (requestCode == REQUEST_SETTINGS) {
                 updateUser(data.getParcelableExtra(INTENT_EXTRA_USER_UPDATED));

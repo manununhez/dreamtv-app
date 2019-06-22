@@ -42,7 +42,8 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
+        super.attachBaseContext(LocaleHelper.onAttach(base));
+//        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
     }
 
     @Override
