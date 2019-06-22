@@ -238,15 +238,17 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private void setupEventsListener() {
         btnCancel.setOnClickListener(view -> dismiss());
         btnSave.setOnClickListener(view -> {
+            UserTaskError userTaskError = prepareReasonsToSave();
             if (selectedReasons.size() > 0) {
-                mCallback.onSaveReasons(prepareReasonsToSave());
+                mCallback.onSaveReasons(userTaskError);
                 dismiss();
             } else {
-                Toast.makeText(getActivity(), "Please, select some options to save.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getActivity().getString(R.string.select_errors_to_save), Toast.LENGTH_SHORT).show();
             }
         });
         btnSaveChanges.setOnClickListener(view -> {
-            mCallback.onUpdateReasons(prepareReasonsToSave());
+            UserTaskError userTaskError = prepareReasonsToSave();
+            mCallback.onUpdateReasons(userTaskError);
             dismiss();
         });
 
@@ -365,7 +367,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             ToggleButton toggleButton = inflatedLayout.findViewById(R.id.toogleButton);
             final CheckBox chkBox = inflatedLayout.findViewById(R.id.chkBox);
 
-            toggleButton.setBackgroundResource(R.color.gray);
+            toggleButton.setBackgroundResource(R.color.colorAccent);
             toggleButton.setTextColor(ContextCompat.getColor(getActivity(), R.color.white));
             RadioGroup.LayoutParams layoutParams = new RadioGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, pixels);
             layoutParams.setMargins(0, 0, 0, 15);
@@ -602,7 +604,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
 
             if (position == currentSubtitlePosition - 1) {
-                holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.blue, null));
+                holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_selected_background, null));
                 holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 9,
                         context.getResources().getDisplayMetrics()));
                 holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.NORMAL);
@@ -610,12 +612,12 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                 holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
                         context.getResources().getDisplayMetrics()));
                 holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
-                holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.green, null));
+                holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_found_error_background, null));
             } else {
                 holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
                         context.getResources().getDisplayMetrics()));
                 holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
-                holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.black_opaque, null));
+                holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_default_background, null));
             }
 
             holder.tvText.setText(Html.fromHtml(values.get(position).text));
