@@ -30,6 +30,8 @@ import static com.dream.dreamtv.utils.Constants.PREF_ABR_POLISH;
  */
 public class VideoDetailsActivity extends FragmentActivity {
 
+    public static final String SHARED_ELEMENT_NAME = "VideoDetails";
+
     /**
      * Called when the activity is first created.
      */

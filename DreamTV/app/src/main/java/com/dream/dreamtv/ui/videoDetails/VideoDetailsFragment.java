@@ -21,8 +21,10 @@ import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.ClassPresenterSelector;
 import androidx.leanback.widget.DetailsOverviewRow;
 import androidx.leanback.widget.FullWidthDetailsOverviewRowPresenter;
+import androidx.leanback.widget.FullWidthDetailsOverviewSharedElementHelper;
 import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.ListRowPresenter;
+import androidx.leanback.widget.OnActionClickedListener;
 import androidx.leanback.widget.RowPresenter;
 import androidx.leanback.widget.SparseArrayObjectAdapter;
 import androidx.lifecycle.LiveData;
@@ -215,13 +217,21 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                     }
                 };
 
-
-//        detailsPresenter.setBackgroundColor(
-//                ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.selected_background));
-
-        detailsPresenter.setInitialState(FullWidthDetailsOverviewRowPresenter.STATE_HALF);
+        FullWidthDetailsOverviewSharedElementHelper mHelper = new FullWidthDetailsOverviewSharedElementHelper();
+        mHelper.setSharedElementEnterTransition(getActivity(), VideoDetailsActivity.SHARED_ELEMENT_NAME);
+        detailsPresenter.setListener(mHelper);
         detailsPresenter.setParticipatingEntranceTransition(false);
         prepareEntranceTransition();
+
+        ListRowPresenter shadowDisabledRowPresenter = new ListRowPresenter();
+        shadowDisabledRowPresenter.setShadowEnabled(false);
+
+        ClassPresenterSelector detailsPresenterSelector = new ClassPresenterSelector();
+        detailsPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
+        detailsPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
+        mAdapter = new ArrayObjectAdapter(detailsPresenterSelector);
+
+        setupDetailsOverviewRow();
 
         detailsPresenter.setOnActionClickedListener(action -> {
             if (action.getId() == ACTION_PLAY_VIDEO) {
@@ -239,18 +249,38 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             }
         });
 
-        ClassPresenterSelector mPresenterSelector = new ClassPresenterSelector();
-        mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
-        mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
-        mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
 
-        mAdapter = new ArrayObjectAdapter(mPresenterSelector);
-        mAdapter.clear();
 
+//        detailsPresenter.setBackgroundColor(
+//                ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.selected_background));
+
+//        detailsPresenter.setInitialState(FullWidthDetailsOverviewRowPresenter.STATE_HALF);
+//        detailsPresenter.setParticipatingEntranceTransition(false);
+//        prepareEntranceTransition();
+
+
+//        ClassPresenterSelector mPresenterSelector = new ClassPresenterSelector();
+//        mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
+//        mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
+//        mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
+//
+//        mAdapter = new ArrayObjectAdapter(mPresenterSelector);
+//        mAdapter.clear();
+//
         setAdapter(mAdapter);
-
+//
         new Handler().postDelayed(this::startEntranceTransition, 500);
+
+//        mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
+//
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                startEntranceTransition();
+//            }
+//        }, 500);
     }
+
 
     private void setupDetailsOverviewRow() {
         rowPresenter = new DetailsOverviewRow(mSelectedTask);
@@ -272,6 +302,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                         startEntranceTransition();
                     }
                 });
+
 
     }
 

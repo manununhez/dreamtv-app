@@ -22,8 +22,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
+import androidx.leanback.widget.BaseCardView;
 import androidx.leanback.widget.DiffCallback;
 import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ListRow;
@@ -46,6 +48,7 @@ import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.TasksList;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.presenter.IconCardPresenter;
+import com.dream.dreamtv.presenter.ImageCardView;
 import com.dream.dreamtv.presenter.SingleLineCardPresenter;
 import com.dream.dreamtv.presenter.sideInfoPresenter.SideInfoCardPresenter;
 import com.dream.dreamtv.ui.categories.CategoryActivity;
@@ -718,7 +721,12 @@ public class MainFragment extends BrowseSupportFragment {
                     intent.putExtra(INTENT_TASK, task);
                     intent.putExtra(INTENT_CATEGORY, card.getCategory());
 
-                    startActivity(intent);
+                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            Objects.requireNonNull(getActivity()),
+                            ((BaseCardView) itemViewHolder.view),
+                            VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+
+                    startActivity(intent, bundle);
                 }
             } else
                 Toast.makeText(getActivity(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();
