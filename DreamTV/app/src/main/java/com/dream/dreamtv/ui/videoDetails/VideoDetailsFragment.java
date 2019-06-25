@@ -21,7 +21,6 @@ import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.ClassPresenterSelector;
 import androidx.leanback.widget.DetailsOverviewRow;
 import androidx.leanback.widget.FullWidthDetailsOverviewRowPresenter;
-import androidx.leanback.widget.FullWidthDetailsOverviewSharedElementHelper;
 import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.ListRowPresenter;
 import androidx.leanback.widget.RowPresenter;
@@ -126,13 +125,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
 
         if (mSelectedTask != null) {
-            if (mSelectedTask.userTasks.length > 0)
-                mUserTask = mSelectedTask.userTasks[0]; //TODO what happened is there are more than one UserTask
-
-
             setupDetailsOverview();
-            setupContinueAction();
             fetchUserTasks();
+
+            if (mSelectedTask.userTasks.length > 0) {
+                mUserTask = mSelectedTask.userTasks[0]; //TODO what happened is there are more than one UserTask
+                setupContinueAction();
+            }
         } else {
             getActivity().finish(); //back to MainActivity
         }
@@ -152,9 +151,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         if (fetchSubtitleLiveData != null)
             fetchSubtitleLiveData.removeObservers(getViewLifecycleOwner());
-
-        if (fetchUserTaskLiveData != null)
-            fetchUserTaskLiveData.removeObservers(getViewLifecycleOwner());
 
         if (fetchUserTaskLiveData != null)
             fetchUserTaskLiveData.removeObservers(getViewLifecycleOwner());
@@ -365,6 +361,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     private void setupContinueAction() {
         if (mUserTask != null) {
+            Log.d(TAG, mUserTask.toString());
             if (mUserTask.getTimeWatchedInSecs() > 0) { //To avoid messages like "0 min, 0 secs"
                 String timeFormatted = Utils.getTimeFormatMinSecs(mUserTask.getTimeWatched());
 
@@ -496,41 +493,37 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
      * Verify if the current task has already data created. IF not, is call createTask()
      */
     private void fetchUserTasks() {
-        fetchUserTaskLiveData = mViewModel.fetchUserTask(mSelectedTask.taskId);
+        mViewModel.setTaskId(mSelectedTask.taskId);
+
+        fetchUserTaskLiveData = mViewModel.fetchUserTask();
 
         fetchUserTaskLiveData.removeObservers(getViewLifecycleOwner());
 
         fetchUserTaskLiveData.observe(getViewLifecycleOwner(), userTaskResource -> {
-//            if (userTaskResource.status.equals(Resource.Status.LOADING))
-//                instantiateAndShowLoading(getString(R.string.title_loading_retrieve_user_tasks));
-//            else
             if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
                 Log.d(TAG, "responseFromFetchUserTaskErrorDetails response");
 
-                mUserTask = userTaskResource.data;
+                if (userTaskResource.data != null)
+                    if (mSelectedTask.taskId == userTaskResource.data.getTaskId()) { //TODO this is a bug of the livedata. It keeps getting the last saved value from different calls
+                        mUserTask = userTaskResource.data;
 
-                setupContinueAction();
+                        setupContinueAction();
 
 
-                if (mUserTask != null && mUserTask.getCompleted() == 1) { //TODO improve this calls
-                    mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //trying to keep continue_category always updated
-                    mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT); //trying to keep finished_category always updated
-                    mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT); //trying to keep mylist_category always updated
-                    mViewModel.updateTaskByCategory(TASKS_ALL_CAT); //trying to keep all_category always updated
-                    mViewModel.updateTaskByCategory(TASKS_TEST_CAT); //trying to keep test_category always updated
-                }
-
-//                dismissLoading();
-
+                        if (mUserTask.getCompleted() == 1) { //TODO improve this calls
+                            mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //trying to keep continue_category always updated
+                            mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT); //trying to keep finished_category always updated
+                            mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT); //trying to keep mylist_category always updated
+                            mViewModel.updateTaskByCategory(TASKS_ALL_CAT); //trying to keep all_category always updated
+                            mViewModel.updateTaskByCategory(TASKS_TEST_CAT); //trying to keep test_category always updated
+                        }
+                    }
             } else if (userTaskResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
                 if (userTaskResource.message != null)
                     Log.d(TAG, userTaskResource.message);
                 else
                     Log.d(TAG, "Status ERROR");
-
-
-//                dismissLoading();
             }
         });
     }

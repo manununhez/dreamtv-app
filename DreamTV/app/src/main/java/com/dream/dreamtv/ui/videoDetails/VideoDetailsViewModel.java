@@ -12,6 +12,8 @@ import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.repository.AppRepository;
 import com.dream.dreamtv.utils.AbsentLiveData;
 
+import java.util.Objects;
+
 class VideoDetailsViewModel extends ViewModel {
 
     private final AppRepository mRepository;
@@ -45,10 +47,16 @@ class VideoDetailsViewModel extends ViewModel {
         return mRepository.fetchSubtitle(videoId, languageCode, version);
     }
 
-    LiveData<Resource<UserTask>> fetchUserTask(int taskId) {
-        userTaskMutableLiveData.setValue(taskId);
+    LiveData<Resource<UserTask>> fetchUserTask() {
         return userTask;
 //        return mRepository.fetchUserTask();
+    }
+
+    public void setTaskId(int taskId) {
+        if (Objects.equals(this.userTaskMutableLiveData.getValue(), taskId)) {
+            return;
+        }
+        this.userTaskMutableLiveData.setValue(taskId);
     }
 
     LiveData<Resource<UserTask>> createUserTask(Task task, int mSubtitleVersion) {
