@@ -18,4 +18,5 @@
     <color name="button_selected_shape">#99BB86FC</color>
     <color name="button_focused_shape">#66BB86FC</color>
     <color name="button_default_shape">@color/colorAccent</color>
+    <color name="progress_color">#b71c1c</color>
 </resources>

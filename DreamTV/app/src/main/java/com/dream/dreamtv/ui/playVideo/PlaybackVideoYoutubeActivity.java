@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Chronometer;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -92,13 +93,18 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     private static final int AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION = 2;
     private static final int DIFFERENCE_TIME_IN_SECS_ = 1;
     private static final int VIDEO_COMPLETED_WATCHING_TRUE = 1;//7 secs in ms
+    private static final int BUFFER_VALUE_PB = 2;
     private boolean mPlayFromBeginning;
     private boolean hasAlreadyPlayFromBeginning = false;
     private RelativeLayout rlVideoPlayerInfo;
+    private RelativeLayout rlVideoPlayerProgress;
     private YoutubeTvView mYoutubeView;
     private TextView tvSubtitle;
     private TextView tvTime;
     private TextView tvSubtitleError;
+    private TextView tvVideoTitle;
+    private TextView tvTotalTime;
+    private TextView tvCurrentTime;
     private Handler handler;
     private Chronometer chronometer;
     private Runnable myRunnable;
@@ -111,6 +117,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     private Task mSelectedTask;
     private String mSelectedCategory;
     private LoadingDialog loadingDialog;
+    private ProgressBar pbProgress;
     private ArrayList<UserTaskError> userTaskErrorListForSttlPos = new ArrayList<>();
 
 
@@ -149,14 +156,31 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         tvTime = findViewById(R.id.tvTime);
         rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
 
+        rlVideoPlayerProgress = findViewById(R.id.rlVideoPlayerProgress);
+        tvVideoTitle = findViewById(R.id.tvVideoTitle);
+        tvCurrentTime = findViewById(R.id.tvCurrentTime);
+        tvTotalTime = findViewById(R.id.tvTotalTime);
+        pbProgress = findViewById(R.id.pbProgress);
+
+
         mPlayFromBeginning = getIntent().getBooleanExtra(INTENT_PLAY_FROM_BEGINNING, true);
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         instantiateLoading();
-
+        setupInfoPlayer();
         setupVideoPlayer();
+    }
+
+    private void setupInfoPlayer() {
+        tvVideoTitle.setText(mSelectedTask.video.title);
+        tvTotalTime.setText(Utils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs()));
+        if (mPlayFromBeginning)
+            tvCurrentTime.setText(Utils.getTimeFormat(this, 0));
+        else
+            tvCurrentTime.setText(Utils.getTimeFormat(this, mUserTask.getTimeWatched()));
+
     }
 
 
@@ -331,6 +355,18 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                     firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO);
                     return true;
                 }
+            case KeyEvent.KEYCODE_DPAD_UP:
+                if (action == KeyEvent.ACTION_UP) {
+                    rlVideoPlayerProgress.setVisibility(View.VISIBLE);
+                    return true;
+                }
+
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if (action == KeyEvent.ACTION_UP) {
+                    rlVideoPlayerProgress.setVisibility(View.GONE);
+                    return true;
+                }
+
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 if (action == KeyEvent.ACTION_UP) {
                     Log.d(TAG, "KEYCODE_DPAD_CENTER - dispatchKeyEvent");
@@ -410,6 +446,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
         tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
         rlVideoPlayerInfo.setVisibility(View.VISIBLE);
+        rlVideoPlayerProgress.setVisibility(View.GONE);
 
 
         //Analytics Report Event
@@ -450,6 +487,14 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 timeStoppedTemp = chronometer.getBase();
                 elapsedRealtimeTemp = SystemClock.elapsedRealtime();
 
+                //Updating progress
+                tvCurrentTime.setText(Utils.getTimeFormat(this, elapsedRealtimeTemp - timeStoppedTemp));
+                int videoProgress = (int) ((((float) elapsedRealtimeTemp - timeStoppedTemp) / (float) mSelectedTask.video.getVideoDurationInMs()) * 100);
+                pbProgress.setProgress(videoProgress);
+                pbProgress.setSecondaryProgress(videoProgress + BUFFER_VALUE_PB);
+
+
+                //Subtitles
                 Subtitle selectedSubtitle = mSubtitleResponse.getSyncSubtitleText(elapsedRealtimeTemp - timeStoppedTemp);
 
                 if (selectedSubtitle != null) //if subtitle == null, there is not subtitle in the time selected

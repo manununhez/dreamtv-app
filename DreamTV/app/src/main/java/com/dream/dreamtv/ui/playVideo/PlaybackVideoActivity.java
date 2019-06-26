@@ -12,6 +12,7 @@ import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -76,6 +77,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private static final int ONE_SEC_IN_MS = 1000;
     private static final int DIFFERENCE_TIME_IN_MS = 1000;
     private static final int POSITION_OFFSET_IN_MS = 7000;//7 secs in ms
+    private static final int BUFFER_VALUE_PB = 2;
     private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
     private boolean mPlayFromBeginning;
     private String mSelectedCategory;
@@ -84,13 +86,18 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private PlaybackViewModel mViewModel;
     private SubtitleResponse mSubtitleResponse;
     private RelativeLayout rlVideoPlayerInfo;
+    private RelativeLayout rlVideoPlayerProgress;
     private TextView tvSubtitle;
     private TextView tvSubtitleError;
     private TextView tvTime;
+    private TextView tvVideoTitle;
+    private TextView tvTotalTime;
+    private TextView tvCurrentTime;
     private Task mSelectedTask;
     private UserTask mUserTask;
     private Handler handler;
     private Runnable myRunnable;
+    private ProgressBar pbProgress;
     private FirebaseAnalytics mFirebaseAnalytics;
     private ArrayList<UserTaskError> userTaskErrorListForSttlPos = new ArrayList<>();
 
@@ -132,6 +139,12 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         tvTime = findViewById(R.id.tvTime);
         rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
 
+        rlVideoPlayerProgress = findViewById(R.id.rlVideoPlayerProgress);
+        tvVideoTitle = findViewById(R.id.tvVideoTitle);
+        tvCurrentTime = findViewById(R.id.tvCurrentTime);
+        tvTotalTime = findViewById(R.id.tvTotalTime);
+        pbProgress = findViewById(R.id.pbProgress);
+
         mPlayFromBeginning = getIntent().getBooleanExtra(INTENT_PLAY_FROM_BEGINNING, true);
 
         // Obtain the FirebaseAnalytics instance.
@@ -140,7 +153,18 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         instantiateLoading();
         subtitleHandlerSyncConfig();
         setupVideoPlayer();
+        setupInfoPlayer();
         playVideoMode();
+
+    }
+
+    private void setupInfoPlayer() {
+        tvVideoTitle.setText(mSelectedTask.video.title);
+        tvTotalTime.setText(Utils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs()));
+        if (mPlayFromBeginning)
+            tvCurrentTime.setText(Utils.getTimeFormat(this, 0));
+        else
+            tvCurrentTime.setText(Utils.getTimeFormat(this, mUserTask.getTimeWatched()));
 
     }
 
@@ -227,6 +251,18 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                     return true;
                 }
 
+            case KeyEvent.KEYCODE_DPAD_UP:
+                if (action == KeyEvent.ACTION_UP) {
+                    rlVideoPlayerProgress.setVisibility(View.VISIBLE);
+                    return true;
+                }
+
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if (action == KeyEvent.ACTION_UP) {
+                    rlVideoPlayerProgress.setVisibility(View.GONE);
+                    return true;
+                }
+
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 if (action == KeyEvent.ACTION_UP) {
                     Log.d(TAG, "KEYCODE_DPAD_RIGHT");
@@ -242,7 +278,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                 }
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 if (action == KeyEvent.ACTION_UP) {
-                    if(mVideoView.isPlaying()){
+                    if (mVideoView.isPlaying()) {
                         pauseVideo((long) mVideoView.getCurrentPosition());
                         controlReasonDialogPopUp();
                     } else { //Play
@@ -302,9 +338,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                 if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
                     Log.d(TAG, "OnPreparedListener - MEDIA_INFO_VIDEO_RENDERING_START");
                     dismissLoading();
-
-                    startSyncSubtitle(null);  //Empieza la sync al iniciar el video
-
                 }
 
                 return false;
@@ -358,6 +391,9 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     @Override
     public void playVideo(Integer seekToMs) {
         mVideoView.start();
+        startSyncSubtitle(null);
+        rlVideoPlayerInfo.setVisibility(View.GONE);
+
 
         if (seekToMs != null)
             mVideoView.seekTo(seekToMs);
@@ -376,6 +412,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         String videoDuration = Utils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs());
 
         tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
+
+        rlVideoPlayerProgress.setVisibility(View.GONE);
         rlVideoPlayerInfo.setVisibility(View.VISIBLE);
 
         //Analytics Report Event
@@ -416,6 +454,13 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                 if (!handlerRunning)
                     return;
 
+                //Updating progress
+                tvCurrentTime.setText(Utils.getTimeFormat(this, mVideoView.getCurrentPosition()));
+                int videoProgress = (int) (((float) mVideoView.getCurrentPosition() / (float) mSelectedTask.video.getVideoDurationInMs()) * 100);
+                pbProgress.setProgress(videoProgress);
+                pbProgress.setSecondaryProgress(videoProgress + BUFFER_VALUE_PB);
+
+                //Subtitles
                 Subtitle selectedSubtitle = mSubtitleResponse.getSyncSubtitleText(mVideoView.getCurrentPosition());
 
                 if (selectedSubtitle != null) //if subtitle == null, there is not subtitle in the time selected
@@ -433,7 +478,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public void startSyncSubtitle(Long base) {
-        rlVideoPlayerInfo.setVisibility(View.GONE);
+        Log.d(TAG, "$$ startSyncSubtitle()");
 
         handlerRunning = true;
         handler.post(myRunnable);
@@ -441,6 +486,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public void stopSyncSubtitle() {
+        Log.d(TAG, "$$ stopSyncSubtitle()");
+
         handlerRunning = false;
 
         if (handler != null) {

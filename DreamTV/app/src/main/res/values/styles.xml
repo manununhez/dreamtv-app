@@ -143,4 +143,12 @@
     </style>
 
 
+    <style name="ProgressBarVideoPlayer" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressBackgroundTint">@color/white</item>
+        <item name="android:progressTint">@color/progress_color</item>
+        <item name="android:minWidth">200dp</item>
+        <item name="android:secondaryProgressTint">@color/colorAccent</item>
+        <item name="android:max">100</item>
+    </style>
+
 </resources>
