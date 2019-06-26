@@ -20,7 +20,8 @@
     <string name="title_my_list_category">Moje filmy</string>
     <string name="title_finished_category">Oglądać jeszcze raz</string>
     <string name="title_test_category">Tylko do testowania</string>
-    <string name="title_preferences_category">Ustawienia</string>
+    <string name="title_settings_category">Ustawienia</string>
+    <string name="title_preferences_category">Preferencja</string>
     <string name="title_continue_watching_category">Kontynuuj oglądanie</string>
     <string name="title_topics_category">Tematy</string>
     <string name="title_check_new_tasks_category">Ostatnio dodane filmy</string>
@@ -96,7 +97,7 @@
     <string name="pref_title_testing_mode_settings">Tryb testowy</string>
     <string name="pref_title_testing_mode_settings_description">Wyświetl filmy do testowania</string>
     <string name="pref_title_video_duration_settings">Czas trwania wideo</string>
-    <string name="pref_title_settings">Ustawienia</string>
+    <string name="btn_delete_changes">Usunąć</string>
 
     <!--DATA FOR SETTINGS-->
     <string-array name="listAudioLanguages">

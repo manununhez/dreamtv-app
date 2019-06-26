@@ -28,7 +28,8 @@
     <string name="title_my_list_category">My List</string>
     <string name="title_finished_category">Watch again</string>
     <string name="title_test_category">Only for testing</string>
-    <string name="title_preferences_category">Settings</string>
+    <string name="title_settings_category">Settings</string>
+    <string name="title_preferences_category">Preferences</string>
     <string name="title_continue_watching_category">Continue watching</string>
     <string name="title_topics_category">Topics</string>
     <string name="title_check_new_tasks_category">New releases</string>
@@ -100,7 +101,6 @@
     <string name="pref_title_testing_mode_settings">Testing mode</string>
     <string name="pref_title_testing_mode_settings_description">Display videos for testing</string>
     <string name="pref_title_video_duration_settings">Video duration</string>
-    <string name="pref_title_settings">Settings</string>
 
 
     <!--PREFERENCES KEYS-->
@@ -111,6 +111,7 @@
     <string name="pref_key_list_subtitle_languages" translatable="false">listSubtitleLanguage</string>
     <string name="pref_key_video_duration" translatable="false">listVideoDuration</string>
     <string name="pref_key_subtitle_size" translatable="false">listSubtitleSize</string>
+    <string name="btn_delete_changes">clear</string>
 
     <!--DATA FOR SETTINGS-->
     <string-array name="listAudioLanguages">

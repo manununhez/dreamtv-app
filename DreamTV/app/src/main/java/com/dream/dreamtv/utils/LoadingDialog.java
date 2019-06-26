@@ -19,6 +19,7 @@ import java.util.Objects;
 public class LoadingDialog extends Dialog {
 
     private final String message;
+    private boolean isDismissed = false;
 
     public LoadingDialog(Context context, String message) {
         super(context);

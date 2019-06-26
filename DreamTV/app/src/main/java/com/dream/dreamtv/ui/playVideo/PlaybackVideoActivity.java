@@ -43,7 +43,25 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.dream.dreamtv.utils.Constants.*;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP;
+import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
+import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
+import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
+import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
+import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
+import static com.dream.dreamtv.utils.Constants.PREF_SUBTITLE_SMALL_SIZE;
+import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
 
 /**
  * PlaybackOverlayActivity for video playback that loads PlaybackOverlayFragment
@@ -57,27 +75,24 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private static final int AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION = 2;
     private static final int ONE_SEC_IN_MS = 1000;
     private static final int DIFFERENCE_TIME_IN_MS = 1000;
-    private static final int PLAY = 0;
-    private static final int PAUSE = 1;
     private static final int POSITION_OFFSET_IN_MS = 7000;//7 secs in ms
-    private int lastSelectedUserTaskShown = -1;
-    private int isPlayPauseAction = PAUSE;
     private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
     private boolean mPlayFromBeginning;
+    private String mSelectedCategory;
     private VideoView mVideoView;
+    private LoadingDialog loadingDialog;
+    private PlaybackViewModel mViewModel;
+    private SubtitleResponse mSubtitleResponse;
+    private RelativeLayout rlVideoPlayerInfo;
     private TextView tvSubtitle;
+    private TextView tvSubtitleError;
     private TextView tvTime;
+    private Task mSelectedTask;
+    private UserTask mUserTask;
     private Handler handler;
     private Runnable myRunnable;
-    private RelativeLayout rlVideoPlayerInfo;
-    private LoadingDialog loadingDialog;
-    private ArrayList<UserTaskError> userTaskErrorListForSttlPos;
     private FirebaseAnalytics mFirebaseAnalytics;
-    private Task mSelectedTask;
-    private SubtitleResponse mSubtitleResponse;
-    private UserTask mUserTask;
-    private PlaybackViewModel mViewModel;
-    private String mSelectedCategory;
+    private ArrayList<UserTaskError> userTaskErrorListForSttlPos = new ArrayList<>();
 
 
     /**
@@ -110,6 +125,9 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         tvSubtitle = findViewById(R.id.tvSubtitle);
         tvSubtitle.setTextSize(Integer.parseInt(Objects.requireNonNull(sharedPreferences.getString(getString(R.string.pref_key_subtitle_size), PREF_SUBTITLE_SMALL_SIZE))));
 
+        tvSubtitleError = findViewById(R.id.tvSubtitleError);
+        tvSubtitleError.setTextSize(Integer.parseInt(Objects.requireNonNull(sharedPreferences.getString(getString(R.string.pref_key_subtitle_size), PREF_SUBTITLE_SMALL_SIZE))));
+
 
         tvTime = findViewById(R.id.tvTime);
         rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
@@ -119,12 +137,12 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
+        instantiateLoading();
         subtitleHandlerSyncConfig();
         setupVideoPlayer();
         playVideoMode();
 
     }
-
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -136,6 +154,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         outState.putParcelable(INTENT_USER_TASK, mUserTask);
 
     }
+
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -184,97 +203,69 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(LocaleHelper.onAttach(base));
-//        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
     }
 
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public boolean dispatchKeyEvent(KeyEvent event) {
 
-        Log.d(TAG, "$$ onPause()");
-        if (mVideoView.isPlaying()) {
-            if (!requestVisibleBehind(true)) {
-                // Try to play behind launcher, but if it fails, stop playback.
-                stopVideo();
-            }
-        } else {
-            requestVisibleBehind(false);
-        }
-    }
+        int action = event.getAction();
+        int keyCode = event.getKeyCode();
 
-    @Override
-    public void onVisibleBehindCanceled() {
-        super.onVisibleBehindCanceled();
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                Log.d(TAG, "KEYCODE_DPAD_LEFT");
+                if (action == KeyEvent.ACTION_UP) {
+                    Log.d(TAG, "KEYCODE_DPAD_LEFT");
 
-                mVideoView.seekTo(mVideoView.getCurrentPosition() - POSITION_OFFSET_IN_MS);
-                Toast.makeText(this, getString(R.string.title_video_backward, (POSITION_OFFSET_IN_MS / ONE_SEC_IN_MS)),
-                        Toast.LENGTH_SHORT).show();
+                    mVideoView.seekTo(mVideoView.getCurrentPosition() - POSITION_OFFSET_IN_MS);
+                    Toast.makeText(this, getString(R.string.title_video_backward, (POSITION_OFFSET_IN_MS / ONE_SEC_IN_MS)),
+                            Toast.LENGTH_SHORT).show();
 
-                //Analytics Report Event
-                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO);
+                    //Analytics Report Event
+                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO);
 
-                return true;
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                Log.d(TAG, "KEYCODE_DPAD_RIGHT");
-
-                mVideoView.seekTo(mVideoView.getCurrentPosition() + POSITION_OFFSET_IN_MS);
-                Toast.makeText(this, getString(R.string.title_video_forward, (POSITION_OFFSET_IN_MS / ONE_SEC_IN_MS)),
-                        Toast.LENGTH_SHORT).show();
-
-                //Analytics Report Event
-                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO);
-
-                return true;
-
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-                if (isPlayPauseAction == PLAY) { //Pause
-
-                    pauseVideo((long) mVideoView.getCurrentPosition());
-                    controlReasonDialogPopUp();
-
-                } else { //Play
-                    playVideoMode();
-
+                    return true;
                 }
-                return true;
+
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                if (action == KeyEvent.ACTION_UP) {
+                    Log.d(TAG, "KEYCODE_DPAD_RIGHT");
+
+                    mVideoView.seekTo(mVideoView.getCurrentPosition() + POSITION_OFFSET_IN_MS);
+                    Toast.makeText(this, getString(R.string.title_video_forward, (POSITION_OFFSET_IN_MS / ONE_SEC_IN_MS)),
+                            Toast.LENGTH_SHORT).show();
+
+                    //Analytics Report Event
+                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO);
+
+                    return true;
+                }
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                if (action == KeyEvent.ACTION_UP) {
+                    if(mVideoView.isPlaying()){
+                        pauseVideo((long) mVideoView.getCurrentPosition());
+                        controlReasonDialogPopUp();
+                    } else { //Play
+                        playVideo(null);
+
+                    }
+                    return true;
+                }
+
+            case KeyEvent.KEYCODE_BACK:
+                if (action == KeyEvent.ACTION_UP) {
+                    Log.d(TAG, "$$ dispatchKeyEvent() - KeyEvent.KEYCODE_BACK");
+                    stopVideo();
+                    mVideoView.suspend();
+                    finish();
+                    return true;
+                }
 
             default:
-                return super.onKeyUp(keyCode, event);
+                return super.dispatchKeyEvent(event);
         }
     }
 
-//    @Override
-//    public boolean dispatchKeyEvent(KeyEvent event) {
-//
-//        int action = event.getAction();
-//        int keyCode = event.getKeyCode();
-//
-//        switch (keyCode) {
-////            case KeyEvent.KEYCODE_DPAD_CENTER:
-////                if (action == KeyEvent.ACTION_UP) {
-////                    if (isPlayPauseAction == PLAY) { //Pause
-////
-////                        pauseVideo((long) mVideoView.getCurrentPosition());
-////                        controlReasonDialogPopUp();
-////
-////                    } else { //Play
-////                        playVideoMode();
-////
-////                    }
-////                    return true;
-////                }
-//            default:
-//                return super.dispatchKeyEvent(event);
-//        }
-//    }
 
     @Override
     public void setupVideoPlayer() {
@@ -298,10 +289,10 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         });
 
         mVideoView.setOnPreparedListener(mp -> {
-
             mp.setOnInfoListener((mp1, what, extra) -> {
                 if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
                     Log.d(TAG, "OnPreparedListener - MEDIA_INFO_BUFFERING_START");
+                    showLoading();
                 }
                 if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
                     Log.d(TAG, "OnPreparedListener - MEDIA_INFO_BUFFERING_END");
@@ -311,6 +302,9 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                 if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
                     Log.d(TAG, "OnPreparedListener - MEDIA_INFO_VIDEO_RENDERING_START");
                     dismissLoading();
+
+                    startSyncSubtitle(null);  //Empieza la sync al iniciar el video
+
                 }
 
                 return false;
@@ -318,11 +312,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
 
             mp.setOnCompletionListener(mediaPlayer -> {
-                mUserTask.setCompleted(1);
-                stopSyncSubtitle();
-
+                stopVideo();
                 showRatingDialog();
-
             });
 
         });
@@ -332,9 +323,12 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     }
 
-    private void showLoading() {
+    private void instantiateLoading() {
         loadingDialog = new LoadingDialog(PlaybackVideoActivity.this, getString(R.string.title_loading_buffering));
         loadingDialog.setCanceledOnTouchOutside(false);
+    }
+
+    private void showLoading() {
         loadingDialog.show();
     }
 
@@ -363,14 +357,10 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public void playVideo(Integer seekToMs) {
-        isPlayPauseAction = PLAY;
+        mVideoView.start();
 
         if (seekToMs != null)
             mVideoView.seekTo(seekToMs);
-
-        rlVideoPlayerInfo.setVisibility(View.GONE);
-        startSyncSubtitle(null);
-        mVideoView.start();
 
         //Analytics Report Event
         firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY);
@@ -382,14 +372,11 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
         mVideoView.pause();
 
-        isPlayPauseAction = PAUSE;
-
         String currentTime = Utils.getTimeFormat(this, position);
         String videoDuration = Utils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs());
 
         tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
         rlVideoPlayerInfo.setVisibility(View.VISIBLE);
-
 
         //Analytics Report Event
         firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE);
@@ -399,8 +386,17 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     public void stopVideo() {
         stopSyncSubtitle();
 
-        if (mVideoView != null) {
+        updateUserTimeWatched();
 
+        if (mVideoView != null)
+            mVideoView.stopPlayback();
+
+        //Analytics Report Event
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP);
+    }
+
+    private void updateUserTimeWatched() {
+        if (mVideoView != null) {
             if (mVideoView.getCurrentPosition() > 0) {
                 //Update current time of the video
                 Log.d(TAG, "stopVideo() => Time" + mVideoView.getCurrentPosition());
@@ -409,13 +405,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                 mViewModel.updateUserTask(mUserTask);
 
             }
-
-            mVideoView.stopPlayback();
-
-
-            //Analytics Report Event
-            firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP);
-
         }
     }
 
@@ -429,26 +418,12 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
                 Subtitle selectedSubtitle = mSubtitleResponse.getSyncSubtitleText(mVideoView.getCurrentPosition());
 
-                if (selectedSubtitle != null) {
-                    Log.d(TAG, "Selected subtitle: #" + selectedSubtitle.position + " - " + selectedSubtitle.text);
-
+                if (selectedSubtitle != null) //if subtitle == null, there is not subtitle in the time selected
                     userTaskErrorListForSttlPos = mUserTask.getUserTaskErrorsForASpecificSubtitlePosition(selectedSubtitle.position);
+                else userTaskErrorListForSttlPos.clear();
 
-                    if (userTaskErrorListForSttlPos != null && userTaskErrorListForSttlPos.size() > 0) {
-                        Log.d(TAG, "Position = " + selectedSubtitle.position
-                                + " List: " + userTaskErrorListForSttlPos.toString());
+                showSubtitle(selectedSubtitle, userTaskErrorListForSttlPos);
 
-                        if (lastSelectedUserTaskShown != selectedSubtitle.position) {  //pause the video and show the popup
-                            //Automatic pop-up with selected errors
-                            pauseVideo((long) mVideoView.getCurrentPosition());
-                            controlReasonDialogPopUp();
-
-                            lastSelectedUserTaskShown = selectedSubtitle.position;
-                        }
-                    }
-
-                    showSubtitle(selectedSubtitle);
-                }
             });
 
             if (handlerRunning)
@@ -458,6 +433,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public void startSyncSubtitle(Long base) {
+        rlVideoPlayerInfo.setVisibility(View.GONE);
+
         handlerRunning = true;
         handler.post(myRunnable);
     }
@@ -472,14 +449,38 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         }
     }
 
+
     @Override
     public void showSubtitle(Subtitle subtitle) {
         if (subtitle == null)
             tvSubtitle.setVisibility(View.GONE);
         else {
+            tvSubtitleError.setVisibility(View.GONE);
             tvSubtitle.setVisibility(View.VISIBLE);
             tvSubtitle.setText(Html.fromHtml(subtitle.text));
         }
+    }
+
+    @Override
+    public void showSubtitleWithErrors(Subtitle subtitle) {
+        if (subtitle == null)
+            tvSubtitleError.setVisibility(View.GONE);
+        else {
+            tvSubtitle.setVisibility(View.GONE);
+            tvSubtitleError.setVisibility(View.VISIBLE);
+            tvSubtitleError.setText(Html.fromHtml(subtitle.text));
+        }
+    }
+
+    @Override
+    public void showSubtitle(Subtitle subtitle, ArrayList<UserTaskError> userTaskErrorListForSttlPos) {
+        if (userTaskErrorListForSttlPos.size() > 0) {
+            Log.d(TAG, "Position = " + subtitle.position + " List: " + userTaskErrorListForSttlPos.toString());
+
+            showSubtitleWithErrors(subtitle);
+        } else
+            showSubtitle(subtitle);
+
     }
 
     @Override
@@ -490,7 +491,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
             dismissLoading(); //in case the loading is still visible
 
-//            if (!mSelectedCategory.equals(TASKS_MY_LIST_CAT)) { //For now, we dont show the popup in my list category . This category is just to see saved video
             ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(mSubtitleResponse,
                     subtitle.position, mSelectedTask, userTask);
             if (!isFinishing()) {
@@ -510,7 +510,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         if (subtitle != null) { //only shows the popup when exist an subtitle
             dismissLoading(); //in case the loading is still visible
 
-//            if (!mSelectedCategory.equals(TASKS_MY_LIST_CAT)) { //For now, we dont show the popup in my list category . This category is just to see saved video
             ErrorSelectionDialogFragment errorSelectionDialogFragment =
                     ErrorSelectionDialogFragment.newInstance(mSubtitleResponse,
                             subtitle.position, mSelectedTask, userTask, userTaskErrorList);
@@ -540,13 +539,9 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
-//        Subtitle subtitleOriginal = mSubtitleResponse.subtitles.get(subtitleOriginalPosition - 1);
         Subtitle subtitleOneBeforeNew;
 
         // A subtitle from the subtitle navigation was pressed. The video is moving forward or backward
-//        if (selectedSubtitle != null) {
-        //if selectedSubtitle is null means that the onDialogDismiss action comes from the informative user reason dialog (it shows the selected reasons of the user)
-
         if (selectedSubtitle.position != subtitleOriginalPosition) { //a different subtitle from the original was selected
             if (selectedSubtitle.position - AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION >= 0) { //avoid index out of range
                 subtitleOneBeforeNew = mSubtitleResponse.subtitles.get(
@@ -575,28 +570,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        Log.d(TAG, "$$ onDestroy()");
-
-
-        stopVideo();
-        mVideoView.suspend();
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-
-        Log.d(TAG, "$$ onBackPressed()");
-
-        stopVideo();
-        mVideoView.suspend();
-    }
-
-
-    @Override
     public void onSaveReasons(UserTaskError userTaskError) {
         Log.d(TAG, "onSaveReasons() =>" + userTaskError.toString());
 
@@ -608,7 +581,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             if (errorsResource.status.equals(Resource.Status.SUCCESS)) {
                 Log.d(TAG, "errorsUpdate response");
 
-//                mUserTask.addUserTaskErrorToList(errorsResource.data);
                 mUserTask.setUserTaskErrorList(errorsResource.data);
 
             } else if (errorsResource.status.equals(Resource.Status.ERROR)) {
@@ -637,7 +609,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             if (errorsResource.status.equals(Resource.Status.SUCCESS)) {
                 Log.d(TAG, "errorsUpdate response");
 
-//                mUserTask.addUserTaskErrorToList(errorsResource.data);
                 mUserTask.setUserTaskErrorList(errorsResource.data);
 
             } else if (errorsResource.status.equals(Resource.Status.ERROR)) {
@@ -658,6 +629,9 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     @Override
     public void setRating(int rating) {
         mUserTask.setRating(rating);
+
+        mUserTask.setCompleted(VIDEO_COMPLETED_WATCHING_TRUE);
+        mUserTask.setTimeWatched(0);//restart video watched
 
         //Update values and exit from the video
         mViewModel.updateUserTask(mUserTask);

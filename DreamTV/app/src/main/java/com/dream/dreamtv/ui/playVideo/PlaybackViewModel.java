@@ -25,12 +25,6 @@ class PlaybackViewModel extends ViewModel {
 
 
     void updateUserTask(UserTask userTask) {
-        if (Objects.equals(this.userTaskMutableLiveData.getValue(), userTask)) {
-            return;
-        }
-
-        userTaskMutableLiveData.setValue(userTask);
-
         mRepository.updateUserTask(userTask);
     }
 

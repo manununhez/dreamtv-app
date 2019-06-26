@@ -3,7 +3,7 @@
     <color name="stt_list_nav_selected_background">#051880</color>
     <color name="stt_list_nav_found_error_background">#2E7433</color>
 
-    <color name="subtitle_background">#b6000000</color>
+    <color name="subtitle_background">#D5000000</color>
     <color name="white">#FFFFFF</color>
     <color name="background_gradient_start">#000000</color>
     <color name="background_gradient_end">#DDDDDD</color>

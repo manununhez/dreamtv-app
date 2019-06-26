@@ -87,9 +87,9 @@ public class UserTask implements Parcelable {
 
         if (this.userTaskErrorList != null && this.userTaskErrorList.length > 0)
             for (UserTaskError userTaskError : this.userTaskErrorList) {
-                if((userTaskError.getSubtitlePosition() - 1) > subtitlePosition)
+                if(userTaskError.getSubtitlePosition() > subtitlePosition)
                     break;
-                else if ((userTaskError.getSubtitlePosition() - 1) == subtitlePosition) {
+                else if (userTaskError.getSubtitlePosition() == subtitlePosition) {
                     userTaskErrorList.add(userTaskError);
                 }
             }

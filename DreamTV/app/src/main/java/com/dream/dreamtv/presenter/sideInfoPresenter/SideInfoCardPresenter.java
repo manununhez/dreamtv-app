@@ -33,6 +33,8 @@ import com.dream.dreamtv.model.Card;
 import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.utils.Utils;
 
+import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
+
 /**
  * This Presenter will display a card consisting of an image on the left side of the card followed
  * by text on the right side. The image and text have equal width. The text will work like a info
@@ -116,7 +118,7 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
         //-------------- ERRORS REPORT
         TextView errors = cardView.findViewById(R.id.tvErrorsSelected);
         if (task.userTasks.length > 0 && task.userTasks[0].getUserTaskErrorList().length > 0) { //TODO what happened if we have more than one userTask, e.g same tasks, different subtVersions???
-            if (task.userTasks[0].getCompleted() == 1)
+            if (task.userTasks[0].getCompleted() == VIDEO_COMPLETED_WATCHING_TRUE)
                 errors.setText(getContext().getResources()
                         .getQuantityString(R.plurals.errors_found_finished,
                                 task.userTasks[0].getUserTaskErrorList().length, task.userTasks[0].getUserTaskErrorList().length));

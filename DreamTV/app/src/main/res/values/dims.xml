@@ -14,9 +14,9 @@
   -->
 <resources>
 
-    <dimen name="popup_width_dialog">300dp</dimen>
-    <dimen name="popup_width">400dp</dimen>
-    <dimen name="popup_height">350dp</dimen>
+    <dimen name="popup_width_dialog">290dp</dimen>
+    <dimen name="popup_width">430dp</dimen>
+    <dimen name="popup_height">430dp</dimen>
 
 
     <dimen name="default_image_card_width">224dp</dimen>

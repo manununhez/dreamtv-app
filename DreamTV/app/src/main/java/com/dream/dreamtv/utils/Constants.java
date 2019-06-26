@@ -111,6 +111,7 @@ public class Constants {
 
 
     public static final String YOUTUBE_VIDEO_ID = "videoId";
+    public static final String YOUTUBE_CONTROLS = "control";
     public static final String YOUTUBE_AUTOPLAY = "autoplay";
     public static final String YOUTUBE_SHOW_RELATED_VIDEOS = "showRelatedVideos";
     public static final String YOUTUBE_SHOW_VIDEO_INFO = "showVideoInfo";
@@ -119,7 +120,13 @@ public class Constants {
     public static final String YOUTUBE_CLOSED_CAPTIONS = "closedCaptions";
     public static final String STATE_PLAY = "PLAYING";
     public static final String STATE_BUFFERING = "BUFFERING";
+    public static final String STATE_UNSTARTED = "UNSTARTED";
+    public static final String STATE_VIDEO_CUED = "VIDEO_CUED";
     public static final String STATE_ENDED = "ENDED";
     public static final String STATE_PAUSED = "PAUSED";
+
+
+    public static final int VIDEO_COMPLETED_WATCHING_TRUE = 1;
+    public static final int VIDEO_COMPLETED_WATCHING_FALSE = 0;
 
 }

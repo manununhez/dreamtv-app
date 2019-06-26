@@ -71,6 +71,7 @@ import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_MY_LIST_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
+import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
 
 
 /*
@@ -541,7 +542,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                         setupContinueAction();
 
 
-                        if (mUserTask.getCompleted() == 1) { //TODO improve this calls
+                        if (mUserTask.getCompleted() == VIDEO_COMPLETED_WATCHING_TRUE) { //TODO improve this calls
                             mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //trying to keep continue_category always updated
                             mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT); //trying to keep finished_category always updated
                             mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT); //trying to keep mylist_category always updated

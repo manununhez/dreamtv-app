@@ -2,167 +2,206 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_centerInParent="true"
-    android:gravity="center"
     tools:context="com.dream.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment">
-
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_toEndOf="@+id/llBody"
-        android:background="@color/colorPrimary">
-
-        <ListView
-            android:id="@+id/lv"
-            android:layout_width="@dimen/popup_width"
-            android:layout_height="@dimen/popup_height"
-            android:layout_gravity="center"
-            android:choiceMode="singleChoice"
-            android:focusable="true"
-            android:focusableInTouchMode="true" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/llBody"
-        android:layout_width="@dimen/popup_width_dialog"
-        android:layout_height="@dimen/popup_height"
-        android:background="@color/default_background"
-        android:orientation="vertical"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp">
-
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
-            android:text="@string/title_reasons_dialog"
-            android:textColor="@color/white"
-            android:textSize="18sp" />
-
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <ScrollView
-                android:id="@+id/scrollViewAdvanced"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <LinearLayout
-                    android:id="@+id/llReasons"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
-            </ScrollView>
-
-            <ScrollView
-                android:id="@+id/scrollViewBeginner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <RadioGroup
-                    android:id="@+id/rgReasons"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
-            </ScrollView>
-
-            <TextView
-                android:id="@+id/tvOtherSelected"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/scrollViewBeginner"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:textColor="@color/white"
-                android:textSize="15sp"
-                android:visibility="gone" />
-        </RelativeLayout>
+        android:layout_centerInParent="true">
 
         <LinearLayout
-            android:id="@+id/llComments"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="5dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/btnRecord"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_focusable_selector"
-                android:contentDescription="@string/btn_start_recording"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:padding="4dp"
-                android:src="@drawable/ic_keyboard_voice"
-                android:textColor="@color/white" />
+            android:id="@+id/llBody"
+            android:layout_width="@dimen/popup_width_dialog"
+            android:layout_height="@dimen/popup_height"
+            android:background="@color/default_background"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp">
 
             <TextView
-                android:id="@+id/voiceInput"
+                android:id="@+id/tvTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="@string/btn_start_recording"
-                android:padding="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="5dp"
+                android:text="@string/title_reasons_dialog"
                 android:textColor="@color/white"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvSelectedSubtitle"
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="20dp"
+                android:background="@color/button_focused_shape"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="2"
+                android:textColor="@color/white"
+                android:textSize="13sp"
                 android:textStyle="italic" />
 
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ScrollView
+                    android:id="@+id/scrollViewAdvanced"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:id="@+id/llReasons"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </ScrollView>
+
+                <ScrollView
+                    android:id="@+id/scrollViewBeginner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <RadioGroup
+                        android:id="@+id/rgReasons"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </ScrollView>
+
+                <TextView
+                    android:id="@+id/tvOtherSelected"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/scrollViewBeginner"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:textColor="@color/white"
+                    android:textSize="15sp"
+                    android:visibility="gone" />
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/btnDeleteChanges"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/button_selector_height"
+                android:layout_gravity="end"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/button_focusable_selector"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:text="@string/btn_delete_changes"
+                android:textColor="@color/white" />
+
+            <LinearLayout
+                android:id="@+id/llComments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/btnRecord"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button_focusable_selector"
+                    android:contentDescription="@string/btn_start_recording"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_keyboard_voice"
+                    android:textColor="@color/white" />
+
+                <TextView
+                    android:id="@+id/voiceInput"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/btn_start_recording"
+                    android:padding="10dp"
+                    android:textColor="@color/white"
+                    android:textStyle="italic" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_selector_height"
+                android:layout_marginTop="25dp"
+                android:layout_marginBottom="10dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="@drawable/button_focusable_selector"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:padding="5dp"
+                    android:text="@string/btn_cancel"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/btnSave"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="20dp"
+                    android:background="@drawable/button_focusable_selector"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:padding="10dp"
+                    android:text="@string/btn_save"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/btnSaveChanges"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="20dp"
+                    android:background="@drawable/button_focusable_selector"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:padding="10dp"
+                    android:text="@string/btn_save_changes"
+                    android:textColor="@color/white"
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
-            android:layout_marginBottom="10dp"
-            android:gravity="center"
-            android:orientation="horizontal">
+            android:layout_gravity="center"
+            android:background="@color/colorPrimary">
 
-            <Button
-                android:id="@+id/btnCancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <ListView
+                android:id="@+id/lv"
+                android:layout_width="@dimen/popup_width"
+                android:layout_height="@dimen/popup_height"
                 android:layout_gravity="center"
-                android:background="@drawable/button_focusable_selector"
+                android:choiceMode="singleChoice"
                 android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:padding="10dp"
-                android:text="@string/btn_cancel"
-                android:textColor="@color/white" />
+                android:focusableInTouchMode="true" />
 
-            <Button
-                android:id="@+id/btnSave"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginStart="20dp"
-                android:background="@drawable/button_focusable_selector"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:padding="10dp"
-                android:text="@string/btn_save"
-                android:textColor="@color/white" />
-
-            <Button
-                android:id="@+id/btnSaveChanges"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginStart="20dp"
-                android:background="@drawable/button_focusable_selector"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:padding="10dp"
-                android:text="@string/btn_save_changes"
-                android:textColor="@color/white"
-                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="340dp"
+        android:src="@drawable/ic_chevron_left_black" />
+
+
 </RelativeLayout>

@@ -79,6 +79,7 @@ import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_TOPIC_NAME;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_USER_UPDATED;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
+import static com.dream.dreamtv.utils.Constants.SETTINGS_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_ALL_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
@@ -144,7 +145,7 @@ public class MainFragment extends BrowseSupportFragment {
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mIconCardPresenter);
         Card settingsCard = new Card();
         settingsCard.setType(Card.Type.ICON);
-//        settingsCard.setTitle(SETTINGS_CAT);
+        settingsCard.setTitle(getString(R.string.title_settings_category));
         settingsCard.setLocalImageResource("ic_settings_settings");
         gridRowAdapter.add(settingsCard);
 

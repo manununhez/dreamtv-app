@@ -69,16 +69,16 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private static final String SPEECH_NOT_SUPPORTED = "speech_not_supported";
     private LinearLayout llComments;
     private LinearLayout llReasons;
-    //    private LinearLayout llButtonsOptions1;
-//    private LinearLayout llButtonsOptions2;
     private RadioGroup rgReasons;
     private UserTask userTask;
-    //    private Button btnOk;
     private Button btnSave;
     private Button btnCancel;
     private Button btnSaveChanges;
+    private Button btnDeleteChanges;
     private TextView voiceInput;
     private TextView tvTitle;
+    private TextView tvOtherSelected;
+    private TextView tvSelectedSubtitle;
     private Dialog viewRoot;
     private SubtitleResponse subtitle;
     private ScrollView scrollViewAdvanced;
@@ -90,7 +90,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private List<String> selectedReasons = new ArrayList<>();
     private List<ErrorReason> errorReasonList;
     private int subtitleOriginalPosition;
-    private TextView tvOtherSelected;
 
     public ErrorSelectionDialogFragment() {
         // Required empty public constructor
@@ -156,10 +155,12 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         viewRoot.setContentView(R.layout.fragment_reasons_dialog);
 
         tvTitle = viewRoot.findViewById(R.id.tvTitle);
+        tvSelectedSubtitle = viewRoot.findViewById(R.id.tvSelectedSubtitle);
         tvOtherSelected = viewRoot.findViewById(R.id.tvOtherSelected);
         btnCancel = viewRoot.findViewById(R.id.btnCancel);
         btnSave = viewRoot.findViewById(R.id.btnSave);
         btnSaveChanges = viewRoot.findViewById(R.id.btnSaveChanges);
+        btnDeleteChanges = viewRoot.findViewById(R.id.btnDeleteChanges);
 
         scrollViewAdvanced = viewRoot.findViewById(R.id.scrollViewAdvanced);
         scrollViewBeginner = viewRoot.findViewById(R.id.scrollViewBeginner);
@@ -252,6 +253,11 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             dismiss();
         });
 
+        btnDeleteChanges.setOnClickListener(view -> {
+            clearOptions();
+
+        });
+
     }
 
 
@@ -264,8 +270,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         ListView mListView = viewRoot.findViewById(R.id.lv);
 
         // Initialize a new ArrayAdapter
-//        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
-
         MySubtitleAdapter mySubtitleAdapter = new MySubtitleAdapter(getActivity(), subtitle.subtitles,
                 subtitlePosition, userTask.getUserTaskErrorList());
 
@@ -280,7 +284,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             goToThisSelectedSubtitle = (Subtitle) adapterView.getItemAtPosition(position);
             Log.d(TAG, "CPRCurrentPosition: " + subtitleOriginalPosition);
             Log.d(TAG, "CPRNewPosition: " + (position + 1));
-//            currentSubtitlePosition = i + 1;
 
             setupSubtitleNavigationListView(position + 1);
 
@@ -293,6 +296,8 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 Log.d(TAG, "OnItemSelected - Position: " + position);
                 selectedSubtitle = (Subtitle) adapterView.getItemAtPosition(position);
+
+                tvSelectedSubtitle.setText(Html.fromHtml(selectedSubtitle.text));
 
                 repopulateFormWithUserTaskData(position);
             }
@@ -434,10 +439,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     }
 
     private void repopulateFormWithUserTaskData(int position) {
-        rgReasons.clearCheck(); //clear all previous checks in radio buttons to get the animation correctly
-        selectedReasons.clear(); //clear all previous selected reasons in checks
+        clearOptions();
 
-        ArrayList<UserTaskError> errors = userTask.getUserTaskErrorsForASpecificSubtitlePosition(position);
+        ArrayList<UserTaskError> errors = userTask.getUserTaskErrorsForASpecificSubtitlePosition(position + 1);
         Log.d(TAG, "repopulateFormWithUserTaskData()");
 
         if (errors.size() > 0) { //if at least there are one error
@@ -445,6 +449,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             tvTitle.setText(getString(R.string.title_reasons_dialog_2));
             btnSave.setVisibility(View.GONE);
             btnSaveChanges.setVisibility(View.VISIBLE);
+            btnDeleteChanges.setVisibility(View.VISIBLE);
 
             //Interface mode preferences
             User user = getApplication().getUser();
@@ -499,27 +504,35 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             tvTitle.setText(getString(R.string.title_reasons_dialog));
             btnSave.setVisibility(View.VISIBLE);
             btnSaveChanges.setVisibility(View.GONE);
+            btnDeleteChanges.setVisibility(View.GONE);
 
-            //Interface mode preferences
-            User user = getApplication().getUser();
-            if (user.interfaceMode.equals(PREF_BEGINNER_INTERFACE_MODE)) { //BEGINNER MODE
-                for (int i = 0; i < rgReasons.getChildCount(); i++) {
-                    RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
-                    radioButton.setChecked(false);
+            clearOptions();
+        }
+    }
 
-                }
-            } else { //ADVANCED MODE
-                voiceInput.setText(""); //repopulate comments
+    private void clearOptions() {
+        selectedReasons.clear(); //clear all previous selected reasons in checks
+        //Interface mode preferences
+        User user = getApplication().getUser();
+        if (user.interfaceMode.equals(PREF_BEGINNER_INTERFACE_MODE)) { //BEGINNER MODE
+//                for (int i = 0; i < rgReasons.getChildCount(); i++) {
+//                    RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
+//                    radioButton.setChecked(false);
+//
+//                }
+            rgReasons.clearCheck(); //clear all previous checks in radio buttons to get the animation correctly
 
-                //re-select the reasons id
-                for (int i = 0; i < llReasons.getChildCount(); i++) {
-                    LinearLayout childAt = (LinearLayout) llReasons.getChildAt(i);
-                    CheckBox checkBox = (CheckBox) childAt.getChildAt(0); //0 -> checkbox, 1->Tooglebutton
-                    ToggleButton toggleButton = (ToggleButton) childAt.getChildAt(1); //0 -> checkbox, 1->Tooglebutton
+        } else { //ADVANCED MODE
+            voiceInput.setText(""); //repopulate comments
 
-                    toggleButton.setChecked(false);
-                    checkBox.setChecked(false);
-                }
+            //re-select the reasons id
+            for (int i = 0; i < llReasons.getChildCount(); i++) {
+                LinearLayout childAt = (LinearLayout) llReasons.getChildAt(i);
+                CheckBox checkBox = (CheckBox) childAt.getChildAt(0); //0 -> checkbox, 1->Tooglebutton
+                ToggleButton toggleButton = (ToggleButton) childAt.getChildAt(1); //0 -> checkbox, 1->Tooglebutton
+
+                toggleButton.setChecked(false);
+                checkBox.setChecked(false);
             }
         }
     }
@@ -543,6 +556,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                 selectedErrorsListJson(selectedReasons), subtitle.versionNumber,
                 selectedSubtitle.position, voiceInput.getText().toString());
     }
+
 
     public String selectedErrorsListJson(List<String> selectedReasons) {
         List<ErrorReason> tempList = new ArrayList<>();
@@ -604,29 +618,34 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
 
             if (position == currentSubtitlePosition - 1) {
-                holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_selected_background, null));
-                holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 9,
-                        context.getResources().getDisplayMetrics()));
-                holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.NORMAL);
-            } else if (isPositionError(userTaskErrors, position)) {
-                holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
-                        context.getResources().getDisplayMetrics()));
-                holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
-                holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_found_error_background, null));
+                if (isPositionError(userTaskErrors, position)) {
+                    holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 9,
+                            context.getResources().getDisplayMetrics()));
+                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
+                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_found_error_background, null));
+                } else {
+                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_selected_background, null));
+                    holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 9,
+                            context.getResources().getDisplayMetrics()));
+                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
+                }
             } else {
-                holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
-                        context.getResources().getDisplayMetrics()));
-                holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
-                holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_default_background, null));
+                if (isPositionError(userTaskErrors, position)) {
+                    holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
+                            context.getResources().getDisplayMetrics()));
+                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
+                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_found_error_background, null));
+                } else {
+                    holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
+                            context.getResources().getDisplayMetrics()));
+                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.NORMAL);
+                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_default_background, null));
+                }
+
             }
 
             holder.tvText.setText(Html.fromHtml(values.get(position).text));
 
-
-//            if (userInterfaceMode.equals(Constants.PREF_ADVANCED_INTERFACE_MODE)) { //Advanced MODE
-//                holder.tvTime.setText(videoCurrentReadVeloc(values.get(position).text, (values.get(position).getEnd() - values.get(position).getStart())));
-//
-//            }
             return convertView;
         }
 

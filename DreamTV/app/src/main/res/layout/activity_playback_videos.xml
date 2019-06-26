@@ -13,18 +13,12 @@
 
     <TextView
         android:id="@+id/tvSubtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="20dp"
-        android:background="@color/subtitle_background"
-        android:gravity="center"
-        android:maxLines="2"
-        android:padding="3dp"
-        android:textColor="@color/white"
-        android:textSize="25sp"
+        style="@style/SubtitleStyle"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tvSubtitleError"
+        style="@style/SubtitleStyleError"
         android:visibility="gone" />
 
     <RelativeLayout
