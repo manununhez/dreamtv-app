@@ -1207,7 +1207,8 @@ public class NetworkDataSource {
         params.put(PARAM_TASK_ID, String.valueOf(userTask.getTaskId()));
         params.put(PARAM_SUB_VERSION, userTask.getSubtitleVersion());
         params.put(PARAM_TIME_WATCHED, String.valueOf(userTask.getTimeWatched()));
-        params.put(PARAM_COMPLETED, String.valueOf(userTask.getCompleted()));
+        params.put(PARAM_COMPLETED, String.valueOf(userTask.
+                getCompleted()));
         params.put(PARAM_RATING, String.valueOf(userTask.getRating()));
 
         Uri userTaskUri = Uri.parse(URL_BASE.concat(Urls.USER_TASKS.value)).buildUpon().build();

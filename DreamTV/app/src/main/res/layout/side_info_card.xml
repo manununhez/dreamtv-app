@@ -59,6 +59,7 @@
                 android:layout_height="wrap_content"
                 android:max="5"
                 android:numStars="5"
+                android:progressBackgroundTint="@color/progress_start"
                 android:stepSize="1" />
 
             <TextView
