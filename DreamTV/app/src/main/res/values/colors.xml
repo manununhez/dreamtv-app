@@ -19,5 +19,5 @@
     <color name="button_focused_shape">#66BB86FC</color>
     <color name="button_default_shape">@color/colorAccent</color>
     <color name="progress_bar">#b71c1c</color>
-    <color name="progress_start">#b4a23e</color>
+    <color name="ratingBarStar">#FDC839</color>
 </resources>

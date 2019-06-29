@@ -2,6 +2,21 @@
 
     <!--NON-TRANSLATABLE-->
     <string name="app_name" translatable="false">DreamTV</string>
+    <!--SHAREDPREFERENCES-->
+    <string name="dreamTVApp_token" translatable="false">dreamTVApp_token</string>
+    <string name="user_preferences" translatable="false">user_preferences</string>
+    <string name="reasons_preferences" translatable="false">reasons_preferences</string>
+    <string name="video_tests_preferences" translatable="false">video_tests_preferences</string>
+    <!--PREFERENCES KEYS-->
+    <string name="pref_key_list_app_languages" translatable="false">listAppLanguage</string>
+    <string name="pref_key_list_interface_mode" translatable="false">listInterfaceMode</string>
+    <string name="pref_key_testing_mode" translatable="false">testingMode</string>
+    <string name="pref_key_list_audio_languages" translatable="false">listAudioLanguage</string>
+    <string name="pref_key_list_subtitle_languages" translatable="false">listSubtitleLanguage</string>
+    <string name="pref_key_video_duration" translatable="false">listVideoDuration</string>
+    <string name="pref_key_subtitle_size" translatable="false">listSubtitleSize</string>
+
+
 
     <!-- Error messages -->
     <string name="video_error_media_load_timeout">Media loading timed out</string>
@@ -16,23 +31,18 @@
     <string name="parsing_failed">Parsing Failure</string>
     <string name="auth_failed">Authentication Failure</string>
 
-    <!--SHAREDPREFERENCES-->
-    <string name="dreamTVApp_token" translatable="false">dreamTVApp_token</string>
-    <string name="user_preferences" translatable="false">user_preferences</string>
-    <string name="reasons_preferences" translatable="false">reasons_preferences</string>
-    <string name="video_tests_preferences" translatable="false">video_tests_preferences</string>
 
     <!--titles-->
     <string name="title_reasons_dialog">What is wrong here?</string>
     <string name="title_reasons_dialog_2">Edit what have you chosen:</string>
     <string name="title_my_list_category">My List</string>
-    <string name="title_finished_category">Watch again</string>
-    <string name="title_test_category">Only for testing</string>
+    <string name="title_finished_category">Watch It Again</string>
+    <string name="title_test_category">Recommended Videos</string>
     <string name="title_settings_category">Settings</string>
     <string name="title_preferences_category">Preferences</string>
-    <string name="title_continue_watching_category">Continue watching</string>
-    <string name="title_topics_category">Topics</string>
-    <string name="title_check_new_tasks_category">New releases</string>
+    <string name="title_continue_watching_category">Continue Watching</string>
+    <string name="title_topics_category">Categories</string>
+    <string name="title_check_new_tasks_category">New Releases</string>
     <string name="hint_voice_google_input">Please, say your comment</string>
     <string name="title_current_time_video">%1$s / %2$s</string>
     <string name="title_video_details">%1$s | Audio: %2$s | Subtitle: %3$s | Duration: %4$s | Interface mode: %5$s</string>
@@ -67,6 +77,7 @@
     <string name="btn_play_video">Play video</string>
     <string name="btn_add_to_my_list">+ Add to my list</string>
     <string name="btn_remove_to_my_list">- Remove from my list</string>
+    <string name="btn_delete_changes">clear</string>
 
 
     <!--loadingDialog-->
@@ -102,16 +113,6 @@
     <string name="pref_title_testing_mode_settings_description">Display videos for testing</string>
     <string name="pref_title_video_duration_settings">Video duration</string>
 
-
-    <!--PREFERENCES KEYS-->
-    <string name="pref_key_list_app_languages" translatable="false">listAppLanguage</string>
-    <string name="pref_key_list_interface_mode" translatable="false">listInterfaceMode</string>
-    <string name="pref_key_testing_mode" translatable="false">testingMode</string>
-    <string name="pref_key_list_audio_languages" translatable="false">listAudioLanguage</string>
-    <string name="pref_key_list_subtitle_languages" translatable="false">listSubtitleLanguage</string>
-    <string name="pref_key_video_duration" translatable="false">listVideoDuration</string>
-    <string name="pref_key_subtitle_size" translatable="false">listSubtitleSize</string>
-    <string name="btn_delete_changes">clear</string>
 
     <!--DATA FOR SETTINGS-->
     <string-array name="listAudioLanguages">

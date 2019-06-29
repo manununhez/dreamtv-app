@@ -72,7 +72,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private RadioGroup rgReasons;
     private UserTask userTask;
     private Button btnSave;
-    private Button btnCancel;
     private Button btnSaveChanges;
     private Button btnDeleteChanges;
     private TextView voiceInput;
@@ -157,7 +156,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         tvTitle = viewRoot.findViewById(R.id.tvTitle);
         tvSelectedSubtitle = viewRoot.findViewById(R.id.tvSelectedSubtitle);
         tvOtherSelected = viewRoot.findViewById(R.id.tvOtherSelected);
-        btnCancel = viewRoot.findViewById(R.id.btnCancel);
         btnSave = viewRoot.findViewById(R.id.btnSave);
         btnSaveChanges = viewRoot.findViewById(R.id.btnSaveChanges);
         btnDeleteChanges = viewRoot.findViewById(R.id.btnDeleteChanges);
@@ -237,7 +235,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     }
 
     private void setupEventsListener() {
-        btnCancel.setOnClickListener(view -> dismiss());
         btnSave.setOnClickListener(view -> {
             UserTaskError userTaskError = prepareReasonsToSave();
             if (selectedReasons.size() > 0) {

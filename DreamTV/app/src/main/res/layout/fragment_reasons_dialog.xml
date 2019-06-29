@@ -130,31 +130,19 @@
 
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="@dimen/button_selector_height"
                 android:layout_marginTop="25dp"
                 android:layout_marginBottom="10dp"
                 android:gravity="center"
                 android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/btnCancel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@drawable/button_focusable_selector"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:padding="5dp"
-                    android:text="@string/btn_cancel"
-                    android:textColor="@color/white" />
 
                 <Button
                     android:id="@+id/btnSave"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginStart="20dp"
                     android:background="@drawable/button_focusable_selector"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
@@ -195,13 +183,4 @@
 
         </LinearLayout>
     </LinearLayout>
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="340dp"
-        android:src="@drawable/ic_chevron_left_black" />
-
-
 </RelativeLayout>

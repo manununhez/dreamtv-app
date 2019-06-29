@@ -10,7 +10,7 @@
         android:id="@+id/llBody"
         android:layout_width="@dimen/popup_width_dialog"
         android:layout_height="wrap_content"
-        android:background="@color/default_background"
+        android:background="@color/colorPrimary"
         android:orientation="vertical">
 
 
@@ -27,7 +27,7 @@
 
         <RatingBar
             android:id="@+id/rtBar"
-            style="?android:attr/ratingBarStyle"
+            style="@style/Widget.AppCompat.RatingBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -35,7 +35,8 @@
             android:max="5"
             android:numStars="5"
             android:rating="3"
-            android:stepSize="1"/>
+            android:stepSize="1"
+            android:theme="@style/RatingBar"/>
 
         <Button
             android:id="@+id/btnSaveAndExit"
