@@ -22,15 +22,15 @@
     <application
         android:name=".DreamTVApp"
         android:allowBackup="true"
+        android:banner="@drawable/logo_tv"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:banner="@drawable/logo_tv"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
 
-        <activity
-            android:name=".ui.welcome.SplashScreenActivity">
+        <activity android:name=".ui.welcome.SplashScreenActivity">
             <tools:validation testUrl="http://dreamproject.pjwstk.edu.pl/dreamtv" />
 
             <intent-filter>
@@ -45,9 +45,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
                     android:host="dreamproject.pjwstk.edu.pl"
-                    android:pathPattern="/dreamtv" />
+                    android:pathPattern="/dreamtv"
+                    android:scheme="http" />
             </intent-filter>
         </activity> <!-- configChanges, para evitar que cuando el control se desconecte, interrumpa el app -->
         <activity android:name=".ui.main.MainActivity" />

@@ -103,7 +103,8 @@ public class CategoryFragment extends VerticalGridSupportFragment {
     }
 
     private void showLoading() {
-        loadingDialog.show();
+        if (!Objects.requireNonNull(getActivity()).isFinishing())
+            loadingDialog.show();
     }
 
     public void onCreate(Bundle savedInstanceState) {

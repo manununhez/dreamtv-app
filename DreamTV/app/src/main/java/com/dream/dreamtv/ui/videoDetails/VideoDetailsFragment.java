@@ -24,7 +24,6 @@ import androidx.leanback.widget.FullWidthDetailsOverviewRowPresenter;
 import androidx.leanback.widget.FullWidthDetailsOverviewSharedElementHelper;
 import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.ListRowPresenter;
-import androidx.leanback.widget.OnActionClickedListener;
 import androidx.leanback.widget.RowPresenter;
 import androidx.leanback.widget.SparseArrayObjectAdapter;
 import androidx.lifecycle.LiveData;
@@ -44,6 +43,7 @@ import com.dream.dreamtv.model.VideoTests;
 import com.dream.dreamtv.presenter.detailsPresenter.DetailsDescriptionPresenter;
 import com.dream.dreamtv.ui.playVideo.PlaybackVideoActivity;
 import com.dream.dreamtv.ui.playVideo.PlaybackVideoYoutubeActivity;
+import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.dream.dreamtv.utils.Utils;
@@ -126,27 +126,18 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         mSelectedCategory = getActivity().getIntent().getStringExtra(INTENT_CATEGORY);
 
-
         if (mSelectedTask != null) {
             setupDetailsOverview();
             fetchUserTasks();
 
-            if (mSelectedTask.userTasks.length > 0) {
-                mUserTask = mSelectedTask.userTasks[0]; //TODO what happened is there are more than one UserTask
+            if (mSelectedTask.userTasks != null && mSelectedTask.userTasks.length > 0) {
+                mUserTask = mSelectedTask.userTasks[0]; //TODO what happened is there is more than one UserTask
                 setupContinueAction();
             }
         } else {
             getActivity().finish(); //back to MainActivity
         }
     }
-
-    private void setupDetailsOverview() {
-        setupAdapter();
-        setupDetailsOverviewRow();
-        initActionPanel();
-        updateBackground(mSelectedTask.video.thumbnail);
-    }
-
 
     @Override
     public void onDestroyView() {
@@ -167,6 +158,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         if (removeFromListLiveData != null)
             removeFromListLiveData.removeObservers(getViewLifecycleOwner());
 
+    }
+
+    private void setupDetailsOverview() {
+        setupAdapter();
+        setupDetailsOverviewRow();
+        initActionPanel();
+        updateBackground(mSelectedTask.video.thumbnail);
     }
 
     private void prepareBackgroundManager() {
@@ -197,7 +195,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void setupAdapter() {
-
         // Set detail background and style.
         FullWidthDetailsOverviewRowPresenter detailsPresenter =
                 new FullWidthDetailsOverviewRowPresenter(new DetailsDescriptionPresenter()) {
@@ -236,11 +233,11 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         detailsPresenter.setOnActionClickedListener(action -> {
             if (action.getId() == ACTION_PLAY_VIDEO) {
-                goToPlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN);
+                fetchSubtitlePlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN);
             } else if (action.getId() == ACTION_PLAY_VIDEO_FROM_BEGGINING) {
-                goToPlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO);
+                fetchSubtitlePlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO);
             } else if (action.getId() == ACTION_CONTINUE_VIDEO) {
-                goToPlayVideo(false, FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO);
+                fetchSubtitlePlayVideo(false, FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO);
             } else if (action.getId() == ACTION_ADD_MY_LIST) {
                 addVideoToMyList();
             } else if (action.getId() == ACTION_REMOVE_MY_LIST) {
@@ -251,37 +248,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         });
 
 
-
-//        detailsPresenter.setBackgroundColor(
-//                ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.selected_background));
-
-//        detailsPresenter.setInitialState(FullWidthDetailsOverviewRowPresenter.STATE_HALF);
-//        detailsPresenter.setParticipatingEntranceTransition(false);
-//        prepareEntranceTransition();
-
-
-//        ClassPresenterSelector mPresenterSelector = new ClassPresenterSelector();
-//        mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
-//        mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
-//        mPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
-//
-//        mAdapter = new ArrayObjectAdapter(mPresenterSelector);
-//        mAdapter.clear();
-//
         setAdapter(mAdapter);
-//
+
         new Handler().postDelayed(this::startEntranceTransition, 500);
-
-//        mPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
-//
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                startEntranceTransition();
-//            }
-//        }, 500);
     }
-
 
     private void setupDetailsOverviewRow() {
         rowPresenter = new DetailsOverviewRow(mSelectedTask);
@@ -315,9 +285,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         verifyIfVideoIsInMyList();
     }
 
-    /**
-     *
-     */
     private void verifyIfVideoIsInMyList() {
         boolean result = mViewModel.verifyIfTaskIsInList(mSelectedTask);
 
@@ -350,16 +317,16 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void instantiateAndShowLoading(String message) {
-
         loadingDialog = new LoadingDialog(getActivity(), message);
         loadingDialog.setCanceledOnTouchOutside(false);
-        loadingDialog.show();
+
+        if (!Objects.requireNonNull(getActivity()).isFinishing())
+            loadingDialog.show();
     }
 
     private void dismissLoading() {
         if (loadingDialog != null) loadingDialog.dismiss();
     }
-
 
     private void firebaseLoginEvents(String logEventName) {
         Bundle bundle = new Bundle();
@@ -390,29 +357,29 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     }
 
-
     private void setupContinueAction() {
-        if (mUserTask != null) {
-            Log.d(TAG, mUserTask.toString());
-            if (mUserTask.getTimeWatchedInSecs() > 0) { //To avoid messages like "0 min, 0 secs"
-                String timeFormatted = Utils.getTimeFormatMinSecs(mUserTask.getTimeWatched());
+//        if (mUserTask != null) {
+        Log.d(TAG, mUserTask.toString());
+        if (mUserTask.getTimeWatchedInSecs() > 0) { //To avoid messages like "0 min, 0 secs"
+            String timeFormatted = Utils.getTimeFormatMinSecs(mUserTask.getTimeWatched());
 
-                setActionPanel(ACTION_PLAY_VIDEO,
-                        new Action(ACTION_CONTINUE_VIDEO, getString(R.string.btn_continue_watching, timeFormatted)),
-                        new Action(ACTION_PLAY_VIDEO_FROM_BEGGINING, getString(R.string.btn_no_from_beggining)));
-            } else {
-                initActionPanel();
-            }
+            setActionPanel(ACTION_PLAY_VIDEO,
+                    new Action(ACTION_CONTINUE_VIDEO, getString(R.string.btn_continue_watching, timeFormatted)),
+                    new Action(ACTION_PLAY_VIDEO_FROM_BEGGINING, getString(R.string.btn_no_from_beggining)));
         } else {
             initActionPanel();
         }
+//        } else {
+//            initActionPanel();
+//        }
     }
 
-
-    private void goToPlayVideo(boolean playFromBeginning, String logEventName) {
+    private void fetchSubtitlePlayVideo(boolean playFromBeginning, String logEventName) {
         //We retrieve subtitles first
-        fetchSubtitleLiveData = mViewModel.fetchSubtitle(mSelectedTask.video.videoId,
+        mViewModel.setSubtitleId(mSelectedTask.video.videoId,
                 mSelectedTask.subLanguage, getSubtitleVersion());
+
+        fetchSubtitleLiveData = mViewModel.fetchSubtitle();
 
         fetchSubtitleLiveData.removeObservers(getViewLifecycleOwner());
 
@@ -425,13 +392,17 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                 mSubtitleResponse = subtitleResponseResource.data;
 
+                if (mSubtitleResponse != null && mSubtitleResponse.subtitles == null)
+                    Toast.makeText(getActivity(), "Subtitle not found", Toast.LENGTH_SHORT).show();
+                else {
+                    //PLAY VIDEO
+                    if (mUserTask == null) //the are not user tasks for this video, so we need to create a new one
+                        createUserTask();
+                    else
+                        playVideo(playFromBeginning, logEventName);
+                }
+
                 dismissLoading();
-
-                //PLAY VIDEO
-                if (mUserTask == null) //the are not user tasks for this video, so we need to create a new one
-                    createUserTask();
-                else playVideo(playFromBeginning, logEventName);
-
 
             } else if (subtitleResponseResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
@@ -445,7 +416,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         });
 
     }
-
 
     private void playVideo(boolean playFromBeginning, String logEventName) {
         Intent intent;
@@ -465,12 +435,11 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
 
         firebaseLoginEvents(logEventName);
-
     }
 
 
-    private int getSubtitleVersion() {
-        int newestVersion = 0;
+    private String getSubtitleVersion() {
+        String newestVersion = Constants.SUBTITLE_LAST_VERSION;
         DreamTVApp dreamTVApp = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
         List<VideoTests> videoTestsList = dreamTVApp.getVideoTests();
 
@@ -478,8 +447,11 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             //We find the version of the video test
             for (VideoTests videoTests : videoTestsList)
                 if (videoTests.videoId.equals(mSelectedTask.video.videoId)) {
-                    return videoTests.version;
+                    return String.valueOf(videoTests.version);
                 }
+        } else {
+            if (mUserTask != null)
+                return mUserTask.getSubtitleVersion();
         }
 
         return newestVersion;
@@ -502,7 +474,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                 mUserTask = userTaskResource.data;
 
-                goToPlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN);
+                fetchSubtitlePlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN);
 
                 mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //update category after a new task was added
 
@@ -525,8 +497,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
      * Verify if the current task has already data created. IF not, is call createTask()
      */
     private void fetchUserTasks() {
-        mViewModel.setTaskId(mSelectedTask.taskId);
-
         fetchUserTaskLiveData = mViewModel.fetchUserTask();
 
         fetchUserTaskLiveData.removeObservers(getViewLifecycleOwner());
@@ -634,9 +604,5 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 dismissLoading();
             }
         });
-
-
     }
-
-
 }

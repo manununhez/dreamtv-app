@@ -16,4 +16,13 @@ public class VideoTests  {
     @SerializedName("language_code")
     public String languageCode;
 
+    @Override
+    public String toString() {
+        return "VideoTests{" +
+                "id=" + id +
+                ", videoId='" + videoId + '\'' +
+                ", version=" + version +
+                ", languageCode='" + languageCode + '\'' +
+                '}';
+    }
 }

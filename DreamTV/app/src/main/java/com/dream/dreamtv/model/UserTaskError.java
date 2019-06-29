@@ -15,8 +15,6 @@ public class UserTaskError implements Parcelable {
     @SerializedName("comment")
     private String comment;
 
-    private int subtitleVersion;
-    private int taskId;
 
     public UserTaskError(Parcel in) {
         userTasksId = in.readInt();
@@ -37,10 +35,8 @@ public class UserTaskError implements Parcelable {
         }
     };
 
-    public UserTaskError(int taskId, String reasonCode, int subtitleVersion, int subtitlePosition, String comment) {
-        this.taskId = taskId;
+    public UserTaskError(String reasonCode, int subtitlePosition, String comment) {
         this.reasonCode = reasonCode;
-        this.subtitleVersion = subtitleVersion;
         this.subtitlePosition = subtitlePosition;
         this.comment = comment;
 
@@ -78,21 +74,6 @@ public class UserTaskError implements Parcelable {
         this.comment = comment;
     }
 
-    public int getSubtitleVersion() {
-        return subtitleVersion;
-    }
-
-    public void setSubtitleVersion(int subtitleVersion) {
-        this.subtitleVersion = subtitleVersion;
-    }
-
-    public int getTaskId() {
-        return taskId;
-    }
-
-    public void setTaskId(int taskId) {
-        this.taskId = taskId;
-    }
 
     @Override
     public int describeContents() {

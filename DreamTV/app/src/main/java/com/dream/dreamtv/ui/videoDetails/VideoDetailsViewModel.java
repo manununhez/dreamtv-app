@@ -17,19 +17,19 @@ import java.util.Objects;
 class VideoDetailsViewModel extends ViewModel {
 
     private final AppRepository mRepository;
-    private final MutableLiveData<Integer> userTaskMutableLiveData;
-    private final LiveData<Resource<UserTask>> userTask;
+    private final MutableLiveData<SubtitleId> subtitleIdMLD;
+    private final LiveData<Resource<SubtitleResponse>> subtitle;
 
     VideoDetailsViewModel(AppRepository appRepository) {
         mRepository = appRepository;
 
-        userTaskMutableLiveData = new MutableLiveData<>();
+        this.subtitleIdMLD = new MutableLiveData<>();
 
-        userTask = Transformations.switchMap(userTaskMutableLiveData, input -> {
-            if (input == null) {
+        subtitle = Transformations.switchMap(subtitleIdMLD, input -> {
+            if (input.isEmpty()) {
                 return AbsentLiveData.create();
             }
-            return mRepository.fetchUserTask();
+            return mRepository.fetchSubtitle(input.videoId, input.languageCode, input.version);
         });
 
     }
@@ -43,24 +43,26 @@ class VideoDetailsViewModel extends ViewModel {
         return mRepository.requestRemoveFromList(task.taskId);
     }
 
-    LiveData<Resource<SubtitleResponse>> fetchSubtitle(String videoId, String languageCode, int version) {
-        return mRepository.fetchSubtitle(videoId, languageCode, version);
+    LiveData<Resource<SubtitleResponse>> fetchSubtitle() {
+        return subtitle;
     }
 
     LiveData<Resource<UserTask>> fetchUserTask() {
-        return userTask;
-//        return mRepository.fetchUserTask();
+        return mRepository.fetchUserTask();
     }
 
-    public void setTaskId(int taskId) {
-        if (Objects.equals(this.userTaskMutableLiveData.getValue(), taskId)) {
-            return;
-        }
-        this.userTaskMutableLiveData.setValue(taskId);
-    }
 
     LiveData<Resource<UserTask>> createUserTask(Task task, int mSubtitleVersion) {
         return mRepository.createUserTask(task.taskId, mSubtitleVersion);
+    }
+
+    void setSubtitleId(String videoId, String languageCode, String version) {
+        SubtitleId update = new SubtitleId(videoId, languageCode, version);
+
+        if (Objects.equals(subtitleIdMLD.getValue(), update)) {
+            return;
+        }
+        this.subtitleIdMLD.setValue(update);
     }
 
     void updateTaskByCategory(String category) {
@@ -71,4 +73,36 @@ class VideoDetailsViewModel extends ViewModel {
         return mRepository.verifyIfTaskIsInList(task);
     }
 
+
+    static class SubtitleId {
+        public final String videoId;
+        public final String languageCode;
+        public final String version;
+
+        SubtitleId(String videoId, String languageCode, String version) {
+            this.videoId = videoId;
+            this.languageCode = languageCode;
+            this.version = version;
+        }
+
+        boolean isEmpty() {
+            return videoId == null || languageCode == null || version == null ||
+                    videoId.length() == 0 || languageCode.length() == 0 || version.length() == 0;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SubtitleId that = (SubtitleId) o;
+            return Objects.equals(videoId, that.videoId) &&
+                    Objects.equals(languageCode, that.languageCode) &&
+                    Objects.equals(version, that.version);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(videoId, languageCode, version);
+        }
+    }
 }

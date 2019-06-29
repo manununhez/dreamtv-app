@@ -53,19 +53,6 @@ public class User implements Parcelable {
         }
     };
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "token='" + token + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", subLanguage='" + subLanguage + '\'' +
-                ", audioLanguage='" + audioLanguage + '\'' +
-                ", id='" + id + '\'' +
-                ", interfaceMode='" + interfaceMode + '\'' +
-                ", interfaceLanguage='" + interfaceLanguage + '\'' +
-                '}';
-    }
 
     public boolean isEmpty() {
         return email == null || email.length() == 0 ;
@@ -86,5 +73,19 @@ public class User implements Parcelable {
         dest.writeString(audioLanguage);
         dest.writeString(interfaceMode);
         dest.writeString(interfaceLanguage);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", token='" + token + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", subLanguage='" + subLanguage + '\'' +
+                ", audioLanguage='" + audioLanguage + '\'' +
+                ", interfaceMode='" + interfaceMode + '\'' +
+                ", interfaceLanguage='" + interfaceLanguage + '\'' +
+                '}';
     }
 }

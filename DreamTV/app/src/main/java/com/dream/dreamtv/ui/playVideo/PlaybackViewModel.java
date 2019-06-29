@@ -14,22 +14,17 @@ import java.util.Objects;
 class PlaybackViewModel extends ViewModel {
 
     private final AppRepository mRepository;
-    private final MutableLiveData<UserTask> userTaskMutableLiveData;
 
     PlaybackViewModel(AppRepository appRepository) {
         mRepository = appRepository;
-
-        userTaskMutableLiveData = new MutableLiveData<>();
-
     }
-
 
     void updateUserTask(UserTask userTask) {
         mRepository.updateUserTask(userTask);
     }
 
-    LiveData<Resource<UserTaskError[]>> errorsUpdate(UserTaskError userTaskError, boolean saveError) {
-        return mRepository.errorsUpdate(userTaskError, saveError);
+    LiveData<Resource<UserTaskError[]>> errorsUpdate(int taskId, int subtitleVersion, UserTaskError userTaskError, boolean saveError) {
+        return mRepository.errorsUpdate(taskId, subtitleVersion, userTaskError, saveError);
     }
 
 }

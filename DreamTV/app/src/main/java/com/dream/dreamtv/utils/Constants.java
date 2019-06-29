@@ -129,4 +129,5 @@ public class Constants {
     public static final int VIDEO_COMPLETED_WATCHING_TRUE = 1;
     public static final int VIDEO_COMPLETED_WATCHING_FALSE = 0;
 
+    public static final String SUBTITLE_LAST_VERSION = "last";
 }

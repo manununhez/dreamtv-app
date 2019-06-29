@@ -362,7 +362,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     }
 
     private void showLoading() {
-        loadingDialog.show();
+        if (!isFinishing())
+            loadingDialog.show();
     }
 
     private void dismissLoading() {
@@ -617,10 +618,10 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
 
     @Override
-    public void onSaveReasons(UserTaskError userTaskError) {
+    public void onSaveReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
         Log.d(TAG, "onSaveReasons() =>" + userTaskError.toString());
 
-        LiveData<Resource<UserTaskError[]>> saveErrorsLiveData = mViewModel.errorsUpdate(userTaskError, true);
+        LiveData<Resource<UserTaskError[]>> saveErrorsLiveData = mViewModel.errorsUpdate(taskId, subtitleVersion, userTaskError, true);
 
         saveErrorsLiveData.removeObservers(this);
 
@@ -645,10 +646,10 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     }
 
     @Override
-    public void onUpdateReasons(UserTaskError userTaskError) {
+    public void onUpdateReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
         Log.d(TAG, "onUpdateReasons() =>" + userTaskError.toString());
 
-        LiveData<Resource<UserTaskError[]>> updateErrorsLiveData = mViewModel.errorsUpdate(userTaskError, false);
+        LiveData<Resource<UserTaskError[]>> updateErrorsLiveData = mViewModel.errorsUpdate(taskId, subtitleVersion, userTaskError, false);
 
         updateErrorsLiveData.removeObservers(this);
 

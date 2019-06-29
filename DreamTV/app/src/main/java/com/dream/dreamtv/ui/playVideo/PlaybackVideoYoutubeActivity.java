@@ -251,8 +251,10 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     }
 
     private void showLoading() {
-        if (!loadingDialog.isShowing())
-            loadingDialog.show();
+        if (!isFinishing()) {
+            if (!loadingDialog.isShowing())
+                loadingDialog.show();
+        }
     }
 
     private void dismissLoading() {
@@ -640,10 +642,10 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
 
     @Override
-    public void onSaveReasons(UserTaskError userTaskError) {
+    public void onSaveReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
         Log.d(TAG, "onSaveReasons() =>" + userTaskError.toString());
 
-        LiveData<Resource<UserTaskError[]>> saveErrorsLiveData = mViewModel.errorsUpdate(userTaskError, true);
+        LiveData<Resource<UserTaskError[]>> saveErrorsLiveData = mViewModel.errorsUpdate(taskId, subtitleVersion, userTaskError, true);
 
         saveErrorsLiveData.removeObservers(this);
 
@@ -668,10 +670,10 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     }
 
     @Override
-    public void onUpdateReasons(UserTaskError userTaskError) {
+    public void onUpdateReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
         Log.d(TAG, "onUpdateReasons() =>" + userTaskError.toString());
 
-        LiveData<Resource<UserTaskError[]>> updateErrorsLiveData = mViewModel.errorsUpdate(userTaskError, false);
+        LiveData<Resource<UserTaskError[]>> updateErrorsLiveData = mViewModel.errorsUpdate(taskId, subtitleVersion, userTaskError, false);
 
         updateErrorsLiveData.removeObservers(this);
 

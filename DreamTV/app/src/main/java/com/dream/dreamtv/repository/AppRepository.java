@@ -172,7 +172,7 @@ public class AppRepository {
     }
 
 
-    public LiveData<Resource<SubtitleResponse>> fetchSubtitle(String videoId, String languageCode, int version) {
+    public LiveData<Resource<SubtitleResponse>> fetchSubtitle(String videoId, String languageCode, String version) {
         return mNetworkDataSource.fetchSubtitle(videoId, languageCode, version);
     }
 
@@ -195,8 +195,8 @@ public class AppRepository {
     }
 
 
-    public MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(UserTaskError userTaskError, boolean saveError) {
-        return mNetworkDataSource.errorsUpdate(userTaskError, saveError);
+    public MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(int taskId, int subtitleVersion, UserTaskError userTaskError, boolean saveError) {
+        return mNetworkDataSource.errorsUpdate(taskId, subtitleVersion, userTaskError, saveError);
     }
 
     public void updateUserTask(UserTask userTask) {

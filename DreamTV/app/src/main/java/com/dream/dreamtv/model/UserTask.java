@@ -197,10 +197,10 @@ public class UserTask implements Parcelable {
                 ", userId=" + userId +
                 ", taskId=" + taskId +
                 ", subtitleVersion='" + subtitleVersion + '\'' +
-                ", timeWatched=" + timeWatched +
                 ", completed=" + completed +
                 ", rating=" + rating +
                 ", userTaskErrorList=" + Arrays.toString(userTaskErrorList) +
+                ", timeWatched=" + timeWatched +
                 ", created_at='" + created_at + '\'' +
                 ", updated_at='" + updated_at + '\'' +
                 '}';

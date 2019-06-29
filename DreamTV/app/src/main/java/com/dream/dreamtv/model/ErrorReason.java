@@ -15,4 +15,14 @@ public class ErrorReason {
     public String description;
     @SerializedName("language")
     public String language;
+
+    @Override
+    public String toString() {
+        return "ErrorReason{" +
+                "reasonCode='" + reasonCode + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", language='" + language + '\'' +
+                '}';
+    }
 }

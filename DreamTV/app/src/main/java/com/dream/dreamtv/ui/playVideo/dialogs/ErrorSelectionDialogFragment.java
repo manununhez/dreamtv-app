@@ -241,7 +241,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         btnSave.setOnClickListener(view -> {
             UserTaskError userTaskError = prepareReasonsToSave();
             if (selectedReasons.size() > 0) {
-                mCallback.onSaveReasons(userTaskError);
+                mCallback.onSaveReasons(mSelectedTask.taskId, subtitle.versionNumber, userTaskError);
                 dismiss();
             } else {
                 Toast.makeText(getActivity(), getActivity().getString(R.string.select_errors_to_save), Toast.LENGTH_SHORT).show();
@@ -249,7 +249,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         });
         btnSaveChanges.setOnClickListener(view -> {
             UserTaskError userTaskError = prepareReasonsToSave();
-            mCallback.onUpdateReasons(userTaskError);
+            mCallback.onUpdateReasons(mSelectedTask.taskId, subtitle.versionNumber, userTaskError);
             dismiss();
         });
 
@@ -552,8 +552,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
         }
 
-        return new UserTaskError(mSelectedTask.taskId,
-                selectedErrorsListJson(selectedReasons), subtitle.versionNumber,
+        return new UserTaskError(selectedErrorsListJson(selectedReasons),
                 selectedSubtitle.position, voiceInput.getText().toString());
     }
 
@@ -576,9 +575,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     public interface OnListener {
         void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition);
 
-        void onSaveReasons(UserTaskError userTaskError);
+        void onSaveReasons(int taskId, int subtitleVersion, UserTaskError userTaskError);
 
-        void onUpdateReasons(UserTaskError userTaskError);
+        void onUpdateReasons(int taskId, int subtitleVersion, UserTaskError userTaskError);
     }
 
     public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {

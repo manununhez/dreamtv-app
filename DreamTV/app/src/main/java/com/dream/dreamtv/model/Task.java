@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Arrays;
+
 /**
  * Created by manuel on 7/8/17.
  */
@@ -78,5 +80,22 @@ public class Task implements Parcelable {
         dest.writeString(updated_at);
         dest.writeParcelable(video, flags);
         dest.writeTypedArray(userTasks, flags);
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "taskId=" + taskId +
+                ", videoId='" + videoId + '\'' +
+                ", subLanguage='" + subLanguage + '\'' +
+                ", type='" + type + '\'' +
+                ", created='" + created + '\'' +
+                ", modified='" + modified + '\'' +
+                ", completed='" + completed + '\'' +
+                ", created_at='" + created_at + '\'' +
+                ", updated_at='" + updated_at + '\'' +
+                ", video=" + video +
+                ", userTasks=" + Arrays.toString(userTasks) +
+                '}';
     }
 }

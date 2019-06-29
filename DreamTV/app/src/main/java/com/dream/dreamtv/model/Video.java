@@ -105,4 +105,22 @@ public class Video implements Parcelable {
         dest.writeString(created_at);
         dest.writeString(updated_at);
     }
+
+    @Override
+    public String toString() {
+        return "Video{" +
+                "videoId='" + videoId + '\'' +
+                ", primaryAudioLanguageCode='" + primaryAudioLanguageCode + '\'' +
+                ", speakerName='" + speakerName + '\'' +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", duration=" + duration +
+                ", thumbnail='" + thumbnail + '\'' +
+                ", team='" + team + '\'' +
+                ", project='" + project + '\'' +
+                ", videoUrl='" + videoUrl + '\'' +
+                ", created_at='" + created_at + '\'' +
+                ", updated_at='" + updated_at + '\'' +
+                '}';
+    }
 }

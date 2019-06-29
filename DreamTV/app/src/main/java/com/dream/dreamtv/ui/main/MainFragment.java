@@ -697,7 +697,9 @@ public class MainFragment extends BrowseSupportFragment {
     }
 
     private void showLoading() {
-        loadingDialog.show();
+        if (!Objects.requireNonNull(getActivity()).isFinishing())
+            loadingDialog.show();
+
     }
 
 

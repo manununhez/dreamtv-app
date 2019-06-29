@@ -593,26 +593,30 @@ public class NetworkDataSource {
      * @param version      version
      */
     @SuppressWarnings("unchecked")
-    public MutableLiveData<Resource<SubtitleResponse>> fetchSubtitle(String videoId, String languageCode, int version) {
+    public MutableLiveData<Resource<SubtitleResponse>> fetchSubtitle(String videoId, String languageCode, String version) {
         responseFromFetchSubtitle.postValue(Resource.loading(null));
 
         Uri subtitleUri;
-        if (version > 0) {
+//        if (version > 0) {
             subtitleUri = Uri.parse(URL_BASE.concat(Urls.SUBTITLE.value)).buildUpon()
                     .appendQueryParameter(PARAM_VIDEO_ID, videoId)
                     .appendQueryParameter(PARAM_LANG_CODE, languageCode)
-                    .appendQueryParameter(PARAM_VERSION, String.valueOf(version))
-                    .build();
-        } else
-            subtitleUri = Uri.parse(URL_BASE.concat(Urls.SUBTITLE.value)).buildUpon()
-                    .appendQueryParameter(PARAM_VIDEO_ID, videoId)
-                    .appendQueryParameter(PARAM_LANG_CODE, languageCode)
-                    .appendQueryParameter(PARAM_VERSION, "last")
+                    .appendQueryParameter(PARAM_VERSION, version)
                     .build();
 
-        Log.d(TAG, "fetchSubtitle() Request URL: " + subtitleUri.toString() + " Params: " + PARAM_VIDEO_ID + "=>" + videoId
-                + "; " + PARAM_LANG_CODE + "=>" + languageCode
-                + "; " + PARAM_VERSION + "=>" + version);
+            Log.d(TAG, "fetchSubtitle() Request URL: " + subtitleUri.toString() + " Params: " + PARAM_VIDEO_ID + "=>" + videoId
+                    + "; " + PARAM_LANG_CODE + "=>" + languageCode
+                    + "; " + PARAM_VERSION + "=>" + version);
+//        } else {
+//            subtitleUri = Uri.parse(URL_BASE.concat(Urls.SUBTITLE.value)).buildUpon()
+//                    .appendQueryParameter(PARAM_VIDEO_ID, videoId)
+//                    .appendQueryParameter(PARAM_LANG_CODE, languageCode)
+//                    .appendQueryParameter(PARAM_VERSION, "last")
+//                    .build();
+//            Log.d(TAG, "fetchSubtitle() Request URL: " + subtitleUri.toString() + " Params: " + PARAM_VIDEO_ID + "=>" + videoId
+//                    + "; " + PARAM_LANG_CODE + "=>" + languageCode
+//                    + "; " + PARAM_VERSION + "=>" + "last");
+//        }
 
 
         ResponseListener responseListener = new ResponseListener(mContext) {
@@ -1251,25 +1255,25 @@ public class NetworkDataSource {
      * @param userTaskError userTaskError
      */
     @SuppressWarnings("unchecked")
-    public MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(UserTaskError userTaskError, boolean saveError) {
+    public MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(int taskId, int subtitleVersion, UserTaskError userTaskError, boolean saveError) {
         responseFromErrorsUpdate.postValue(Resource.loading(null));
 
         Uri saveErrorsUri = Uri.parse(URL_BASE.concat(Urls.USER_ERRORS.value)).buildUpon().build();
         Map<String, String> params = new HashMap<>();
-        params.put(PARAM_TASK_ID, String.valueOf(userTaskError.getTaskId()));
+        params.put(PARAM_TASK_ID, String.valueOf(taskId));
         params.put(PARAM_REASON_CODE, userTaskError.getReasonCode());
         params.put(PARAM_SUB_POSITION, String.valueOf(userTaskError.getSubtitlePosition()));
-        params.put(PARAM_SUB_VERSION, String.valueOf(userTaskError.getSubtitleVersion()));
+        params.put(PARAM_SUB_VERSION, String.valueOf(subtitleVersion));
 
 
         if (saveError)
-            Log.d(TAG, "saveErrors() Request URL: " + saveErrorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + userTaskError.getTaskId()
-                    + "; " + PARAM_SUB_VERSION + " => " + userTaskError.getSubtitleVersion()
+            Log.d(TAG, "saveErrors() Request URL: " + saveErrorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + taskId
+                    + "; " + PARAM_SUB_VERSION + " => " + subtitleVersion
                     + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
                     + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
         else
-            Log.d(TAG, "updateErrors() Request URL: " + saveErrorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + userTaskError.getTaskId()
-                    + "; " + PARAM_SUB_VERSION + " => " + userTaskError.getSubtitleVersion()
+            Log.d(TAG, "updateErrors() Request URL: " + saveErrorsUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + taskId
+                    + "; " + PARAM_SUB_VERSION + " => " + subtitleVersion
                     + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
                     + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
 

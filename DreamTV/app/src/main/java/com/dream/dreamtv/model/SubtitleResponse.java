@@ -12,17 +12,6 @@ import java.util.List;
  */
 
 public class SubtitleResponse implements Parcelable {
-    public static final Creator<SubtitleResponse> CREATOR = new Creator<SubtitleResponse>() {
-        @Override
-        public SubtitleResponse createFromParcel(Parcel in) {
-            return new SubtitleResponse(in);
-        }
-
-        @Override
-        public SubtitleResponse[] newArray(int size) {
-            return new SubtitleResponse[size];
-        }
-    };
     @SerializedName("version_number")
     public int versionNumber;
     @SerializedName("subtitles")
@@ -35,6 +24,18 @@ public class SubtitleResponse implements Parcelable {
         subFormat = in.readString();
         subtitles = in.createTypedArrayList(Subtitle.CREATOR);
     }
+
+    public static final Creator<SubtitleResponse> CREATOR = new Creator<SubtitleResponse>() {
+        @Override
+        public SubtitleResponse createFromParcel(Parcel in) {
+            return new SubtitleResponse(in);
+        }
+
+        @Override
+        public SubtitleResponse[] newArray(int size) {
+            return new SubtitleResponse[size];
+        }
+    };
 
 
     public Subtitle getSyncSubtitleText(long l) {
@@ -63,13 +64,12 @@ public class SubtitleResponse implements Parcelable {
         parcel.writeTypedList(subtitles);
     }
 
-
     @Override
     public String toString() {
         return "SubtitleResponse{" +
                 "versionNumber=" + versionNumber +
-                ", subFormat='" + subFormat + '\'' +
                 ", subtitles=" + subtitles +
+                ", subFormat='" + subFormat + '\'' +
                 '}';
     }
 }
