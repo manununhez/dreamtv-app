@@ -79,6 +79,9 @@ public class Video implements Parcelable {
         return newUrl.getQueryParameter(QUERY_PARAMETER);
     }
 
+    public long getVideoDuration() {
+        return this.duration;
+    }
 
     public long getVideoDurationInMs() {
         return this.duration * 1000;

@@ -106,7 +106,7 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
         primaryText.setText(card.getTitle());
 
         //-------------- VIDEO INFO
-        String timeFormatted = Utils.getTimeFormatMinSecs(task.video.duration * 1000);
+        String timeFormatted = Utils.getTimeFormatMinSecs(task.video.getVideoDurationInMs());
         TextView secondaryText = cardView.findViewById(R.id.secondary_text);
         secondaryText.setText(getContext().getString(R.string.title_video_details_main, task.video.project,
                 task.video.primaryAudioLanguageCode, task.subLanguage, timeFormatted));

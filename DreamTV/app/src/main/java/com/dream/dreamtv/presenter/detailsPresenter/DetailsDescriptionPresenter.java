@@ -37,7 +37,7 @@ public class DetailsDescriptionPresenter extends CustomAbstractDetailsDescriptio
         User user = ((DreamTVApp) ((Activity) context).getApplication()).getUser();
 
         if (video != null) {
-            String timeFormatted = Utils.getTimeFormatMinSecs(video.duration * 1000);
+            String timeFormatted = Utils.getTimeFormatMinSecs(video.getVideoDurationInMs());
 
             viewHolder.getTitle().setText(video.title);
             viewHolder.getSubtitle().setText(context.getString(R.string.title_video_details, video.project,
