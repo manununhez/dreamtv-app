@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
@@ -78,20 +79,19 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private static final int ONE_SEC_IN_MS = 1000;
     private static final int DIFFERENCE_TIME_IN_MS = 1000;
     private static final int POSITION_OFFSET_IN_MS = 7000;//7 secs in ms
-    private static final int BUFFER_VALUE_PB = 2;
+    private static final int BUFFER_VALUE_PB = 1;
     private static final int PLAYER_PROGRESS_SHOW_DELAY = 5000;
 
     private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
     private boolean mPlayFromBeginning;
     private long mLastClickTime = 0;
     private long mLastProgressPlayerTime = 0;
+    private long mLastDownPressedTime = 0;
     private int counterClicks = 1;
-    
+    private int counterDownPressed = 0;
+
     private String mSelectedCategory;
-    private VideoView mVideoView;
-    private LoadingDialog loadingDialog;
-    private PlaybackViewModel mViewModel;
-    private SubtitleResponse mSubtitleResponse;
+
     private RelativeLayout rlVideoPlayerInfo;
     private RelativeLayout rlVideoPlayerProgress;
     private TextView tvSubtitle;
@@ -100,6 +100,10 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private TextView tvVideoTitle;
     private TextView tvTotalTime;
     private TextView tvCurrentTime;
+    private VideoView mVideoView;
+    private LoadingDialog loadingDialog;
+    private PlaybackViewModel mViewModel;
+    private SubtitleResponse mSubtitleResponse;
     private Task mSelectedTask;
     private UserTask mUserTask;
     private Handler handler;
@@ -166,6 +170,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     }
 
     private void setupInfoPlayer() {
+        showPlayerProgress();
+
         tvVideoTitle.setText(mSelectedTask.video.title);
         tvTotalTime.setText(Utils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs()));
         if (mPlayFromBeginning)
@@ -245,75 +251,115 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                if (action == KeyEvent.ACTION_UP) {
-                    Log.d(TAG, "KEYCODE_DPAD_RIGHT");
+                if (action == KeyEvent.ACTION_DOWN) {
+                    Log.d(TAG, "KEYCODE_DPAD_RIGHT - ACTION_DOWN");
 
-                    showPlayerProgress();
+                    counterDownPressed++;
+                    if (mLastDownPressedTime == 0) {
+                        mLastDownPressedTime = SystemClock.elapsedRealtime();
 
-                    // Handling multiple clicks, using threshold of 1 second
-                    if (SystemClock.elapsedRealtime() - mLastClickTime < DELAY_IN_MS)
-                        counterClicks++;
+                        pauseVideo();
+
+                        showPlayerProgress();
+
+                    }
+
+                    runOnUiThread(() -> {
+                        long tmp = mVideoView.getCurrentPosition() + (counterDownPressed * 1000);
+                        long progress = tmp < mSelectedTask.video.getVideoDurationInMs() ? tmp : mSelectedTask.video.getVideoDurationInMs(); //time finish video control
+                        updatePlayerProgress((int) progress, mSelectedTask.video.getVideoDurationInMs());
+
+                    });
+
+
+                } else if (action == KeyEvent.ACTION_UP) {
+                    Log.d(TAG, "KEYCODE_DPAD_RIGHT - ACTION_UP - counterDownPressed release: " + counterDownPressed + " - release time:" + ((SystemClock.elapsedRealtime() - mLastDownPressedTime) / ONE_SEC_IN_MS));
+
+
+                    playVideo();
+
+                    int moveForward;
+                    if (counterDownPressed == 1) //only one click was pressed
+                        moveForward = POSITION_OFFSET_IN_MS;
                     else
-                        counterClicks = 1;
-
-
-                    Log.d(TAG, "Consecutive clicks =" + counterClicks);
-
-                    mLastClickTime = SystemClock.elapsedRealtime();
-
-                    int moveForward = counterClicks * POSITION_OFFSET_IN_MS;
+                        moveForward = counterDownPressed * 1000;
 
                     if (mVideoView.canSeekForward()) {
                         mVideoView.seekTo(mVideoView.getCurrentPosition() + moveForward);
-//                    Toast.makeText(this, getString(R.string.title_video_forward, (moveForward / ONE_SEC_IN_MS)), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.title_video_forward, (moveForward / ONE_SEC_IN_MS)), Toast.LENGTH_SHORT).show();
 
                         //Analytics Report Event
                         firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO);
                     }
-                    return true;
+
+                    //reset values
+                    counterDownPressed = 0;
+                    mLastDownPressedTime = 0;
+
                 }
+
+                return true;
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                if (action == KeyEvent.ACTION_UP) {
+                if (action == KeyEvent.ACTION_DOWN) {
+                    Log.d(TAG, "KEYCODE_DPAD_LEFT - ACTION_DOWN");
+                    counterDownPressed++;
+                    if (mLastDownPressedTime == 0) {
+                        mLastDownPressedTime = SystemClock.elapsedRealtime();
+                        stopSyncSubtitle();
+                        mVideoView.pause();
 
-                    showPlayerProgress();
+                        showPlayerProgress();
 
-                    Log.d(TAG, "KEYCODE_DPAD_LEFT");
+                    }
 
-                    // Handling multiple clicks, using threshold of 1 second
-                    if (SystemClock.elapsedRealtime() - mLastClickTime < DELAY_IN_MS)
-                        counterClicks++;
+                    runOnUiThread(() -> {
+                        long tmp = mVideoView.getCurrentPosition() - (counterDownPressed * 1000);
+                        long progress = tmp > 0 ? tmp : 0; //time start video control
+                        updatePlayerProgress((int) progress, mSelectedTask.video.getVideoDurationInMs());
+
+                    });
+
+
+                } else if (action == KeyEvent.ACTION_UP) {
+                    Log.d(TAG, "KEYCODE_DPAD_LEFT - ACTION_UP - counterDownPressed release: " + counterDownPressed + " - release time:" + ((SystemClock.elapsedRealtime() - mLastDownPressedTime) / ONE_SEC_IN_MS));
+
+
+                    startSyncSubtitle(null);
+                    mVideoView.start();
+
+                    int moveBackward;
+                    if (counterDownPressed == 1) //only one click was pressed
+                        moveBackward = POSITION_OFFSET_IN_MS;
                     else
-                        counterClicks = 1;
+                        moveBackward = counterDownPressed * 1000;
 
-
-                    Log.d(TAG, "Consecutive clicks =" + counterClicks);
-
-                    mLastClickTime = SystemClock.elapsedRealtime();
-
-
-                    int moveBackward = counterClicks * POSITION_OFFSET_IN_MS;
                     if (mVideoView.canSeekBackward()) {
                         mVideoView.seekTo(mVideoView.getCurrentPosition() - moveBackward);
-
-//                    Toast.makeText(this, getString(R.string.title_video_backward, (POSITION_OFFSET_IN_MS / ONE_SEC_IN_MS)), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.title_video_backward, (moveBackward / ONE_SEC_IN_MS)), Toast.LENGTH_SHORT).show();
 
                         //Analytics Report Event
                         firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO);
                     }
-                    return true;
+
+
+                    //reset values
+                    counterDownPressed = 0;
+                    mLastDownPressedTime = 0;
+
                 }
 
+                return true;
             case KeyEvent.KEYCODE_DPAD_UP:
                 if (action == KeyEvent.ACTION_UP) {
                     showPlayerProgress();
-                    return true;
                 }
+                return true;
 
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 if (action == KeyEvent.ACTION_UP) {
                     dismissPlayerProgress();
-                    return true;
                 }
+                return true;
 
 
             case KeyEvent.KEYCODE_DPAD_CENTER:
@@ -322,11 +368,11 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                         pauseVideo((long) mVideoView.getCurrentPosition());
                         controlReasonDialogPopUp();
                     } else { //Play
-                        playVideo(null);
+                        playVideo();
 
                     }
-                    return true;
                 }
+                return true;
 
             case KeyEvent.KEYCODE_BACK:
                 if (action == KeyEvent.ACTION_UP) {
@@ -334,8 +380,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                     stopVideo();
                     mVideoView.suspend();
                     finish();
-                    return true;
                 }
+                return true;
 
             default:
                 return super.dispatchKeyEvent(event);
@@ -424,7 +470,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     @Override
     public void playVideoMode() {
         if (mPlayFromBeginning)
-            playVideo(null);
+            playVideo();
         else
             playVideo(mUserTask.getTimeWatched());
     }
@@ -438,6 +484,16 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
         if (seekToMs != null)
             mVideoView.seekTo(seekToMs);
+
+        //Analytics Report Event
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY);
+    }
+
+    void playVideo(){
+        mVideoView.start();
+        startSyncSubtitle(null);
+
+        dismissPlayerInfoOnPause();
 
         //Analytics Report Event
         firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY);
@@ -460,6 +516,12 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
         //Analytics Report Event
         firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE);
+    }
+
+    void pauseVideo(){
+        stopSyncSubtitle();
+
+        mVideoView.pause();
     }
 
     @Override
@@ -488,6 +550,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         }
     }
 
+
     @Override
     public void subtitleHandlerSyncConfig() {
         handler = new Handler();
@@ -500,11 +563,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                     if (SystemClock.elapsedRealtime() - mLastProgressPlayerTime > PLAYER_PROGRESS_SHOW_DELAY)
                         dismissPlayerProgress();
 
-                    //Updating progress
-                    tvCurrentTime.setText(Utils.getTimeFormat(this, mVideoView.getCurrentPosition()));
-                    int videoProgress = (int) (((float) mVideoView.getCurrentPosition() / (float) mSelectedTask.video.getVideoDurationInMs()) * 100);
-                    pbProgress.setProgress(videoProgress);
-                    pbProgress.setSecondaryProgress(videoProgress + BUFFER_VALUE_PB);
+                    updatePlayerProgress(mVideoView.getCurrentPosition(), mSelectedTask.video.getVideoDurationInMs());
                 }
 
                 //Subtitles
@@ -521,6 +580,14 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             if (handlerRunning)
                 handler.postDelayed(myRunnable, SUBTITLE_DELAY_IN_MS);
         };
+    }
+
+    private void updatePlayerProgress(int currentVideoPosition, long totalVideoDuration) {
+        //Updating progress
+        tvCurrentTime.setText(Utils.getTimeFormat(this, currentVideoPosition));
+        int videoProgress = (int) (((float) currentVideoPosition / (float) totalVideoDuration) * 100);
+        pbProgress.setProgress(videoProgress);
+        pbProgress.setSecondaryProgress(videoProgress + BUFFER_VALUE_PB);
     }
 
     @Override
@@ -543,11 +610,11 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         }
     }
 
-    void showPlayerInfoOnPause(){
+    void showPlayerInfoOnPause() {
         rlVideoPlayerInfo.setVisibility(View.VISIBLE);
     }
 
-    void dismissPlayerInfoOnPause(){
+    void dismissPlayerInfoOnPause() {
         rlVideoPlayerInfo.setVisibility(View.GONE);
     }
 
@@ -680,7 +747,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
         }
 
-        playVideo(null);
+        playVideo();
     }
 
 
