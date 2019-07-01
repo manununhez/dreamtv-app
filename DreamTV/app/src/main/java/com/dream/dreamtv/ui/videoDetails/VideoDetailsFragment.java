@@ -443,17 +443,17 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         DreamTVApp dreamTVApp = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
         List<VideoTests> videoTestsList = dreamTVApp.getVideoTests();
 
-        if (mSelectedCategory.equals(TASKS_TEST_CAT)) {
-            //We find the version of the video test
-            for (VideoTests videoTests : videoTestsList)
-                if (videoTests.videoId.equals(mSelectedTask.video.videoId)) {
-                    return String.valueOf(videoTests.version);
-                }
-        } else {
-            if (mUserTask != null)
-                return mUserTask.getSubtitleVersion();
-        }
+        // We first look is the video is a test video
+        for (VideoTests videoTests : videoTestsList)
+            if (videoTests.videoId.equals(mSelectedTask.video.videoId)) {
+                return String.valueOf(videoTests.subtitleVersion);
+            }
 
+        //If is it not a test video, we look if the task has already an userTask with the subtitle version
+        if (mUserTask != null)
+            return mUserTask.getSubtitleVersion();
+
+        // Finally, we look for the last version available
         return newestVersion;
     }
 

@@ -11,8 +11,8 @@ public class VideoTests  {
     public int id;
     @SerializedName("video_id")
     public String videoId;
-    @SerializedName("version")
-    public int version;
+    @SerializedName("subtitle_version")
+    public int subtitleVersion;
     @SerializedName("language_code")
     public String languageCode;
 
@@ -21,7 +21,7 @@ public class VideoTests  {
         return "VideoTests{" +
                 "id=" + id +
                 ", videoId='" + videoId + '\'' +
-                ", version=" + version +
+                ", subtitleVersion=" + subtitleVersion +
                 ", languageCode='" + languageCode + '\'' +
                 '}';
     }
