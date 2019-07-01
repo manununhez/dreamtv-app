@@ -89,13 +89,20 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     private static final String TAG = PlaybackVideoYoutubeActivity.class.getSimpleName();
 
     private static final int POSITION_OFFSET = 7;//7 secs
-    private static final int DELAY_IN_MS = 100;
+    private static final int SUBTITLE_DELAY_IN_MS = 100;
+    private static final int DELAY_IN_MS = 1000;
     private static final int AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION = 2;
     private static final int DIFFERENCE_TIME_IN_SECS_ = 1;
     private static final int VIDEO_COMPLETED_WATCHING_TRUE = 1;//7 secs in ms
     private static final int BUFFER_VALUE_PB = 2;
+    private static final int PLAYER_PROGRESS_SHOW_DELAY = 5000;
+
     private boolean mPlayFromBeginning;
     private boolean hasAlreadyPlayFromBeginning = false;
+    private long mLastClickTime = 0;
+    private long mLastProgressPlayerTime = 0;
+    private int counterClicks = 1;
+
     private RelativeLayout rlVideoPlayerInfo;
     private RelativeLayout rlVideoPlayerProgress;
     private YoutubeTvView mYoutubeView;
@@ -301,10 +308,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             Log.d(TAG, "State : " + STATE_ENDED);
 
             stopVideo();
-
             showRatingDialog();
-
-
         }
 
     }
@@ -335,37 +339,68 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         int keyCode = event.getKeyCode();
 
         switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                if (action == KeyEvent.ACTION_UP) {
-                    Log.d(TAG, "KEYCODE_DPAD_LEFT");
-                    mYoutubeView.moveBackward(POSITION_OFFSET);
-                    Toast.makeText(this, getString(R.string.title_video_backward, POSITION_OFFSET),
-                            Toast.LENGTH_SHORT).show();
-
-                    //Analytics Report Event
-                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO);
-                    return true;
-                }
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 if (action == KeyEvent.ACTION_UP) {
                     Log.d(TAG, "KEYCODE_DPAD_RIGHT");
-                    mYoutubeView.moveForward(POSITION_OFFSET);
-                    Toast.makeText(this, getString(R.string.title_video_forward, POSITION_OFFSET),
-                            Toast.LENGTH_SHORT).show();
+
+                    showPlayerProgress();
+
+                    // Handling multiple clicks, using threshold of 1 second
+                    if (SystemClock.elapsedRealtime() - mLastClickTime < DELAY_IN_MS)
+                        counterClicks++;
+                    else
+                        counterClicks = 1;
+
+
+                    Log.d(TAG, "Consecutive clicks =" + counterClicks);
+
+                    mLastClickTime = SystemClock.elapsedRealtime();
+
+                    int moveForward = counterClicks * POSITION_OFFSET;
+
+                    mYoutubeView.moveForward(moveForward);
+//                    Toast.makeText(this, getString(R.string.title_video_forward, POSITION_OFFSET),
+//                            Toast.LENGTH_SHORT).show();
 
                     //Analytics Report Event
                     firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO);
                     return true;
                 }
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                if (action == KeyEvent.ACTION_UP) {
+                    Log.d(TAG, "KEYCODE_DPAD_LEFT");
+
+                    showPlayerProgress();
+
+                    // Handling multiple clicks, using threshold of 1 second
+                    if (SystemClock.elapsedRealtime() - mLastClickTime < DELAY_IN_MS)
+                        counterClicks++;
+                    else
+                        counterClicks = 1;
+
+
+                    Log.d(TAG, "Consecutive clicks =" + counterClicks);
+
+                    mLastClickTime = SystemClock.elapsedRealtime();
+
+                    int moveBackward = counterClicks * POSITION_OFFSET;
+                    mYoutubeView.moveBackward(moveBackward);
+//                    Toast.makeText(this, getString(R.string.title_video_backward, POSITION_OFFSET),
+//                            Toast.LENGTH_SHORT).show();
+
+                    //Analytics Report Event
+                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO);
+                    return true;
+                }
             case KeyEvent.KEYCODE_DPAD_UP:
                 if (action == KeyEvent.ACTION_UP) {
-                    rlVideoPlayerProgress.setVisibility(View.VISIBLE);
+                    showPlayerProgress();
                     return true;
                 }
 
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 if (action == KeyEvent.ACTION_UP) {
-                    rlVideoPlayerProgress.setVisibility(View.GONE);
+                    dismissPlayerProgress();
                     return true;
                 }
 
@@ -447,8 +482,8 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         String videoDuration = Utils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs());
 
         tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
-        rlVideoPlayerInfo.setVisibility(View.VISIBLE);
-        rlVideoPlayerProgress.setVisibility(View.GONE);
+        showPlayerInfoOnPause();
+        dismissPlayerProgress();
 
 
         //Analytics Report Event
@@ -489,11 +524,16 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 timeStoppedTemp = chronometer.getBase();
                 elapsedRealtimeTemp = SystemClock.elapsedRealtime();
 
-                //Updating progress
-                tvCurrentTime.setText(Utils.getTimeFormat(this, elapsedRealtimeTemp - timeStoppedTemp));
-                int videoProgress = (int) ((((float) elapsedRealtimeTemp - timeStoppedTemp) / (float) mSelectedTask.video.getVideoDurationInMs()) * 100);
-                pbProgress.setProgress(videoProgress);
-                pbProgress.setSecondaryProgress(videoProgress + BUFFER_VALUE_PB);
+                if (rlVideoPlayerProgress.getVisibility() == View.VISIBLE) {
+                    if (SystemClock.elapsedRealtime() - mLastProgressPlayerTime > PLAYER_PROGRESS_SHOW_DELAY)
+                        dismissPlayerProgress();
+
+                    //Updating progress
+                    tvCurrentTime.setText(Utils.getTimeFormat(this, elapsedRealtimeTemp - timeStoppedTemp));
+                    int videoProgress = (int) ((((float) elapsedRealtimeTemp - timeStoppedTemp) / (float) mSelectedTask.video.getVideoDurationInMs()) * 100);
+                    pbProgress.setProgress(videoProgress);
+                    pbProgress.setSecondaryProgress(videoProgress + BUFFER_VALUE_PB);
+                }
 
 
                 //Subtitles
@@ -506,13 +546,13 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 showSubtitle(selectedSubtitle, userTaskErrorListForSttlPos);
 
             });
-            handler.postDelayed(myRunnable, DELAY_IN_MS);
+            handler.postDelayed(myRunnable, SUBTITLE_DELAY_IN_MS);
         };
     }
 
     @Override
     public void startSyncSubtitle(Long base) {
-        rlVideoPlayerInfo.setVisibility(View.GONE);
+        dismissPlayerInfoOnPause();
 
         chronometer.setBase(base);
         chronometer.start();
@@ -529,6 +569,29 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             handler.removeCallbacksAndMessages(null);
         }
     }
+
+    void showPlayerInfoOnPause(){
+        rlVideoPlayerInfo.setVisibility(View.VISIBLE);
+    }
+
+    void dismissPlayerInfoOnPause(){
+        rlVideoPlayerInfo.setVisibility(View.GONE);
+    }
+
+    void showPlayerProgress() {
+        if (rlVideoPlayerProgress.getVisibility() == View.GONE) {
+            mLastProgressPlayerTime = SystemClock.elapsedRealtime();
+            rlVideoPlayerProgress.setVisibility(View.VISIBLE);
+        }
+    }
+
+    void dismissPlayerProgress() {
+        if (rlVideoPlayerProgress.getVisibility() == View.VISIBLE) {
+            mLastProgressPlayerTime = 0;
+            rlVideoPlayerProgress.setVisibility(View.GONE);
+        }
+    }
+
 
     @Override
     public void showSubtitle(Subtitle subtitle) {
