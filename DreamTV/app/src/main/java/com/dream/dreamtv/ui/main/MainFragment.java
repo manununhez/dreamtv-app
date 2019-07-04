@@ -580,9 +580,8 @@ public class MainFragment extends BrowseSupportFragment {
 
     private void setupUIElements() {
 
-        setBadgeDrawable(Objects.requireNonNull(getActivity()).getResources().getDrawable(R.drawable.logo_tv, null));
-//        setTitle(getString(R.string.browse_title)); // Badge, when set, takes precedent
-
+        setBadgeDrawable(Objects.requireNonNull(getActivity()).getResources().getDrawable(R.drawable.dreamtv_logo, null));
+//        setTitle(getString(R.string.app_name)); // Badge, when set, takes precedent
         // over title
         setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(true);
