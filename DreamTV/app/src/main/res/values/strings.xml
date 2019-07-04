@@ -45,7 +45,7 @@
     <string name="title_check_new_tasks_category">New Releases</string>
     <string name="hint_voice_google_input">Please, say your comment</string>
     <string name="title_current_time_video">%1$s / %2$s</string>
-    <string name="title_video_details">%1$s | Audio: %2$s | Subtitle: %3$s | Duration: %4$s | Interface mode: %5$s</string>
+    <string name="title_video_details">%1$s | Audio: %2$s | Subtitle: %3$s | Duration: %4$s</string>
     <string name="title_video_details_main">%1$s | Audio: %2$s | Subtitle: %3$s | %4$s</string>
     <string name="title_video_forward">+ %1$d secs</string>
     <string name="title_video_backward">- %1$d secs</string>
@@ -95,8 +95,9 @@
 
 
     <!--PREFERENCES-->
-    <string name="pref_title_app_settings">App settings</string>
-    <string name="pref_title_subtitle_settings">Subtitle settings</string>
+    <string name="pref_title_app_settings">App Settings</string>
+    <string name="pref_title_subtitle_settings">Subtitle Settings</string>
+    <string name="pref_title_video_settings">Video Settings</string>
     <string name="pref_title_subtitle_size">Text Size</string>
     <string name="pref_title_app_language_dialog">Select language</string>
     <string name="pref_title_interface_mode_dialog">Select mode</string>
@@ -106,7 +107,6 @@
     <string name="pref_title_subtitle_language_dialog">Select subtitle language</string>
     <string name="pref_title_audio">Audio</string>
     <string name="pref_title_subtitle">Subtitles</string>
-    <string name="pref_title_video_settings">Video Settings</string>
     <string name="pref_title_text_language_settings">App language</string>
     <string name="pref_title_reason_dialog_interface_settings">Interface</string>
     <string name="pref_title_testing_mode_settings">Testing mode</string>

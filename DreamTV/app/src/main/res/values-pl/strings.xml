@@ -27,7 +27,7 @@
     <string name="title_check_new_tasks_category">Ostatnio Dodane Filmy</string>
     <string name="hint_voice_google_input">Nagraj wiadomość</string>
     <string name="title_current_time_video">%1$s / %2$s</string>
-    <string name="title_video_details">%1$s | Audio: %2$s | Napisy: %3$s | Długość: %4$s | Tryb interfejsu: %5$s</string>
+    <string name="title_video_details">%1$s | Audio: %2$s | Napisy: %3$s | Długość: %4$s</string>
     <string name="title_video_details_main">%1$s | Audio: %2$s | Napisy: %3$s | %4$s</string>
     <string name="title_video_forward">+ %1$d s</string>
     <string name="title_video_backward">- %1$d s</string>
@@ -80,8 +80,9 @@
     <string name="text_pause">PAUZA</string>
 
     <!--PREFERENCES-->
-    <string name="pref_title_app_settings">Ustawienia aplikacji</string>
-    <string name="pref_title_subtitle_settings">Ustawienia napisów</string>
+    <string name="pref_title_app_settings">Ustawienia Aplikacji</string>
+    <string name="pref_title_subtitle_settings">Ustawienia Napisów</string>
+    <string name="pref_title_video_settings">Ustawienia Filmu</string>
     <string name="pref_title_subtitle_size">Rozmiar czcionki</string>
     <string name="pref_title_app_language_dialog">Wybierz język aplikacji</string>
     <string name="pref_title_interface_mode_dialog">Wybierz tryb interfejsu</string>
@@ -91,7 +92,6 @@
     <string name="pref_title_subtitle_language_dialog">Wybierz język napisów</string>
     <string name="pref_title_audio">Dźwięk</string>
     <string name="pref_title_subtitle">Napisy</string>
-    <string name="pref_title_video_settings">Ustawienia filmu</string>
     <string name="pref_title_text_language_settings">Język app</string>
     <string name="pref_title_reason_dialog_interface_settings">Interfejs</string>
     <string name="pref_title_testing_mode_settings">Tryb testowy</string>

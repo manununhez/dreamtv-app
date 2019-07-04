@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
     <fragment
         android:id="@+id/preferencesFragment"
-        android:name="com.dream.dreamtv.ui.preferences.PreferencesFragment"
+        android:name="com.dream.dreamtv.ui.preferences.VideoPreferencesFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </RelativeLayout>

@@ -48,11 +48,12 @@ import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.TasksList;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.presenter.IconCardPresenter;
-import com.dream.dreamtv.presenter.ImageCardView;
 import com.dream.dreamtv.presenter.SingleLineCardPresenter;
 import com.dream.dreamtv.presenter.sideInfoPresenter.SideInfoCardPresenter;
 import com.dream.dreamtv.ui.categories.CategoryActivity;
-import com.dream.dreamtv.ui.preferences.PreferencesActivity;
+import com.dream.dreamtv.ui.preferences.AppPreferencesActivity;
+import com.dream.dreamtv.ui.preferences.SubtitlePreferencesActivity;
+import com.dream.dreamtv.ui.preferences.VideoPreferencesActivity;
 import com.dream.dreamtv.ui.search.SearchActivity;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsActivity;
 import com.dream.dreamtv.utils.InjectorUtils;
@@ -79,7 +80,6 @@ import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_TOPIC_NAME;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_USER_UPDATED;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
-import static com.dream.dreamtv.utils.Constants.SETTINGS_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_ALL_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
@@ -91,7 +91,9 @@ public class MainFragment extends BrowseSupportFragment {
     private static final String TAG = MainFragment.class.getSimpleName();
 
     private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
-    private static final int REQUEST_SETTINGS = 45686;
+    private static final int REQUEST_APP_SETTINGS = 45690;
+    private static final int REQUEST_VIDEO_SETTINGS = 45710;
+    private static final int REQUEST_STT_SETTINGS = 45750;
     private static final boolean DEBUG = BuildConfig.DEBUG;
     private ArrayObjectAdapter mRowsAdapter;
     private MainViewModel mViewModel;
@@ -143,11 +145,25 @@ public class MainFragment extends BrowseSupportFragment {
 
         IconCardPresenter mIconCardPresenter = new IconCardPresenter(getActivity());
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mIconCardPresenter);
-        Card settingsCard = new Card();
-        settingsCard.setType(Card.Type.ICON);
-        settingsCard.setTitle(getString(R.string.title_settings_category));
-        settingsCard.setLocalImageResource("ic_settings_settings");
-        gridRowAdapter.add(settingsCard);
+
+
+        Card appSettingsCard = new Card();
+        appSettingsCard.setType(Card.Type.ICON);
+        appSettingsCard.setTitle(getString(R.string.pref_title_app_settings));
+        appSettingsCard.setLocalImageResource("ic_settings_app");
+        gridRowAdapter.add(appSettingsCard);
+
+        Card videoSettingsCard = new Card();
+        videoSettingsCard.setType(Card.Type.ICON);
+        videoSettingsCard.setTitle(getString(R.string.pref_title_video_settings));
+        videoSettingsCard.setLocalImageResource("ic_settings_video");
+        gridRowAdapter.add(videoSettingsCard);
+
+        Card subtitleSettingsCard = new Card();
+        subtitleSettingsCard.setType(Card.Type.ICON);
+        subtitleSettingsCard.setTitle(getString(R.string.pref_title_subtitle_settings));
+        subtitleSettingsCard.setLocalImageResource("ic_settings_stt");
+        gridRowAdapter.add(subtitleSettingsCard);
 
         rowSettings = new ListRow(gridHeader, gridRowAdapter);
 
@@ -643,9 +659,13 @@ public class MainFragment extends BrowseSupportFragment {
 
                 // Receiving a result from the AccountPicker
                 login(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
-
-            } else if (requestCode == REQUEST_SETTINGS) {
-                updateUser(data.getParcelableExtra(INTENT_EXTRA_USER_UPDATED));
+            } else if (requestCode == REQUEST_APP_SETTINGS) {
+                // Parameters considered here:
+                // pref_key_list_app_languages
+                // pref_key_list_interface_mode
+                // pref_key_testing_mode
+                User userToUpdate = data.getParcelableExtra(INTENT_EXTRA_USER_UPDATED);
+                updateUser(userToUpdate);
 
                 boolean restart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
 
@@ -653,9 +673,38 @@ public class MainFragment extends BrowseSupportFragment {
                     //To update screen language
                     Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
                     if (DEBUG)
-                        Log.d(TAG, "REQUEST_SETTINGS - Different language. Updating screen.");
+                        Log.d(TAG, "REQUEST_APP_SETTINGS - Different language. Updating screen.");
                 } else {
+                    //we check is we are not in testing mode. If the language screen does not recreate the activity,
+                    // we manually delete the row testing
+                    boolean testingMode = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()))
+                            .getBoolean(getActivity().getString(R.string.pref_key_testing_mode), false);
 
+                    if (!testingMode) {
+                        verifyRowExistenceAndRemove(rowTestTasks);
+                        if (DEBUG)
+                            Log.d(TAG, "REQUEST_APP_SETTINGS - Removed test category.");
+                    } else {
+                        mViewModel.updateTaskByCategory(TASKS_TEST_CAT);
+                        if (DEBUG)
+                            Log.d(TAG, "REQUEST_APP_SETTINGS - Added test category.");
+                    }
+                }
+            } else if (requestCode == REQUEST_VIDEO_SETTINGS) {
+                // Parameters considered here:
+                // pref_key_video_duration
+                // pref_key_list_audio_languages
+                User userToUpdate = data.getParcelableExtra(INTENT_EXTRA_USER_UPDATED);
+                updateUser(userToUpdate);
+
+                boolean restart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
+
+                if (restart) {
+                    //To update screen language
+                    Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
+                    if (DEBUG)
+                        Log.d(TAG, "REQUEST_VIDEO_SETTINGS - Different video audio language. Updating screen.");
+                } else {
                     boolean callAllCategoriesTasks = data.getBooleanExtra(INTENT_EXTRA_CALL_TASKS, false);
                     if (callAllCategoriesTasks) {
                         mViewModel.updateTaskByCategory(TASKS_ALL_CAT);
@@ -663,22 +712,27 @@ public class MainFragment extends BrowseSupportFragment {
                         mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT);
                         mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT);
                         mViewModel.updateTaskByCategory(TASKS_TEST_CAT);
-                        if (DEBUG) Log.d(TAG, "REQUEST_SETTINGS - Call all Tasks again.");
-                    } else {
-                        //we check is we are not in testing mode. If the language screen does not recreate the activity,
-                        // we manually delete the row testing
-                        boolean testingMode = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()))
-                                .getBoolean(getActivity().getString(R.string.pref_key_testing_mode), false);
-
-                        if (!testingMode)
-                            verifyRowExistenceAndRemove(rowTestTasks);
-                        else {
-//                            callTestTasks();
-                            mViewModel.updateTaskByCategory(TASKS_TEST_CAT);
-                            if (DEBUG) Log.d(TAG, "REQUEST_SETTINGS - Call only test Tasks again.");
-                        }
+                        if (DEBUG)
+                            Log.d(TAG, "REQUEST_VIDEO_SETTINGS - Changed video duration. Call all Tasks again.");
                     }
                 }
+
+            } else if (requestCode == REQUEST_STT_SETTINGS) {
+                // Parameters considered here:
+                // pref_key_list_subtitle_languages
+                // pref_key_subtitle_size
+                User userToUpdate = data.getParcelableExtra(INTENT_EXTRA_USER_UPDATED);
+                updateUser(userToUpdate);
+
+                boolean restart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
+
+                if (restart) {
+                    //To update screen language
+                    Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
+                    if (DEBUG)
+                        Log.d(TAG, "REQUEST_STT_SETTINGS - Different video subtitle language. Updating screen.");
+                }
+
             }
         }
 
@@ -711,8 +765,16 @@ public class MainFragment extends BrowseSupportFragment {
             if (item instanceof Card) {
                 Card card = (Card) item;
                 if (row.getHeaderItem().getName().equals(getString(R.string.title_preferences_category))) {
-                    Intent intent = new Intent(getActivity(), PreferencesActivity.class);
-                    startActivityForResult(intent, REQUEST_SETTINGS);
+                    if (card.getTitle().equals(getString(R.string.pref_title_video_settings))) {
+                        Intent intent = new Intent(getActivity(), VideoPreferencesActivity.class);
+                        startActivityForResult(intent, REQUEST_VIDEO_SETTINGS);
+                    } else if (card.getTitle().equals(getString(R.string.pref_title_subtitle_settings))) {
+                        Intent intent = new Intent(getActivity(), SubtitlePreferencesActivity.class);
+                        startActivityForResult(intent, REQUEST_STT_SETTINGS);
+                    } else if (card.getTitle().equals(getString(R.string.pref_title_app_settings))) {
+                        Intent intent = new Intent(getActivity(), AppPreferencesActivity.class);
+                        startActivityForResult(intent, REQUEST_APP_SETTINGS);
+                    }
                 } else if (row.getHeaderItem().getName().equals(getString(R.string.title_topics_category))) {
                     Intent intent = new Intent(getActivity(), CategoryActivity.class);
                     intent.putExtra(INTENT_EXTRA_TOPIC_NAME, card.getTitle());

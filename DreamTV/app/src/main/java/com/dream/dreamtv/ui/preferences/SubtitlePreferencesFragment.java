@@ -19,7 +19,7 @@ import com.dream.dreamtv.model.User;
 import java.util.Objects;
 
 
-public class PreferencesFragment extends LeanbackSettingsFragmentCompat {
+public class SubtitlePreferencesFragment extends LeanbackSettingsFragmentCompat {
 
     @Override
     public void onPreferenceStartInitialScreen() {
@@ -63,27 +63,13 @@ public class PreferencesFragment extends LeanbackSettingsFragmentCompat {
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
             // Load the preferences from an XML resource
-            setPreferencesFromResource(R.xml.preferences, rootKey);
+            setPreferencesFromResource(R.xml.subtitle_preferences, rootKey);
 
+//            pref_key_list_subtitle_languages
+//            pref_key_subtitle_size
             User user = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getUser();
 
             if (user != null) {
-                //TODO set settings value from Shared USER
-                ListPreference listAppLanguagePreference = findPreference(getString(R.string.pref_key_list_app_languages));
-                if (listAppLanguagePreference != null) {
-                    listAppLanguagePreference.setValue(user.interfaceLanguage);
-                }
-
-                ListPreference listInterfaceModePreference = findPreference(getString(R.string.pref_key_list_interface_mode));
-                if (listInterfaceModePreference != null) {
-                    listInterfaceModePreference.setValue(user.interfaceMode);
-                }
-
-                ListPreference listAudioPreference = findPreference(getString(R.string.pref_key_list_audio_languages));
-                if (listAudioPreference != null) {
-                    listAudioPreference.setValue(user.audioLanguage);
-                }
-
                 ListPreference listSubtitlePreference = findPreference(getString(R.string.pref_key_list_subtitle_languages));
                 if (listSubtitlePreference != null) {
                     listSubtitlePreference.setValue(user.subLanguage);

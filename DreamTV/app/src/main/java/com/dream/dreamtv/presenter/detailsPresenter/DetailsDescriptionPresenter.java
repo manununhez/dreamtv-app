@@ -41,7 +41,7 @@ public class DetailsDescriptionPresenter extends CustomAbstractDetailsDescriptio
 
             viewHolder.getTitle().setText(video.title);
             viewHolder.getSubtitle().setText(context.getString(R.string.title_video_details, video.project,
-                    video.primaryAudioLanguageCode, task.subLanguage, timeFormatted, user.interfaceMode));
+                    video.primaryAudioLanguageCode, task.subLanguage, timeFormatted));
             viewHolder.getBody().setText(video.description);
         }
     }

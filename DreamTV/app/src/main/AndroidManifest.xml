@@ -57,7 +57,15 @@
             android:name=".ui.playVideo.PlaybackVideoYoutubeActivity"
             android:label="@string/app_name" />
         <activity
-            android:name=".ui.preferences.PreferencesActivity"
+            android:name=".ui.preferences.AppPreferencesActivity"
+            android:exported="true"
+            android:theme="@style/LeanbackPreferences" />
+        <activity
+            android:name=".ui.preferences.VideoPreferencesActivity"
+            android:exported="true"
+            android:theme="@style/LeanbackPreferences" />
+        <activity
+            android:name=".ui.preferences.SubtitlePreferencesActivity"
             android:exported="true"
             android:theme="@style/LeanbackPreferences" />
         <activity android:name=".ui.search.SearchActivity" />
