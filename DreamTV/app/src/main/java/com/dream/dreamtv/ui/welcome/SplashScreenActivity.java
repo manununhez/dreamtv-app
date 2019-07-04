@@ -26,7 +26,7 @@ public class SplashScreenActivity extends Activity {
         @Override
         public void run() {
             try {
-                Thread.sleep(3 * 1000);
+                Thread.sleep(1000);
             } catch (Exception e) {
                 Log.d(TAG, "An error occurred");
             }

@@ -143,24 +143,21 @@ public class MainFragment extends BrowseSupportFragment {
     private void initSettingsRow() {
         HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
 
-        IconCardPresenter mIconCardPresenter = new IconCardPresenter(getActivity());
+        SingleLineCardPresenter mIconCardPresenter = new SingleLineCardPresenter(getActivity());
         ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mIconCardPresenter);
 
 
         Card appSettingsCard = new Card();
-        appSettingsCard.setType(Card.Type.ICON);
         appSettingsCard.setTitle(getString(R.string.pref_title_app_settings));
         appSettingsCard.setLocalImageResource("ic_settings_app");
         gridRowAdapter.add(appSettingsCard);
 
         Card videoSettingsCard = new Card();
-        videoSettingsCard.setType(Card.Type.ICON);
         videoSettingsCard.setTitle(getString(R.string.pref_title_video_settings));
         videoSettingsCard.setLocalImageResource("ic_settings_video");
         gridRowAdapter.add(videoSettingsCard);
 
         Card subtitleSettingsCard = new Card();
-        subtitleSettingsCard.setType(Card.Type.ICON);
         subtitleSettingsCard.setTitle(getString(R.string.pref_title_subtitle_settings));
         subtitleSettingsCard.setLocalImageResource("ic_settings_stt");
         gridRowAdapter.add(subtitleSettingsCard);
