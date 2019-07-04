@@ -24,6 +24,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.leanback.app.BrowseSupportFragment;
+import androidx.leanback.app.BrowseSupportFragment.BrowseTransitionListener;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.BaseCardView;
 import androidx.leanback.widget.DiffCallback;
@@ -47,7 +48,6 @@ import com.dream.dreamtv.model.Resource;
 import com.dream.dreamtv.model.Task;
 import com.dream.dreamtv.model.TasksList;
 import com.dream.dreamtv.model.User;
-import com.dream.dreamtv.presenter.IconCardPresenter;
 import com.dream.dreamtv.presenter.SingleLineCardPresenter;
 import com.dream.dreamtv.presenter.sideInfoPresenter.SideInfoCardPresenter;
 import com.dream.dreamtv.ui.categories.CategoryActivity;
@@ -138,6 +138,13 @@ public class MainFragment extends BrowseSupportFragment {
         userRegistration();
 
         populateScreen();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setHeadersState(HEADERS_DISABLED);
     }
 
     private void initSettingsRow() {
@@ -580,8 +587,8 @@ public class MainFragment extends BrowseSupportFragment {
         setBadgeDrawable(Objects.requireNonNull(getActivity()).getResources().getDrawable(R.drawable.dreamtv_logo, null));
 //        setTitle(getString(R.string.app_name)); // Badge, when set, takes precedent
         // over title
-        setHeadersState(HEADERS_ENABLED);
-        setHeadersTransitionOnBackEnabled(true);
+//        setHeadersState(HEADERS_DISABLED);
+        setHeadersTransitionOnBackEnabled(false);
 
 //         set fastLane (or headers) background color
 //        setBrandColor(ContextCompat.getColor(getActivity(), R.color.accent));
@@ -794,5 +801,6 @@ public class MainFragment extends BrowseSupportFragment {
 
         }
     }
+
 
 }

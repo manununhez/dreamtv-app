@@ -56,6 +56,7 @@
     <string name="btn_save_changes">Zapisz zmiany</string>
     <string name="btn_cancel">Anuluj</string>
     <string name="btn_save_exit">Zapisz i wyjdź</string>
+    <string name="btn_exit">Wyjście</string>
     <string name="btn_ok">OK</string>
     <string name="btn_start_recording">Kliknij na mikrofon żeby nagrać wiadomość</string>
     <string name="btn_continue_watching">Wznów: %1$s</string>
@@ -77,6 +78,7 @@
     <!--Languages-->
     <string name="time_format">%02d:%02d</string>
     <string name="alert_msg_video_terminated">Jak ci się podobało wideo?</string>
+    <string name="alert_exit_app">Czy na pewno chcesz opuścić aplikację?</string>
     <string name="text_pause">PAUZA</string>
 
     <!--PREFERENCES-->
@@ -92,7 +94,7 @@
     <string name="pref_title_subtitle_language_dialog">Wybierz język napisów</string>
     <string name="pref_title_audio">Dźwięk</string>
     <string name="pref_title_subtitle">Napisy</string>
-    <string name="pref_title_text_language_settings">Język app</string>
+    <string name="pref_title_text_language_settings">Język aplikacji</string>
     <string name="pref_title_reason_dialog_interface_settings">Interfejs</string>
     <string name="pref_title_testing_mode_settings">Tryb testowy</string>
     <string name="pref_title_testing_mode_settings_description">Wyświetl filmy do testowania</string>

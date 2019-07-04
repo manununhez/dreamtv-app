@@ -70,6 +70,7 @@
     <string name="btn_save_changes">Save changes</string>
     <string name="btn_cancel">Cancel</string>
     <string name="btn_save_exit">Save and Exit</string>
+    <string name="btn_exit">Exit</string>
     <string name="btn_ok">OK</string>
     <string name="btn_start_recording">Click the mic to record your comment</string>
     <string name="btn_continue_watching">Resume: %1$s</string>
@@ -91,11 +92,12 @@
     <!--Languages-->
     <string name="time_format">%02d:%02d</string>
     <string name="alert_msg_video_terminated">How did you like the video?</string>
+    <string name="alert_exit_app">Are you sure you want to leave the application?</string>
     <string name="text_pause">PAUSE</string>
 
 
     <!--PREFERENCES-->
-    <string name="pref_title_app_settings">App Settings</string>
+    <string name="pref_title_app_settings">Application Settings</string>
     <string name="pref_title_subtitle_settings">Subtitle Settings</string>
     <string name="pref_title_video_settings">Video Settings</string>
     <string name="pref_title_subtitle_size">Text Size</string>
@@ -107,7 +109,7 @@
     <string name="pref_title_subtitle_language_dialog">Select subtitle language</string>
     <string name="pref_title_audio">Audio</string>
     <string name="pref_title_subtitle">Subtitles</string>
-    <string name="pref_title_text_language_settings">App language</string>
+    <string name="pref_title_text_language_settings">Application language</string>
     <string name="pref_title_reason_dialog_interface_settings">Interface</string>
     <string name="pref_title_testing_mode_settings">Testing mode</string>
     <string name="pref_title_testing_mode_settings_description">Display videos for testing</string>
