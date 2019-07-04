@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/exit_dialog_background"
     tools:context="com.dream.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment">
 
     <LinearLayout
@@ -20,12 +21,11 @@
             android:paddingEnd="20dp">
 
             <TextView
-                android:id="@+id/tvTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:layout_marginBottom="5dp"
-                android:text="@string/title_reasons_dialog"
+                android:layout_marginBottom="10dp"
+                android:text="@string/title_reason_dialog_location"
                 android:textColor="@color/white"
                 android:textSize="18sp" />
 
@@ -33,16 +33,23 @@
                 android:id="@+id/tvSelectedSubtitle"
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
-                android:layout_marginTop="2dp"
-                android:layout_marginBottom="20dp"
                 android:background="@color/button_focused_shape"
                 android:ellipsize="end"
                 android:gravity="center"
                 android:maxLines="2"
                 android:textColor="@color/white"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:textStyle="italic" />
 
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="10dp"
+                android:text="@string/title_reasons_dialog"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
 
             <RelativeLayout
                 android:layout_width="wrap_content"
@@ -55,8 +62,9 @@
 
                     <LinearLayout
                         android:id="@+id/llReasons"
-                        android:layout_width="match_parent"
+                        android:layout_width="300dp"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
                         android:orientation="vertical" />
                 </ScrollView>
 
@@ -67,8 +75,9 @@
 
                     <RadioGroup
                         android:id="@+id/rgReasons"
-                        android:layout_width="match_parent"
+                        android:layout_width="300dp"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
                         android:orientation="vertical" />
                 </ScrollView>
 
@@ -84,17 +93,52 @@
                     android:visibility="gone" />
             </RelativeLayout>
 
-            <Button
-                android:id="@+id/btnDeleteChanges"
+
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/button_selector_height"
-                android:layout_gravity="end"
-                android:layout_marginTop="5dp"
-                android:background="@drawable/button_focusable_selector"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:text="@string/btn_delete_changes"
-                android:textColor="@color/white" />
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btnDeleteChanges"
+                    android:layout_width="@dimen/btn_reasons_width"
+                    android:layout_height="@dimen/button_selector_height"
+                    android:layout_marginBottom="5dp"
+                    android:background="@drawable/button_focusable_selector"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
+                    android:text="@string/btn_delete_changes"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/btnSave"
+                    android:layout_width="@dimen/btn_reasons_width"
+                    android:layout_height="@dimen/button_selector_height"
+                    android:background="@drawable/button_focusable_selector"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
+                    android:text="@string/btn_save"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/btnSaveChanges"
+                    android:layout_width="@dimen/btn_reasons_width"
+                    android:layout_height="@dimen/button_selector_height"
+                    android:background="@drawable/button_focusable_selector"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
+                    android:text="@string/btn_save_changes"
+                    android:textColor="@color/white"
+                    android:visibility="gone" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/llComments"
@@ -127,54 +171,16 @@
                     android:textStyle="italic" />
 
             </LinearLayout>
-
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/button_selector_height"
-                android:layout_marginTop="25dp"
-                android:layout_marginBottom="10dp"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-
-                <Button
-                    android:id="@+id/btnSave"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@drawable/button_focusable_selector"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:padding="10dp"
-                    android:text="@string/btn_save"
-                    android:textColor="@color/white" />
-
-                <Button
-                    android:id="@+id/btnSaveChanges"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="20dp"
-                    android:background="@drawable/button_focusable_selector"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:padding="10dp"
-                    android:text="@string/btn_save_changes"
-                    android:textColor="@color/white"
-                    android:visibility="gone" />
-            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@color/colorPrimary">
+            android:layout_gravity="center">
 
             <ListView
                 android:id="@+id/lv"
-                android:layout_width="@dimen/popup_width"
+                android:layout_width="@dimen/popup_width_dialog"
                 android:layout_height="@dimen/popup_height"
                 android:layout_gravity="center"
                 android:choiceMode="singleChoice"

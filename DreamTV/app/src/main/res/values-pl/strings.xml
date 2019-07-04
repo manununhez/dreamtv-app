@@ -15,8 +15,9 @@
 
 
     <!--titles-->
-    <string name="title_reasons_dialog">Co tu jest nie tak?</string>
+    <string name="title_reasons_dialog">Co jest nie tak?</string>
     <string name="title_reasons_dialog_2">Edytuj to, co wybrałeś:</string>
+    <string name="title_reason_dialog_location">Jesteś tutaj:</string>
     <string name="title_my_list_category">Moje Filmy</string>
     <string name="title_finished_category">Obejrzyj to Ponownie</string>
     <string name="title_test_category">Zalecane Filmy</string>
