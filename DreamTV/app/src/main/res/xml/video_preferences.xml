@@ -2,7 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:title="@string/pref_title_video_settings">
 
-    <PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_title_video_settings">
 
         <ListPreference
             android:defaultValue="pl"
@@ -20,6 +20,19 @@
             android:entryValues="@array/listVideoDurationValues"
             android:key="@string/pref_key_video_duration"
             android:title="@string/pref_title_video_duration_settings"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_title_subtitle_settings">
+
+        <ListPreference
+            android:defaultValue="25"
+            android:dialogTitle="@string/pref_title_subtitle_size_dialog"
+            android:entries="@array/listSubtitleSize"
+            android:entryValues="@array/listSubtitleSizeValues"
+            android:key="@string/pref_key_subtitle_size"
+            android:title="@string/pref_title_subtitle_size"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>

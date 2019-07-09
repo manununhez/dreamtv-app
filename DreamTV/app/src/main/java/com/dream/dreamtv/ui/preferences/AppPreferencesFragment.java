@@ -71,7 +71,7 @@ public class AppPreferencesFragment extends LeanbackSettingsFragmentCompat {
                 //TODO set settings value from Shared USER
                 ListPreference listAppLanguagePreference = findPreference(getString(R.string.pref_key_list_app_languages));
                 if (listAppLanguagePreference != null) {
-                    listAppLanguagePreference.setValue(user.interfaceLanguage);
+                    listAppLanguagePreference.setValue(user.subLanguage);
                 }
 
                 ListPreference listInterfaceModePreference = findPreference(getString(R.string.pref_key_list_interface_mode));

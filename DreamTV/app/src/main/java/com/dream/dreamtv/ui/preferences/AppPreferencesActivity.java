@@ -108,13 +108,13 @@ public class AppPreferencesActivity extends FragmentActivity implements SharedPr
         User userUpdated = new User();
         userUpdated.email = userCached.email;
         userUpdated.password = userCached.password;
-        userUpdated.subLanguage = userCached.subLanguage;
         userUpdated.audioLanguage = userCached.audioLanguage;
         userUpdated.interfaceMode = interfaceMode; //interface mode updated
-        userUpdated.interfaceLanguage = interfaceLanguage; //interface language updated
+        userUpdated.subLanguage = interfaceLanguage; //interface language updated
+//        userUpdated.interfaceLanguage = interfaceLanguage; //interface language updated
 
 
-        restart = !userCached.interfaceLanguage.equals(interfaceLanguage);
+        restart = !userCached.subLanguage.equals(interfaceLanguage);
 
         return userUpdated;
     }

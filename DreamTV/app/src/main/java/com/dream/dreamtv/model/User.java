@@ -24,8 +24,6 @@ public class User implements Parcelable {
     public String audioLanguage;
     @SerializedName("interface_mode")
     public String interfaceMode;
-    @SerializedName("interface_language")
-    public String interfaceLanguage;
 
     public User() {
     }
@@ -38,7 +36,6 @@ public class User implements Parcelable {
         subLanguage = in.readString();
         audioLanguage = in.readString();
         interfaceMode = in.readString();
-        interfaceLanguage = in.readString();
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -72,7 +69,6 @@ public class User implements Parcelable {
         dest.writeString(subLanguage);
         dest.writeString(audioLanguage);
         dest.writeString(interfaceMode);
-        dest.writeString(interfaceLanguage);
     }
 
     @Override
@@ -85,7 +81,6 @@ public class User implements Parcelable {
                 ", subLanguage='" + subLanguage + '\'' +
                 ", audioLanguage='" + audioLanguage + '\'' +
                 ", interfaceMode='" + interfaceMode + '\'' +
-                ", interfaceLanguage='" + interfaceLanguage + '\'' +
                 '}';
     }
 }

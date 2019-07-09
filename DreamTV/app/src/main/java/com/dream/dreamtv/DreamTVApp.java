@@ -84,7 +84,7 @@ public class DreamTVApp extends Application {
         List<ErrorReason> newList = new ArrayList<>();
 
         for (ErrorReason error : list) {
-            if (error.language.equals(user.interfaceLanguage))
+            if (error.language.equals(user.subLanguage))
                 newList.add(error);
         }
 

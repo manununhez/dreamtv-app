@@ -110,7 +110,7 @@ public class VideoPreferencesActivity extends FragmentActivity implements Shared
         userUpdated.password = userCached.password;
         userUpdated.subLanguage = userCached.subLanguage;
         userUpdated.interfaceMode = userCached.interfaceMode;
-        userUpdated.interfaceLanguage = userCached.interfaceLanguage;
+//        userUpdated.interfaceLanguage = userCached.interfaceLanguage;
         userUpdated.audioLanguage = audioLanguage; //audio updated
 
 

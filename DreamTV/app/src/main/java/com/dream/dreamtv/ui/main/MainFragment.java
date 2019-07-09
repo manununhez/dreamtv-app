@@ -24,7 +24,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.leanback.app.BrowseSupportFragment;
-import androidx.leanback.app.BrowseSupportFragment.BrowseTransitionListener;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.BaseCardView;
 import androidx.leanback.widget.DiffCallback;
@@ -52,7 +51,6 @@ import com.dream.dreamtv.presenter.SingleLineCardPresenter;
 import com.dream.dreamtv.presenter.sideInfoPresenter.SideInfoCardPresenter;
 import com.dream.dreamtv.ui.categories.CategoryActivity;
 import com.dream.dreamtv.ui.preferences.AppPreferencesActivity;
-import com.dream.dreamtv.ui.preferences.SubtitlePreferencesActivity;
 import com.dream.dreamtv.ui.preferences.VideoPreferencesActivity;
 import com.dream.dreamtv.ui.search.SearchActivity;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsActivity;
@@ -163,11 +161,6 @@ public class MainFragment extends BrowseSupportFragment {
         videoSettingsCard.setTitle(getString(R.string.pref_title_video_settings));
         videoSettingsCard.setLocalImageResource("ic_settings_video");
         gridRowAdapter.add(videoSettingsCard);
-
-        Card subtitleSettingsCard = new Card();
-        subtitleSettingsCard.setTitle(getString(R.string.pref_title_subtitle_settings));
-        subtitleSettingsCard.setLocalImageResource("ic_settings_stt");
-        gridRowAdapter.add(subtitleSettingsCard);
 
         rowSettings = new ListRow(gridHeader, gridRowAdapter);
 
@@ -415,9 +408,9 @@ public class MainFragment extends BrowseSupportFragment {
             if (userResource.status.equals(Resource.Status.SUCCESS)) {
 
                 if (userResource.data != null) {
-                    if (!userResource.data.interfaceLanguage.equals(LocaleHelper.getLanguage(getActivity()))) {
-                        Log.d(TAG, "fetchUserDetails() response!: userResource.data.interfaceLanguage=" + userResource.data.interfaceLanguage + " LocaleHelper.getLanguage(getActivity()):" + LocaleHelper.getLanguage(getActivity()));
-                        LocaleHelper.setLocale(getActivity(), userResource.data.interfaceLanguage);
+                    if (!userResource.data.subLanguage.equals(LocaleHelper.getLanguage(getActivity()))) {
+                        Log.d(TAG, "fetchUserDetails() response!: userResource.data.subLanguage=" + userResource.data.subLanguage + " LocaleHelper.getLanguage(getActivity()):" + LocaleHelper.getLanguage(getActivity()));
+                        LocaleHelper.setLocale(getActivity(), userResource.data.subLanguage);
                         Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
 //                        Log.d(TAG, "fetchUserDetails() response!");
                     } else {
@@ -623,7 +616,7 @@ public class MainFragment extends BrowseSupportFragment {
         bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
         bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
         bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
-        bundle.putString(FIREBASE_KEY_INTERFACE_LANGUAGE, user.interfaceLanguage);
+//        bundle.putString(FIREBASE_KEY_INTERFACE_LANGUAGE, user.interfaceLanguage);
         mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN, bundle);
     }
 
@@ -720,23 +713,24 @@ public class MainFragment extends BrowseSupportFragment {
                     }
                 }
 
-            } else if (requestCode == REQUEST_STT_SETTINGS) {
-                // Parameters considered here:
-                // pref_key_list_subtitle_languages
-                // pref_key_subtitle_size
-                User userToUpdate = data.getParcelableExtra(INTENT_EXTRA_USER_UPDATED);
-                updateUser(userToUpdate);
-
-                boolean restart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
-
-                if (restart) {
-                    //To update screen language
-                    Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
-                    if (DEBUG)
-                        Log.d(TAG, "REQUEST_STT_SETTINGS - Different video subtitle language. Updating screen.");
-                }
-
             }
+//            else if (requestCode == REQUEST_STT_SETTINGS) {
+//                // Parameters considered here:
+//                // pref_key_list_subtitle_languages
+//                // pref_key_subtitle_size
+//                User userToUpdate = data.getParcelableExtra(INTENT_EXTRA_USER_UPDATED);
+//                updateUser(userToUpdate);
+//
+//                boolean restart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
+//
+//                if (restart) {
+//                    //To update screen language
+//                    Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
+//                    if (DEBUG)
+//                        Log.d(TAG, "REQUEST_STT_SETTINGS - Different video subtitle language. Updating screen.");
+//                }
+//
+//            }
         }
 
     }
@@ -771,9 +765,6 @@ public class MainFragment extends BrowseSupportFragment {
                     if (card.getTitle().equals(getString(R.string.pref_title_video_settings))) {
                         Intent intent = new Intent(getActivity(), VideoPreferencesActivity.class);
                         startActivityForResult(intent, REQUEST_VIDEO_SETTINGS);
-                    } else if (card.getTitle().equals(getString(R.string.pref_title_subtitle_settings))) {
-                        Intent intent = new Intent(getActivity(), SubtitlePreferencesActivity.class);
-                        startActivityForResult(intent, REQUEST_STT_SETTINGS);
                     } else if (card.getTitle().equals(getString(R.string.pref_title_app_settings))) {
                         Intent intent = new Intent(getActivity(), AppPreferencesActivity.class);
                         startActivityForResult(intent, REQUEST_APP_SETTINGS);

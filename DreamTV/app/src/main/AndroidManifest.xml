@@ -64,10 +64,6 @@
             android:name=".ui.preferences.VideoPreferencesActivity"
             android:exported="true"
             android:theme="@style/LeanbackPreferences" />
-        <activity
-            android:name=".ui.preferences.SubtitlePreferencesActivity"
-            android:exported="true"
-            android:theme="@style/LeanbackPreferences" />
         <activity android:name=".ui.search.SearchActivity" />
         <activity android:name=".ui.categories.CategoryActivity" />
     </application>

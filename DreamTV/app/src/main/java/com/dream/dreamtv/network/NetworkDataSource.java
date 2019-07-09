@@ -422,13 +422,13 @@ public class NetworkDataSource {
 
         Uri userUri = Uri.parse(URL_BASE.concat(Urls.USER.value)).buildUpon()
                 .appendQueryParameter(PARAM_INTERFACE_MODE, user.interfaceMode)
-                .appendQueryParameter(PARAM_INTERFACE_LANGUAGE, user.interfaceLanguage)
+//                .appendQueryParameter(PARAM_INTERFACE_LANGUAGE, user.interfaceLanguage)
                 .appendQueryParameter(PARAM_SUB_LANGUAGE, user.subLanguage)
                 .appendQueryParameter(PARAM_AUDIO_LANGUAGE, user.audioLanguage)
                 .build();
 
         Log.d(TAG, "updateUser() Request URL: " + userUri.toString() + " Params: interfaceMode=>" + user.interfaceMode
-                + "; interfaceLanguage=>" + user.interfaceLanguage
+//                + "; interfaceLanguage=>" + user.interfaceLanguage
                 + "; subLanguage=>" + user.subLanguage
                 + "; audioLanguage=>" + user.audioLanguage);
 
