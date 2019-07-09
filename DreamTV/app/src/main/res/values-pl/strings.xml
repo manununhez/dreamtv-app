@@ -6,6 +6,7 @@
     <string name="video_error_unknown_error">Nie udało się wczytać filmu</string>
 
     <!--ERROR NETWORK MESSAGES-->
+    <string name="too_many_request">Zbyt dużo próśb. Zwolnij próby.</string>
     <string name="generic_server_down">Serwer nie działa</string>
     <string name="generic_server_timeout">Limit czasu serwera</string>
     <string name="generic_error">Brak internetu</string>
@@ -93,9 +94,9 @@
     <string name="pref_title_subtitle_size_dialog">Wybierz rozmiar napisów</string>
     <string name="pref_title_audio_language_dialog">Wybierz język audio</string>
     <string name="pref_title_subtitle_language_dialog">Wybierz język napisów</string>
-    <string name="pref_title_audio">Dźwięk</string>
-    <string name="pref_title_subtitle">Napisy</string>
-    <string name="pref_title_text_language_settings">Język aplikacji</string>
+    <string name="pref_title_audio">Język audio</string>
+    <string name="pref_title_subtitle">Język napisów</string>
+    <string name="pref_title_text_language_settings">Język aplikacji &amp; napisów</string>
     <string name="pref_title_reason_dialog_interface_settings">Interfejs</string>
     <string name="pref_title_testing_mode_settings">Tryb testowy</string>
     <string name="pref_title_testing_mode_settings_description">Wyświetl filmy do testowania</string>
@@ -125,26 +126,18 @@
 
 
     <string-array name="listSubtitleLanguages">
-        <item>Chiński, Yue</item>
         <item>Angielski</item>
-        <item>Hiszpański</item>
-        <item>Arabski</item>
-        <item>Francuski</item>
         <item>Polski</item>
     </string-array>
 
     <string-array name="listSubtitleLanguagesValues">
-        <item>zh</item>
         <item>en</item>
-        <item>es</item>
-        <item>ar</item>
-        <item>fr</item>
         <item>pl</item>
     </string-array>
 
     <string-array name="listSubtitleSize">
         <item>Mały</item>
-        <item>Średni</item>
+        <item>Normalne</item>
         <item>Duży</item>
     </string-array>
 

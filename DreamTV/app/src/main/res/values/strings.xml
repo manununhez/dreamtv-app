@@ -16,14 +16,13 @@
     <string name="pref_key_video_duration" translatable="false">listVideoDuration</string>
     <string name="pref_key_subtitle_size" translatable="false">listSubtitleSize</string>
 
-
-
     <!-- Error messages -->
     <string name="video_error_media_load_timeout">Media loading timed out</string>
     <string name="video_error_server_inaccessible">Media server was not reachable</string>
     <string name="video_error_unknown_error">Failed to load video</string>
 
     <!--ERROR NETWORK MESSAGES-->
+    <string name="too_many_request">Too many requests. Please slow down the attempts.</string>
     <string name="generic_server_down">Server down</string>
     <string name="generic_server_timeout">Server Timeout</string>
     <string name="generic_error">No internet</string>
@@ -108,9 +107,9 @@
     <string name="pref_title_subtitle_size_dialog">Select subtitle size</string>
     <string name="pref_title_audio_language_dialog">Select audio language</string>
     <string name="pref_title_subtitle_language_dialog">Select subtitle language</string>
-    <string name="pref_title_audio">Audio</string>
-    <string name="pref_title_subtitle">Subtitles</string>
-    <string name="pref_title_text_language_settings">Application language</string>
+    <string name="pref_title_audio">Audio language</string>
+    <string name="pref_title_subtitle">Subtitles language</string>
+    <string name="pref_title_text_language_settings">Application &amp; Subtitle language</string>
     <string name="pref_title_reason_dialog_interface_settings">Interface</string>
     <string name="pref_title_testing_mode_settings">Testing mode</string>
     <string name="pref_title_testing_mode_settings_description">Display videos for testing</string>
@@ -140,26 +139,18 @@
 
 
     <string-array name="listSubtitleLanguages">
-        <item>Chinese, Yue</item>
         <item>English</item>
-        <item>Spanish</item>
-        <item>Arabic</item>
-        <item>French</item>
         <item>Polish</item>
     </string-array>
 
     <string-array name="listSubtitleLanguagesValues">
-        <item>zh</item>
         <item>en</item>
-        <item>es</item>
-        <item>ar</item>
-        <item>fr</item>
         <item>pl</item>
     </string-array>
 
     <string-array name="listSubtitleSize">
         <item>Small</item>
-        <item>Medium</item>
+        <item>Normal</item>
         <item>Large</item>
     </string-array>
 

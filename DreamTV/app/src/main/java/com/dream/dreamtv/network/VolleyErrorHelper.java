@@ -112,7 +112,8 @@ public class VolleyErrorHelper {
                     }
                     // invalid request
                     return error.getMessage();
-
+                case 429:
+                    return context.getResources().getString(R.string.too_many_request);
                 default:
                     return context.getResources().getString(R.string.generic_server_down);
             }
