@@ -54,9 +54,9 @@ public class Card {
 
     public Card(Task task, String category) {
         mType = Type.SIDE_INFO;
-        mTitle = task.video.title;
+        mTitle = task.videoTitle;
         mDescription = task.video.project;
-        mExtraText = task.video.description;
+        mExtraText = task.videoDescription;
         mImageUrl = task.video.thumbnail;
         mTask = task;
         mCategory = category;
@@ -66,9 +66,9 @@ public class Card {
 
     public Card(Task task) {
         mType = Type.SIDE_INFO;
-        mTitle = task.video.title;
+        mTitle = task.videoTitle;
         mDescription = task.video.project;
-        mExtraText = task.video.description;
+        mExtraText = task.videoDescription;
         mImageUrl = task.video.thumbnail;
         mTask = task;
     }

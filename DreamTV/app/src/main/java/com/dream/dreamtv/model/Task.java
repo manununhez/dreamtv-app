@@ -16,6 +16,10 @@ public class Task implements Parcelable {
     public int taskId;
     @SerializedName("video_id")
     public String videoId;
+    @SerializedName("video_title")
+    public String videoTitle;
+    @SerializedName("video_description")
+    public String videoDescription;
     @SerializedName("language")
     public String subLanguage;
     @SerializedName("type")
@@ -39,6 +43,8 @@ public class Task implements Parcelable {
     protected Task(Parcel in) {
         taskId = in.readInt();
         videoId = in.readString();
+        videoTitle = in.readString();
+        videoDescription = in.readString();
         subLanguage = in.readString();
         type = in.readString();
         created = in.readString();
@@ -48,6 +54,28 @@ public class Task implements Parcelable {
         updated_at = in.readString();
         video = in.readParcelable(Video.class.getClassLoader());
         userTasks = in.createTypedArray(UserTask.CREATOR);
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(taskId);
+        dest.writeString(videoId);
+        dest.writeString(videoTitle);
+        dest.writeString(videoDescription);
+        dest.writeString(subLanguage);
+        dest.writeString(type);
+        dest.writeString(created);
+        dest.writeString(modified);
+        dest.writeString(completed);
+        dest.writeString(created_at);
+        dest.writeString(updated_at);
+        dest.writeParcelable(video, flags);
+        dest.writeTypedArray(userTasks, flags);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<Task> CREATOR = new Creator<Task>() {
@@ -63,30 +91,12 @@ public class Task implements Parcelable {
     };
 
     @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(taskId);
-        dest.writeString(videoId);
-        dest.writeString(subLanguage);
-        dest.writeString(type);
-        dest.writeString(created);
-        dest.writeString(modified);
-        dest.writeString(completed);
-        dest.writeString(created_at);
-        dest.writeString(updated_at);
-        dest.writeParcelable(video, flags);
-        dest.writeTypedArray(userTasks, flags);
-    }
-
-    @Override
     public String toString() {
         return "Task{" +
                 "taskId=" + taskId +
                 ", videoId='" + videoId + '\'' +
+                ", videoTitle='" + videoTitle + '\'' +
+                ", videoDescription='" + videoDescription + '\'' +
                 ", subLanguage='" + subLanguage + '\'' +
                 ", type='" + type + '\'' +
                 ", created='" + created + '\'' +

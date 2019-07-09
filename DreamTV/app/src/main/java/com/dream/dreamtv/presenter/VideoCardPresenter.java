@@ -75,15 +75,15 @@ public class VideoCardPresenter extends Presenter {
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
-        Video video = ((Task) item).video;
+        Task task = ((Task) item);
         ImageCardView cardView = (ImageCardView) viewHolder.view;
 
         Log.d(TAG, "onBindViewHolder");
 //        String videoTypeTitle = video.video_type != null ? ("[" + video.video_type.toLowerCase() + "] ") : "";
-        cardView.setTitleText(video.title);
-        cardView.setContentText(video.description);
+        cardView.setTitleText(task.videoTitle);
+        cardView.setContentText(task.videoDescription);
 
-        if (video.thumbnail != null) {
+        if (task.video.thumbnail != null) {
             // Set card size from dimension resources.
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
 
@@ -95,7 +95,7 @@ public class VideoCardPresenter extends Presenter {
                     .priority(Priority.HIGH);
 
             Glide.with(viewHolder.view.getContext())
-                    .load(video.thumbnail)
+                    .load(task.video.thumbnail)
                     .apply(options)
                     .into(cardView.getMainImageView());
         }

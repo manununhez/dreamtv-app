@@ -13,8 +13,8 @@ public class VideoTests  {
     public String videoId;
     @SerializedName("subtitle_version")
     public int subtitleVersion;
-    @SerializedName("language_code")
-    public String languageCode;
+    @SerializedName("subtitle_language_code")
+    public String subtitleLanguageCode;
 
     @Override
     public String toString() {
@@ -22,7 +22,7 @@ public class VideoTests  {
                 "id=" + id +
                 ", videoId='" + videoId + '\'' +
                 ", subtitleVersion=" + subtitleVersion +
-                ", languageCode='" + languageCode + '\'' +
+                ", languageCode='" + subtitleLanguageCode + '\'' +
                 '}';
     }
 }
