@@ -18,10 +18,10 @@ public class DetailsDescriptionPresenter extends CustomAbstractDetailsDescriptio
         if (task.video != null) {
             String timeFormatted = Utils.getTimeFormatMinSecs(task.video.getVideoDurationInMs());
 
-            viewHolder.getTitle().setText(task.videoTitle);
+            viewHolder.getTitle().setText(task.videoTitleTranslated);
             viewHolder.getSubtitle().setText(context.getString(R.string.title_video_details, task.video.project,
                     task.video.primaryAudioLanguageCode, task.subLanguage, timeFormatted));
-            viewHolder.getBody().setText(task.videoDescription);
+            viewHolder.getBody().setText(task.videoDescriptionTranslated);
         }
     }
 }

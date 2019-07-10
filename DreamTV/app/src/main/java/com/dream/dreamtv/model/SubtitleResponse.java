@@ -17,12 +17,41 @@ public class SubtitleResponse implements Parcelable {
     @SerializedName("subtitles")
     public List<Subtitle> subtitles;
     @SerializedName("sub_format")
-    private String subFormat;
+    public String subFormat;
+    @SerializedName("title")
+    public String videoTitleTranslated;
+    @SerializedName("description")
+    public String videoDescriptionTranslated;
+    @SerializedName("video_title")
+    public String videoTitleOriginal;
+    @SerializedName("video_description")
+    public String videoDescriptionOriginal;
+
 
     protected SubtitleResponse(Parcel in) {
         versionNumber = in.readInt();
-        subFormat = in.readString();
         subtitles = in.createTypedArrayList(Subtitle.CREATOR);
+        subFormat = in.readString();
+        videoTitleTranslated = in.readString();
+        videoDescriptionTranslated = in.readString();
+        videoTitleOriginal = in.readString();
+        videoDescriptionOriginal = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(versionNumber);
+        dest.writeTypedList(subtitles);
+        dest.writeString(subFormat);
+        dest.writeString(videoTitleTranslated);
+        dest.writeString(videoDescriptionTranslated);
+        dest.writeString(videoTitleOriginal);
+        dest.writeString(videoDescriptionOriginal);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<SubtitleResponse> CREATOR = new Creator<SubtitleResponse>() {
@@ -36,7 +65,6 @@ public class SubtitleResponse implements Parcelable {
             return new SubtitleResponse[size];
         }
     };
-
 
     public Subtitle getSyncSubtitleText(long l) {
         Subtitle subtitle = null;
@@ -53,23 +81,15 @@ public class SubtitleResponse implements Parcelable {
     }
 
     @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(versionNumber);
-        parcel.writeString(subFormat);
-        parcel.writeTypedList(subtitles);
-    }
-
-    @Override
     public String toString() {
         return "SubtitleResponse{" +
                 "versionNumber=" + versionNumber +
                 ", subtitles=" + subtitles +
                 ", subFormat='" + subFormat + '\'' +
+                ", videoTitleTranslated='" + videoTitleTranslated + '\'' +
+                ", videoDescriptionTranslated='" + videoDescriptionTranslated + '\'' +
+                ", videoTitleOriginal='" + videoTitleOriginal + '\'' +
+                ", videoDescriptionOriginal='" + videoDescriptionOriginal + '\'' +
                 '}';
     }
 }

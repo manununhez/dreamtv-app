@@ -1,5 +1,7 @@
 package com.dream.dreamtv.ui.videoDetails;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -15,6 +17,7 @@ import com.dream.dreamtv.utils.AbsentLiveData;
 import java.util.Objects;
 
 class VideoDetailsViewModel extends ViewModel {
+    private static final String TAG = VideoDetailsViewModel.class.getSimpleName();
 
     private final AppRepository mRepository;
     private final MutableLiveData<SubtitleId> subtitleIdMLD;
@@ -60,8 +63,10 @@ class VideoDetailsViewModel extends ViewModel {
         SubtitleId update = new SubtitleId(videoId, languageCode, version);
 
         if (Objects.equals(subtitleIdMLD.getValue(), update)) {
+            Log.d(TAG, "Getting old subtitle");
             return;
         }
+        Log.d(TAG, "Getting new subtitle");
         this.subtitleIdMLD.setValue(update);
     }
 

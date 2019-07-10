@@ -24,7 +24,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.model.Video;
 
 import androidx.core.content.ContextCompat;
 import androidx.leanback.widget.Presenter;
@@ -80,8 +79,8 @@ public class VideoCardPresenter extends Presenter {
 
         Log.d(TAG, "onBindViewHolder");
 //        String videoTypeTitle = video.video_type != null ? ("[" + video.video_type.toLowerCase() + "] ") : "";
-        cardView.setTitleText(task.videoTitle);
-        cardView.setContentText(task.videoDescription);
+        cardView.setTitleText(task.videoTitleTranslated);
+        cardView.setContentText(task.videoDescriptionTranslated);
 
         if (task.video.thumbnail != null) {
             // Set card size from dimension resources.

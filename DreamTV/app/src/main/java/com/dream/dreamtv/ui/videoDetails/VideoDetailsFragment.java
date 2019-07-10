@@ -375,9 +375,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void fetchSubtitlePlayVideo(boolean playFromBeginning, String logEventName) {
+        String subtitleVersion = getSubtitleVersion();
         //We retrieve subtitles first
         mViewModel.setSubtitleId(mSelectedTask.video.videoId,
-                mSelectedTask.subLanguage, getSubtitleVersion());
+                mSelectedTask.subLanguage, subtitleVersion);
 
         fetchSubtitleLiveData = mViewModel.fetchSubtitle();
 
@@ -390,16 +391,20 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             else if (subtitleResponseResource.status.equals(Resource.Status.SUCCESS)) {
                 Log.d(TAG, "Subtitle response");
 
-                mSubtitleResponse = subtitleResponseResource.data;
+                if (subtitleResponseResource.data != null &&
+                        mSelectedTask.video.title.equals(String.valueOf(subtitleResponseResource.data.videoTitleOriginal))) {
 
-                if (mSubtitleResponse != null && mSubtitleResponse.subtitles == null)
-                    Toast.makeText(getActivity(), "Subtitle not found", Toast.LENGTH_SHORT).show();
-                else {
-                    //PLAY VIDEO
-                    if (mUserTask == null) //the are not user tasks for this video, so we need to create a new one
-                        createUserTask();
-                    else
-                        playVideo(playFromBeginning, logEventName);
+                    mSubtitleResponse = subtitleResponseResource.data;
+
+                    if (mSubtitleResponse.subtitles == null)
+                        Toast.makeText(getActivity(), "Subtitle not found", Toast.LENGTH_SHORT).show();
+                    else {
+                        //PLAY VIDEO
+                        if (mUserTask == null) //the are not user tasks for this video, so we need to create a new one
+                            createUserTask(playFromBeginning, logEventName);
+                        else
+                            playVideo(playFromBeginning, logEventName);
+                    }
                 }
 
                 dismissLoading();
@@ -459,9 +464,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
 
     /**
-     *
+     * @param playFromBeginning
+     * @param logEventName
      */
-    private void createUserTask() {
+    private void createUserTask(boolean playFromBeginning, String logEventName) {
         createUserTaskLiveData = mViewModel.createUserTask(mSelectedTask, mSubtitleResponse.versionNumber);
 
         createUserTaskLiveData.removeObservers(getViewLifecycleOwner());
@@ -472,12 +478,15 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             else if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
                 Log.d(TAG, "createUserTask() response");
 
-                mUserTask = userTaskResource.data;
+                if (userTaskResource.data != null && userTaskResource.data.getTaskId() == mSelectedTask.taskId) {
+                    mUserTask = userTaskResource.data;
 
-                fetchSubtitlePlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN);
+//                    fetchSubtitlePlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN);
 
-                mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //update category after a new task was added
+                    playVideo(playFromBeginning, logEventName);
 
+                    mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //update category after a new task was added
+                }
                 dismissLoading();
             } else if (userTaskResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
@@ -511,13 +520,14 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                         setupContinueAction();
 
-
-                        if (mUserTask.getCompleted() == VIDEO_COMPLETED_WATCHING_TRUE) { //TODO improve this calls
+                        if (mUserTask.getCompleted() == VIDEO_COMPLETED_WATCHING_TRUE) { //After the user finished a video, we update all categories
                             mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //trying to keep continue_category always updated
                             mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT); //trying to keep finished_category always updated
                             mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT); //trying to keep mylist_category always updated
                             mViewModel.updateTaskByCategory(TASKS_ALL_CAT); //trying to keep all_category always updated
                             mViewModel.updateTaskByCategory(TASKS_TEST_CAT); //trying to keep test_category always updated
+                        } else {
+                            mViewModel.updateTaskByCategory(mSelectedCategory); //we update only the current video category
                         }
                     }
             } else if (userTaskResource.status.equals(Resource.Status.ERROR)) {
