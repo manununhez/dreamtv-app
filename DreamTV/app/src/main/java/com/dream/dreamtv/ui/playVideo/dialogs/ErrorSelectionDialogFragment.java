@@ -49,7 +49,6 @@ import com.dream.dreamtv.utils.Constants;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -76,12 +75,12 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private Button btnDeleteChanges;
     private TextView voiceInput;
     private TextView tvTitle;
-    private TextView tvOtherSelected;
     private TextView tvSelectedSubtitle;
     private Dialog viewRoot;
     private SubtitleResponse subtitle;
     private ScrollView scrollViewAdvanced;
     private ScrollView scrollViewBeginner;
+    private ScrollView scrollViewBeginnerEdition;
     private Subtitle selectedSubtitle;
     private Subtitle goToThisSelectedSubtitle;
     private Task mSelectedTask;
@@ -89,6 +88,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private List<String> selectedReasons = new ArrayList<>();
     private List<ErrorReason> errorReasonList;
     private int subtitleOriginalPosition;
+    private LinearLayout llReasonsEdit;
 
     public ErrorSelectionDialogFragment() {
         // Required empty public constructor
@@ -155,15 +155,16 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
         tvTitle = viewRoot.findViewById(R.id.tvTitle);
         tvSelectedSubtitle = viewRoot.findViewById(R.id.tvSelectedSubtitle);
-        tvOtherSelected = viewRoot.findViewById(R.id.tvOtherSelected);
         btnSave = viewRoot.findViewById(R.id.btnSave);
         btnSaveChanges = viewRoot.findViewById(R.id.btnSaveChanges);
         btnDeleteChanges = viewRoot.findViewById(R.id.btnDeleteChanges);
 
         scrollViewAdvanced = viewRoot.findViewById(R.id.scrollViewAdvanced);
         scrollViewBeginner = viewRoot.findViewById(R.id.scrollViewBeginner);
+        scrollViewBeginnerEdition = viewRoot.findViewById(R.id.scrollViewBeginnerEdition);
 
         llReasons = viewRoot.findViewById(R.id.llReasons);
+        llReasonsEdit = viewRoot.findViewById(R.id.llReasonsEdit);
         rgReasons = viewRoot.findViewById(R.id.rgReasons);
 
         setupEventsListener();
@@ -355,6 +356,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         llComments.setVisibility(View.VISIBLE);
         scrollViewAdvanced.setVisibility(View.VISIBLE);
         scrollViewBeginner.setVisibility(View.GONE);
+        scrollViewBeginnerEdition.setVisibility(View.GONE);
 
         llReasons.removeAllViews();
         for (int i = 0; i < errorReasonList.size(); i++) {
@@ -378,8 +380,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             toggleButton.setTextOff(errorReason.name);
             toggleButton.setText(errorReason.name);
             toggleButton.setLayoutParams(layoutParams);
-//            toggleButton.setFocusable(true);
-//            toggleButton.setFocusableInTouchMode(true);
             toggleButton.setAllCaps(true);
             toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_1));
 
@@ -405,13 +405,12 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private void setupReasonsRadioGroup() {
         llComments.setVisibility(View.GONE);
         scrollViewBeginner.setVisibility(View.VISIBLE);
+        scrollViewBeginnerEdition.setVisibility(View.GONE);
         scrollViewAdvanced.setVisibility(View.GONE);
 
         rgReasons.removeAllViews();
+        llReasonsEdit.removeAllViews();
 
-//        rgReasons.setOnCheckedChangeListener((radioGroup, i) -> {
-//            btnSave.requestFocus(); //Nos posicionamos en el boton guardar
-//        });
 
         for (int i = 0; i < errorReasonList.size(); i++) {
             ErrorReason errorReason = errorReasonList.get(i);
@@ -432,6 +431,32 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             radioButton.setLayoutParams(layoutParams);
 
             rgReasons.addView(radioButton);
+
+            //-------- For multiple errors selected
+
+
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
+            View inflatedLayout = inflater.inflate(R.layout.reasons_button_layout, null);
+            ToggleButton toggleButton = inflatedLayout.findViewById(R.id.toogleButton);
+
+            toggleButton.setBackgroundResource(R.color.colorAccent);
+            toggleButton.setTextColor(ContextCompat.getColor(getActivity(), R.color.white));
+            layoutParams.setMargins(0, 0, 0, 15);
+            toggleButton.setContentDescription(errorReason.reasonCode); //instead of setId
+            toggleButton.setTextOn(errorReason.name);
+            toggleButton.setTextOff(errorReason.name);
+            toggleButton.setText(errorReason.name);
+            toggleButton.setLayoutParams(layoutParams);
+            toggleButton.setAllCaps(true);
+            toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_1));
+
+
+            toggleButton.setEnabled(false);
+
+            if (inflatedLayout.getParent() != null)
+                ((ViewGroup) inflatedLayout.getParent()).removeView(inflatedLayout); // <- fix
+
+            llReasonsEdit.addView(inflatedLayout);
         }
     }
 
@@ -440,6 +465,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
         ArrayList<UserTaskError> errors = userTask.getUserTaskErrorsForASpecificSubtitlePosition(position + 1);
         Log.d(TAG, "repopulateFormWithUserTaskData()");
+
 
         if (errors.size() > 0) { //if at least there are one error
 
@@ -450,48 +476,54 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
             //Interface mode preferences
             User user = getApplication().getUser();
+
             if (user.interfaceMode.equals(PREF_BEGINNER_INTERFACE_MODE)) { //PREF_BEGINNER_INTERFACE_MODE
                 if (errors.size() == 1) {
+
+                    rgReasons.setEnabled(false);
+
                     for (int i = 0; i < rgReasons.getChildCount(); i++) {
+                        String selectedErrorCode = errors.get(0).getReasonCode();
                         RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
 
-                        if (Objects.equals(radioButton.getContentDescription(), errors.get(0).getReasonCode())) {
+                        if (Objects.equals(radioButton.getContentDescription(), selectedErrorCode)) {
                             radioButton.setChecked(true);
                             break;
                         }
                     }
 
-                    tvOtherSelected.setVisibility(View.GONE);
+                    scrollViewBeginner.setVisibility(View.VISIBLE);
+                    scrollViewBeginnerEdition.setVisibility(View.GONE);
                 } else {
-                    //If we have multiple errors selected, it is not possible to check more than one radiobutton. Instead, we show the selected errors in text. If the user want to change, next time an error is selected, will overwrite this
-                    StringBuilder sb = new StringBuilder();
-                    Iterator<UserTaskError> iterator = errors.iterator();
-                    if (iterator.hasNext()) {
-                        sb.append(iterator.next().getReasonCode());
-                        while (iterator.hasNext()) {
-                            sb.append(", ").append(iterator.next().getReasonCode());
-                        }
+
+                    //re-select the reasons id
+                    for (int i = 0; i < llReasonsEdit.getChildCount(); i++) {
+                        LinearLayout childAt = (LinearLayout) llReasonsEdit.getChildAt(i);
+                        CheckBox checkBox = (CheckBox) childAt.getChildAt(0); //0 -> checkbox, 1->Tooglebutton
+                        ToggleButton toggleButton = (ToggleButton) childAt.getChildAt(1); //0 -> checkbox, 1->Tooglebutton
+
+                        for (UserTaskError userTaskError : errors)
+                            if (userTaskError.getReasonCode().contentEquals(toggleButton.getContentDescription())) {
+                                checkBox.setChecked(true);
+                                toggleButton.setChecked(true);
+                            }
                     }
 
-                    tvOtherSelected.setText(getString(R.string.title_reasons_others_selected, sb));
-                    tvOtherSelected.setVisibility(View.VISIBLE);
+                    scrollViewBeginner.setVisibility(View.GONE);
+                    scrollViewBeginnerEdition.setVisibility(View.VISIBLE);
                 }
 
 
             } else { //ADVANCED MODE
-                tvOtherSelected.setVisibility(View.GONE);
                 voiceInput.setText(errors.get(0).getComment()); //repopulate comments
 
                 //re-select the reasons id
                 for (int i = 0; i < llReasons.getChildCount(); i++) {
                     LinearLayout childAt = (LinearLayout) llReasons.getChildAt(i);
-//                    CheckBox checkBox = (CheckBox) childAt.getChildAt(0); //0 -> checkbox, 1->Tooglebutton
                     ToggleButton toggleButton = (ToggleButton) childAt.getChildAt(1); //0 -> checkbox, 1->Tooglebutton
 
                     for (UserTaskError userTaskError : errors)
                         if (userTaskError.getReasonCode().contentEquals(toggleButton.getContentDescription())) {
-//                            toggleButton.setChecked(true);
-//                            checkBox.setChecked(true);
                             toggleButton.performClick();
                         }
                 }
@@ -508,18 +540,22 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     }
 
     private void clearOptions() {
-        selectedReasons.clear(); //clear all previous selected reasons in checks
         //Interface mode preferences
         User user = getApplication().getUser();
+
+        selectedReasons.clear(); //clear all previous selected reasons in checks
+
         if (user.interfaceMode.equals(PREF_BEGINNER_INTERFACE_MODE)) { //BEGINNER MODE
-//                for (int i = 0; i < rgReasons.getChildCount(); i++) {
-//                    RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
-//                    radioButton.setChecked(false);
-//
-//                }
+
+            scrollViewBeginner.setVisibility(View.VISIBLE);
+            if (scrollViewBeginnerEdition.getVisibility() == View.VISIBLE)
+                scrollViewBeginnerEdition.setVisibility(View.GONE);
+
             rgReasons.clearCheck(); //clear all previous checks in radio buttons to get the animation correctly
 
         } else { //ADVANCED MODE
+            scrollViewAdvanced.setVisibility(View.VISIBLE);
+
             voiceInput.setText(""); //repopulate comments
 
             //re-select the reasons id

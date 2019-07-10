@@ -181,7 +181,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     }
 
     private void setupInfoPlayer() {
-        tvVideoTitle.setText(mSelectedTask.video.title);
+        tvVideoTitle.setText(mSubtitleResponse.videoTitleTranslated);
         tvTotalTime.setText(Utils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs()));
         if (mPlayFromBeginning)
             tvCurrentTime.setText(Utils.getTimeFormat(this, 0));

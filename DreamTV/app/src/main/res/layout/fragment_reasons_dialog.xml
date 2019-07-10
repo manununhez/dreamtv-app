@@ -79,6 +79,20 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:orientation="vertical" />
+
+                </ScrollView>
+
+                <ScrollView
+                    android:id="@+id/scrollViewBeginnerEdition"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:id="@+id/llReasonsEdit"
+                        android:layout_width="300dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="vertical" />
                 </ScrollView>
 
                 <TextView
@@ -99,6 +113,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:gravity="center"
+                android:layout_marginTop="10dp"
                 android:orientation="vertical">
 
                 <Button
