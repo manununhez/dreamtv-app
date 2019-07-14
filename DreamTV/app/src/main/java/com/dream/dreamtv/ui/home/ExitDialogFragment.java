@@ -1,4 +1,4 @@
-package com.dream.dreamtv.ui.main;
+package com.dream.dreamtv.ui.home;
 
 
 import android.app.Dialog;
@@ -6,7 +6,6 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.TypedValue;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RatingBar;
@@ -14,10 +13,13 @@ import android.widget.RatingBar;
 import androidx.annotation.NonNull;
 
 import com.dream.dreamtv.R;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.Objects;
 
 import static android.util.TypedValue.applyDimension;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_CANCEL_EXITDIALOG;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_EXIT_EXITDIALOG;
 
 
 public class ExitDialogFragment extends DialogFragment {
@@ -26,6 +28,7 @@ public class ExitDialogFragment extends DialogFragment {
 
     private OnListener mCallback;
     private RatingBar rtBar;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
     public void onAttach(Context context) {
@@ -53,6 +56,9 @@ public class ExitDialogFragment extends DialogFragment {
 
         viewRoot.setContentView(R.layout.fragment_exit_dialog);
 
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+
         Button btnExit = viewRoot.findViewById(R.id.btnExit);
         Button btnCancel = viewRoot.findViewById(R.id.btnCancel);
 
@@ -63,12 +69,18 @@ public class ExitDialogFragment extends DialogFragment {
                 getResources().getDisplayMetrics())));
 
 
-        btnCancel.setOnClickListener(v -> dismiss());
-        btnExit.setOnClickListener(v -> mCallback.exit());
+        btnCancel.setOnClickListener(v -> {
+            mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_CANCEL_EXITDIALOG, new Bundle());
+            dismiss();
+        });
+        btnExit.setOnClickListener(v -> {
+            mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_EXIT_EXITDIALOG, new Bundle());
+            mCallback.exit();
+        });
 
 
         btnExit.setOnFocusChangeListener((v, hasFocus) -> {
-            if(hasFocus)
+            if (hasFocus)
                 btnExit.setTextSize((applyDimension(TypedValue.COMPLEX_UNIT_SP, 10,
                         getResources().getDisplayMetrics())));
             else
@@ -77,7 +89,7 @@ public class ExitDialogFragment extends DialogFragment {
         });
 
         btnCancel.setOnFocusChangeListener((v, hasFocus) -> {
-            if(hasFocus)
+            if (hasFocus)
                 btnCancel.setTextSize((applyDimension(TypedValue.COMPLEX_UNIT_SP, 10,
                         getResources().getDisplayMetrics())));
             else
@@ -97,7 +109,6 @@ public class ExitDialogFragment extends DialogFragment {
 
         super.onResume();
     }
-
 
     // Container Activity must implement this interface
     public interface OnListener {

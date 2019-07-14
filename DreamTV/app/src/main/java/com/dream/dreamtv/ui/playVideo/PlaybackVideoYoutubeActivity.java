@@ -16,7 +16,6 @@ import android.widget.Chronometer;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -50,17 +49,28 @@ import fr.bmartel.youtubetv.model.VideoInfo;
 import fr.bmartel.youtubetv.model.VideoState;
 
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_RATING;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_ID;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_USER_TASK_ID;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_PROGRESS_PLAYER;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_REMOTE_BACK_BTN;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SAVED_ERRORS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_PROGRESS_PLAYER;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_RATING_VIDEO;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_UPDATE_USER_TASK;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_VIDEO_COMPLETED;
 import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
@@ -216,23 +226,42 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         Bundle bundle = new Bundle();
 
         switch (logEventName) {
+            case FIREBASE_LOG_EVENT_UPDATE_USER_TASK:
+                bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
+                break;
+            case FIREBASE_LOG_EVENT_RATING_VIDEO:
+                bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
+                bundle.putInt(FIREBASE_KEY_RATING, mUserTask.getRating());
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_SAVED_ERRORS:
+            case FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS:
+                bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
+                break;
             case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY:
             case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE:
             case FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP:
             case FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS:
             case FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO:
             case FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO:
+            case FIREBASE_LOG_EVENT_PRESSED_SHOW_PROGRESS_PLAYER:
+            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_PROGRESS_PLAYER:
+            case FIREBASE_LOG_EVENT_PRESSED_REMOTE_BACK_BTN:
+            case FIREBASE_LOG_EVENT_VIDEO_COMPLETED:
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
                 bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
                 bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
                 break;
             case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T:
                 logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
                 bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
                 bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
                 bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
                 break;
             case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F:
                 logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
                 bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
                 bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
                 bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
@@ -309,6 +338,8 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
             stopVideo();
             showRatingDialog();
+
+            firebaseLoginEvents(FIREBASE_LOG_EVENT_VIDEO_COMPLETED);
         }
 
     }
@@ -395,12 +426,16 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             case KeyEvent.KEYCODE_DPAD_UP:
                 if (action == KeyEvent.ACTION_UP) {
                     showPlayerProgress();
+                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SHOW_PROGRESS_PLAYER);
+
                     return true;
                 }
 
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 if (action == KeyEvent.ACTION_UP) {
                     dismissPlayerProgress();
+                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_DISMISS_PROGRESS_PLAYER);
+
                     return true;
                 }
 
@@ -423,6 +458,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                     stopVideo();
                     mYoutubeView.closePlayer();
                     finish();
+                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_REMOTE_BACK_BTN);
                     return true;
                 }
             default:
@@ -449,11 +485,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public void playVideoMode() {
-//        if (mPlayFromBeginning)
-//            playVideo(null);
-//        else
-//            playVideo(mUserTask.getTimeWatchedInSecs());
-
         playVideo(null);
 
     }
@@ -464,13 +495,9 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
         mYoutubeView.start();
 
-//        if (seekToSecs != null)
-//            mYoutubeView.seekTo(seekToSecs);
-
         //Analytics Report Event
         firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY);
     }
-
 
     @Override
     public void pauseVideo(Long position) {
@@ -512,7 +539,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
             mUserTask.setTimeWatched((int) time);
 
-            mViewModel.updateUserTask(mUserTask);
+            updateUserTask(mUserTask);
         }
     }
 
@@ -570,11 +597,11 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         }
     }
 
-    void showPlayerInfoOnPause(){
+    void showPlayerInfoOnPause() {
         rlVideoPlayerInfo.setVisibility(View.VISIBLE);
     }
 
-    void dismissPlayerInfoOnPause(){
+    void dismissPlayerInfoOnPause() {
         rlVideoPlayerInfo.setVisibility(View.GONE);
     }
 
@@ -591,7 +618,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             rlVideoPlayerProgress.setVisibility(View.GONE);
         }
     }
-
 
     @Override
     public void showSubtitle(Subtitle subtitle) {
@@ -625,8 +651,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     }
 
     @Override
-    public void showReasonDialogPopUp(long subtitlePosition,
-                                      UserTask userTask) {
+    public void showReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
         Subtitle subtitle = mSubtitleResponse.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) { //only shows the popup when exist an subtitle
             ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(mSubtitleResponse,
@@ -653,7 +678,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             }
         }
     }
-
 
     @Override
     public void controlReasonDialogPopUp() {
@@ -703,7 +727,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     }
 
-
     @Override
     public void onSaveReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
         Log.d(TAG, "onSaveReasons() =>" + userTaskError.toString());
@@ -717,6 +740,8 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 Log.d(TAG, "errorsUpdate response");
 
                 mUserTask.setUserTaskErrorList(errorsResource.data);
+
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVED_ERRORS);
 
             } else if (errorsResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
@@ -746,6 +771,8 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
                 mUserTask.setUserTaskErrorList(errorsResource.data);
 
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS);
+
             } else if (errorsResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
                 if (errorsResource.message != null)
@@ -759,6 +786,12 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         });
     }
 
+    private void updateUserTask(UserTask userTask){
+        //Update values and exit from the video
+        mViewModel.updateUserTask(userTask);
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_UPDATE_USER_TASK);
+    }
+
 
     @Override
     public void setRating(int rating) {
@@ -768,7 +801,9 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         mUserTask.setTimeWatched(0);//restart video watched
 
         //Update values and exit from the video
-        mViewModel.updateUserTask(mUserTask);
+        updateUserTask(mUserTask);
+
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_RATING_VIDEO);
 
         finish();
     }

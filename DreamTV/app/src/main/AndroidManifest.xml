@@ -50,7 +50,7 @@
                     android:scheme="http" />
             </intent-filter>
         </activity> <!-- configChanges, para evitar que cuando el control se desconecte, interrumpa el app -->
-        <activity android:name=".ui.main.MainActivity" />
+        <activity android:name=".ui.home.HomeActivity" />
         <activity android:name=".ui.videoDetails.VideoDetailsActivity" />
         <activity android:name=".ui.playVideo.PlaybackVideoActivity" />
         <activity

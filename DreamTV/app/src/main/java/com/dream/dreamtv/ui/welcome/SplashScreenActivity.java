@@ -6,8 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.ui.main.MainActivity;
-
+import com.dream.dreamtv.ui.home.HomeActivity;
 
 
 public class SplashScreenActivity extends Activity {
@@ -31,7 +30,7 @@ public class SplashScreenActivity extends Activity {
                 Log.d(TAG, "An error occurred");
             }
 
-            Intent intent = new Intent(SplashScreenActivity.this, MainActivity.class);
+            Intent intent = new Intent(SplashScreenActivity.this, HomeActivity.class);
             intent.setAction(Intent.ACTION_VIEW);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);

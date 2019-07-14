@@ -39,12 +39,16 @@ import com.dream.dreamtv.presenter.CardPresenterSelector;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsActivity;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static com.dream.dreamtv.utils.Constants.EMPTY_ITEM;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_CATEGORY_SELECTED;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_SELECTED;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_TASK_SELECTED;
 import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_TOPIC_NAME;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
@@ -60,6 +64,7 @@ public class CategoryFragment extends VerticalGridSupportFragment {
     private ArrayObjectAdapter mAdapter;
     private String title;
     private LoadingDialog loadingDialog;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -67,6 +72,9 @@ public class CategoryFragment extends VerticalGridSupportFragment {
 
         CategoryViewModelFactory factory = InjectorUtils.provideCategoryViewModelFactory(Objects.requireNonNull(getActivity()));
         CategoryViewModel mViewModel = ViewModelProviders.of(this, factory).get(CategoryViewModel.class);
+
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
 
         instantiateLoading();
 
@@ -146,20 +154,33 @@ public class CategoryFragment extends VerticalGridSupportFragment {
         mAdapter.addAll(0, cards);
     }
 
+    private void firebaseLoginEvents(String category, int taskId, String logEventName) {
+        Bundle bundle = new Bundle();
+
+        if (logEventName.equals(FIREBASE_LOG_EVENT_TASK_SELECTED)) {
+            bundle.putString(FIREBASE_KEY_TASK_CATEGORY_SELECTED, category);
+            bundle.putInt(FIREBASE_KEY_TASK_SELECTED, taskId);
+            mFirebaseAnalytics.logEvent(logEventName, bundle);
+        }
+
+    }
+
     public final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
             if (item instanceof Card) {
-                Card value = (Card) item;
-                Task task = value.getTask();
+                Card card = (Card) item;
+                Task task = card.getTask();
 
                 Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
                 intent.putExtra(INTENT_TASK, task);
-                intent.putExtra(INTENT_CATEGORY, value.getCategory());
+                intent.putExtra(INTENT_CATEGORY, card.getCategory());
 
                 startActivity(intent);
+
+                firebaseLoginEvents(card.getCategory(), task.taskId, FIREBASE_LOG_EVENT_TASK_SELECTED);
 
             } else
                 Toast.makeText(getActivity(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();

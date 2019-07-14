@@ -1,18 +1,4 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
-
-package com.dream.dreamtv.ui.main;
+package com.dream.dreamtv.ui.home;
 
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -25,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
-import androidx.leanback.widget.BaseCardView;
 import androidx.leanback.widget.DiffCallback;
 import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ListRow;
@@ -67,11 +52,20 @@ import java.util.Objects;
 
 import static com.dream.dreamtv.utils.Constants.EMPTY_ITEM;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_AUDIO_LANGUAGE;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_CATEGORY_SELECTED;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_EMAIL;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_MODE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PASSWORD;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SETTINGS_CATEGORY_SELECTED;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUB_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_CATEGORY_SELECTED;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_SELECTED;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TESTING_MODE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_CATEGORIES;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_LOGIN;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_SETTINGS;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_TASK_SELECTED;
 import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_CALL_TASKS;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
@@ -85,16 +79,15 @@ import static com.dream.dreamtv.utils.Constants.TASKS_MY_LIST_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
 
 
-public class MainFragment extends BrowseSupportFragment {
-    private static final String TAG = MainFragment.class.getSimpleName();
+public class HomeFragment extends BrowseSupportFragment {
+    private static final String TAG = HomeFragment.class.getSimpleName();
 
     private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
     private static final int REQUEST_APP_SETTINGS = 45690;
     private static final int REQUEST_VIDEO_SETTINGS = 45710;
-    private static final int REQUEST_STT_SETTINGS = 45750;
     private static final boolean DEBUG = BuildConfig.DEBUG;
     private ArrayObjectAdapter mRowsAdapter;
-    private MainViewModel mViewModel;
+    private HomeViewModel mViewModel;
     private LoadingDialog loadingDialog;
     private ListRow rowSettings;
     private ListRow rowAllTasks;
@@ -117,8 +110,8 @@ public class MainFragment extends BrowseSupportFragment {
         super.onActivityCreated(savedInstanceState);
 
 //        // Get the ViewModel from the factory
-        MainViewModelFactory factory = InjectorUtils.provideMainViewModelFactory(Objects.requireNonNull(getActivity()));
-        mViewModel = ViewModelProviders.of(this, factory).get(MainViewModel.class);
+        HomeViewModelFactory factory = InjectorUtils.provideMainViewModelFactory(Objects.requireNonNull(getActivity()));
+        mViewModel = ViewModelProviders.of(this, factory).get(HomeViewModel.class);
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
@@ -178,9 +171,11 @@ public class MainFragment extends BrowseSupportFragment {
 
 
     private void login(String email) {
-        if (DEBUG) Log.d(TAG, ">>>>>>>>>>>>>>>>>>>REQUEST LOGIN");
-//        showLoading();
+        if (DEBUG) Log.d(TAG, ">>>REQUEST LOGIN");
+
         mViewModel.login(email, "com.google"); //TODO change password
+
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_LOGIN);
     }
 
     @Override
@@ -409,10 +404,10 @@ public class MainFragment extends BrowseSupportFragment {
 
                 if (userResource.data != null) {
                     if (!userResource.data.subLanguage.equals(LocaleHelper.getLanguage(getActivity()))) {
-                        Log.d(TAG, "fetchUserDetails() response!: userResource.data.subLanguage=" + userResource.data.subLanguage + " LocaleHelper.getLanguage(getActivity()):" + LocaleHelper.getLanguage(getActivity()));
+                        if (DEBUG)
+                            Log.d(TAG, "fetchUserDetails() response!: userResource.data.subLanguage=" + userResource.data.subLanguage + " LocaleHelper.getLanguage(getActivity()):" + LocaleHelper.getLanguage(getActivity()));
                         LocaleHelper.setLocale(getActivity(), userResource.data.subLanguage);
                         Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
-//                        Log.d(TAG, "fetchUserDetails() response!");
                     } else {
                         mViewModel.initializeSyncData();
                     }
@@ -578,15 +573,7 @@ public class MainFragment extends BrowseSupportFragment {
     private void setupUIElements() {
 
         setBadgeDrawable(Objects.requireNonNull(getActivity()).getResources().getDrawable(R.drawable.dreamtv_logo, null));
-//        setTitle(getString(R.string.app_name)); // Badge, when set, takes precedent
-        // over title
-//        setHeadersState(HEADERS_DISABLED);
         setHeadersTransitionOnBackEnabled(false);
-
-//         set fastLane (or headers) background color
-//        setBrandColor(ContextCompat.getColor(getActivity(), R.color.accent));
-        // set search icon color
-//        setSearchAffordanceColor(ContextCompat.getColor(getActivity(), R.color.search_opaque));
 
     }
 
@@ -601,23 +588,66 @@ public class MainFragment extends BrowseSupportFragment {
         setOnItemViewClickedListener(new ItemViewClickedListener());
     }
 
-    private void firebaseAnalyticsSettingsReportEvent(User user) {
+
+    private void firebaseLoginEvents(String value, String logEventName) {
+        Bundle bundle = new Bundle();
+
+        if (logEventName.equals(FIREBASE_LOG_EVENT_CATEGORIES)) {
+            bundle.putString(FIREBASE_KEY_CATEGORY_SELECTED, value);
+        } else if (logEventName.equals(FIREBASE_LOG_EVENT_SETTINGS)) {
+            bundle.putString(FIREBASE_KEY_SETTINGS_CATEGORY_SELECTED, value);
+        }
+        mFirebaseAnalytics.logEvent(logEventName, bundle);
+
+    }
+
+    private void firebaseLoginEvents(String category, int taskId, String logEventName) {
+        Bundle bundle = new Bundle();
+
+        if (logEventName.equals(FIREBASE_LOG_EVENT_TASK_SELECTED)) {
+            bundle.putString(FIREBASE_KEY_TASK_CATEGORY_SELECTED, category);
+            bundle.putInt(FIREBASE_KEY_TASK_SELECTED, taskId);
+            mFirebaseAnalytics.logEvent(logEventName, bundle);
+        }
+
+    }
+
+    private void firebaseLoginEvents(String logEventName) {
         boolean testingMode = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()))
                 .getBoolean(getActivity().getString(R.string.pref_key_testing_mode), false);
 
+        User user = getApplication().getUser();
+
         Bundle bundle = new Bundle();
 
-        if (testingMode)
-            bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, true);
-        else
-            bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, false);
+        switch (logEventName) {
+            case FIREBASE_LOG_EVENT_LOGIN:
+                bundle.putString(FIREBASE_KEY_EMAIL, user.email);
+                bundle.putString(FIREBASE_KEY_PASSWORD, user.password);
+                break;
 
-        //User Settings Saved - Analytics Report Event
-        bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
-        bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
-        bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
-//        bundle.putString(FIREBASE_KEY_INTERFACE_LANGUAGE, user.interfaceLanguage);
-        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN, bundle);
+            case FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN:
+                if (testingMode)
+                    bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, true);
+                else
+                    bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, false);
+
+                //User Settings Saved
+                bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
+                bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
+                bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
+                break;
+
+            default: // FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN
+                //User Settings Saved - Analytics Report Event
+                bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
+                bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
+                bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
+                break;
+        }
+
+        mFirebaseAnalytics.logEvent(logEventName, bundle);
+
     }
 
     private void updateUser(User userUpdated) {
@@ -629,7 +659,7 @@ public class MainFragment extends BrowseSupportFragment {
                 if (response.data != null) {
                     if (DEBUG) Log.d(TAG, response.data.toString());
 
-                    firebaseAnalyticsSettingsReportEvent(userUpdated);
+                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN);
                 }
             } else if (response.status.equals(Resource.Status.ERROR)) {
                 //TODO do something error
@@ -643,7 +673,6 @@ public class MainFragment extends BrowseSupportFragment {
 
         });
     }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -714,23 +743,6 @@ public class MainFragment extends BrowseSupportFragment {
                 }
 
             }
-//            else if (requestCode == REQUEST_STT_SETTINGS) {
-//                // Parameters considered here:
-//                // pref_key_list_subtitle_languages
-//                // pref_key_subtitle_size
-//                User userToUpdate = data.getParcelableExtra(INTENT_EXTRA_USER_UPDATED);
-//                updateUser(userToUpdate);
-//
-//                boolean restart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
-//
-//                if (restart) {
-//                    //To update screen language
-//                    Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
-//                    if (DEBUG)
-//                        Log.d(TAG, "REQUEST_STT_SETTINGS - Different video subtitle language. Updating screen.");
-//                }
-//
-//            }
         }
 
     }
@@ -765,14 +777,17 @@ public class MainFragment extends BrowseSupportFragment {
                     if (card.getTitle().equals(getString(R.string.pref_title_video_settings))) {
                         Intent intent = new Intent(getActivity(), VideoPreferencesActivity.class);
                         startActivityForResult(intent, REQUEST_VIDEO_SETTINGS);
+                        firebaseLoginEvents(card.getTitle(), FIREBASE_LOG_EVENT_SETTINGS);
                     } else if (card.getTitle().equals(getString(R.string.pref_title_app_settings))) {
                         Intent intent = new Intent(getActivity(), AppPreferencesActivity.class);
                         startActivityForResult(intent, REQUEST_APP_SETTINGS);
+                        firebaseLoginEvents(card.getTitle(), FIREBASE_LOG_EVENT_SETTINGS);
                     }
                 } else if (row.getHeaderItem().getName().equals(getString(R.string.title_topics_category))) {
                     Intent intent = new Intent(getActivity(), CategoryActivity.class);
                     intent.putExtra(INTENT_EXTRA_TOPIC_NAME, card.getTitle());
                     startActivity(intent);
+                    firebaseLoginEvents(card.getTitle(), FIREBASE_LOG_EVENT_CATEGORIES);
                 } else {
                     Task task = card.getTask();
 
@@ -781,15 +796,15 @@ public class MainFragment extends BrowseSupportFragment {
                     intent.putExtra(INTENT_CATEGORY, card.getCategory());
 
                     Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            Objects.requireNonNull(getActivity()),
-                            ((BaseCardView) itemViewHolder.view),
+                            Objects.requireNonNull(getActivity()), itemViewHolder.view,
                             VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
 
                     startActivity(intent, bundle);
+
+                    firebaseLoginEvents(card.getCategory(), task.taskId, FIREBASE_LOG_EVENT_TASK_SELECTED);
                 }
             } else
                 Toast.makeText(getActivity(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();
-
         }
     }
 

@@ -28,7 +28,7 @@ import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.model.UserTask;
 import com.dream.dreamtv.model.UserTaskError;
 import com.dream.dreamtv.model.VideoTests;
-import com.dream.dreamtv.ui.main.MainFragment;
+import com.dream.dreamtv.ui.home.HomeFragment;
 import com.dream.dreamtv.utils.AppExecutors;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.JsonUtils;
@@ -43,7 +43,6 @@ import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE_CONFIG;
 import static com.dream.dreamtv.utils.Constants.PARAM_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.PARAM_COMPLETED;
 import static com.dream.dreamtv.utils.Constants.PARAM_EMAIL;
-import static com.dream.dreamtv.utils.Constants.PARAM_INTERFACE_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_INTERFACE_MODE;
 import static com.dream.dreamtv.utils.Constants.PARAM_LANG;
 import static com.dream.dreamtv.utils.Constants.PARAM_LANG_CODE;
@@ -266,7 +265,7 @@ public class NetworkDataSource {
     }
 
     /**
-     * Login. Used in {@link MainFragment} to implement the ...
+     * Login. Used in {@link HomeFragment} to implement the ...
      *
      * @param email    Email
      * @param password password
@@ -318,7 +317,7 @@ public class NetworkDataSource {
     }
 
     /**
-     * Register. Used in {@link MainFragment} to implement the ...
+     * Register. Used in {@link HomeFragment} to implement the ...
      *
      * @param email    Email
      * @param password Password
@@ -363,7 +362,7 @@ public class NetworkDataSource {
     }
 
     /**
-     * UserDetails. Used in {@link MainFragment} to get user details
+     * UserDetails. Used in {@link HomeFragment} to get user details
      */
     @SuppressWarnings("unchecked")
     public MutableLiveData<Resource<User>> fetchUserDetails() {
@@ -412,7 +411,7 @@ public class NetworkDataSource {
 
 
     /**
-     * Used in {@link MainFragment}
+     * Used in {@link HomeFragment}
      *
      * @param user User
      */

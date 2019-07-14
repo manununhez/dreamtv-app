@@ -45,17 +45,28 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_RATING;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_ID;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_USER_TASK_ID;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_DISMISS_PROGRESS_PLAYER;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_REMOTE_BACK_BTN;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SAVED_ERRORS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SHOW_PROGRESS_PLAYER;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_RATING_VIDEO;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_UPDATE_USER_TASK;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_VIDEO_COMPLETED;
 import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
@@ -186,7 +197,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     }
 
-
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
@@ -201,23 +211,42 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         Bundle bundle = new Bundle();
 
         switch (logEventName) {
+            case FIREBASE_LOG_EVENT_UPDATE_USER_TASK:
+                bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
+                break;
+            case FIREBASE_LOG_EVENT_RATING_VIDEO:
+                bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
+                bundle.putInt(FIREBASE_KEY_RATING, mUserTask.getRating());
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_SAVED_ERRORS:
+            case FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS:
+                bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
+                break;
             case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY:
             case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE:
             case FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP:
             case FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS:
             case FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO:
             case FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO:
+            case FIREBASE_LOG_EVENT_PRESSED_SHOW_PROGRESS_PLAYER:
+            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_PROGRESS_PLAYER:
+            case FIREBASE_LOG_EVENT_PRESSED_REMOTE_BACK_BTN:
+            case FIREBASE_LOG_EVENT_VIDEO_COMPLETED:
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
                 bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
                 bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
                 break;
             case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T:
                 logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
                 bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
                 bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
                 bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
                 break;
             case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F:
                 logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
                 bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
                 bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
                 bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
@@ -306,12 +335,15 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             case KeyEvent.KEYCODE_DPAD_UP:
                 if (action == KeyEvent.ACTION_UP) {
                     showPlayerProgress();
+                    //Analytics Report Event
+                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SHOW_PROGRESS_PLAYER);
                     return true;
                 }
 
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 if (action == KeyEvent.ACTION_UP) {
                     dismissPlayerProgress();
+                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_DISMISS_PROGRESS_PLAYER);
                     return true;
                 }
 
@@ -334,6 +366,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                     stopVideo();
                     mVideoView.suspend();
                     finish();
+                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_REMOTE_BACK_BTN);
                     return true;
                 }
 
@@ -387,6 +420,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             mp.setOnCompletionListener(mediaPlayer -> {
                 stopVideo();
                 showRatingDialog();
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_VIDEO_COMPLETED);
             });
 
         });
@@ -482,7 +516,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                 Log.d(TAG, "stopVideo() => Time" + mVideoView.getCurrentPosition());
                 mUserTask.setTimeWatched(mVideoView.getCurrentPosition());
 
-                mViewModel.updateUserTask(mUserTask);
+                updateUserTask(mUserTask);
 
             }
         }
@@ -543,11 +577,11 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         }
     }
 
-    void showPlayerInfoOnPause(){
+    void showPlayerInfoOnPause() {
         rlVideoPlayerInfo.setVisibility(View.VISIBLE);
     }
 
-    void dismissPlayerInfoOnPause(){
+    void dismissPlayerInfoOnPause() {
         rlVideoPlayerInfo.setVisibility(View.GONE);
     }
 
@@ -564,7 +598,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             rlVideoPlayerProgress.setVisibility(View.GONE);
         }
     }
-
 
     @Override
     public void showSubtitle(Subtitle subtitle) {
@@ -599,8 +632,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     }
 
     @Override
-    public void showReasonDialogPopUp(long subtitlePosition,
-                                      UserTask userTask) {
+    public void showReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
         Subtitle subtitle = mSubtitleResponse.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) { //only shows the popup when exist an subtitle
 
@@ -698,6 +730,9 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
                 mUserTask.setUserTaskErrorList(errorsResource.data);
 
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVED_ERRORS);
+
+
             } else if (errorsResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
                 if (errorsResource.message != null)
@@ -709,6 +744,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 //                dismissLoading();
             }
         });
+
 
     }
 
@@ -726,6 +762,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
                 mUserTask.setUserTaskErrorList(errorsResource.data);
 
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS);
+
             } else if (errorsResource.status.equals(Resource.Status.ERROR)) {
                 //TODO do something
                 if (errorsResource.message != null)
@@ -741,6 +779,12 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     }
 
 
+    private void updateUserTask(UserTask userTask) {
+        //Update values and exit from the video
+        mViewModel.updateUserTask(userTask);
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_UPDATE_USER_TASK);
+    }
+
     @Override
     public void setRating(int rating) {
         mUserTask.setRating(rating);
@@ -749,7 +793,9 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         mUserTask.setTimeWatched(0);//restart video watched
 
         //Update values and exit from the video
-        mViewModel.updateUserTask(mUserTask);
+        updateUserTask(mUserTask);
+
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_RATING_VIDEO);
 
         finish();
     }

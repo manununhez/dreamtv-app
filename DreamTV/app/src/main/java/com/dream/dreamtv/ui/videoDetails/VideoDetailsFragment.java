@@ -135,7 +135,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 setupContinueAction();
             }
         } else {
-            getActivity().finish(); //back to MainActivity
+            getActivity().finish(); //back to HomeActivity
         }
     }
 
@@ -358,7 +358,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void setupContinueAction() {
-//        if (mUserTask != null) {
         Log.d(TAG, mUserTask.toString());
         if (mUserTask.getTimeWatchedInSecs() > 0) { //To avoid messages like "0 min, 0 secs"
             String timeFormatted = Utils.getTimeFormatMinSecs(mUserTask.getTimeWatched());
@@ -369,12 +368,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         } else {
             initActionPanel();
         }
-//        } else {
-//            initActionPanel();
-//        }
     }
 
-    private void fetchSubtitlePlayVideo(boolean playFromBeginning, String logEventName) {
+    private void  fetchSubtitlePlayVideo(boolean playFromBeginning, String logEventName) {
         String subtitleVersion = getSubtitleVersion();
         //We retrieve subtitles first
         mViewModel.setSubtitleId(mSelectedTask.video.videoId,

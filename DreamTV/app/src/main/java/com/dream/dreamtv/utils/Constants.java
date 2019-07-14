@@ -54,6 +54,13 @@ public class Constants {
 
     //    FIREBASE LOG EVENTS
 //    KEYS
+    public static final String FIREBASE_KEY_QUERY = "query";
+    public static final String FIREBASE_KEY_SETTINGS_CATEGORY_SELECTED = "settings_category_selected";
+    public static final String FIREBASE_KEY_CATEGORY_SELECTED = "category_selected";
+    public static final String FIREBASE_KEY_TASK_CATEGORY_SELECTED = "task_category_selected";
+    public static final String FIREBASE_KEY_TASK_SELECTED = "task_selected";
+    public static final String FIREBASE_KEY_PASSWORD = "password";
+    public static final String FIREBASE_KEY_EMAIL = "email";
     public static final String FIREBASE_KEY_SUBTITLE_NAVEGATION = "subtitle_navigation";
     public static final String FIREBASE_KEY_TESTING_MODE = "testing_mode";
     public static final String FIREBASE_KEY_SUB_LANGUAGE = "sub_language";
@@ -64,22 +71,40 @@ public class Constants {
     public static final String FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE = "primary_audio_language";
     public static final String FIREBASE_KEY_VIDEO_PROJECT_NAME = "project";
     public static final String FIREBASE_KEY_VIDEO_DURATION = "duration";
+    public static final String FIREBASE_KEY_TASK_ID = "task_id";
+    public static final String FIREBASE_KEY_USER_TASK_ID = "user_task_id";
+    public static final String FIREBASE_KEY_RATING = "rating";
     //    LOG EVENT NAMES
+    public static final String FIREBASE_LOG_EVENT_LOGIN = "login_event_started";
+    public static final String FIREBASE_LOG_EVENT_SETTINGS = "settings_event_enter";
+    public static final String FIREBASE_LOG_EVENT_CATEGORIES = "categories_event_enter";
+    public static final String FIREBASE_LOG_EVENT_TASK_SELECTED = "task_selected_event_enter";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_CANCEL_EXITDIALOG = "pressed_exitdialog_cancel_btn";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_EXIT_EXITDIALOG = "pressed_exitdialog_exit_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN = "pressed_add_video_my_list_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN = "pressed_remove_video_my_list_btn";
-    public static final String FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN = "pressed_save_settings_btn";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN = "settings_configuration_saved";
     public static final String FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN = "pressed_play_video_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE = "pressed_playback_video_pause_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY = "pressed_playback_video_play_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP = "pressed_playback_video_stop_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO = "pressed_continue_video_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO = "pressed_restart_video_btn";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO = "pressed_playback_video_bwd_btn";//backward
+    public static final String FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO = "pressed_playback_video_fwd_btn"; //forward
+    public static final String FIREBASE_LOG_EVENT_PRESSED_SHOW_PROGRESS_PLAYER = "pressed_show_progress_player";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_DISMISS_PROGRESS_PLAYER = "pressed_dismiss_progress_player";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_REMOTE_BACK_BTN = "pressed_remote_back_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS = "pressed_show_errors_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS = "pressed_dismiss_errors_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T = "pressed_dismiss_errors_btn_t";
     public static final String FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F = "pressed_dismiss_errors_btn_f";
-    public static final String FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO = "pressed_playback_video_bwd_btn";//backward
-    public static final String FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO = "pressed_playback_video_fwd_btn"; //forward
+    public static final String FIREBASE_LOG_EVENT_PRESSED_SAVED_ERRORS = "pressed_save_errors_btn";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS = "pressed_update_errors_btn";
+    public static final String FIREBASE_LOG_EVENT_VIDEO_COMPLETED = "video_completed";
+    public static final String FIREBASE_LOG_EVENT_RATING_VIDEO = "rating_video";
+    public static final String FIREBASE_LOG_EVENT_UPDATE_USER_TASK = "update_user_task";
+    public static final String FIREBASE_LOG_EVENT_SEARCH = "search";
 
 
     //Network parameters

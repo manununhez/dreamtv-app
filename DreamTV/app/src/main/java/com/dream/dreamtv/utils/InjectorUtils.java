@@ -5,7 +5,7 @@ import android.content.Context;
 import com.dream.dreamtv.network.NetworkDataSource;
 import com.dream.dreamtv.repository.AppRepository;
 import com.dream.dreamtv.ui.categories.CategoryViewModelFactory;
-import com.dream.dreamtv.ui.main.MainViewModelFactory;
+import com.dream.dreamtv.ui.home.HomeViewModelFactory;
 import com.dream.dreamtv.ui.playVideo.PlaybackViewModelFactory;
 import com.dream.dreamtv.ui.search.SearchViewModelFactory;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsViewModelFactory;
@@ -21,9 +21,9 @@ public class InjectorUtils {
         return AppRepository.getInstance(networkDataSource, executors);
     }
 
-    public static MainViewModelFactory provideMainViewModelFactory(Context context) {
+    public static HomeViewModelFactory provideMainViewModelFactory(Context context) {
         AppRepository repository = provideRepository(context.getApplicationContext());
-        return new MainViewModelFactory(repository);
+        return new HomeViewModelFactory(repository);
     }
 
 

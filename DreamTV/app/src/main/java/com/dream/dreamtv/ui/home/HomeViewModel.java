@@ -1,4 +1,4 @@
-package com.dream.dreamtv.ui.main;
+package com.dream.dreamtv.ui.home;
 
 
 import androidx.lifecycle.LiveData;
@@ -10,11 +10,11 @@ import com.dream.dreamtv.model.TasksList;
 import com.dream.dreamtv.model.User;
 import com.dream.dreamtv.repository.AppRepository;
 
-class MainViewModel extends ViewModel {
+class HomeViewModel extends ViewModel {
 
     private final AppRepository mRepository;
 
-    MainViewModel(AppRepository appRepository) {
+    HomeViewModel(AppRepository appRepository) {
         mRepository = appRepository;
 
     }

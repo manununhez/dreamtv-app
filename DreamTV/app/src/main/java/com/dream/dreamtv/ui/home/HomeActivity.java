@@ -12,7 +12,7 @@
  * the License.
  */
 
-package com.dream.dreamtv.ui.main;
+package com.dream.dreamtv.ui.home;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -28,10 +28,10 @@ import com.dream.dreamtv.utils.LocaleHelper;
 
 
 /*
- * MainActivity class that loads MainFragment
+ * HomeActivity class that loads HomeFragment
  */
-public class MainActivity extends FragmentActivity implements ExitDialogFragment.OnListener {
-    private static final String TAG = MainActivity.class.getSimpleName();
+public class HomeActivity extends FragmentActivity implements ExitDialogFragment.OnListener {
+    private static final String TAG = HomeActivity.class.getSimpleName();
 
     /**
      * Called when the activity is first created.
@@ -40,7 +40,7 @@ public class MainActivity extends FragmentActivity implements ExitDialogFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_home);
     }
 
     @Override

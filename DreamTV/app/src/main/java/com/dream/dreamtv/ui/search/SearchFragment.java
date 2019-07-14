@@ -33,11 +33,17 @@ import com.dream.dreamtv.presenter.sideInfoPresenter.SideInfoCardPresenter;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsActivity;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_QUERY;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_CATEGORY_SELECTED;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_SELECTED;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_SEARCH;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_TASK_SELECTED;
 import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 
@@ -57,6 +63,7 @@ public class SearchFragment extends SearchSupportFragment
     private boolean mResultsFound = false;
     private SearchViewModel mViewModel;
     private LoadingDialog loadingDialog;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,6 +76,9 @@ public class SearchFragment extends SearchSupportFragment
 
         setSearchResultProvider(this);
         instantiateLoading();
+
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
 
         setOnItemViewClickedListener(new ItemViewClickedListener());
         if (DEBUG) {
@@ -169,6 +179,7 @@ public class SearchFragment extends SearchSupportFragment
             else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
                 loadVideos(tasksListResource.data);
 
+                firebaseLoginEvents(query, FIREBASE_LOG_EVENT_SEARCH);
 
                 if (DEBUG) Log.d(TAG, "task response");
                 dismissLoading();
@@ -218,20 +229,43 @@ public class SearchFragment extends SearchSupportFragment
         getView().findViewById(R.id.lb_search_bar).requestFocus();
     }
 
+    private void firebaseLoginEvents(String category, int taskId, String logEventName) {
+        Bundle bundle = new Bundle();
+
+        if (logEventName.equals(FIREBASE_LOG_EVENT_TASK_SELECTED)) {
+            bundle.putString(FIREBASE_KEY_TASK_CATEGORY_SELECTED, category);
+            bundle.putInt(FIREBASE_KEY_TASK_SELECTED, taskId);
+            mFirebaseAnalytics.logEvent(logEventName, bundle);
+        }
+
+    }
+
+    private void firebaseLoginEvents(String value, String logEventName) {
+        Bundle bundle = new Bundle();
+
+        if (logEventName.equals(FIREBASE_LOG_EVENT_SEARCH)) {
+            bundle.putString(FIREBASE_KEY_QUERY, value);
+            mFirebaseAnalytics.logEvent(logEventName, bundle);
+        }
+
+    }
+
     public final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
             if (item instanceof Card) {
-                Card value = (Card) item;
-                Task task = value.getTask();
+                Card card = (Card) item;
+                Task task = card.getTask();
 
                 Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
                 intent.putExtra(INTENT_TASK, task);
-                intent.putExtra(INTENT_CATEGORY, value.getCategory());
+                intent.putExtra(INTENT_CATEGORY, card.getCategory());
 
                 startActivity(intent);
+
+                firebaseLoginEvents(card.getCategory(), task.taskId, FIREBASE_LOG_EVENT_TASK_SELECTED);
 
             } else
                 Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT).show();
