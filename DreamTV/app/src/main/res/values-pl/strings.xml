@@ -34,7 +34,7 @@
     <string name="title_video_forward">+ %1$d s</string>
     <string name="title_video_backward">- %1$d s</string>
     <string name="title_reasons_others_selected">Wybrane w trybie zaawansowanym: %1$s</string>
-    <string name="select_errors_to_save">Wybierz opcje, aby zapisać</string>
+    <string name="select_errors_to_save">Please, select some options to save. To exit the dialog press &lt;- </string>
 
     <plurals name="errors_found_finished">
         <item quantity="one">Znalazłeś %d błąd</item>

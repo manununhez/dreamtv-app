@@ -50,7 +50,7 @@
     <string name="title_video_forward">+ %1$d secs</string>
     <string name="title_video_backward">- %1$d secs</string>
     <string name="title_reasons_others_selected">Selected in advanced mode: %1$s</string>
-    <string name="select_errors_to_save">Please, select some options to save</string>
+    <string name="select_errors_to_save">Please, select some options to save. To exit the dialog press &lt;- </string>
 
     <plurals name="errors_found_finished">
         <item quantity="one">You found %d error</item>
