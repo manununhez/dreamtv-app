@@ -177,7 +177,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     private void updateBackground(String uri) {
         RequestOptions options = new RequestOptions()
-                .centerCrop()
+//                .centerCrop()
+                .centerInside()
                 .error(mDefaultBackground);
 
         Glide.with(this)
@@ -206,11 +207,12 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                         View actionsView = viewHolder.view.
                                 findViewById(R.id.details_overview_actions_background);
-                        actionsView.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.detail_view_actionbar_background));
+//                        actionsView.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.detail_view_actionbar_background));
+                        actionsView.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.button_selected_shape));
 
                         View detailsView = viewHolder.view.findViewById(R.id.details_frame);
-                        detailsView.setBackgroundColor(
-                                ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.detail_view_background));
+//                        detailsView.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.detail_view_background));
+                        detailsView.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.detail_view_actionbar_background));
                         return viewHolder;
                     }
                 };
@@ -242,9 +244,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 addVideoToMyList();
             } else if (action.getId() == ACTION_REMOVE_MY_LIST) {
                 removeVideoFromMyList();
-            } else {
-                Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
             }
+//            } else {
+//                Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
+//            }
         });
 
 
@@ -307,8 +310,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void setActionPanel(Action... actions) {
         SparseArrayObjectAdapter adapter = new SparseArrayObjectAdapter();
 
-        for (Action action : actions)
+        for (Action action : actions) {
             adapter.set((int) action.getId(), action);
+        }
 
 
         rowPresenter.setActionsAdapter(adapter);
@@ -370,7 +374,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         }
     }
 
-    private void  fetchSubtitlePlayVideo(boolean playFromBeginning, String logEventName) {
+    private void fetchSubtitlePlayVideo(boolean playFromBeginning, String logEventName) {
         String subtitleVersion = getSubtitleVersion();
         //We retrieve subtitles first
         mViewModel.setSubtitleId(mSelectedTask.video.videoId,
