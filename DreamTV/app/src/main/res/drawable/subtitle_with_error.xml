@@ -5,7 +5,7 @@
             <corners android:radius="2dp"/>
             <solid android:color="@color/subtitle_background" />
             <stroke
-                android:width="7dp"
+                android:width="5dp"
                 android:color="@color/stt_list_nav_found_error_background" />
         </shape>
     </item>

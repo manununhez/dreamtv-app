@@ -15,12 +15,14 @@
 
         <TextView
             android:id="@+id/tvSubtitle"
-            style="@style/SubtitleStyle"
+            style="@style/SubtitleStyleWithoutError"
+            android:textSize="25sp"
             android:visibility="gone" />
 
         <TextView
             android:id="@+id/tvSubtitleError"
             style="@style/SubtitleStyleError"
+            android:textSize="25sp"
             android:visibility="gone" />
     </RelativeLayout>
 

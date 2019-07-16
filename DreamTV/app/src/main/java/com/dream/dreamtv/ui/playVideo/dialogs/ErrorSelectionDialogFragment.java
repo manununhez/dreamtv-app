@@ -242,7 +242,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                 mCallback.onSaveReasons(mSelectedTask.taskId, subtitle.versionNumber, userTaskError);
                 dismiss();
             } else {
-                Toast.makeText(getActivity(), getActivity().getString(R.string.select_errors_to_save), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), getActivity().getString(R.string.select_errors_to_save), Toast.LENGTH_LONG).show();
             }
         });
         btnSaveChanges.setOnClickListener(view -> {
@@ -641,7 +641,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             if (convertView == null) {
                 convertView = Objects.requireNonNull(mInflater).inflate(R.layout.subtitle_layout, null);
                 holder = new ViewHolder();
-                holder.tvText = convertView.findViewById(R.id.tvText);
+                holder.tvSubtitle = convertView.findViewById(R.id.tvSubtitle);
+                holder.tvSubtitleError = convertView.findViewById(R.id.tvSubtitleError);
+                holder.tvSubtitleSelected = convertView.findViewById(R.id.tvSubtitleSelected);
                 holder.tvTime = convertView.findViewById(R.id.tvTime);
                 convertView.setTag(holder);
             } else {
@@ -651,32 +653,55 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
             if (position == currentSubtitlePosition - 1) {
                 if (isPositionError(userTaskErrors, position)) {
-                    holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 9,
+                    holder.tvSubtitle.setVisibility(View.GONE);
+                    holder.tvSubtitleSelected.setVisibility(View.GONE);
+                    holder.tvSubtitleError.setVisibility(View.VISIBLE);
+                    holder.tvSubtitleError.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 9,
                             context.getResources().getDisplayMetrics()));
-                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
-                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_found_error_background, null));
+                    holder.tvSubtitleError.setText(Html.fromHtml(values.get(position).text));
+
+//                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
+//                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_found_error_background, null));
                 } else {
-                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_selected_background, null));
-                    holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 9,
+                    holder.tvSubtitle.setVisibility(View.GONE);
+                    holder.tvSubtitleError.setVisibility(View.GONE);
+                    holder.tvSubtitleSelected.setVisibility(View.VISIBLE);
+//                    holder.tvText.setTextAppearance(R.style.SubtitleStyleSelected);
+                    holder.tvSubtitleSelected.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 9,
                             context.getResources().getDisplayMetrics()));
-                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
+                    holder.tvSubtitleSelected.setText(Html.fromHtml(values.get(position).text));
+
+//                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_selected_background, null));
+//                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
                 }
             } else {
                 if (isPositionError(userTaskErrors, position)) {
-                    holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
+                    holder.tvSubtitle.setVisibility(View.GONE);
+                    holder.tvSubtitleSelected.setVisibility(View.GONE);
+                    holder.tvSubtitleError.setVisibility(View.VISIBLE);
+//                    holder.tvText.setTextAppearance(R.style.SubtitleStyleError);
+                    holder.tvSubtitleError.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
                             context.getResources().getDisplayMetrics()));
-                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
-                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_found_error_background, null));
+                    holder.tvSubtitleError.setText(Html.fromHtml(values.get(position).text));
+
+//                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
+//                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_found_error_background, null));
                 } else {
-                    holder.tvText.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
+                    holder.tvSubtitleSelected.setVisibility(View.GONE);
+                    holder.tvSubtitleError.setVisibility(View.GONE);
+                    holder.tvSubtitle.setVisibility(View.VISIBLE);
+//                    holder.tvText.setTextAppearance(R.style.SubtitleStyleWithoutError);
+                    holder.tvSubtitle.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
                             context.getResources().getDisplayMetrics()));
-                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.NORMAL);
-                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_default_background, null));
+                    holder.tvSubtitle.setText(Html.fromHtml(values.get(position).text));
+//                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.NORMAL);
+//                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_default_background, null));
                 }
 
             }
 
-            holder.tvText.setText(Html.fromHtml(values.get(position).text));
+
+//            holder.tvText.setText(Html.fromHtml(values.get(position).text));
 
             return convertView;
         }
@@ -701,7 +726,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         }
 
         class ViewHolder {
-            TextView tvText;
+            TextView tvSubtitle;
+            TextView tvSubtitleError;
+            TextView tvSubtitleSelected;
             TextView tvTime;
         }
     }
