@@ -621,9 +621,10 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public void showSubtitle(Subtitle subtitle) {
-        if (subtitle == null)
+        if (subtitle == null) {
             tvSubtitle.setVisibility(View.GONE);
-        else {
+            tvSubtitleError.setVisibility(View.GONE);
+        } else {
             tvSubtitleError.setVisibility(View.GONE);
             tvSubtitle.setVisibility(View.VISIBLE);
             tvSubtitle.setText(Html.fromHtml(subtitle.text));
@@ -632,9 +633,10 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public void showSubtitleWithErrors(Subtitle subtitle) {
-        if (subtitle == null)
+        if (subtitle == null) {
+            tvSubtitle.setVisibility(View.GONE);
             tvSubtitleError.setVisibility(View.GONE);
-        else {
+        } else {
             tvSubtitle.setVisibility(View.GONE);
             tvSubtitleError.setVisibility(View.VISIBLE);
             tvSubtitleError.setText(Html.fromHtml(subtitle.text));
@@ -786,7 +788,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         });
     }
 
-    private void updateUserTask(UserTask userTask){
+    private void updateUserTask(UserTask userTask) {
         //Update values and exit from the video
         mViewModel.updateUserTask(userTask);
         firebaseLoginEvents(FIREBASE_LOG_EVENT_UPDATE_USER_TASK);

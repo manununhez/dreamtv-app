@@ -601,9 +601,10 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public void showSubtitle(Subtitle subtitle) {
-        if (subtitle == null)
+        if (subtitle == null) {
             tvSubtitle.setVisibility(View.GONE);
-        else {
+            tvSubtitleError.setVisibility(View.GONE);
+        } else {
             tvSubtitleError.setVisibility(View.GONE);
             tvSubtitle.setVisibility(View.VISIBLE);
             tvSubtitle.setText(Html.fromHtml(subtitle.text));
@@ -612,9 +613,10 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public void showSubtitleWithErrors(Subtitle subtitle) {
-        if (subtitle == null)
+        if (subtitle == null) {
+            tvSubtitle.setVisibility(View.GONE);
             tvSubtitleError.setVisibility(View.GONE);
-        else {
+        } else {
             tvSubtitle.setVisibility(View.GONE);
             tvSubtitleError.setVisibility(View.VISIBLE);
             tvSubtitleError.setText(Html.fromHtml(subtitle.text));
