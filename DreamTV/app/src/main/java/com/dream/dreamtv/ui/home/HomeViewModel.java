@@ -19,15 +19,6 @@ class HomeViewModel extends ViewModel {
 
     }
 
-    void login(String email, String password) {
-        //TODO login and transformation according to user data and call initialize syncData
-        mRepository.login(email, password);
-    }
-
-    void initializeSyncData() {
-        mRepository.initializeSyncData();
-    }
-
     LiveData<Resource<TasksList>> requestTasksByCategory(String category) {
         //TODO should this change with Transformations after login or user update?
         return mRepository.requestTaskByCategory(category);
@@ -37,16 +28,20 @@ class HomeViewModel extends ViewModel {
         return mRepository.fetchCategories();
     }
 
-    void updateTaskByCategory(String category) {
-        mRepository.updateTasksCategory(category);
-    }
-
     LiveData<Resource<User>> updateUser(User userData) {
         return mRepository.updateUser(userData);
     }
 
-    LiveData<Resource<User>> fetchUserDetails() {
-        return mRepository.fetchUserDetails();
+    void updateTaskByCategory(String category) {
+        mRepository.updateTasksCategory(category);
+    }
+
+    void fetchReasons() {
+        mRepository.fetchReasons();
+    }
+
+    void fetchVideoTestsDetails() {
+        mRepository.fetchVideoTestsDetails();
     }
 
 }

@@ -9,6 +9,7 @@ import com.dream.dreamtv.ui.home.HomeViewModelFactory;
 import com.dream.dreamtv.ui.playVideo.PlaybackViewModelFactory;
 import com.dream.dreamtv.ui.search.SearchViewModelFactory;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsViewModelFactory;
+import com.dream.dreamtv.ui.welcome.WelcomeViewModelFactory;
 
 /**
  * Provides static methods to inject the various classes needed for this weather application
@@ -47,5 +48,9 @@ public class InjectorUtils {
         return new CategoryViewModelFactory(repository);
     }
 
+    public static WelcomeViewModelFactory provideWelcomeViewModelFactory(Context context) {
+        AppRepository repository = provideRepository(context.getApplicationContext());
+        return new WelcomeViewModelFactory(repository);
+    }
 
 }

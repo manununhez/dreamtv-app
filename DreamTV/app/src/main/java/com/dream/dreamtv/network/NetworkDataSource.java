@@ -217,33 +217,6 @@ public class NetworkDataSource {
     // * NETWORK CALLS
     // ****************/
 
-    /**
-     * Data synchronization
-     */
-    public void syncData() {
-        Log.d(TAG, "synchronizing data ...");
-
-        fetchAllTaskCategory();
-        fetchContinueTaskCategory();
-        fetchMyListTaskCategory();
-        fetchFinishedTaskCategory();
-
-        boolean testingMode = PreferenceManager.getDefaultSharedPreferences(mContext)
-                .getBoolean(mContext.getString(R.string.pref_key_testing_mode), false);
-
-        if (testingMode)
-            fetchTestTaskCategory();
-
-        fetchReasons();
-
-        fetchCategories();
-
-        fetchVideoTestsDetails();
-
-
-    }
-
-
     public void fetchAllTaskCategory() {
         fetchTasksByCategory(TASKS_ALL_CAT, responseFromFetchAllTasks, 1);
     }
@@ -305,8 +278,8 @@ public class NetworkDataSource {
                 super.processError(error);
                 //TODO do something error
 //                Log.d(TAG, "login() Error response: " + error.getMessage());
-                if (VolleyErrorHelper.getErrorType(error, mContext).equals(mContext.getString(R.string.auth_failed)))
-                    register(email, password);
+//                if (VolleyErrorHelper.getErrorType(error, mContext).equals(mContext.getString(R.string.auth_failed)))
+                register(email, password);
 
             }
         };
@@ -365,7 +338,7 @@ public class NetworkDataSource {
      * UserDetails. Used in {@link HomeFragment} to get user details
      */
     @SuppressWarnings("unchecked")
-    public MutableLiveData<Resource<User>> fetchUserDetails() {
+    public void fetchUserDetails() {
         responseFromFetchUser.setValue(Resource.loading(null));
 
         Uri userDetailsUri = Uri.parse(URL_BASE.concat(Urls.USER_DETAILS.value)).buildUpon().build();
@@ -406,7 +379,7 @@ public class NetworkDataSource {
 
         mExecutors.networkIO().execute(() -> requestString(Method.GET, userDetailsUri.toString(), null, responseListener));
 
-        return responseFromFetchUser;
+//        return responseFromFetchUser;
     }
 
 
@@ -471,7 +444,7 @@ public class NetworkDataSource {
      *
      */
     @SuppressWarnings("unchecked")
-    private void fetchReasons() {
+    public void fetchReasons() {
         Uri errorsUri = Uri.parse(URL_BASE.concat(Urls.REASON_ERRORS.value)).buildUpon().build();
 
         Log.d(TAG, "fetchReasons() Request URL: " + errorsUri.toString());
@@ -505,7 +478,7 @@ public class NetworkDataSource {
      *
      */
     @SuppressWarnings("unchecked")
-    public MutableLiveData<Resource<Category[]>> fetchCategories() {
+    public LiveData<Resource<Category[]>> fetchCategories() {
         responseFromCategories.setValue(Resource.loading(null));
 
         Uri categoriesUri = Uri.parse(URL_BASE.concat(Urls.CATEGORIES.value)).buildUpon()
@@ -553,7 +526,7 @@ public class NetworkDataSource {
      *
      */
     @SuppressWarnings("unchecked")
-    private void fetchVideoTestsDetails() {
+    public void fetchVideoTestsDetails() {
         Uri videoTestsUri = Uri.parse(URL_BASE.concat(Urls.VIDEO_TESTS.value)).buildUpon().build();
 
         Log.d(TAG, "fetchVideoTestsDetails() Request URL: " + videoTestsUri.toString());
@@ -597,15 +570,15 @@ public class NetworkDataSource {
 
         Uri subtitleUri;
 //        if (version > 0) {
-            subtitleUri = Uri.parse(URL_BASE.concat(Urls.SUBTITLE.value)).buildUpon()
-                    .appendQueryParameter(PARAM_VIDEO_ID, videoId)
-                    .appendQueryParameter(PARAM_LANG_CODE, languageCode)
-                    .appendQueryParameter(PARAM_VERSION, version)
-                    .build();
+        subtitleUri = Uri.parse(URL_BASE.concat(Urls.SUBTITLE.value)).buildUpon()
+                .appendQueryParameter(PARAM_VIDEO_ID, videoId)
+                .appendQueryParameter(PARAM_LANG_CODE, languageCode)
+                .appendQueryParameter(PARAM_VERSION, version)
+                .build();
 
-            Log.d(TAG, "fetchSubtitle() Request URL: " + subtitleUri.toString() + " Params: " + PARAM_VIDEO_ID + "=>" + videoId
-                    + "; " + PARAM_LANG_CODE + "=>" + languageCode
-                    + "; " + PARAM_VERSION + "=>" + version);
+        Log.d(TAG, "fetchSubtitle() Request URL: " + subtitleUri.toString() + " Params: " + PARAM_VIDEO_ID + "=>" + videoId
+                + "; " + PARAM_LANG_CODE + "=>" + languageCode
+                + "; " + PARAM_VERSION + "=>" + version);
 //        } else {
 //            subtitleUri = Uri.parse(URL_BASE.concat(Urls.SUBTITLE.value)).buildUpon()
 //                    .appendQueryParameter(PARAM_VIDEO_ID, videoId)
@@ -929,17 +902,7 @@ public class NetworkDataSource {
 
                 Task[] tasks = jsonResponse.data;
 
-
-//                if (taskResponse.length > 0) {//If the response data if not empty
-//                Task[] taskEntities = new Task[taskResponse.length];
-//
-//                for (int i = 0; i < taskResponse.length; i++) {
-//                    taskEntities[i] = taskResponse[i].getEntity(paramType);
-//                }
-
-
                 responseFromSearch.postValue(Resource.success(tasks)); //post the value to live data
-//                }
 
             }
 
@@ -991,16 +954,7 @@ public class NetworkDataSource {
                 tasksList.data = tasks;
                 tasksList.category = paramType;
 
-//                if (taskResponse.length > 0) {//If the response data if not empty
-//                Task[] taskEntities = new Task[taskResponse.length];
-//
-//                for (int i = 0; i < taskResponse.length; i++) {
-//                    taskEntities[i] = taskResponse[i].getEntity(paramType);
-//                }
-
-
                 responseMutable.postValue(Resource.success(tasksList)); //post the value to live data
-//                }
 
             }
 
@@ -1352,6 +1306,10 @@ public class NetworkDataSource {
      */
     public LiveData<Resource<TasksList>> responseFromFetchMyListTasks() {
         return responseFromFetchMyListTasks;
+    }
+
+    public MutableLiveData<Resource<User>> responseFromFetchUserDetails() {
+        return responseFromFetchUser;
     }
 
 

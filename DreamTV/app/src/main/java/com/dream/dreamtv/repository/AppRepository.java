@@ -52,15 +52,6 @@ public class AppRepository {
     }
 
 
-    //*****************************
-    //  Database related operation
-    //****************************
-
-//    private void insertAllTasks(final Task[] taskList) {
-//        mTaskDao.bulkInsert(taskList);
-//    }
-
-
     public LiveData<Resource<TasksList>> requestTaskByCategory(String category) {
         switch (category) {
             case TASKS_MY_LIST_CAT:
@@ -80,15 +71,6 @@ public class AppRepository {
     }
 
 
-    /**
-     * Creates periodic sync tasks and checks to see if an immediate sync is required. If an
-     * immediate sync is required, this method will take care of making sure that sync occurs.
-     */
-    public void initializeSyncData() {
-        startFetchingData();
-    }
-
-
     public boolean verifyIfTaskIsInList(Task task) {
 
         Resource<TasksList> results = mNetworkDataSource.responseFromFetchMyListTasks().getValue();
@@ -102,38 +84,6 @@ public class AppRepository {
         }
 
         return false;
-    }
-
-
-    //***********************************
-    //     Network related operation
-    //*********************************
-    private void startFetchingData() {
-//        new NetworkBoundResource<Task[], Task>(mExecutors){
-////            @Override
-////            protected void saveCallResult(@NonNull Task item) {
-////
-////            }
-////
-////            @Override
-////            protected boolean shouldFetch(@Nullable Task[] data) {
-////                return false;
-////            }
-////
-////            @NonNull
-////            @Override
-////            protected LiveData<Task[]> loadFromDb() {
-////                return null;
-////            }
-////
-////            @NonNull
-////            @Override
-////            protected LiveData<JsonResponseBaseBean<Task>> createCall() {
-////                mNetworkDataSource.syncData();
-////                return null;
-////            }
-////        }.asLiveData();
-        mNetworkDataSource.syncData();
     }
 
 
@@ -207,7 +157,7 @@ public class AppRepository {
         return mNetworkDataSource.search(query);
     }
 
-    public MutableLiveData<Resource<Category[]>> fetchCategories(){
+    public LiveData<Resource<Category[]>> fetchCategories(){
         return mNetworkDataSource.fetchCategories();
     }
 
@@ -216,6 +166,14 @@ public class AppRepository {
     }
 
     public MutableLiveData<Resource<User>> fetchUserDetails(){
-        return mNetworkDataSource.fetchUserDetails();
+        return mNetworkDataSource.responseFromFetchUserDetails();
+    }
+
+    public void fetchReasons() {
+        mNetworkDataSource.fetchReasons();
+    }
+
+    public void fetchVideoTestsDetails() {
+        mNetworkDataSource.fetchVideoTestsDetails();
     }
 }

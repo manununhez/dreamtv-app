@@ -46,7 +46,6 @@ public class HomeActivity extends FragmentActivity implements ExitDialogFragment
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(LocaleHelper.onAttach(base));
-//        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
     }
 
     @Override
@@ -58,12 +57,11 @@ public class HomeActivity extends FragmentActivity implements ExitDialogFragment
     public void onBackPressed() {
         Log.d(TAG, "onBackPressed()");
         showExitDialog();
-        //super.onBackPressed();
+//        super.onBackPressed();
     }
 
 
     private void showExitDialog() {
-
         ExitDialogFragment ratingDialogFragment = new ExitDialogFragment();
         if (!isFinishing()) {
             FragmentManager fm = getFragmentManager();

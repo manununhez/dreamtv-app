@@ -1,7 +1,7 @@
 package com.dream.dreamtv.ui.home;
 
-import android.accounts.AccountManager;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -41,28 +41,22 @@ import com.dream.dreamtv.ui.search.SearchActivity;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsActivity;
 import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
-import com.dream.dreamtv.utils.LocaleHelper;
-import com.google.android.gms.common.AccountPicker;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import static com.dream.dreamtv.utils.Constants.EMPTY_ITEM;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_CATEGORY_SELECTED;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_EMAIL;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_MODE;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PASSWORD;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SETTINGS_CATEGORY_SELECTED;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUB_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_CATEGORY_SELECTED;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_SELECTED;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TESTING_MODE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_CATEGORIES;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_LOGIN;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_SETTINGS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_TASK_SELECTED;
@@ -82,10 +76,10 @@ import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
 public class HomeFragment extends BrowseSupportFragment {
     private static final String TAG = HomeFragment.class.getSimpleName();
 
-    private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
+    private static final boolean DEBUG = BuildConfig.DEBUG;
+    //    private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
     private static final int REQUEST_APP_SETTINGS = 45690;
     private static final int REQUEST_VIDEO_SETTINGS = 45710;
-    private static final boolean DEBUG = BuildConfig.DEBUG;
     private ArrayObjectAdapter mRowsAdapter;
     private HomeViewModel mViewModel;
     private LoadingDialog loadingDialog;
@@ -104,10 +98,18 @@ public class HomeFragment extends BrowseSupportFragment {
     private FirebaseAnalytics mFirebaseAnalytics;
     private LiveData<Resource<User>> updateUserLiveData;
 
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        Log.i(TAG, "onAttach()");
+
+    }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        Log.i(TAG, "onCreate");
         super.onActivityCreated(savedInstanceState);
+        Log.i(TAG, "onActivityCreated()");
 
 //        // Get the ViewModel from the factory
         HomeViewModelFactory factory = InjectorUtils.provideMainViewModelFactory(Objects.requireNonNull(getActivity()));
@@ -116,19 +118,225 @@ public class HomeFragment extends BrowseSupportFragment {
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
 
-        setupUIElements();
-
         setupVideosList();
-
-        setupEventListeners();
 
         instantiateLoading();
 
         initSettingsRow();
 
-        userRegistration();
 
-        populateScreen();
+        syncData();
+    }
+
+    private void syncData() {
+        if (DEBUG) Log.d(TAG, "syncData()");
+
+
+        boolean testingMode = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()))
+                .getBoolean(getActivity().getString(R.string.pref_key_testing_mode), false);
+
+        addRowSettings();
+
+//------- ALL TASKS
+        allTaskLiveData = mViewModel.requestTasksByCategory(TASKS_ALL_CAT);
+        allTaskLiveData.removeObservers(getViewLifecycleOwner());
+        allTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
+
+            if (tasksListResource.status.equals(Resource.Status.LOADING))
+                showLoading();
+            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
+                if (tasksListResource.data != null) {
+                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
+                        loadVideos(tasksListResource.data);
+                    else verifyRowExistenceAndRemove(rowAllTasks);
+                }
+
+                if (DEBUG) Log.d(TAG, "task response: rowAllTasks");
+
+                dismissLoading();
+            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (tasksListResource.message != null) {
+                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                } else {
+                    if (DEBUG) Log.d(TAG, "Status ERROR");
+                }
+
+                dismissLoading();
+            }
+
+        });
+        mViewModel.updateTaskByCategory(TASKS_ALL_CAT);
+
+
+//------- CONTINUE TASKS
+        continueTaskLiveData = mViewModel.requestTasksByCategory(TASKS_CONTINUE_CAT);
+        continueTaskLiveData.removeObservers(getViewLifecycleOwner());
+        continueTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
+            if (tasksListResource.status.equals(Resource.Status.LOADING))
+                showLoading();
+            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
+                if (tasksListResource.data != null) {
+                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
+                        loadVideos(tasksListResource.data);
+                    else verifyRowExistenceAndRemove(rowContinueTasks);
+                }
+
+                if (DEBUG) Log.d(TAG, "task response: rowContinueTasks");
+
+
+                dismissLoading();
+            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (tasksListResource.message != null) {
+                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                } else {
+                    if (DEBUG) Log.d(TAG, "Status ERROR");
+                }
+
+                dismissLoading();
+            }
+
+            // TODO throw new RuntimeException("Get list sorted of continued tasks");
+
+        });
+
+        mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT);
+
+
+//------- FINISHED TASKS
+        finishedTaskLiveData = mViewModel.requestTasksByCategory(TASKS_FINISHED_CAT);
+        finishedTaskLiveData.removeObservers(getViewLifecycleOwner());
+        finishedTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
+            if (tasksListResource.status.equals(Resource.Status.LOADING))
+                showLoading();
+            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
+                if (tasksListResource.data != null) {
+                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
+                        loadVideos(tasksListResource.data);
+                    else verifyRowExistenceAndRemove(rowFinishedTasks);
+                }
+
+                if (DEBUG) Log.d(TAG, "task response: rowFinishedTasks");
+
+                dismissLoading();
+            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (tasksListResource.message != null) {
+                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                } else {
+                    if (DEBUG) Log.d(TAG, "Status ERROR");
+                }
+
+                dismissLoading();
+            }
+
+            // TODO throw new RuntimeException("Get list sorted of finished tasks");
+
+        });
+
+        mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT);
+
+
+//------- MY LIST TASKS
+        myListTaskLiveData = mViewModel.requestTasksByCategory(TASKS_MY_LIST_CAT);
+        myListTaskLiveData.removeObservers(getViewLifecycleOwner());
+        myListTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
+            if (tasksListResource.status.equals(Resource.Status.LOADING))
+                showLoading();
+            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
+                if (tasksListResource.data != null) {
+                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0) {
+                        loadVideos(tasksListResource.data);
+                    } else verifyRowExistenceAndRemove(rowMyListTasks);
+                }
+
+                if (DEBUG) Log.d(TAG, "task response: rowMyListTasks");
+
+
+                dismissLoading();
+            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (tasksListResource.message != null) {
+                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                } else {
+                    if (DEBUG) Log.d(TAG, "Status ERROR");
+                }
+
+                dismissLoading();
+            }
+
+            //  TODO throw new RuntimeException("Get list sorted of my list tasks");
+
+        });
+
+        mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT);
+
+
+//------- TEST TASKS
+        testTaskLiveData = mViewModel.requestTasksByCategory(TASKS_TEST_CAT);
+        testTaskLiveData.removeObservers(getViewLifecycleOwner());
+        testTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
+            if (tasksListResource.status.equals(Resource.Status.LOADING))
+                showLoading();
+            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
+                if (tasksListResource.data != null) {
+                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
+                        loadVideos(tasksListResource.data);
+                    else verifyRowExistenceAndRemove(rowTestTasks);
+                }
+
+                if (DEBUG) Log.d(TAG, "task response: rowTestTasks");
+
+
+                dismissLoading();
+            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (tasksListResource.message != null) {
+                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                } else if (DEBUG) Log.d(TAG, "Status ERROR");
+
+                dismissLoading();
+            }
+
+        });
+
+        if (testingMode)
+            mViewModel.updateTaskByCategory(TASKS_TEST_CAT);
+
+
+//        REASONS
+        mViewModel.fetchReasons();
+
+//        VIDEO TESTS
+        mViewModel.fetchVideoTestsDetails();
+
+//        CATEGORIES
+        LiveData<Resource<Category[]>> categoriesLiveData = mViewModel.fetchCategories();
+        categoriesLiveData.removeObservers(getViewLifecycleOwner());
+        categoriesLiveData.observe(getViewLifecycleOwner(), resource -> {
+            if (resource.status.equals(Resource.Status.LOADING)) {
+                showLoading();
+            } else if (resource.status.equals(Resource.Status.SUCCESS)) {
+                if (resource.data != null) {
+                    categoriesRowSettings(resource.data);
+                } else verifyRowExistenceAndRemove(rowCategories);
+
+
+                if (DEBUG) Log.d(TAG, "task response: rowCategories");
+
+                dismissLoading();
+            } else if (resource.status.equals(Resource.Status.ERROR)) {
+                //TODO do something
+                if (resource.message != null) {
+                    if (DEBUG) Log.d(TAG, resource.message);
+                } else {
+                    if (DEBUG) Log.d(TAG, "Status ERROR");
+                }
+
+                dismissLoading();
+            }
+        });
     }
 
     @Override
@@ -139,6 +347,8 @@ public class HomeFragment extends BrowseSupportFragment {
     }
 
     private void initSettingsRow() {
+        if (DEBUG) Log.d(TAG, "initSettingsRow()");
+
         HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
 
         SingleLineCardPresenter mIconCardPresenter = new SingleLineCardPresenter(getActivity());
@@ -170,17 +380,10 @@ public class HomeFragment extends BrowseSupportFragment {
     }
 
 
-    private void login(String email) {
-        if (DEBUG) Log.d(TAG, ">>>REQUEST LOGIN");
-
-        mViewModel.login(email, "com.google"); //TODO change password
-
-        firebaseLoginEvents(FIREBASE_LOG_EVENT_LOGIN);
-    }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
         if (DEBUG) Log.d(TAG, "onDestroyView");
 
         if (allTaskLiveData != null)
@@ -203,236 +406,29 @@ public class HomeFragment extends BrowseSupportFragment {
 
     }
 
-    private void populateScreen() {
-
-
-        reorderRowSettings();
-
-
-        LiveData<Resource<Category[]>> categoriesLiveData = mViewModel.fetchCategories();
-        categoriesLiveData.removeObservers(getViewLifecycleOwner());
-        categoriesLiveData.observe(getViewLifecycleOwner(), resource -> {
-            if (resource.status.equals(Resource.Status.LOADING)) {
-                if (DEBUG) Log.d(TAG, "loading");
-
-            } else if (resource.status.equals(Resource.Status.SUCCESS)) {
-                if (resource.data != null)
-                    categoriesRowSettings(resource.data);
-                else verifyRowExistenceAndRemove(rowCategories);
-
-
-                if (DEBUG) Log.d(TAG, "task response");
-            } else if (resource.status.equals(Resource.Status.ERROR)) {
-                //TODO do something
-                if (resource.message != null) {
-                    if (DEBUG) Log.d(TAG, resource.message);
-                } else {
-                    if (DEBUG) Log.d(TAG, "Status ERROR");
-                }
-
-//                dismissLoading();
-            }
-        });
-
-        allTaskLiveData = mViewModel.requestTasksByCategory(TASKS_ALL_CAT);
-        allTaskLiveData.removeObservers(getViewLifecycleOwner());
-        allTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
-
-            if (tasksListResource.status.equals(Resource.Status.LOADING))
-                showLoading();
-
-            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
-                if (tasksListResource.data != null) {
-                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
-                        loadVideos(tasksListResource.data);
-                    else verifyRowExistenceAndRemove(rowAllTasks);
-                }
-
-                if (DEBUG) Log.d(TAG, "task response");
-
-                dismissLoading();
-            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
-                //TODO do something
-                if (tasksListResource.message != null) {
-                    if (DEBUG) Log.d(TAG, tasksListResource.message);
-                } else {
-                    if (DEBUG) Log.d(TAG, "Status ERROR");
-                }
-
-                dismissLoading();
-            }
-
-        });
-
-        continueTaskLiveData = mViewModel.requestTasksByCategory(TASKS_CONTINUE_CAT);
-        continueTaskLiveData.removeObservers(getViewLifecycleOwner());
-        continueTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
-            if (tasksListResource.status.equals(Resource.Status.LOADING))
-                showLoading();
-            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
-                if (tasksListResource.data != null) {
-                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
-                        loadVideos(tasksListResource.data);
-                    else verifyRowExistenceAndRemove(rowContinueTasks);
-                }
-
-                if (DEBUG) Log.d(TAG, "task response");
-
-                dismissLoading();
-            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
-                //TODO do something
-                if (tasksListResource.message != null) {
-                    if (DEBUG) Log.d(TAG, tasksListResource.message);
-                } else {
-                    if (DEBUG) Log.d(TAG, "Status ERROR");
-                }
-
-                dismissLoading();
-            }
-
-            // TODO throw new RuntimeException("Get list sorted of continued tasks");
-
-        });
-
-        finishedTaskLiveData = mViewModel.requestTasksByCategory(TASKS_FINISHED_CAT);
-        finishedTaskLiveData.removeObservers(getViewLifecycleOwner());
-        finishedTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
-            if (tasksListResource.status.equals(Resource.Status.LOADING))
-                showLoading();
-            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
-                if (tasksListResource.data != null) {
-                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
-                        loadVideos(tasksListResource.data);
-                    else verifyRowExistenceAndRemove(rowFinishedTasks);
-                }
-
-                if (DEBUG) Log.d(TAG, "task response");
-                dismissLoading();
-            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
-                //TODO do something
-                if (tasksListResource.message != null) {
-                    if (DEBUG) Log.d(TAG, tasksListResource.message);
-                } else {
-                    if (DEBUG) Log.d(TAG, "Status ERROR");
-                }
-
-                dismissLoading();
-            }
-
-            // TODO throw new RuntimeException("Get list sorted of finished tasks");
-
-        });
-
-        myListTaskLiveData = mViewModel.requestTasksByCategory(TASKS_MY_LIST_CAT);
-        myListTaskLiveData.removeObservers(getViewLifecycleOwner());
-        myListTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
-            if (tasksListResource.status.equals(Resource.Status.LOADING))
-                showLoading();
-            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
-                if (tasksListResource.data != null) {
-                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0) {
-                        if (DEBUG)
-                            Log.d(TAG, "task response My list:[" + tasksListResource.data.data.length + "]" + Arrays.toString(tasksListResource.data.data));
-
-                        loadVideos(tasksListResource.data);
-                    } else verifyRowExistenceAndRemove(rowMyListTasks);
-                }
-
-                dismissLoading();
-            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
-                //TODO do something
-                if (tasksListResource.message != null) {
-                    if (DEBUG) Log.d(TAG, tasksListResource.message);
-                } else {
-                    if (DEBUG) Log.d(TAG, "Status ERROR");
-                }
-
-                dismissLoading();
-            }
-
-            //  TODO throw new RuntimeException("Get list sorted of my list tasks");
-
-        });
-
-        testTaskLiveData = mViewModel.requestTasksByCategory(TASKS_TEST_CAT);
-        testTaskLiveData.removeObservers(getViewLifecycleOwner());
-        testTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
-            if (tasksListResource.status.equals(Resource.Status.LOADING))
-                showLoading();
-            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
-                if (tasksListResource.data != null) {
-                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
-                        loadVideos(tasksListResource.data);
-                    else verifyRowExistenceAndRemove(rowTestTasks);
-                }
-
-                if (DEBUG) Log.d(TAG, "task response");
-
-                dismissLoading();
-            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
-                //TODO do something
-                if (tasksListResource.message != null) {
-                    if (DEBUG) Log.d(TAG, tasksListResource.message);
-                } else if (DEBUG) Log.d(TAG, "Status ERROR");
-
-                dismissLoading();
-            }
-
-        });
-
-    }
-
 
     private DreamTVApp getApplication() {
         return ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
     }
 
-    private void userRegistration() {
-
-        if (DEBUG) Log.d(TAG, "userRegistration()");
-        String token = getApplication().getToken();
-        User user = getApplication().getUser();
-        if (token == null || user == null) //first time the app is initiated. The user has to select an account
-            pickUserAccount();
-        else
-            login(user.email);
-
-
-        LiveData<Resource<User>> userDetails = mViewModel.fetchUserDetails();
-        userDetails.observe(getViewLifecycleOwner(), userResource -> {
-            if (userResource.status.equals(Resource.Status.SUCCESS)) {
-
-                if (userResource.data != null) {
-                    if (!userResource.data.subLanguage.equals(LocaleHelper.getLanguage(getActivity()))) {
-                        if (DEBUG)
-                            Log.d(TAG, "fetchUserDetails() response!: userResource.data.subLanguage=" + userResource.data.subLanguage + " LocaleHelper.getLanguage(getActivity()):" + LocaleHelper.getLanguage(getActivity()));
-                        LocaleHelper.setLocale(getActivity(), userResource.data.subLanguage);
-                        Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
-                    } else {
-                        mViewModel.initializeSyncData();
-                    }
-                }
-            }
-        });
-
-    }
-
-
-    private void pickUserAccount() {
-        if (DEBUG) Log.d(TAG, "pickUserAccount()");
-
-        /*This will list all available accounts on device without any filtering*/
-
-        Intent intent = AccountPicker.newChooseAccountIntent(null, null,
-                null, false, null, null, null, null);
-
-        startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
-    }
-
 
     private void setupVideosList() {
-        if (DEBUG) Log.d(TAG, "New mRowsAdapter()");
+        if (DEBUG) Log.d(TAG, "setupVideosList()");
+
+        setBadgeDrawable(Objects.requireNonNull(getActivity()).getResources().getDrawable(R.drawable.dreamtv_logo, null));
+        setHeadersTransitionOnBackEnabled(false);
+
+
+        setOnSearchClickedListener(view -> {
+                    Intent intent = new Intent(getActivity(), SearchActivity.class);
+                    startActivity(intent);
+                }
+        );
+
+        setOnItemViewClickedListener(new ItemViewClickedListener());
+
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
+
     }
 
 
@@ -527,6 +523,7 @@ public class HomeFragment extends BrowseSupportFragment {
 //            card.setFooterColor("#c51162");
             card.setLocalImageResource(category.imageName);
             cards.add(card);
+
         }
 
         int indexOfRow = mRowsAdapter.indexOf(rowCategories);
@@ -550,7 +547,7 @@ public class HomeFragment extends BrowseSupportFragment {
     }
 
 
-    private void reorderRowSettings() {
+    private void addRowSettings() {
 
         int lastIndexOf = mRowsAdapter.indexOf(rowSettings);
 
@@ -567,25 +564,6 @@ public class HomeFragment extends BrowseSupportFragment {
 
             mRowsAdapter.remove(listRow);
         }
-    }
-
-
-    private void setupUIElements() {
-
-        setBadgeDrawable(Objects.requireNonNull(getActivity()).getResources().getDrawable(R.drawable.dreamtv_logo, null));
-        setHeadersTransitionOnBackEnabled(false);
-
-    }
-
-
-    private void setupEventListeners() {
-        setOnSearchClickedListener(view -> {
-                    Intent intent = new Intent(getActivity(), SearchActivity.class);
-                    startActivity(intent);
-                }
-        );
-
-        setOnItemViewClickedListener(new ItemViewClickedListener());
     }
 
 
@@ -620,30 +598,21 @@ public class HomeFragment extends BrowseSupportFragment {
 
         Bundle bundle = new Bundle();
 
-        switch (logEventName) {
-            case FIREBASE_LOG_EVENT_LOGIN:
-                bundle.putString(FIREBASE_KEY_EMAIL, user.email);
-                bundle.putString(FIREBASE_KEY_PASSWORD, user.password);
-                break;
+        // FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN
+        if (FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN.equals(logEventName)) {
+            if (testingMode)
+                bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, true);
+            else
+                bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, false);
 
-            case FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN:
-                if (testingMode)
-                    bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, true);
-                else
-                    bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, false);
-
-                //User Settings Saved
-                bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
-                bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
-                bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
-                break;
-
-            default: // FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN
-                //User Settings Saved - Analytics Report Event
-                bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
-                bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
-                bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
-                break;
+            //User Settings Saved
+            bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
+            bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
+            bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
+        } else {//User Settings Saved - Analytics Report Event
+            bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
+            bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
+            bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
         }
 
         mFirebaseAnalytics.logEvent(logEventName, bundle);
@@ -679,12 +648,7 @@ public class HomeFragment extends BrowseSupportFragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
-                if (DEBUG) Log.d(TAG, "onActivityResult() - Result from pickAccount()");
-
-                // Receiving a result from the AccountPicker
-                login(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
-            } else if (requestCode == REQUEST_APP_SETTINGS) {
+            if (requestCode == REQUEST_APP_SETTINGS) {
                 // Parameters considered here:
                 // pref_key_list_app_languages
                 // pref_key_list_interface_mode
@@ -751,6 +715,8 @@ public class HomeFragment extends BrowseSupportFragment {
     // Loading and progress bar related functions
     //********************************************
     private void instantiateLoading() {
+        if (DEBUG) Log.d(TAG, "instantiateLoading()");
+
         loadingDialog = new LoadingDialog(getActivity(), getString(R.string.title_loading_retrieve_tasks));
         loadingDialog.setCanceledOnTouchOutside(false);
     }

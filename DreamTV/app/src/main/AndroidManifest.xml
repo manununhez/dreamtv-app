@@ -30,7 +30,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
 
-        <activity android:name=".ui.welcome.SplashScreenActivity">
+        <activity android:name=".ui.welcome.WelcomeActivity">
             <tools:validation testUrl="http://dreamproject.pjwstk.edu.pl/dreamtv" />
 
             <intent-filter>
