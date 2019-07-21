@@ -1,32 +1,32 @@
 <resources>
 
     <!-- Error messages -->
-    <string name="video_error_media_load_timeout">Ładowanie multimediów zostało przekroczone</string>
+    <string name="video_error_media_load_timeout">Czas ładowania multimediów został przekroczony</string>
     <string name="video_error_server_inaccessible">Serwer mediów nie był dostępny</string>
     <string name="video_error_unknown_error">Nie udało się wczytać filmu</string>
 
     <!--ERROR NETWORK MESSAGES-->
-    <string name="too_many_request">Zbyt dużo próśb. Zwolnij próby.</string>
+    <string name="too_many_request">Zbyt dużo prób. Poczekaj chwilę.</string>
     <string name="generic_server_down">Serwer nie działa</string>
-    <string name="generic_server_timeout">Limit czasu serwera</string>
+    <string name="generic_server_timeout">Przekroczony czas oczekiwania na połączenie.</string>
     <string name="generic_error">Brak internetu</string>
     <string name="no_internet">Brak internetu</string>
-    <string name="parsing_failed">Niepowodzenie analizowania</string>
+    <string name="parsing_failed">Niepowodzenie przetwarzania</string>
     <string name="auth_failed">Błąd autoryzacji</string>
 
 
     <!--titles-->
     <string name="title_reasons_dialog">Co jest nie tak?</string>
-    <string name="title_reasons_dialog_2">Edytuj to, co wybrałeś:</string>
+    <string name="title_reasons_dialog_2">Zmień swój wybór:</string>
     <string name="title_reason_dialog_location">Jesteś tutaj:</string>
-    <string name="title_my_list_category">Moje Filmy</string>
-    <string name="title_finished_category">Obejrzyj to Ponownie</string>
-    <string name="title_test_category">Zalecane Filmy</string>
+    <string name="title_my_list_category">Moje filmy</string>
+    <string name="title_finished_category">Zobacz jeszcze raz</string>
+    <string name="title_test_category">Polecane filmy</string>
     <string name="title_settings_category">Ustawienia</string>
-    <string name="title_preferences_category">Preferencja</string>
-    <string name="title_continue_watching_category">Kontynuuj Oglądanie</string>
+    <string name="title_preferences_category">Preferencje</string>
+    <string name="title_continue_watching_category">Kontynuuj oglądanie</string>
     <string name="title_topics_category">Kategorie</string>
-    <string name="title_check_new_tasks_category">Ostatnio Dodane Filmy</string>
+    <string name="title_check_new_tasks_category">Najnowsze filmy</string>
     <string name="hint_voice_google_input">Nagraj wiadomość</string>
     <string name="title_current_time_video">%1$s / %2$s</string>
     <string name="title_video_details">%1$s | Audio: %2$s | Napisy: %3$s | Długość: %4$s</string>
@@ -34,7 +34,7 @@
     <string name="title_video_forward">+ %1$d s</string>
     <string name="title_video_backward">- %1$d s</string>
     <string name="title_reasons_others_selected">Wybrane w trybie zaawansowanym: %1$s</string>
-    <string name="select_errors_to_save">Please, select some options to save. To exit the dialog press &lt;- </string>
+    <string name="select_errors_to_save">Wybierz jakąś obcję, aby anulować kliknij &lt;- </string>
 
     <plurals name="errors_found_finished">
         <item quantity="one">Znalazłeś %d błąd</item>
@@ -50,8 +50,8 @@
     </plurals>
 
     <!--search-->
-    <string name="search_results">Search results for \'%1$s\'</string>
-    <string name="no_search_results">No search results found for \'%1$s\'</string>
+    <string name="search_results">Wyniki wyszukiwania dla \'%1$s\'</string>
+    <string name="no_search_results">Nie znaleziono wyników wyszukiwania dla \'%1$s\'</string>
 
     <!--buttons-->
     <string name="btn_save">Zapisz</string>
@@ -62,10 +62,10 @@
     <string name="btn_ok">OK</string>
     <string name="btn_start_recording">Kliknij na mikrofon żeby nagrać wiadomość</string>
     <string name="btn_continue_watching">Wznów: %1$s</string>
-    <string name="btn_no_from_beggining">Graj od początku</string>
+    <string name="btn_no_from_beggining">Odtwórz od początku</string>
     <string name="btn_play_video">Odtwórz film</string>
-    <string name="btn_add_to_my_list">+ Dodaj do moich filmów</string>
-    <string name="btn_remove_to_my_list">- Usuń z mojej filmów</string>
+    <string name="btn_add_to_my_list">+ Dodaj do mojej listy filmów</string>
+    <string name="btn_remove_to_my_list">- Usuń z jej listy filmów</string>
 
     <!--alertDialog-->
 
@@ -73,35 +73,35 @@
     <string name="title_loading_buffering">Buforowanie…</string>
     <string name="title_loading_retrieve_subtitle">Pobieranie napisów…</string>
     <string name="title_loading_retrieve_tasks">Pobieranie zadań…</string>
-    <string name="title_loading_add_to_list">Dodawanie wideo do listy…</string>
+    <string name="title_loading_add_to_list">Dodawanie filmu do listy…</string>
     <string name="title_loading_preparing_task">Przygotowanie zadania…</string>
-    <string name="title_loading_remove_from_list">Usuwanie wideo z listy…</string>
+    <string name="title_loading_remove_from_list">Usuwanie filmu z listy…</string>
 
     <!--Languages-->
     <string name="time_format">%02d:%02d</string>
-    <string name="alert_msg_video_terminated">Jak ci się podobało wideo?</string>
+    <string name="alert_msg_video_terminated">Jak ci się podobał ten film?</string>
     <string name="alert_exit_app">Czy na pewno chcesz opuścić aplikację?</string>
     <string name="text_pause">PAUZA</string>
 
     <!--PREFERENCES-->
     <string name="pref_title_app_settings">Ustawienia Aplikacji</string>
-    <string name="pref_title_subtitle_settings">Ustawienia Napisów</string>
-    <string name="pref_title_video_settings">Ustawienia Filmu</string>
+    <string name="pref_title_subtitle_settings">Ustawienia napisów</string>
+    <string name="pref_title_video_settings">Ustawienia filmu</string>
     <string name="pref_title_subtitle_size">Rozmiar czcionki</string>
     <string name="pref_title_app_language_dialog">Wybierz język aplikacji</string>
     <string name="pref_title_interface_mode_dialog">Wybierz tryb interfejsu</string>
-    <string name="pref_title_video_duration_dialog">Wybierz czas trwania wideo</string>
+    <string name="pref_title_video_duration_dialog">Wybierz czas trwania filmu</string>
     <string name="pref_title_subtitle_size_dialog">Wybierz rozmiar napisów</string>
-    <string name="pref_title_audio_language_dialog">Wybierz język audio</string>
+    <string name="pref_title_audio_language_dialog">Wybierz język nagrania</string>
     <string name="pref_title_subtitle_language_dialog">Wybierz język napisów</string>
-    <string name="pref_title_audio">Język audio</string>
+    <string name="pref_title_audio">Język nagrania</string>
     <string name="pref_title_subtitle">Język napisów</string>
     <string name="pref_title_text_language_settings">Język aplikacji &amp; napisów</string>
     <string name="pref_title_reason_dialog_interface_settings">Interfejs</string>
     <string name="pref_title_testing_mode_settings">Tryb testowy</string>
     <string name="pref_title_testing_mode_settings_description">Wyświetl filmy do testowania</string>
-    <string name="pref_title_video_duration_settings">Czas trwania wideo</string>
-    <string name="btn_delete_changes">Usunąć</string>
+    <string name="pref_title_video_duration_settings">Czas trwania filmu</string>
+    <string name="btn_delete_changes">Usuń</string>
 
     <!--DATA FOR SETTINGS-->
     <string-array name="listAudioLanguages">
@@ -137,7 +137,7 @@
 
     <string-array name="listSubtitleSize">
         <item>Mały</item>
-        <item>Normalne</item>
+        <item>Standardowy</item>
         <item>Duży</item>
     </string-array>
 
@@ -149,7 +149,7 @@
 
 
     <string-array name="listAppLanguages">
-        <item>Polskie</item>
+        <item>Polski</item>
         <item>Angielski</item>
     </string-array>
 
@@ -159,8 +159,8 @@
     </string-array>
 
     <string-array name="listInterfaceMode">
-        <item>Nowicjusz</item>
-        <item>Zaawansowane</item>
+        <item>Standardowy</item>
+        <item>Zaawansowany</item>
     </string-array>
 
     <string-array name="listInterfaceModeValues">
@@ -169,7 +169,7 @@
     </string-array>
 
     <string-array name="listVideoDuration">
-        <item>wszystko</item>
+        <item>wszystkie</item>
         <item>0 – 5 min</item>
         <item>5 – 10 min</item>
         <item>10+ min</item>
