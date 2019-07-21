@@ -527,6 +527,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                             mViewModel.updateTaskByCategory(TASKS_ALL_CAT); //trying to keep all_category always updated
                             mViewModel.updateTaskByCategory(TASKS_TEST_CAT); //trying to keep test_category always updated
                         } else {
+                            mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //trying to keep continue_category always updated
                             mViewModel.updateTaskByCategory(mSelectedCategory); //we update only the current video category
                         }
                     }
