@@ -66,6 +66,10 @@
             android:theme="@style/LeanbackPreferences" />
         <activity android:name=".ui.search.SearchActivity" />
         <activity android:name=".ui.categories.CategoryActivity" />
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

@@ -79,6 +79,7 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
             RequestOptions myOptions = new RequestOptions()
                     .override(width, height);
 
+
             Glide.with(getContext())
                     .asBitmap()
                     .load(resourceId)
@@ -106,14 +107,18 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
         primaryText.setText(card.getTitle());
 
         //-------------- VIDEO INFO
-        String timeFormatted = Utils.getTimeFormatMinSecs(task.video.getVideoDurationInMs());
         TextView secondaryText = cardView.findViewById(R.id.secondary_text);
         secondaryText.setText(getContext().getString(R.string.title_video_details_main, task.video.project,
-                task.video.primaryAudioLanguageCode, task.subLanguage, timeFormatted));
+                task.video.primaryAudioLanguageCode, task.subLanguage));
 
         //-------------- VIDEO DESCRIPTION
-        TextView extraText = cardView.findViewById(R.id.extra_text);
-        extraText.setText(card.getExtraText());
+//        TextView extraText = cardView.findViewById(R.id.extra_text);
+//        extraText.setText(card.getExtraText());
+
+        //-------------- VIDEO DURATION
+        String timeFormatted = Utils.getTimeFormatMinSecsDoublePoints(task.video.getVideoDurationInMs());
+        TextView tvVideoDuration = cardView.findViewById(R.id.tvVideoDuration);
+        tvVideoDuration.setText(timeFormatted);
 
         //-------------- ERRORS REPORT
         TextView errors = cardView.findViewById(R.id.tvErrorsSelected);

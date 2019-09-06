@@ -13,101 +13,123 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:lb="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:apps="http://schemas.android.com/tools"
     android:id="@+id/container"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:elevation="02dp"
-    android:orientation="vertical">
+    android:layout_width="250dp"
+    android:layout_height="200dp"
+    android:elevation="02dp">
+
+    <ProgressBar
+        android:id="@+id/pbContinueWatching"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/default_background"
+        android:max="100"
+        android:theme="@style/ProgressBarVideoPlayer"
+        apps:progress="40" />
 
 
-    <TextView
-        android:id="@+id/tvErrorsSelected"
-        style="@style/Widget.Leanback.ImageCardView.TitleStyle"
-        android:background="@color/errors_found_report_background"
-        android:fontFamily="sans-serif-condensed"
-        android:maxLines="2"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
-        android:textAlignment="center"
-        android:textSize="12sp" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+    <RelativeLayout
+        android:id="@+id/rlContent"
+        android:layout_width="250dp"
+        android:layout_height="200dp"
+        android:layout_above="@id/pbContinueWatching"
+        android:layout_below="@id/tvErrorsSelected"
+        android:gravity="center_horizontal">
 
         <ImageView
             android:id="@+id/main_image"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            lb:layout_viewType="main" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            apps:src="@drawable/dreamtv_logo" />
+
 
         <LinearLayout
-            android:id="@+id/info"
-            android:layout_width="130dp"
-            android:layout_height="match_parent"
-            android:background="@color/default_background"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@color/text_background_card"
             android:orientation="vertical"
-            android:paddingStart="7dp"
-            android:paddingTop="7dp"
-            android:paddingEnd="7dp">
+            android:padding="4dp">
 
             <RatingBar
                 android:id="@+id/rbTask"
                 style="@style/Widget.AppCompat.RatingBar.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginBottom="2dp"
                 android:max="5"
                 android:numStars="5"
-                android:rating="1"
                 android:stepSize="1"
-                android:theme="@style/RatingBar" />
+                android:theme="@style/RatingBar"
+                apps:rating="1" />
+
 
             <TextView
                 android:id="@+id/primary_text"
-                style="@style/Widget.Leanback.ImageCardView.TitleStyle"
-                android:fontFamily="sans-serif-condensed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginBottom="2dp"
+                android:fontFamily="@font/roboto"
+                android:gravity="start"
                 android:maxLines="5"
-                android:textSize="15sp" />
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                apps:text="Title" />
 
+            <TextView
+                android:id="@+id/secondary_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginBottom="2dp"
+                android:fontFamily="@font/roboto"
+                android:maxLines="2"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                apps:text="Video Description" />
 
         </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="@color/default_background"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="7dp">
 
         <TextView
-            android:id="@+id/secondary_text"
-            style="@style/Widget.Leanback.ImageCardView.ContentStyle"
-            android:fontFamily="sans-serif-condensed"
-            android:maxLines="1"
-            android:textColor="#EEEEEE"
-            android:textStyle="bold" />
+            android:id="@+id/tvVideoDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:padding="2dp"
+            android:background="@color/text_background_card"
+            android:fontFamily="@font/roboto"
+            android:textColor="@color/white"
+            android:textSize="10sp"
+            apps:text="23:15" />
+    </RelativeLayout>
 
-        <TextView
-            android:id="@+id/extra_text"
-            style="@style/Widget.Leanback.ImageCardView.ContentStyle"
-            android:layout_marginTop="2dp"
-            android:fontFamily="sans-serif-condensed"
-            android:maxLines="3" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/tvErrorsSelected"
+        style="@style/Widget.Leanback.ImageCardView.TitleStyle"
+        android:layout_alignParentTop="true"
+        android:background="@color/errors_found_report_background"
+        android:fontFamily="@font/roboto"
+        android:maxLines="2"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:textAlignment="center"
+        android:textSize="12sp"
+        apps:text="Texto que van en la cabecera" />
 
-    <ProgressBar
-        android:id="@+id/pbContinueWatching"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="7dp"
-        android:background="@color/default_background"
-        android:max="100"
-        android:progress="40"
-        android:theme="@style/ProgressBarVideoPlayer" />
-
-</LinearLayout>
+</RelativeLayout>

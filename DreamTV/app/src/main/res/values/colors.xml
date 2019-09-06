@@ -12,6 +12,7 @@
     <color name="colorAccent">#BB86FC</color>
     <color name="colorSecondary">#03DAC5</color>
     <color name="colorPrimary">#1F1A24</color>
+    <color name="text_background_card">#CE1F1A24</color>
     <color name="exit_dialog_background">#D71F1A24</color>
     <color name="dark_grey">#121212</color>
     <color name="detail_view_actionbar_background">@color/colorPrimary</color>
