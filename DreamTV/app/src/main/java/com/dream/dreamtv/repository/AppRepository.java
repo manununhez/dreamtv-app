@@ -157,8 +157,8 @@ public class AppRepository {
         return mNetworkDataSource.search(query);
     }
 
-    public LiveData<Resource<Category[]>> fetchCategories(){
-        return mNetworkDataSource.fetchCategories();
+    public LiveData<Resource<Category[]>> fetchCategories(String language){
+        return mNetworkDataSource.fetchCategories(language);
     }
 
     public MutableLiveData<Resource<Task[]>> searchByKeywordCategory(String category){

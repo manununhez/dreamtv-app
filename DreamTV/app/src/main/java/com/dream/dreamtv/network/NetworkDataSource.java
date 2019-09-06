@@ -476,14 +476,14 @@ public class NetworkDataSource {
 
     /**
      *
+     * @param language
      */
     @SuppressWarnings("unchecked")
-    public LiveData<Resource<Category[]>> fetchCategories() {
+    public LiveData<Resource<Category[]>> fetchCategories(String language) {
         responseFromCategories.setValue(Resource.loading(null));
 
         Uri categoriesUri = Uri.parse(URL_BASE.concat(Urls.CATEGORIES.value)).buildUpon()
-                .appendQueryParameter(PARAM_LANG, PreferenceManager.getDefaultSharedPreferences(mContext)
-                        .getString(mContext.getString(R.string.pref_key_list_app_languages), Constants.PREF_ABR_POLISH))
+                .appendQueryParameter(PARAM_LANG, language)
                 .build();
 
         Log.d(TAG, "fetchCategories() Request URL: " + categoriesUri.toString());

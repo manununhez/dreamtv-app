@@ -24,8 +24,8 @@ class HomeViewModel extends ViewModel {
         return mRepository.requestTaskByCategory(category);
     }
 
-    LiveData<Resource<Category[]>> fetchCategories(){
-        return mRepository.fetchCategories();
+    LiveData<Resource<Category[]>> fetchCategories(String language){
+        return mRepository.fetchCategories(language);
     }
 
     LiveData<Resource<User>> updateUser(User userData) {

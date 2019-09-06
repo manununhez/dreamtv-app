@@ -312,7 +312,7 @@ public class HomeFragment extends BrowseSupportFragment {
         mViewModel.fetchVideoTestsDetails();
 
 //        CATEGORIES
-        LiveData<Resource<Category[]>> categoriesLiveData = mViewModel.fetchCategories();
+        LiveData<Resource<Category[]>> categoriesLiveData = mViewModel.fetchCategories(getApplication().getUser().subLanguage);
         categoriesLiveData.removeObservers(getViewLifecycleOwner());
         categoriesLiveData.observe(getViewLifecycleOwner(), resource -> {
             if (resource.status.equals(Resource.Status.LOADING)) {
