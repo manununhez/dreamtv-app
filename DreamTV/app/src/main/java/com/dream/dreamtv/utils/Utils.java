@@ -94,6 +94,14 @@ public class Utils {
         );
     }
 
+    public static String getTimeFormatMinSecsDoublePoints(long millis) {
+        return String.format(Locale.getDefault(), "%d:%d",
+                TimeUnit.MILLISECONDS.toMinutes(millis),
+                TimeUnit.MILLISECONDS.toSeconds(millis) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
+        );
+    }
+
     /**
      * Will read the content from a given {@link InputStream} and return it as a String.
      *

@@ -176,6 +176,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void updateBackground(String uri) {
+        int resourceId = getContext().getResources()
+                .getIdentifier("ic_endless_constellation",
+                        "drawable", getContext().getPackageName());
+
         RequestOptions options = new RequestOptions()
 //                .centerCrop()
                 .centerInside()
@@ -183,7 +187,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         Glide.with(this)
                 .asBitmap()
-                .load(uri)
+                .load(resourceId)
                 .apply(options)
                 .into(new SimpleTarget<Bitmap>(mMetrics.widthPixels, mMetrics.heightPixels) {
                     @Override

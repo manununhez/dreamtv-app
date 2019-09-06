@@ -46,7 +46,7 @@
     <string name="hint_voice_google_input">Please, say your comment</string>
     <string name="title_current_time_video">%1$s / %2$s</string>
     <string name="title_video_details">%1$s | Audio: %2$s | Subtitle: %3$s | Duration: %4$s</string>
-    <string name="title_video_details_main">%1$s | Audio: %2$s | Subtitle: %3$s | %4$s</string>
+    <string name="title_video_details_main">%1$s | Audio: %2$s | Subtitle: %3$ss</string>
     <string name="title_video_forward">+ %1$d secs</string>
     <string name="title_video_backward">- %1$d secs</string>
     <string name="title_reasons_others_selected">Selected in advanced mode: %1$s</string>
