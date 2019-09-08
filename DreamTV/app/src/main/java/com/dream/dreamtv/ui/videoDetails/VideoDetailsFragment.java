@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.leanback.app.BackgroundManager;
 import androidx.leanback.app.DetailsSupportFragment;
 import androidx.leanback.widget.Action;
@@ -44,7 +45,6 @@ import com.dream.dreamtv.presenter.detailsPresenter.DetailsDescriptionPresenter;
 import com.dream.dreamtv.ui.playVideo.PlaybackVideoActivity;
 import com.dream.dreamtv.ui.playVideo.PlaybackVideoYoutubeActivity;
 import com.dream.dreamtv.utils.Constants;
-import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.dream.dreamtv.utils.Utils;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -52,6 +52,9 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.util.List;
 import java.util.Objects;
 
+import static com.dream.dreamtv.model.Resource.Status.ERROR;
+import static com.dream.dreamtv.model.Resource.Status.LOADING;
+import static com.dream.dreamtv.model.Resource.Status.SUCCESS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_DURATION;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
@@ -72,6 +75,7 @@ import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_MY_LIST_CAT;
 import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
 import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
+import static com.dream.dreamtv.utils.InjectorUtils.provideVideoDetailsViewModelFactory;
 
 
 /*
@@ -80,13 +84,14 @@ import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
  */
 public class VideoDetailsFragment extends DetailsSupportFragment {
 
-    private static final String TRANSITION_NAME = "t_for_transition";
     private static final String TAG = "VideoDetailsFragment";
     private static final int ACTION_PLAY_VIDEO = 1;
     private static final int ACTION_CONTINUE_VIDEO = 2;
     private static final int ACTION_PLAY_VIDEO_FROM_BEGGINING = 3;
     private static final int ACTION_ADD_MY_LIST = 4;
     private static final int ACTION_REMOVE_MY_LIST = 5;
+    private static final String BACKGROUND_DEFAULT_IMAGE = "ic_endless_constellation";
+    private static final String TYPE_DRAWABLE = "drawable";
 
     private BackgroundManager mBackgroundManager;
     private Drawable mDefaultBackground;
@@ -116,28 +121,40 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         prepareBackgroundManager();
 
         // Get the ViewModel from the factory
-        VideoDetailsViewModelFactory factory = InjectorUtils.provideVideoDetailsViewModelFactory(Objects.requireNonNull(getActivity()));
+        VideoDetailsViewModelFactory factory = provideVideoDetailsViewModelFactory(getContext());
         mViewModel = ViewModelProviders.of(this, factory).get(VideoDetailsViewModel.class);
 
         // Obtain the FirebaseAnalytics instance.
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(Objects.requireNonNull(getActivity()));
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
 
-        mSelectedTask = getActivity().getIntent().getParcelableExtra(INTENT_TASK);
 
-        mSelectedCategory = getActivity().getIntent().getStringExtra(INTENT_CATEGORY);
+        getValuesFromIntent();
 
         if (mSelectedTask != null) {
             setupDetailsOverview();
-            fetchUserTasks();
+            fetchUserTasksObserver();
+            fetchSubtitle();
 
             if (mSelectedTask.userTasks != null && mSelectedTask.userTasks.length > 0) {
                 mUserTask = mSelectedTask.userTasks[0]; //TODO what happened is there is more than one UserTask
                 setupContinueAction();
             }
         } else {
-            getActivity().finish(); //back to HomeActivity
+            getContext().finish(); //back to HomeActivity
         }
     }
+
+
+    public FragmentActivity getContext() {
+        return Objects.requireNonNull(getActivity());
+    }
+
+    private void getValuesFromIntent() {
+        mSelectedTask = getContext().getIntent().getParcelableExtra(INTENT_TASK);
+
+        mSelectedCategory = getContext().getIntent().getStringExtra(INTENT_CATEGORY);
+    }
+
 
     @Override
     public void onDestroyView() {
@@ -164,24 +181,23 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         setupAdapter();
         setupDetailsOverviewRow();
         initActionPanel();
-        updateBackground(mSelectedTask.video.thumbnail);
+        updateBackground();
     }
 
     private void prepareBackgroundManager() {
-        mBackgroundManager = BackgroundManager.getInstance(Objects.requireNonNull(getActivity()));
-        mBackgroundManager.attach(getActivity().getWindow());
+        mBackgroundManager = BackgroundManager.getInstance(getContext());
+        mBackgroundManager.attach(getContext().getWindow());
         mDefaultBackground = getResources().getDrawable(R.drawable.default_background, null);
         mMetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
+        getContext().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
     }
 
-    private void updateBackground(String uri) {
+    private void updateBackground() {
         int resourceId = getContext().getResources()
-                .getIdentifier("ic_endless_constellation",
-                        "drawable", getContext().getPackageName());
+                .getIdentifier(BACKGROUND_DEFAULT_IMAGE,
+                        TYPE_DRAWABLE, getContext().getPackageName());
 
         RequestOptions options = new RequestOptions()
-//                .centerCrop()
                 .centerInside()
                 .error(mDefaultBackground);
 
@@ -211,18 +227,18 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                         View actionsView = viewHolder.view.
                                 findViewById(R.id.details_overview_actions_background);
-//                        actionsView.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.detail_view_actionbar_background));
-                        actionsView.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.button_selected_shape));
+                        actionsView.setBackgroundColor(ContextCompat.getColor(getContext(),
+                                R.color.button_selected_shape));
 
                         View detailsView = viewHolder.view.findViewById(R.id.details_frame);
-//                        detailsView.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.detail_view_background));
-                        detailsView.setBackgroundColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.detail_view_actionbar_background));
+                        detailsView.setBackgroundColor(ContextCompat.getColor(getContext(),
+                                R.color.detail_view_actionbar_background));
                         return viewHolder;
                     }
                 };
 
         FullWidthDetailsOverviewSharedElementHelper mHelper = new FullWidthDetailsOverviewSharedElementHelper();
-        mHelper.setSharedElementEnterTransition(getActivity(), VideoDetailsActivity.SHARED_ELEMENT_NAME);
+        mHelper.setSharedElementEnterTransition(getContext(), VideoDetailsActivity.SHARED_ELEMENT_NAME);
         detailsPresenter.setListener(mHelper);
         detailsPresenter.setParticipatingEntranceTransition(false);
         prepareEntranceTransition();
@@ -239,19 +255,16 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         detailsPresenter.setOnActionClickedListener(action -> {
             if (action.getId() == ACTION_PLAY_VIDEO) {
-                fetchSubtitlePlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN);
+                playVideo(true, FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN);
             } else if (action.getId() == ACTION_PLAY_VIDEO_FROM_BEGGINING) {
-                fetchSubtitlePlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO);
+                playVideo(true, FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO);
             } else if (action.getId() == ACTION_CONTINUE_VIDEO) {
-                fetchSubtitlePlayVideo(false, FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO);
+                playVideo(false, FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO);
             } else if (action.getId() == ACTION_ADD_MY_LIST) {
                 addVideoToMyList();
             } else if (action.getId() == ACTION_REMOVE_MY_LIST) {
                 removeVideoFromMyList();
             }
-//            } else {
-//                Toast.makeText(getActivity(), action.toString(), Toast.LENGTH_SHORT).show();
-//            }
         });
 
 
@@ -276,7 +289,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                     public void onResourceReady(
                             @NonNull Bitmap resource,
                             Transition<? super Bitmap> transition) {
-                        rowPresenter.setImageBitmap(Objects.requireNonNull(getActivity()), resource);
+                        rowPresenter.setImageBitmap(getContext(), resource);
                         startEntranceTransition();
                     }
                 });
@@ -325,10 +338,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void instantiateAndShowLoading(String message) {
-        loadingDialog = new LoadingDialog(getActivity(), message);
+        loadingDialog = new LoadingDialog(getContext(), message);
         loadingDialog.setCanceledOnTouchOutside(false);
 
-        if (!Objects.requireNonNull(getActivity()).isFinishing())
+        if (!getContext().isFinishing())
             loadingDialog.show();
     }
 
@@ -353,12 +366,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
                 bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
                 break;
-            default: // FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                bundle.putString(FIREBASE_KEY_VIDEO_PROJECT_NAME, mSelectedTask.video.project);
-                bundle.putLong(FIREBASE_KEY_VIDEO_DURATION, mSelectedTask.video.getVideoDurationInMs());
-                break;
+            default:
+                throw new RuntimeException("Event not contemplated: " + logEventName);
         }
 
         mFirebaseAnalytics.logEvent(logEventName, bundle);
@@ -378,7 +387,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         }
     }
 
-    private void fetchSubtitlePlayVideo(boolean playFromBeginning, String logEventName) {
+    private void fetchSubtitle() {
         String subtitleVersion = getSubtitleVersion();
         //We retrieve subtitles first
         mViewModel.setSubtitleId(mSelectedTask.video.videoId,
@@ -389,31 +398,27 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         fetchSubtitleLiveData.removeObservers(getViewLifecycleOwner());
 
         fetchSubtitleLiveData.observe(getViewLifecycleOwner(), subtitleResponseResource -> {
-            if (subtitleResponseResource.status.equals(Resource.Status.LOADING))
+            Resource.Status status = subtitleResponseResource.status;
+            SubtitleResponse data = subtitleResponseResource.data;
+
+            if (status.equals(LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_retrieve_subtitle));
 
-            else if (subtitleResponseResource.status.equals(Resource.Status.SUCCESS)) {
+            else if (status.equals(SUCCESS)) {
                 Log.d(TAG, "Subtitle response");
 
-                if (subtitleResponseResource.data != null &&
-                        mSelectedTask.video.title.equals(String.valueOf(subtitleResponseResource.data.videoTitleOriginal))) {
+                if (data != null && mSelectedTask.video.title.equals(data.videoTitleOriginal)) {
+                    mSubtitleResponse = data;
 
-                    mSubtitleResponse = subtitleResponseResource.data;
-
-                    if (mSubtitleResponse.subtitles == null)
-                        Toast.makeText(getActivity(), "Subtitle not found", Toast.LENGTH_SHORT).show();
-                    else {
-                        //PLAY VIDEO
-                        if (mUserTask == null) //the are not user tasks for this video, so we need to create a new one
-                            createUserTask(playFromBeginning, logEventName);
-                        else
-                            playVideo(playFromBeginning, logEventName);
-                    }
+                    mSelectedTask.videoTitleTranslated = mSubtitleResponse.videoTitleTranslated;
+                    mSelectedTask.videoDescriptionTranslated = mSubtitleResponse.videoDescriptionTranslated;
                 }
 
                 dismissLoading();
 
-            } else if (subtitleResponseResource.status.equals(Resource.Status.ERROR)) {
+                setupDetailsOverview();
+
+            } else if (status.equals(ERROR)) {
                 //TODO do something
                 if (subtitleResponseResource.message != null)
                     Log.d(TAG, subtitleResponseResource.message);
@@ -427,12 +432,24 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void playVideo(boolean playFromBeginning, String logEventName) {
+        if (mSubtitleResponse.subtitles == null)
+            Toast.makeText(getContext(), getContext().getString(R.string.subtitle_not_found_alert), Toast.LENGTH_SHORT).show();
+        else {
+            //PLAY VIDEO
+            if (mUserTask == null) //the are not user tasks for this video, so we need to create a new one
+                createUserTask(playFromBeginning, logEventName);
+            else
+                goToPlaybackVideo(playFromBeginning, logEventName);
+        }
+    }
+
+    private void goToPlaybackVideo(boolean playFromBeginning, String logEventName) {
         Intent intent;
 
         if (mSelectedTask.video.isUrlFromYoutube())
-            intent = new Intent(getActivity(), PlaybackVideoYoutubeActivity.class);
+            intent = new Intent(getContext(), PlaybackVideoYoutubeActivity.class);
         else
-            intent = new Intent(getActivity(), PlaybackVideoActivity.class);
+            intent = new Intent(getContext(), PlaybackVideoActivity.class);
 
 
         intent.putExtra(INTENT_TASK, mSelectedTask);
@@ -449,7 +466,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     private String getSubtitleVersion() {
         String newestVersion = Constants.SUBTITLE_LAST_VERSION;
-        DreamTVApp dreamTVApp = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
+        DreamTVApp dreamTVApp = ((DreamTVApp) getContext().getApplication());
         List<VideoTests> videoTestsList = dreamTVApp.getVideoTests();
 
         // We first look is the video is a test video
@@ -477,22 +494,21 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         createUserTaskLiveData.removeObservers(getViewLifecycleOwner());
 
         createUserTaskLiveData.observe(getViewLifecycleOwner(), userTaskResource -> {
-            if (userTaskResource.status.equals(Resource.Status.LOADING))
+            if (userTaskResource.status.equals(LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_preparing_task));
-            else if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
+            else if (userTaskResource.status.equals(SUCCESS)) {
                 Log.d(TAG, "createUserTask() response");
 
                 if (userTaskResource.data != null && userTaskResource.data.getTaskId() == mSelectedTask.taskId) {
                     mUserTask = userTaskResource.data;
 
-//                    fetchSubtitlePlayVideo(true, FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN);
-
-                    playVideo(playFromBeginning, logEventName);
+                    goToPlaybackVideo(playFromBeginning, logEventName);
 
                     mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //update category after a new task was added
                 }
+
                 dismissLoading();
-            } else if (userTaskResource.status.equals(Resource.Status.ERROR)) {
+            } else if (userTaskResource.status.equals(ERROR)) {
                 //TODO do something
                 if (userTaskResource.message != null)
                     Log.d(TAG, userTaskResource.message);
@@ -509,18 +525,21 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     /**
      * Verify if the current task has already data created. IF not, is call createTask()
      */
-    private void fetchUserTasks() {
+    private void fetchUserTasksObserver() {
         fetchUserTaskLiveData = mViewModel.fetchUserTask();
 
         fetchUserTaskLiveData.removeObservers(getViewLifecycleOwner());
 
         fetchUserTaskLiveData.observe(getViewLifecycleOwner(), userTaskResource -> {
-            if (userTaskResource.status.equals(Resource.Status.SUCCESS)) {
+            Resource.Status status = userTaskResource.status;
+            UserTask data = userTaskResource.data;
+
+            if (status.equals(SUCCESS)) {
                 Log.d(TAG, "responseFromFetchUserTaskErrorDetails response");
 
-                if (userTaskResource.data != null)
-                    if (mSelectedTask.taskId == userTaskResource.data.getTaskId()) { //TODO this is a bug of the livedata. It keeps getting the last saved value from different calls
-                        mUserTask = userTaskResource.data;
+                if (data != null) {
+                    if (mSelectedTask.taskId == data.getTaskId()) { //TODO this is a bug of the livedata. It keeps getting the last saved value from different calls
+                        mUserTask = data;
 
                         setupContinueAction();
 
@@ -535,7 +554,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                             mViewModel.updateTaskByCategory(mSelectedCategory); //we update only the current video category
                         }
                     }
-            } else if (userTaskResource.status.equals(Resource.Status.ERROR)) {
+                }
+            } else if (status.equals(ERROR)) {
                 //TODO do something
                 if (userTaskResource.message != null)
                     Log.d(TAG, userTaskResource.message);
@@ -555,9 +575,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         addToListLiveData.removeObservers(getViewLifecycleOwner());
 
         addToListLiveData.observe(getViewLifecycleOwner(), booleanResource -> {
-            if (booleanResource.status.equals(Resource.Status.LOADING))
+            Resource.Status status = booleanResource.status;
+            if (status.equals(LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_add_to_list));
-            else if (booleanResource.status.equals(Resource.Status.SUCCESS)) {
+            else if (status.equals(SUCCESS)) {
                 Log.d(TAG, "addVideoToMyList() response");
 
                 setActionPanel(ACTION_ADD_MY_LIST,
@@ -571,7 +592,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
 
                 dismissLoading();
-            } else if (booleanResource.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(ERROR)) {
                 //TODO do something
                 if (booleanResource.message != null)
                     Log.d(TAG, booleanResource.message);
@@ -593,9 +614,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         removeFromListLiveData.removeObservers(getViewLifecycleOwner());
 
         removeFromListLiveData.observe(getViewLifecycleOwner(), booleanResource -> {
-            if (booleanResource.status.equals(Resource.Status.LOADING))
+            Resource.Status status = booleanResource.status;
+            if (status.equals(LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_remove_from_list));
-            else if (booleanResource.status.equals(Resource.Status.SUCCESS)) {
+            else if (status.equals(SUCCESS)) {
                 Log.d(TAG, "removeVideoFromMyList() response");
 
                 setActionPanel(ACTION_REMOVE_MY_LIST,
@@ -609,7 +631,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN);
 
                 dismissLoading();
-            } else if (booleanResource.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(ERROR)) {
                 //TODO do something
                 if (booleanResource.message != null)
                     Log.d(TAG, booleanResource.message);

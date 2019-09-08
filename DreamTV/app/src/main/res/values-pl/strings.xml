@@ -102,6 +102,7 @@
     <string name="pref_title_testing_mode_settings_description">Wyświetl filmy do testowania</string>
     <string name="pref_title_video_duration_settings">Czas trwania filmu</string>
     <string name="btn_delete_changes">Usuń</string>
+    <string name="subtitle_not_found_alert">Nie znaleziono napisów</string>
 
     <!--DATA FOR SETTINGS-->
     <string-array name="listAudioLanguages">
