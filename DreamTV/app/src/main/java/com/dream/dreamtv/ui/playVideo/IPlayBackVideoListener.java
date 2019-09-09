@@ -1,4 +1,4 @@
-package com.dream.dreamtv.common;
+package com.dream.dreamtv.ui.playVideo;
 
 
 public interface IPlayBackVideoListener {

@@ -1,4 +1,4 @@
-package com.dream.dreamtv.network;
+package com.dream.dreamtv.data.networking;
 
 import android.content.Context;
 import android.util.Log;
@@ -9,7 +9,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.dream.dreamtv.model.JsonResponseBaseBean;
+import com.dream.dreamtv.data.model.api.JsonResponseBaseBean;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.google.gson.reflect.TypeToken;
 

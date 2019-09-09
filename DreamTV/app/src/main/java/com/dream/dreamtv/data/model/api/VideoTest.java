@@ -1,4 +1,4 @@
-package com.dream.dreamtv.model;
+package com.dream.dreamtv.data.model.api;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by manuel on 7/18/17.
  */
 
-public class VideoTests  {
+public class VideoTest {
     @SerializedName("id")
     public int id;
     @SerializedName("video_id")
@@ -18,7 +18,7 @@ public class VideoTests  {
 
     @Override
     public String toString() {
-        return "VideoTests{" +
+        return "VideoTest{" +
                 "id=" + id +
                 ", videoId='" + videoId + '\'' +
                 ", subtitleVersion=" + subtitleVersion +

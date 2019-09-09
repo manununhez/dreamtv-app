@@ -23,7 +23,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.Task;
+import com.dream.dreamtv.data.model.api.Task;
 
 import androidx.core.content.ContextCompat;
 import androidx.leanback.widget.Presenter;

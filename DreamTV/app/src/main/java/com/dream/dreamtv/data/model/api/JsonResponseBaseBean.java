@@ -1,4 +1,4 @@
-package com.dream.dreamtv.model;
+package com.dream.dreamtv.data.model.api;
 
 /**
  * Created by gbogarin on 12/10/2015.

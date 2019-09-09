@@ -3,7 +3,7 @@ package com.dream.dreamtv.presenter.detailsPresenter;
 import android.content.Context;
 
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.Task;
+import com.dream.dreamtv.data.model.api.Task;
 import com.dream.dreamtv.utils.Utils;
 
 

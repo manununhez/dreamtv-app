@@ -1,8 +1,8 @@
-package com.dream.dreamtv.model;
+package com.dream.dreamtv.data.model.api;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Category {
+public class VideoTopic {
     @SerializedName("name")
     public String name;
     @SerializedName("language")
@@ -12,7 +12,7 @@ public class Category {
 
     @Override
     public String toString() {
-        return "Category{" +
+        return "VideoTopic{" +
                 "name='" + name + '\'' +
                 ", language='" + language + '\'' +
                 ", imageName='" + imageName + '\'' +

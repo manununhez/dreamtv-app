@@ -3,7 +3,7 @@ package com.dream.dreamtv.presenter.sideInfoPresenter;
 import android.content.Context;
 import android.view.ViewGroup;
 
-import com.dream.dreamtv.model.Card;
+import com.dream.dreamtv.data.model.Card;
 
 import androidx.leanback.widget.BaseCardView;
 import androidx.leanback.widget.Presenter;

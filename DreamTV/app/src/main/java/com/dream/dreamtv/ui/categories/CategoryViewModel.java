@@ -4,15 +4,15 @@ package com.dream.dreamtv.ui.categories;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.Task;
+import com.dream.dreamtv.data.model.api.Resource;
+import com.dream.dreamtv.data.model.api.Task;
 import com.dream.dreamtv.repository.AppRepository;
 
-class CategoryViewModel extends ViewModel {
+public class CategoryViewModel extends ViewModel {
 
     private final AppRepository mRepository;
 
-    CategoryViewModel(AppRepository appRepository) {
+    public CategoryViewModel(AppRepository appRepository) {
         mRepository = appRepository;
 
     }

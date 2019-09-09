@@ -1,4 +1,4 @@
-package com.dream.dreamtv.model;
+package com.dream.dreamtv.data.model.api;
 
 import android.net.Uri;
 import android.os.Parcel;

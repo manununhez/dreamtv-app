@@ -19,7 +19,7 @@ import android.view.ContextThemeWrapper;
 
 import com.bumptech.glide.Glide;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.Card;
+import com.dream.dreamtv.data.model.Card;
 import com.dream.dreamtv.presenter.sideInfoPresenter.AbstractCardPresenter;
 
 

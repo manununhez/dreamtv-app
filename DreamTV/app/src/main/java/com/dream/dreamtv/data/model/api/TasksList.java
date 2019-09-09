@@ -1,4 +1,6 @@
-package com.dream.dreamtv.model;
+package com.dream.dreamtv.data.model.api;
+
+import com.dream.dreamtv.data.model.Category;
 
 import java.util.Arrays;
 
@@ -13,7 +15,7 @@ public class TasksList {
     public int last_page;
     public int total;
     public int to;
-    public String category;
+    public Category.Type category;
 
     @Override
     public String toString() {
@@ -24,7 +26,7 @@ public class TasksList {
                 ", last_page=" + last_page +
                 ", total=" + total +
                 ", to=" + to +
-                ", category='" + category + '\'' +
+                ", category=" + category +
                 '}';
     }
 }

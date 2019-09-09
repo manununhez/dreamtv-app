@@ -19,7 +19,7 @@ import android.content.res.TypedArray;
 import android.util.Log;
 
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.Card;
+import com.dream.dreamtv.data.model.Card;
 
 /**
  * This Presenter will display a card which consists of a big image followed by a colored footer.
