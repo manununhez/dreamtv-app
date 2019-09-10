@@ -43,40 +43,4 @@ public interface NetworkDataSource {
     MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(int taskId, int subtitleVersion,
                                                             UserTaskError userTaskError, boolean saveError);
 
-    enum Urls {
-        LOGIN("login"),
-
-        REGISTER("register"),
-
-        USER_DETAILS("details"),
-
-        TASKS_BY_KEYWORD_CATEGORIES("tasks/search/category"),
-
-        TASKS_BY_CATEGORY("tasks/categories"),
-
-        TASKS_SEARCH("tasks/search"),
-
-        USER_TASKS("usertasks"),
-
-        USER_ERRORS("usertask/errors"),
-
-        USER_TASK_MY_LIST("usertask/list"),
-
-        VIDEO_TESTS("videotests"),
-
-        CATEGORIES("categories"),
-
-        REASON_ERRORS("errors"),
-
-        SUBTITLE("amara/subtitle"),
-
-        USER("user");
-
-
-        final String value;
-
-        Urls(String value) {
-            this.value = value;
-        }
-    }
 }

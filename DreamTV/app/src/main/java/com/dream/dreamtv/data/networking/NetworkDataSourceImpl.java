@@ -1,7 +1,6 @@
 package com.dream.dreamtv.data.networking;
 
 import android.content.Context;
-import android.net.Uri;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -9,7 +8,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.android.volley.VolleyError;
 import com.dream.dreamtv.data.model.Category;
-import com.dream.dreamtv.data.model.VideoDuration;
 import com.dream.dreamtv.data.model.api.AuthResponse;
 import com.dream.dreamtv.data.model.api.ErrorReason;
 import com.dream.dreamtv.data.model.api.JsonResponseBaseBean;
@@ -36,36 +34,29 @@ import static com.android.volley.Request.Method.GET;
 import static com.android.volley.Request.Method.POST;
 import static com.android.volley.Request.Method.PUT;
 import static com.dream.dreamtv.data.model.Category.Type.ALL;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.CATEGORIES;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.LOGIN;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.REASON_ERRORS;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.REGISTER;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.SUBTITLE;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.TASKS_BY_CATEGORY;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.TASKS_BY_KEYWORD_CATEGORIES;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.TASKS_SEARCH;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.USER;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.USER_DETAILS;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.USER_ERRORS;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.USER_TASKS;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.USER_TASK_MY_LIST;
-import static com.dream.dreamtv.data.networking.NetworkDataSource.Urls.VIDEO_TESTS;
-import static com.dream.dreamtv.utils.Constants.BASE_URL;
-import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE;
+import static com.dream.dreamtv.data.networking.NetworkUtils.userErrorsURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.userTaskURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.getCategoriesURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.getErrorReasonsURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.getRegisterURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.getSubtitleURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.getTasksURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.getUserURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.getVideoTestsURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.removeTaskFromUserListURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.searchByCategoryURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.searchURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.addTaskToUserListURL;
 import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE_CONFIG;
 import static com.dream.dreamtv.utils.Constants.PARAM_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.PARAM_COMPLETED;
 import static com.dream.dreamtv.utils.Constants.PARAM_EMAIL;
-import static com.dream.dreamtv.utils.Constants.PARAM_INTERFACE_MODE;
 import static com.dream.dreamtv.utils.Constants.PARAM_LANG_CODE;
-import static com.dream.dreamtv.utils.Constants.PARAM_MAX_VIDEO_DURATION;
-import static com.dream.dreamtv.utils.Constants.PARAM_MIN_VIDEO_DURATION;
 import static com.dream.dreamtv.utils.Constants.PARAM_PAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_PASSWORD;
 import static com.dream.dreamtv.utils.Constants.PARAM_QUERY;
 import static com.dream.dreamtv.utils.Constants.PARAM_RATING;
 import static com.dream.dreamtv.utils.Constants.PARAM_REASON_CODE;
-import static com.dream.dreamtv.utils.Constants.PARAM_SUB_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_SUB_LANGUAGE_CONFIG;
 import static com.dream.dreamtv.utils.Constants.PARAM_SUB_POSITION;
 import static com.dream.dreamtv.utils.Constants.PARAM_SUB_VERSION;
@@ -183,7 +174,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     @Override
     @SuppressWarnings("unchecked")
     public void login(final String email, final String password) {
-        String URL = getUri(LOGIN);
+        String URL = NetworkUtils.getLoginURL();
 
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_EMAIL, email);
@@ -223,9 +214,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
             }
         };
 
-
         mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, responseListener));
-
     }
 
     /**
@@ -236,7 +225,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
      */
     @SuppressWarnings("unchecked")
     private void register(final String email, final String password) {
-        String URL = getUri(REGISTER);
+        String URL = getRegisterURL();
 
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_EMAIL, email);
@@ -280,7 +269,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     @Override
     @SuppressWarnings("unchecked")
     public void fetchUserDetails() {
-        String URL = getUri(USER_DETAILS);
+        String URL = NetworkUtils.getUserDetailsURL();
 
         responseFromFetchUser.setValue(Resource.loading(null));
 
@@ -334,13 +323,9 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     public MutableLiveData<Resource<User>> updateUser(User user) {
         responseFromUserUpdate.setValue(Resource.loading(null));
 
-        Uri userUri = Uri.parse(BASE_URL.concat(USER.value)).buildUpon()
-                .appendQueryParameter(PARAM_INTERFACE_MODE, user.interfaceMode)
-                .appendQueryParameter(PARAM_SUB_LANGUAGE, user.subLanguage)
-                .appendQueryParameter(PARAM_AUDIO_LANGUAGE, user.audioLanguage)
-                .build();
+        String userUri = getUserURL(user.interfaceMode, user.subLanguage, user.audioLanguage);
 
-        Log.d(TAG, "updateUser() Request URL: " + userUri.toString() + " Params: interfaceMode=>" + user.interfaceMode
+        Log.d(TAG, "updateUser() Request URL: " + userUri + " Params: interfaceMode=>" + user.interfaceMode
                 + "; subLanguage=>" + user.subLanguage
                 + "; audioLanguage=>" + user.audioLanguage);
 
@@ -372,7 +357,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
             }
         };
 
-        mExecutors.networkIO().execute(() -> mVolley.requestString(PUT, userUri.toString(), null, responseListener));
+        mExecutors.networkIO().execute(() -> mVolley.requestString(PUT, userUri, null, responseListener));
 
         return responseFromUserUpdate;
     }
@@ -384,7 +369,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     @Override
     @SuppressWarnings("unchecked")
     public void fetchReasons() {
-        String URL = getUri(REASON_ERRORS);
+        String URL = getErrorReasonsURL();
 
         Log.d(TAG, "fetchReasons() Request URL: " + URL);
 
@@ -428,10 +413,9 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     public MutableLiveData<Resource<VideoTopic[]>> fetchCategories() {
         responseFromCategories.setValue(Resource.loading(null));
 
-        Uri categoriesUri = Uri.parse(BASE_URL.concat(CATEGORIES.value)).buildUpon()
-                .build();
+        String categoriesUri = getCategoriesURL();
 
-        Log.d(TAG, "fetchCategories() Request URL: " + categoriesUri.toString());
+        Log.d(TAG, "fetchCategories() Request URL: " + categoriesUri);
 
 
         ResponseListener responseListener = new ResponseListener(mContext) {
@@ -462,7 +446,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         };
 
 
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, categoriesUri.toString(), null, responseListener));
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, categoriesUri, null, responseListener));
 
         return responseFromCategories;
     }
@@ -473,7 +457,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     @Override
     @SuppressWarnings("unchecked")
     public void fetchVideoTestsDetails() {
-        String URL = getUri(VIDEO_TESTS);
+        String URL = getVideoTestsURL();
 
         Log.d(TAG, "fetchVideoTestsDetails() Request URL: " + URL);
 
@@ -521,15 +505,9 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     public MutableLiveData<Resource<SubtitleResponse>> fetchSubtitle(String videoId, String languageCode, String version) {
         responseFromFetchSubtitle.postValue(Resource.loading(null));
 
-        Uri subtitleUri;
-//        if (version > 0) {
-        subtitleUri = Uri.parse(BASE_URL.concat(SUBTITLE.value)).buildUpon()
-                .appendQueryParameter(PARAM_VIDEO_ID, videoId)
-                .appendQueryParameter(PARAM_LANG_CODE, languageCode)
-                .appendQueryParameter(PARAM_VERSION, version)
-                .build();
+        String subtitleUri = getSubtitleURL(videoId, languageCode, version);
 
-        Log.d(TAG, "fetchSubtitle() Request URL: " + subtitleUri.toString() + " Params: " + PARAM_VIDEO_ID + "=>" + videoId
+        Log.d(TAG, "fetchSubtitle() Request URL: " + subtitleUri + " Params: " + PARAM_VIDEO_ID + "=>" + videoId
                 + "; " + PARAM_LANG_CODE + "=>" + languageCode
                 + "; " + PARAM_VERSION + "=>" + version);
 
@@ -559,7 +537,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         };
 
 
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, subtitleUri.toString(), null, responseListener));
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, subtitleUri, null, responseListener));
 
         return responseFromFetchSubtitle;
     }
@@ -578,10 +556,10 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         if (page == -1) return;
 
-        Uri tasksUri = taskUrlFormatter(BASE_URL.concat(TASKS_BY_CATEGORY.value), taskRequest.getCategory(), page, taskRequest.getVideoDuration());
+        String tasksUri = getTasksURL(taskRequest.getCategory(), page, taskRequest.getVideoDuration());
 
 
-        Log.d(TAG, "fetchTasksByCategory() Request URL: " + tasksUri.toString() + " Params: " + PARAM_PAGE + "=>" + page
+        Log.d(TAG, "fetchTasksByCategory() Request URL: " + tasksUri + " Params: " + PARAM_PAGE + "=>" + page
                 + "; " + PARAM_TYPE + "=>" + taskRequest.getCategory());
 
 
@@ -620,171 +598,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
             }
         };
 
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, tasksUri.toString(), null, responseListener));
-    }
-
-
-    private Uri taskUrlFormatter(String uriString, Category.Type paramType, VideoDuration videoDuration) {
-
-        Uri uri;
-
-        if (videoDuration.getMinDuration() > 0 && videoDuration.getMaxDuration() > 0)
-            uri = Uri.parse(uriString).buildUpon()
-                    .appendQueryParameter(PARAM_TYPE, paramType.value)
-                    .appendQueryParameter(PARAM_MIN_VIDEO_DURATION, String.valueOf(videoDuration.getMinDuration()))
-                    .appendQueryParameter(PARAM_MAX_VIDEO_DURATION, String.valueOf(videoDuration.getMaxDuration()))
-                    .build();
-
-        else if (videoDuration.getMinDuration() > 0)
-            uri = Uri.parse(uriString).buildUpon()
-                    .appendQueryParameter(PARAM_TYPE, paramType.value)
-                    .appendQueryParameter(PARAM_MIN_VIDEO_DURATION, String.valueOf(videoDuration.getMinDuration()))
-                    .build();
-
-        else if (videoDuration.getMaxDuration() > 0)
-            uri = Uri.parse(uriString).buildUpon()
-                    .appendQueryParameter(PARAM_TYPE, paramType.value)
-                    .appendQueryParameter(PARAM_MAX_VIDEO_DURATION, String.valueOf(videoDuration.getMaxDuration()))
-                    .build();
-
-        else
-            uri = Uri.parse(uriString).buildUpon()
-                    .appendQueryParameter(PARAM_TYPE, paramType.value)
-                    .build();
-
-
-        return uri;
-    }
-
-    private Uri taskUrlFormatter(String uriString, Category.Type paramType, int page, VideoDuration videoDuration) {
-
-        Uri uri;
-
-        if (videoDuration.getMinDuration() > 0 && videoDuration.getMaxDuration() > 0)
-            uri = Uri.parse(uriString).buildUpon()
-                    .appendQueryParameter(PARAM_TYPE, paramType.value)
-                    .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
-                    .appendQueryParameter(PARAM_MIN_VIDEO_DURATION, String.valueOf(videoDuration.getMinDuration()))
-                    .appendQueryParameter(PARAM_MAX_VIDEO_DURATION, String.valueOf(videoDuration.getMaxDuration()))
-                    .build();
-
-        else if (videoDuration.getMinDuration() > 0)
-            uri = Uri.parse(uriString).buildUpon()
-                    .appendQueryParameter(PARAM_TYPE, paramType.value)
-                    .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
-                    .appendQueryParameter(PARAM_MIN_VIDEO_DURATION, String.valueOf(videoDuration.getMinDuration()))
-                    .build();
-
-        else if (videoDuration.getMaxDuration() > 0)
-            uri = Uri.parse(uriString).buildUpon()
-                    .appendQueryParameter(PARAM_TYPE, paramType.value)
-                    .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
-                    .appendQueryParameter(PARAM_MAX_VIDEO_DURATION, String.valueOf(videoDuration.getMaxDuration()))
-                    .build();
-
-        else
-            uri = Uri.parse(uriString).buildUpon()
-                    .appendQueryParameter(PARAM_TYPE, paramType.value)
-                    .appendQueryParameter(PARAM_PAGE, String.valueOf(page))
-                    .build();
-
-        return uri;
-    }
-
-    /**
-     * @param category category
-     * @return responseFromSearchByKeywordCategory
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public MutableLiveData<Resource<Task[]>> searchByKeywordCategory(String category) {
-
-        responseFromSearchByKeywordCategory.setValue(Resource.loading(null));
-
-        Uri searchUri = Uri.parse(BASE_URL.concat(TASKS_BY_KEYWORD_CATEGORIES.value)).buildUpon()
-                .appendQueryParameter(PARAM_CATEGORY, category)
-                .build();
-
-        Log.d(TAG, "searchByKeywordCategory() Request URL: " + searchUri.toString()
-                + " Params: " + PARAM_CATEGORY + "=>" + category);
-
-        ResponseListener responseListener = new ResponseListener(mContext) {
-            @Override
-            protected void processResponse(String response) {
-                TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
-                };
-                JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
-
-                Log.d(TAG, "searchByKeywordCategory() Response JSON: " + response);
-
-                Task[] tasks = jsonResponse.data;
-
-
-                responseFromSearchByKeywordCategory.postValue(Resource.success(tasks)); //post the value to live data
-
-            }
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-
-                //TODO do something error
-                responseFromSearchByKeywordCategory.postValue(Resource.error(error.getMessage(), null));
-
-                Log.d(TAG, "searchByKeywordCategory() Response Error: " + error.getMessage());
-            }
-        };
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, searchUri.toString(), null, responseListener));
-
-        return responseFromSearchByKeywordCategory;
-    }
-
-    /**
-     * @param query query
-     * @return responseFromSearch
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public MutableLiveData<Resource<Task[]>> search(String query) {
-
-        responseFromSearch.setValue(Resource.loading(null));
-
-        Uri searchUri = Uri.parse(BASE_URL.concat(TASKS_SEARCH.value)).buildUpon()
-                .appendQueryParameter(PARAM_QUERY, query)
-                .build();
-
-        Log.d(TAG, "search() Request URL: " + searchUri.toString() + " Params: " + PARAM_QUERY + "=>" + query);
-
-        ResponseListener responseListener = new ResponseListener(mContext) {
-            @Override
-            protected void processResponse(String response) {
-                TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
-                };
-                JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
-
-                Log.d(TAG, "search() Response JSON: " + response);
-
-                Task[] tasks = jsonResponse.data;
-
-                responseFromSearch.postValue(Resource.success(tasks)); //post the value to live data
-
-            }
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-
-                //TODO do something error
-                responseFromSearch.postValue(Resource.error(error.getMessage(), null));
-
-                Log.d(TAG, "search() Response Error: " + error.getMessage());
-            }
-        };
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, searchUri.toString(), null, responseListener));
-
-        return responseFromSearch;
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, tasksUri, null, responseListener));
     }
 
 
@@ -800,9 +614,9 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         Category.Type paramType = taskRequest.getCategory();
 
-        Uri tasksUri = taskUrlFormatter(BASE_URL.concat(TASKS_BY_CATEGORY.value), taskRequest.getCategory(), taskRequest.getVideoDuration());
+        String tasksUri = getTasksURL(taskRequest.getCategory(), taskRequest.getVideoDuration());
 
-        Log.d(TAG, "fetchTasksByCategory() Request URL: " + tasksUri.toString() + " Params: " + PARAM_TYPE + "=>" + paramType);
+        Log.d(TAG, "fetchTasksByCategory() Request URL: " + tasksUri + " Params: " + PARAM_TYPE + "=>" + paramType);
 
         ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
@@ -834,7 +648,99 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
             }
         };
 
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, tasksUri.toString(), null, responseListener));
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, tasksUri, null, responseListener));
+    }
+
+    /**
+     * @param category category
+     * @return responseFromSearchByKeywordCategory
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public MutableLiveData<Resource<Task[]>> searchByKeywordCategory(String category) {
+
+        responseFromSearchByKeywordCategory.setValue(Resource.loading(null));
+
+        String searchUri = searchByCategoryURL(category);
+
+        Log.d(TAG, "searchByKeywordCategory() Request URL: " + searchUri
+                + " Params: " + PARAM_CATEGORY + "=>" + category);
+
+        ResponseListener responseListener = new ResponseListener(mContext) {
+            @Override
+            protected void processResponse(String response) {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
+                };
+                JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
+
+                Log.d(TAG, "searchByKeywordCategory() Response JSON: " + response);
+
+                Task[] tasks = jsonResponse.data;
+
+
+                responseFromSearchByKeywordCategory.postValue(Resource.success(tasks)); //post the value to live data
+
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+
+                //TODO do something error
+                responseFromSearchByKeywordCategory.postValue(Resource.error(error.getMessage(), null));
+
+                Log.d(TAG, "searchByKeywordCategory() Response Error: " + error.getMessage());
+            }
+        };
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, searchUri, null, responseListener));
+
+        return responseFromSearchByKeywordCategory;
+    }
+
+    /**
+     * @param query query
+     * @return responseFromSearch
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public MutableLiveData<Resource<Task[]>> search(String query) {
+
+        responseFromSearch.setValue(Resource.loading(null));
+
+        String searchUri = searchURL(query);
+
+        Log.d(TAG, "search() Request URL: " + searchUri + " Params: " + PARAM_QUERY + "=>" + query);
+
+        ResponseListener responseListener = new ResponseListener(mContext) {
+            @Override
+            protected void processResponse(String response) {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
+                };
+                JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
+
+                Log.d(TAG, "search() Response JSON: " + response);
+
+                Task[] tasks = jsonResponse.data;
+
+                responseFromSearch.postValue(Resource.success(tasks)); //post the value to live data
+
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+
+                //TODO do something error
+                responseFromSearch.postValue(Resource.error(error.getMessage(), null));
+
+                Log.d(TAG, "search() Response Error: " + error.getMessage());
+            }
+        };
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, searchUri, null, responseListener));
+
+        return responseFromSearch;
     }
 
 
@@ -845,7 +751,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     @Override
     @SuppressWarnings("unchecked")
     public MutableLiveData<Resource<UserTask>> createUserTask(int taskId, int mSubtitleVersion) {
-        String URL = getUri(USER_TASKS);
+        String URL = userTaskURL();
 
         responseFromCreateUserTask.postValue(Resource.loading(null));
 
@@ -905,7 +811,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     @Override
     public MutableLiveData<Resource<Boolean>> addTaskToList(int taskId, String subLanguageConfig, String audioLanguageConfig) {
 
-        String URL = getUri(USER_TASK_MY_LIST);
+        String URL = addTaskToUserListURL();
 
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_TASK_ID, String.valueOf(taskId));
@@ -947,11 +853,9 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
      */
     @Override
     public MutableLiveData<Resource<Boolean>> removeTaskFromList(int taskId) {
-        Uri removeFromListUri = Uri.parse(BASE_URL.concat(USER_TASK_MY_LIST.value)).buildUpon()
-                .appendQueryParameter(PARAM_TASK_ID, String.valueOf(taskId))
-                .build();
+        String removeFromListUri = removeTaskFromUserListURL(taskId);
 
-        Log.d(TAG, "removeTaskFromList() Request URL: " + removeFromListUri.toString() + " Params: " + PARAM_TASK_ID + "=>" + taskId);
+        Log.d(TAG, "removeTaskFromList() Request URL: " + removeFromListUri + " Params: " + PARAM_TASK_ID + "=>" + taskId);
 
         ResponseListener responseListener = new ResponseListener(mContext) {
             @Override
@@ -975,20 +879,17 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         };
 
-        mExecutors.networkIO().execute(() -> mVolley.requestString(DELETE, removeFromListUri.toString(), null, responseListener));
+        mExecutors.networkIO().execute(() -> mVolley.requestString(DELETE, removeFromListUri, null, responseListener));
 
         return responseFromRemoveFromListTasks;
 
     }
 
-    private String getUri(Urls resource) {
-        return String.valueOf(Uri.parse(BASE_URL.concat(resource.value)).buildUpon().build());
-    }
 
     @Override
     @SuppressWarnings("unchecked")
     public void updateUserTask(UserTask userTask) {
-        String URL = getUri(USER_TASKS);
+        String URL = userTaskURL();
 
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_TASK_ID, String.valueOf(userTask.getTaskId()));
@@ -1038,7 +939,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     @Override
     @SuppressWarnings("unchecked")
     public MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(int taskId, int subtitleVersion, UserTaskError userTaskError, boolean saveError) {
-        String URL = getUri(USER_ERRORS);
+        String URL = userErrorsURL();
 
         responseFromErrorsUpdate.postValue(Resource.loading(null));
 

@@ -5,8 +5,6 @@ package com.dream.dreamtv.utils;
  */
 
 public final class Constants {
-    public static final String BASE_URL = "http://www.dreamproject.pjwstk.edu.pl/api/";     // Facu Produccion
-
     public static final String BEGINNER_INTERFACE_MODE = "beginner";
     public static final String ADVANCED_INTERFACE_MODE = "advanced";
 
