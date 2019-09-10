@@ -26,12 +26,14 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.dream.dreamtv.BuildConfig;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.Card;
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.presenter.sideInfoPresenter.SideInfoCardPresenter;
+import com.dream.dreamtv.ViewModelFactory;
+import com.dream.dreamtv.data.model.Card;
+import com.dream.dreamtv.data.model.api.Resource;
+import com.dream.dreamtv.data.model.api.Resource.Status;
+import com.dream.dreamtv.data.model.api.Task;
+import com.dream.dreamtv.di.InjectorUtils;
+import com.dream.dreamtv.presenter.CardPresenterSelector;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsActivity;
-import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -64,6 +66,7 @@ public class SearchFragment extends SearchSupportFragment
     private SearchViewModel mViewModel;
     private LoadingDialog loadingDialog;
     private FirebaseAnalytics mFirebaseAnalytics;
+    private LiveData<Resource<Task[]>> searchLiveData;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,7 +74,7 @@ public class SearchFragment extends SearchSupportFragment
 
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
 
-        SearchViewModelFactory factory = InjectorUtils.provideSearchViewModelFactory(Objects.requireNonNull(getActivity()));
+        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(Objects.requireNonNull(getActivity()));
         mViewModel = ViewModelProviders.of(this, factory).get(SearchViewModel.class);
 
         setSearchResultProvider(this);
@@ -171,22 +174,26 @@ public class SearchFragment extends SearchSupportFragment
     }
 
     private void search(String query) {
-        LiveData<Resource<Task[]>> searchLiveData = mViewModel.search(query);
+        searchLiveData = mViewModel.search(query);
         searchLiveData.removeObservers(getViewLifecycleOwner());
         searchLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
-            if (tasksListResource.status.equals(Resource.Status.LOADING))
+            Status status = tasksListResource.status;
+            Task[] data = tasksListResource.data;
+            String message = tasksListResource.message;
+
+            if (status.equals(Status.LOADING))
                 showLoading();
-            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
-                loadVideos(tasksListResource.data);
+            else if (status.equals(Status.SUCCESS)) {
+                loadVideos(data);
 
                 firebaseLoginEvents(query, FIREBASE_LOG_EVENT_SEARCH);
 
                 if (DEBUG) Log.d(TAG, "task response");
                 dismissLoading();
-            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
-                if (tasksListResource.message != null) {
-                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                if (message != null) {
+                    if (DEBUG) Log.d(TAG, message);
                 } else {
                     if (DEBUG) Log.d(TAG, "Status ERROR");
                 }
@@ -198,6 +205,12 @@ public class SearchFragment extends SearchSupportFragment
 
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        searchLiveData.removeObservers(getViewLifecycleOwner());
+    }
 
     private void loadVideos(Task[] results) {
         int titleRes;
@@ -210,12 +223,12 @@ public class SearchFragment extends SearchSupportFragment
         }
 
         HeaderItem header = new HeaderItem(getString(titleRes, mQuery));
-        ArrayObjectAdapter adapter = new ArrayObjectAdapter(new SideInfoCardPresenter(getActivity()));
+        ArrayObjectAdapter adapter = new ArrayObjectAdapter(new CardPresenterSelector(getActivity()));
         List<Card> cards = new ArrayList<>();
 
         if (results != null) {
             for (Task task : results) {
-                cards.add(new Card(task));
+                cards.add(new Card(task, Card.Type.SIDE_INFO));
             }
         }
 
@@ -265,7 +278,7 @@ public class SearchFragment extends SearchSupportFragment
 
                 startActivity(intent);
 
-                firebaseLoginEvents(card.getCategory(), task.taskId, FIREBASE_LOG_EVENT_TASK_SELECTED);
+                firebaseLoginEvents(card.getTitle(), task.taskId, FIREBASE_LOG_EVENT_TASK_SELECTED);
 
             } else
                 Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT).show();

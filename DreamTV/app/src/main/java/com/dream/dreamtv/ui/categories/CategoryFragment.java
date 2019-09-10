@@ -32,12 +32,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.Card;
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.Task;
+import com.dream.dreamtv.ViewModelFactory;
+import com.dream.dreamtv.data.model.Card;
+import com.dream.dreamtv.data.model.api.Resource;
+import com.dream.dreamtv.data.model.api.Resource.Status;
+import com.dream.dreamtv.data.model.api.Task;
+import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.presenter.CardPresenterSelector;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsActivity;
-import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -65,12 +67,13 @@ public class CategoryFragment extends VerticalGridSupportFragment {
     private String title;
     private LoadingDialog loadingDialog;
     private FirebaseAnalytics mFirebaseAnalytics;
+    private LiveData<Resource<Task[]>> categoryLiveData;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        CategoryViewModelFactory factory = InjectorUtils.provideCategoryViewModelFactory(Objects.requireNonNull(getActivity()));
+        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(Objects.requireNonNull(getActivity()));
         CategoryViewModel mViewModel = ViewModelProviders.of(this, factory).get(CategoryViewModel.class);
 
         // Obtain the FirebaseAnalytics instance.
@@ -78,24 +81,31 @@ public class CategoryFragment extends VerticalGridSupportFragment {
 
         instantiateLoading();
 
-        LiveData<Resource<Task[]>> resourceLiveData = mViewModel.searchByKeywordCateory(title);
-        resourceLiveData.observe(getViewLifecycleOwner(), resource -> {
-            if (resource.status.equals(Resource.Status.LOADING)) {
+        categoryLiveData = mViewModel.searchByKeywordCategory(title);
+        categoryLiveData.removeObservers(getViewLifecycleOwner());
+        categoryLiveData.observe(getViewLifecycleOwner(), resource -> {
+            Status status = resource.status;
+            Task[] data = resource.data;
+
+            if (status.equals(Status.LOADING)) {
                 showLoading();
-            } else if (resource.status.equals(Resource.Status.SUCCESS)) {
-                if (resource.data != null)
-                    createRows(resource.data);
+            } else if (status.equals(Status.SUCCESS)) {
+                if (data != null)
+                    createRows(data);
 
                 dismissLoading();
-            } else if (resource.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 dismissLoading();
             }
         });
 
+    }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
 
-
-
+        categoryLiveData.removeObservers(getViewLifecycleOwner());
     }
 
     //********************************************
@@ -148,7 +158,7 @@ public class CategoryFragment extends VerticalGridSupportFragment {
         List<Card> cards = new ArrayList<>();
 
         for (Task task : data) {
-            cards.add(new Card(task, title));
+            cards.add(new Card(task, Card.Type.SIDE_INFO));
         }
 
         mAdapter.addAll(0, cards);
@@ -180,7 +190,7 @@ public class CategoryFragment extends VerticalGridSupportFragment {
 
                 startActivity(intent);
 
-                firebaseLoginEvents(card.getCategory(), task.taskId, FIREBASE_LOG_EVENT_TASK_SELECTED);
+                firebaseLoginEvents(title, task.taskId, FIREBASE_LOG_EVENT_TASK_SELECTED);
 
             } else
                 Toast.makeText(getActivity(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();

@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
 import com.dream.dreamtv.R;
+import com.dream.dreamtv.ui.home.dialogs.ExitDialogFragment;
 import com.dream.dreamtv.utils.LocaleHelper;
 
 

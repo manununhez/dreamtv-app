@@ -12,13 +12,12 @@
  * the License.
  */
 
-package com.dream.dreamtv.model;
+package com.dream.dreamtv.data.model;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.util.Log;
 
-import com.google.gson.annotations.SerializedName;
+import com.dream.dreamtv.data.model.api.Task;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,55 +28,51 @@ import java.net.URISyntaxException;
  */
 public class Card {
 
-    private String mCategory;
-    @SerializedName("title")
-    private String mTitle = "";
-    private String mDescription = "";
-    private String mExtraText = "";
+    private Category.Type mCategory;
+    private String mTitle;
+    private String mDescription;
+    private String mExtraText;
     private String mImageUrl;
-    @SerializedName("footerColor")
-    private String mFooterColor = null;
-    private String mSelectedColor = null;
-    @SerializedName("localImageResource")
     private String mLocalImageResource = null;
-    private String mFooterResource = null;
-    @SerializedName("type")
     private Card.Type mType;
-    private int mId;
-    private int mWidth;
-    private int mHeight;
     private Task mTask;
 
-    public Card() {
-
+    private Card() {
+        //non-instantiable
     }
 
-    public Card(Task task, String category) {
-        mType = Type.SIDE_INFO;
-        mTitle = task.videoTitleTranslated;
-        mDescription = task.video.project;
-        mExtraText = task.videoDescriptionTranslated;
+    private Card(Card.Type cardType, String title) {
+        mType = cardType;
+        mTitle = !title.isEmpty() ? title : "<Title>";
+    }
+
+    public Card(Task task, Card.Type cardType) {
+        this(cardType, task.videoTitleTranslated);
+
+        mDescription = !task.video.project.isEmpty() ? task.video.project : "<Project>";
+        mExtraText = !task.videoDescriptionTranslated.isEmpty() ? task.videoDescriptionTranslated : "<Description>";
         mImageUrl = task.video.thumbnail;
         mTask = task;
+    }
+
+    public Card(Task task, Card.Type cardType, Category.Type category) {
+        this(task, cardType);
+
         mCategory = category;
 
-
     }
 
-    public Card(Task task) {
-        mType = Type.SIDE_INFO;
-        mTitle = task.videoTitleTranslated;
-        mDescription = task.video.project;
-        mExtraText = task.videoDescriptionTranslated;
-        mImageUrl = task.video.thumbnail;
-        mTask = task;
+    public Card(String title, Card.Type cardType, String localImageResource) {
+        this(cardType, title);
+
+        mLocalImageResource = localImageResource;
     }
 
     public Task getTask() {
         return mTask;
     }
 
-    public void setTaskEntity(Task mTask) {
+    public void setTask(Task mTask) {
         this.mTask = mTask;
     }
 
@@ -97,37 +92,6 @@ public class Card {
         mLocalImageResource = localImageResource;
     }
 
-    public String getFooterResource() {
-        return mFooterResource;
-    }
-
-    public void setFooterResource(String footerResource) {
-        mFooterResource = footerResource;
-    }
-
-    public int getWidth() {
-        return mWidth;
-    }
-
-    public void setWidth(int width) {
-        mWidth = width;
-    }
-
-    public int getHeight() {
-        return mHeight;
-    }
-
-    public void setHeight(int height) {
-        mHeight = height;
-    }
-
-    public int getId() {
-        return mId;
-    }
-
-    public void setId(int id) {
-        mId = id;
-    }
 
     public Card.Type getType() {
         return mType;
@@ -154,23 +118,6 @@ public class Card {
         mExtraText = extraText;
     }
 
-    public int getFooterColor() {
-        if (mFooterColor == null) return -1;
-        return Color.parseColor(mFooterColor);
-    }
-
-    public void setFooterColor(String footerColor) {
-        mFooterColor = footerColor;
-    }
-
-    public int getSelectedColor() {
-        if (mSelectedColor == null) return -1;
-        return Color.parseColor(mSelectedColor);
-    }
-
-    public void setSelectedColor(String selectedColor) {
-        mSelectedColor = selectedColor;
-    }
 
     public String getImageUrl() {
         return mImageUrl;
@@ -199,33 +146,16 @@ public class Card {
         return mLocalImageResource;
     }
 
-    public String getFooterLocalImageResourceName() {
-        return mFooterResource;
-    }
 
-    public String getCategory() {
+    public Category.Type getCategory() {
         return mCategory;
     }
 
 
     public enum Type {
-
-        MOVIE_COMPLETE,
-        MOVIE,
-        MOVIE_BASE,
         ICON,
-        SQUARE_BIG,
         SINGLE_LINE,
-        GAME,
-        SQUARE_SMALL,
-        DEFAULT,
         SIDE_INFO,
-        SIDE_INFO_TEST_1,
-        TEXT,
-        CHARACTER,
-        GRID_SQUARE,
-        VIDEO_GRID
-
     }
 
 }

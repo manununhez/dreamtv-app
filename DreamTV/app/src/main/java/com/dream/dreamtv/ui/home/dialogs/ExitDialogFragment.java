@@ -1,4 +1,4 @@
-package com.dream.dreamtv.ui.home;
+package com.dream.dreamtv.ui.home.dialogs;
 
 
 import android.app.Dialog;

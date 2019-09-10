@@ -17,7 +17,7 @@ public class CategoryViewModel extends ViewModel {
 
     }
 
-    LiveData<Resource<Task[]>> searchByKeywordCateory(String category){
+    LiveData<Resource<Task[]>> searchByKeywordCategory(String category){
         return mRepository.searchByKeywordCategory(category);
     }
 
