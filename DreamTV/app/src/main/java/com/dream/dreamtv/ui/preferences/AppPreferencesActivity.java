@@ -7,20 +7,22 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.preference.PreferenceManager;
 
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.User;
+import com.dream.dreamtv.ViewModelFactory;
+import com.dream.dreamtv.data.model.api.User;
+import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.utils.LocaleHelper;
 
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_USER_UPDATED;
-import static com.dream.dreamtv.utils.Constants.PREF_ABR_POLISH;
-import static com.dream.dreamtv.utils.Constants.PREF_BEGINNER_INTERFACE_MODE;
+import static com.dream.dreamtv.utils.Constants.LANGUAGE_POLISH;
 
 public class AppPreferencesActivity extends FragmentActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
     private boolean restart = false;
+    private PreferencesViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +32,9 @@ public class AppPreferencesActivity extends FragmentActivity implements SharedPr
         if (savedInstanceState != null) {
             restart = savedInstanceState.getBoolean(INTENT_EXTRA_RESTART);
         }
+
+        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(this);
+        mViewModel = ViewModelProviders.of(this, factory).get(PreferencesViewModel.class);
 
         PreferenceManager.setDefaultValues(this, R.xml.app_preferences, false);
 
@@ -59,7 +64,7 @@ public class AppPreferencesActivity extends FragmentActivity implements SharedPr
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_key_list_app_languages))) {
-            LocaleHelper.setLocale(this, sharedPreferences.getString(key, PREF_ABR_POLISH));
+            LocaleHelper.setLocale(this, sharedPreferences.getString(key, LANGUAGE_POLISH));
         }
     }
 
@@ -98,11 +103,10 @@ public class AppPreferencesActivity extends FragmentActivity implements SharedPr
 //        pref_key_testing_mode
 
         //Save user data
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        User userCached = ((DreamTVApp) getApplication()).getUser();
+        User userCached = mViewModel.getUser();
 
-        String interfaceLanguage = sharedPref.getString(getString(R.string.pref_key_list_app_languages), PREF_ABR_POLISH);
-        String interfaceMode = sharedPref.getString(getString(R.string.pref_key_list_interface_mode), PREF_BEGINNER_INTERFACE_MODE);
+        String interfaceLanguage = mViewModel.getInterfaceAppLanguage();
+        String interfaceMode = mViewModel.getInterfaceMode();
 
 
         User userUpdated = new User();

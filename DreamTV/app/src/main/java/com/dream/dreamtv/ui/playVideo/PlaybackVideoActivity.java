@@ -3,12 +3,10 @@ package com.dream.dreamtv.ui.playVideo;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -24,25 +22,24 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.common.IPlayBackVideoListener;
-import com.dream.dreamtv.common.IReasonsDialogListener;
-import com.dream.dreamtv.common.ISubtitlePlayBackListener;
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.Subtitle;
-import com.dream.dreamtv.model.SubtitleResponse;
-import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.model.UserTask;
-import com.dream.dreamtv.model.UserTaskError;
+import com.dream.dreamtv.ViewModelFactory;
+import com.dream.dreamtv.data.model.Category;
+import com.dream.dreamtv.data.model.api.Resource;
+import com.dream.dreamtv.data.model.api.Resource.Status;
+import com.dream.dreamtv.data.model.api.Subtitle;
+import com.dream.dreamtv.data.model.api.SubtitleResponse;
+import com.dream.dreamtv.data.model.api.Task;
+import com.dream.dreamtv.data.model.api.UserTask;
+import com.dream.dreamtv.data.model.api.UserTaskError;
+import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment;
 import com.dream.dreamtv.ui.playVideo.dialogs.RatingDialogFragment;
-import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.dream.dreamtv.utils.Utils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_RATING;
@@ -72,7 +69,6 @@ import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
-import static com.dream.dreamtv.utils.Constants.PREF_SUBTITLE_SMALL_SIZE;
 import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
 
 /**
@@ -98,7 +94,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private long mLastProgressPlayerTime = 0;
     private int counterClicks = 1;
 
-    private String mSelectedCategory;
+    private Category.Type mSelectedCategory;
     private VideoView mVideoView;
     private LoadingDialog loadingDialog;
     private PlaybackViewModel mViewModel;
@@ -118,6 +114,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private ProgressBar pbProgress;
     private FirebaseAnalytics mFirebaseAnalytics;
     private ArrayList<UserTaskError> userTaskErrorListForSttlPos = new ArrayList<>();
+    private LiveData<Resource<UserTaskError[]>> saveErrorsLiveData;
+    private LiveData<Resource<UserTaskError[]>> updateErrorsLiveData;
 
 
     /**
@@ -132,26 +130,24 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
         if (savedInstanceState != null) {
             mSelectedTask = savedInstanceState.getParcelable(INTENT_TASK);
-            mSelectedCategory = savedInstanceState.getString(INTENT_CATEGORY);
+            mSelectedCategory = (Category.Type) savedInstanceState.getSerializable(INTENT_CATEGORY);
             mSubtitleResponse = savedInstanceState.getParcelable(INTENT_SUBTITLE);
             mUserTask = savedInstanceState.getParcelable(INTENT_USER_TASK);
         } else {
             mSelectedTask = getIntent().getParcelableExtra(INTENT_TASK);
-            mSelectedCategory = getIntent().getStringExtra(INTENT_CATEGORY);
+            mSelectedCategory = (Category.Type) getIntent().getSerializableExtra(INTENT_CATEGORY);
             mSubtitleResponse = getIntent().getParcelableExtra(INTENT_SUBTITLE);
             mUserTask = getIntent().getParcelableExtra(INTENT_USER_TASK);
         }
 
-        PlaybackViewModelFactory factory = InjectorUtils.providePlaybackViewModelFactory(this);
+        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(this);
         mViewModel = ViewModelProviders.of(this, factory).get(PlaybackViewModel.class);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         tvSubtitle = findViewById(R.id.tvSubtitle);
-        tvSubtitle.setTextSize(Integer.parseInt(Objects.requireNonNull(sharedPreferences.getString(getString(R.string.pref_key_subtitle_size), PREF_SUBTITLE_SMALL_SIZE))));
+        tvSubtitle.setTextSize(Integer.parseInt(mViewModel.getListSubtitleSize()));
 
         tvSubtitleError = findViewById(R.id.tvSubtitleError);
-        tvSubtitleError.setTextSize(Integer.parseInt(Objects.requireNonNull(sharedPreferences.getString(getString(R.string.pref_key_subtitle_size), PREF_SUBTITLE_SMALL_SIZE))));
+        tvSubtitleError.setTextSize(Integer.parseInt(mViewModel.getListSubtitleSize()));
 
 
         tvTime = findViewById(R.id.tvTime);
@@ -191,7 +187,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         super.onSaveInstanceState(outState);
 
         outState.putParcelable(INTENT_TASK, mSelectedTask);
-        outState.putString(INTENT_CATEGORY, mSelectedCategory);
+        outState.putSerializable(INTENT_CATEGORY, mSelectedCategory);
         outState.putParcelable(INTENT_SUBTITLE, mSubtitleResponse);
         outState.putParcelable(INTENT_USER_TASK, mUserTask);
 
@@ -202,7 +198,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         super.onRestoreInstanceState(savedInstanceState);
 
         mSelectedTask = savedInstanceState.getParcelable(INTENT_TASK);
-        mSelectedCategory = savedInstanceState.getString(INTENT_CATEGORY);
+        mSelectedCategory = (Category.Type) savedInstanceState.getSerializable(INTENT_CATEGORY);
         mSubtitleResponse = savedInstanceState.getParcelable(INTENT_SUBTITLE);
         mUserTask = savedInstanceState.getParcelable(INTENT_USER_TASK);
     }
@@ -640,7 +636,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
             dismissLoading(); //in case the loading is still visible
 
-            ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(mSubtitleResponse,
+            ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(mViewModel.getReasons(), mViewModel.getUser(), mSubtitleResponse,
                     subtitle.position, mSelectedTask, userTask);
             if (!isFinishing()) {
                 FragmentManager fm = getFragmentManager();
@@ -660,7 +656,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             dismissLoading(); //in case the loading is still visible
 
             ErrorSelectionDialogFragment errorSelectionDialogFragment =
-                    ErrorSelectionDialogFragment.newInstance(mSubtitleResponse,
+                    ErrorSelectionDialogFragment.newInstance(mViewModel.getReasons(), mViewModel.getUser(), mSubtitleResponse,
                             subtitle.position, mSelectedTask, userTask, userTaskErrorList);
             if (!isFinishing()) {
                 FragmentManager fm = getFragmentManager();
@@ -717,31 +713,41 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         playVideo(null);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        saveErrorsLiveData.removeObservers(this);
+        updateErrorsLiveData.removeObservers(this);
+    }
 
     @Override
     public void onSaveReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
         Log.d(TAG, "onSaveReasons() =>" + userTaskError.toString());
 
-        LiveData<Resource<UserTaskError[]>> saveErrorsLiveData = mViewModel.errorsUpdate(taskId, subtitleVersion, userTaskError, true);
+        saveErrorsLiveData = mViewModel.errorsUpdate(taskId, subtitleVersion, userTaskError, true);
 
         saveErrorsLiveData.removeObservers(this);
 
         saveErrorsLiveData.observe(this, errorsResource -> {
-            if (errorsResource.status.equals(Resource.Status.SUCCESS)) {
+            Status status = errorsResource.status;
+            UserTaskError[] data = errorsResource.data;
+            String message = errorsResource.message;
+
+            if (status.equals(Status.SUCCESS)) {
                 Log.d(TAG, "errorsUpdate response");
 
-                mUserTask.setUserTaskErrorList(errorsResource.data);
+                mUserTask.setUserTaskErrorList(data);
 
                 firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVED_ERRORS);
 
 
-            } else if (errorsResource.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
-                if (errorsResource.message != null)
-                    Log.d(TAG, errorsResource.message);
+                if (message != null)
+                    Log.d(TAG, message);
                 else
                     Log.d(TAG, "Status ERROR");
-
 
 //                dismissLoading();
             }
@@ -750,29 +756,34 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     }
 
+
+
     @Override
     public void onUpdateReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
         Log.d(TAG, "onUpdateReasons() =>" + userTaskError.toString());
 
-        LiveData<Resource<UserTaskError[]>> updateErrorsLiveData = mViewModel.errorsUpdate(taskId, subtitleVersion, userTaskError, false);
+        updateErrorsLiveData = mViewModel.errorsUpdate(taskId, subtitleVersion, userTaskError, false);
 
         updateErrorsLiveData.removeObservers(this);
 
         updateErrorsLiveData.observe(this, errorsResource -> {
-            if (errorsResource.status.equals(Resource.Status.SUCCESS)) {
+            Status status = errorsResource.status;
+            UserTaskError[] data = errorsResource.data;
+            String message = errorsResource.message;
+
+            if (status.equals(Status.SUCCESS)) {
                 Log.d(TAG, "errorsUpdate response");
 
-                mUserTask.setUserTaskErrorList(errorsResource.data);
+                mUserTask.setUserTaskErrorList(data);
 
                 firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS);
 
-            } else if (errorsResource.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
-                if (errorsResource.message != null)
-                    Log.d(TAG, errorsResource.message);
+                if (message != null)
+                    Log.d(TAG, message);
                 else
                     Log.d(TAG, "Status ERROR");
-
 
 //                dismissLoading();
             }

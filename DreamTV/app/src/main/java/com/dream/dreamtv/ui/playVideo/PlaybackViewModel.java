@@ -1,21 +1,23 @@
 package com.dream.dreamtv.ui.playVideo;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.UserTask;
-import com.dream.dreamtv.model.UserTaskError;
+import com.dream.dreamtv.data.model.api.ErrorReason;
+import com.dream.dreamtv.data.model.api.Resource;
+import com.dream.dreamtv.data.model.api.User;
+import com.dream.dreamtv.data.model.api.UserTask;
+import com.dream.dreamtv.data.model.api.UserTaskError;
 import com.dream.dreamtv.repository.AppRepository;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
-class PlaybackViewModel extends ViewModel {
+public class PlaybackViewModel extends ViewModel {
 
     private final AppRepository mRepository;
 
-    PlaybackViewModel(AppRepository appRepository) {
+    public PlaybackViewModel(AppRepository appRepository) {
         mRepository = appRepository;
     }
 
@@ -27,5 +29,17 @@ class PlaybackViewModel extends ViewModel {
         return mRepository.errorsUpdate(taskId, subtitleVersion, userTaskError, saveError);
     }
 
+
+    String getListSubtitleSize(){
+        return mRepository.getSubtitleSizePref();
+    }
+
+    ArrayList<ErrorReason> getReasons(){
+        return mRepository.getReasons();
+    }
+
+    User getUser(){
+        return mRepository.getUser();
+    }
 }
 

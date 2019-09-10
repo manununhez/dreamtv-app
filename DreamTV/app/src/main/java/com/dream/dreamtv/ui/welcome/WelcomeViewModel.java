@@ -4,15 +4,15 @@ package com.dream.dreamtv.ui.welcome;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.User;
+import com.dream.dreamtv.data.model.api.Resource;
+import com.dream.dreamtv.data.model.api.User;
 import com.dream.dreamtv.repository.AppRepository;
 
-class WelcomeViewModel extends ViewModel {
+public class WelcomeViewModel extends ViewModel {
 
     private final AppRepository mRepository;
 
-    WelcomeViewModel(AppRepository appRepository) {
+    public WelcomeViewModel(AppRepository appRepository) {
         mRepository = appRepository;
 
     }
@@ -26,5 +26,13 @@ class WelcomeViewModel extends ViewModel {
         return mRepository.fetchUserDetails();
     }
 
+    public String getAccessToken() {
+        return mRepository.getAccessToken();
+    }
+
+
+    public User getUser() {
+        return mRepository.getUser();
+    }
 }
 

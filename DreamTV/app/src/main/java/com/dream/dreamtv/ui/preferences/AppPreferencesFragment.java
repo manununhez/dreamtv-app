@@ -3,23 +3,36 @@ package com.dream.dreamtv.ui.preferences;
 
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.leanback.preference.LeanbackPreferenceFragmentCompat;
 import androidx.leanback.preference.LeanbackSettingsFragmentCompat;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceDialogFragmentCompat;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.User;
+import com.dream.dreamtv.ViewModelFactory;
+import com.dream.dreamtv.data.model.api.User;
+import com.dream.dreamtv.di.InjectorUtils;
 
 import java.util.Objects;
 
 
 public class AppPreferencesFragment extends LeanbackSettingsFragmentCompat {
+
+    private static PreferencesViewModel mViewModel;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(Objects.requireNonNull(getActivity()));
+        mViewModel = ViewModelProviders.of(this, factory).get(PreferencesViewModel.class);
+    }
 
     @Override
     public void onPreferenceStartInitialScreen() {
@@ -54,10 +67,13 @@ public class AppPreferencesFragment extends LeanbackSettingsFragmentCompat {
     }
 
 
+
+
     /**
      * The fragment that is embedded in SettingsFragment
      */
     public static class PrefFragment extends LeanbackPreferenceFragmentCompat {
+
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -65,7 +81,7 @@ public class AppPreferencesFragment extends LeanbackSettingsFragmentCompat {
             // Load the preferences from an XML resource
             setPreferencesFromResource(R.xml.app_preferences, rootKey);
 
-            User user = ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication()).getUser();
+            User user = mViewModel.getUser();
 
             if (user != null) {
                 //TODO set settings value from Shared USER

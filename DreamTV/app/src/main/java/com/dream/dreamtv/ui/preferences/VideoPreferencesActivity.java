@@ -7,21 +7,23 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.preference.PreferenceManager;
 
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.User;
+import com.dream.dreamtv.ViewModelFactory;
+import com.dream.dreamtv.data.model.api.User;
+import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.utils.LocaleHelper;
 
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_CALL_TASKS;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_USER_UPDATED;
-import static com.dream.dreamtv.utils.Constants.PREF_ABR_POLISH;
 
 public class VideoPreferencesActivity extends FragmentActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
     private boolean restart = false;
     private boolean callAllTaskAgain = false;
+    private PreferencesViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +33,9 @@ public class VideoPreferencesActivity extends FragmentActivity implements Shared
         if (savedInstanceState != null) {
             restart = savedInstanceState.getBoolean(INTENT_EXTRA_RESTART);
         }
+
+        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(this);
+        mViewModel = ViewModelProviders.of(this, factory).get(PreferencesViewModel.class);
 
         PreferenceManager.setDefaultValues(this, R.xml.video_preferences, false);
 
@@ -99,10 +104,9 @@ public class VideoPreferencesActivity extends FragmentActivity implements Shared
         //   pref_key_list_audio_languages
 
         //Save user data
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        User userCached = ((DreamTVApp) getApplication()).getUser();
+        User userCached = mViewModel.getUser();
 
-        String audioLanguage = sharedPref.getString(getString(R.string.pref_key_list_audio_languages), PREF_ABR_POLISH);
+        String audioLanguage = mViewModel.getAudioLanguagePref();
 
 
         User userUpdated = new User();

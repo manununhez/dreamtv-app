@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityOptionsCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.DiffCallback;
@@ -21,25 +22,25 @@ import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.preference.PreferenceManager;
 
 import com.dream.dreamtv.BuildConfig;
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.Card;
-import com.dream.dreamtv.model.Category;
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.model.TasksList;
-import com.dream.dreamtv.model.User;
-import com.dream.dreamtv.presenter.SingleLineCardPresenter;
-import com.dream.dreamtv.presenter.sideInfoPresenter.SideInfoCardPresenter;
+import com.dream.dreamtv.ViewModelFactory;
+import com.dream.dreamtv.data.model.Card;
+import com.dream.dreamtv.data.model.Category.Type;
+import com.dream.dreamtv.data.model.api.Resource;
+import com.dream.dreamtv.data.model.api.Resource.Status;
+import com.dream.dreamtv.data.model.api.Task;
+import com.dream.dreamtv.data.model.api.TasksList;
+import com.dream.dreamtv.data.model.api.User;
+import com.dream.dreamtv.data.model.api.VideoTopic;
+import com.dream.dreamtv.di.InjectorUtils;
+import com.dream.dreamtv.presenter.CardPresenterSelector;
 import com.dream.dreamtv.ui.categories.CategoryActivity;
 import com.dream.dreamtv.ui.preferences.AppPreferencesActivity;
 import com.dream.dreamtv.ui.preferences.VideoPreferencesActivity;
 import com.dream.dreamtv.ui.search.SearchActivity;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsActivity;
-import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -47,6 +48,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.dream.dreamtv.data.model.Category.Type.ALL;
+import static com.dream.dreamtv.data.model.Category.Type.CONTINUE;
+import static com.dream.dreamtv.data.model.Category.Type.FINISHED;
+import static com.dream.dreamtv.data.model.Category.Type.MY_LIST;
+import static com.dream.dreamtv.data.model.Category.Type.SETTINGS;
+import static com.dream.dreamtv.data.model.Category.Type.TEST;
+import static com.dream.dreamtv.data.model.Category.Type.TOPICS;
 import static com.dream.dreamtv.utils.Constants.EMPTY_ITEM;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_CATEGORY_SELECTED;
@@ -66,16 +74,12 @@ import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_TOPIC_NAME;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_USER_UPDATED;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
-import static com.dream.dreamtv.utils.Constants.TASKS_ALL_CAT;
-import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
-import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
-import static com.dream.dreamtv.utils.Constants.TASKS_MY_LIST_CAT;
-import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
 
 
 public class HomeFragment extends BrowseSupportFragment {
+    public static final String ICON_SETTINGS_APP = "ic_settings_app";
+    public static final String ICON_SETTINGS_VIDEO = "ic_settings_video";
     private static final String TAG = HomeFragment.class.getSimpleName();
-
     private static final boolean DEBUG = BuildConfig.DEBUG;
     //    private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
     private static final int REQUEST_APP_SETTINGS = 45690;
@@ -97,6 +101,7 @@ public class HomeFragment extends BrowseSupportFragment {
     private LiveData<Resource<TasksList>> testTaskLiveData;
     private FirebaseAnalytics mFirebaseAnalytics;
     private LiveData<Resource<User>> updateUserLiveData;
+    private LiveData<Resource<VideoTopic[]>> categoriesLiveData;
 
 
     @Override
@@ -112,11 +117,11 @@ public class HomeFragment extends BrowseSupportFragment {
         Log.i(TAG, "onActivityCreated()");
 
 //        // Get the ViewModel from the factory
-        HomeViewModelFactory factory = InjectorUtils.provideMainViewModelFactory(Objects.requireNonNull(getActivity()));
+        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(getContext());
         mViewModel = ViewModelProviders.of(this, factory).get(HomeViewModel.class);
 
         // Obtain the FirebaseAnalytics instance.
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
 
         setupVideosList();
 
@@ -124,40 +129,45 @@ public class HomeFragment extends BrowseSupportFragment {
 
         initSettingsRow();
 
-
         syncData();
+    }
+
+    public FragmentActivity getContext() {
+        return Objects.requireNonNull(getActivity());
     }
 
     private void syncData() {
         if (DEBUG) Log.d(TAG, "syncData()");
 
 
-        boolean testingMode = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()))
-                .getBoolean(getActivity().getString(R.string.pref_key_testing_mode), false);
+        boolean testingMode = mViewModel.getTestingMode();
 
         addRowSettings();
 
 //------- ALL TASKS
-        allTaskLiveData = mViewModel.requestTasksByCategory(TASKS_ALL_CAT);
+        allTaskLiveData = mViewModel.requestTasksByCategory(ALL);
         allTaskLiveData.removeObservers(getViewLifecycleOwner());
         allTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
+            Status status = tasksListResource.status;
+            TasksList data = tasksListResource.data;
+            String errorMessage = tasksListResource.message;
 
-            if (tasksListResource.status.equals(Resource.Status.LOADING))
+            if (status.equals(Status.LOADING))
                 showLoading();
-            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
-                if (tasksListResource.data != null) {
-                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
-                        loadVideos(tasksListResource.data);
+            else if (status.equals(Status.SUCCESS)) {
+                if (data != null) {
+                    if (data.data != null && data.data.length > 0)
+                        loadVideos(data);
                     else verifyRowExistenceAndRemove(rowAllTasks);
                 }
 
                 if (DEBUG) Log.d(TAG, "task response: rowAllTasks");
 
                 dismissLoading();
-            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
-                if (tasksListResource.message != null) {
-                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                if (errorMessage != null) {
+                    if (DEBUG) Log.d(TAG, errorMessage);
                 } else {
                     if (DEBUG) Log.d(TAG, "Status ERROR");
                 }
@@ -166,19 +176,23 @@ public class HomeFragment extends BrowseSupportFragment {
             }
 
         });
-        mViewModel.updateTaskByCategory(TASKS_ALL_CAT);
+        mViewModel.updateTaskByCategory(ALL);
 
 
 //------- CONTINUE TASKS
-        continueTaskLiveData = mViewModel.requestTasksByCategory(TASKS_CONTINUE_CAT);
+        continueTaskLiveData = mViewModel.requestTasksByCategory(CONTINUE);
         continueTaskLiveData.removeObservers(getViewLifecycleOwner());
         continueTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
-            if (tasksListResource.status.equals(Resource.Status.LOADING))
+            Status status = tasksListResource.status;
+            TasksList data = tasksListResource.data;
+            String errorMessage = tasksListResource.message;
+
+            if (status.equals(Status.LOADING))
                 showLoading();
-            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
-                if (tasksListResource.data != null) {
-                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
-                        loadVideos(tasksListResource.data);
+            else if (status.equals(Status.SUCCESS)) {
+                if (data != null) {
+                    if (data.data != null && data.data.length > 0)
+                        loadVideos(data);
                     else verifyRowExistenceAndRemove(rowContinueTasks);
                 }
 
@@ -186,10 +200,10 @@ public class HomeFragment extends BrowseSupportFragment {
 
 
                 dismissLoading();
-            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
-                if (tasksListResource.message != null) {
-                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                if (errorMessage != null) {
+                    if (DEBUG) Log.d(TAG, errorMessage);
                 } else {
                     if (DEBUG) Log.d(TAG, "Status ERROR");
                 }
@@ -197,33 +211,35 @@ public class HomeFragment extends BrowseSupportFragment {
                 dismissLoading();
             }
 
-            // TODO throw new RuntimeException("Get list sorted of continued tasks");
-
         });
 
-        mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT);
+        mViewModel.updateTaskByCategory(CONTINUE);
 
 
 //------- FINISHED TASKS
-        finishedTaskLiveData = mViewModel.requestTasksByCategory(TASKS_FINISHED_CAT);
+        finishedTaskLiveData = mViewModel.requestTasksByCategory(FINISHED);
         finishedTaskLiveData.removeObservers(getViewLifecycleOwner());
         finishedTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
-            if (tasksListResource.status.equals(Resource.Status.LOADING))
+            Status status = tasksListResource.status;
+            TasksList data = tasksListResource.data;
+            String errorMessage = tasksListResource.message;
+
+            if (status.equals(Status.LOADING))
                 showLoading();
-            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
-                if (tasksListResource.data != null) {
-                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
-                        loadVideos(tasksListResource.data);
+            else if (status.equals(Status.SUCCESS)) {
+                if (data != null) {
+                    if (data.data != null && data.data.length > 0)
+                        loadVideos(data);
                     else verifyRowExistenceAndRemove(rowFinishedTasks);
                 }
 
                 if (DEBUG) Log.d(TAG, "task response: rowFinishedTasks");
 
                 dismissLoading();
-            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
-                if (tasksListResource.message != null) {
-                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                if (errorMessage != null) {
+                    if (DEBUG) Log.d(TAG, errorMessage);
                 } else {
                     if (DEBUG) Log.d(TAG, "Status ERROR");
                 }
@@ -235,19 +251,23 @@ public class HomeFragment extends BrowseSupportFragment {
 
         });
 
-        mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT);
+        mViewModel.updateTaskByCategory(FINISHED);
 
 
 //------- MY LIST TASKS
-        myListTaskLiveData = mViewModel.requestTasksByCategory(TASKS_MY_LIST_CAT);
+        myListTaskLiveData = mViewModel.requestTasksByCategory(MY_LIST);
         myListTaskLiveData.removeObservers(getViewLifecycleOwner());
         myListTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
-            if (tasksListResource.status.equals(Resource.Status.LOADING))
+            Status status = tasksListResource.status;
+            TasksList data = tasksListResource.data;
+            String errorMessage = tasksListResource.message;
+
+            if (status.equals(Status.LOADING))
                 showLoading();
-            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
-                if (tasksListResource.data != null) {
-                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0) {
-                        loadVideos(tasksListResource.data);
+            else if (status.equals(Status.SUCCESS)) {
+                if (data != null) {
+                    if (data.data != null && data.data.length > 0) {
+                        loadVideos(data);
                     } else verifyRowExistenceAndRemove(rowMyListTasks);
                 }
 
@@ -255,10 +275,10 @@ public class HomeFragment extends BrowseSupportFragment {
 
 
                 dismissLoading();
-            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
-                if (tasksListResource.message != null) {
-                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                if (errorMessage != null) {
+                    if (DEBUG) Log.d(TAG, errorMessage);
                 } else {
                     if (DEBUG) Log.d(TAG, "Status ERROR");
                 }
@@ -270,19 +290,23 @@ public class HomeFragment extends BrowseSupportFragment {
 
         });
 
-        mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT);
+        mViewModel.updateTaskByCategory(MY_LIST);
 
 
 //------- TEST TASKS
-        testTaskLiveData = mViewModel.requestTasksByCategory(TASKS_TEST_CAT);
+        testTaskLiveData = mViewModel.requestTasksByCategory(TEST);
         testTaskLiveData.removeObservers(getViewLifecycleOwner());
         testTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
-            if (tasksListResource.status.equals(Resource.Status.LOADING))
+            Status status = tasksListResource.status;
+            TasksList data = tasksListResource.data;
+            String errorMessage = tasksListResource.message;
+
+            if (status.equals(Status.LOADING))
                 showLoading();
-            else if (tasksListResource.status.equals(Resource.Status.SUCCESS)) {
-                if (tasksListResource.data != null) {
-                    if (tasksListResource.data.data != null && tasksListResource.data.data.length > 0)
-                        loadVideos(tasksListResource.data);
+            else if (status.equals(Status.SUCCESS)) {
+                if (data != null) {
+                    if (data.data != null && data.data.length > 0)
+                        loadVideos(data);
                     else verifyRowExistenceAndRemove(rowTestTasks);
                 }
 
@@ -290,10 +314,10 @@ public class HomeFragment extends BrowseSupportFragment {
 
 
                 dismissLoading();
-            } else if (tasksListResource.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
-                if (tasksListResource.message != null) {
-                    if (DEBUG) Log.d(TAG, tasksListResource.message);
+                if (errorMessage != null) {
+                    if (DEBUG) Log.d(TAG, errorMessage);
                 } else if (DEBUG) Log.d(TAG, "Status ERROR");
 
                 dismissLoading();
@@ -302,7 +326,7 @@ public class HomeFragment extends BrowseSupportFragment {
         });
 
         if (testingMode)
-            mViewModel.updateTaskByCategory(TASKS_TEST_CAT);
+            mViewModel.updateTaskByCategory(TEST);
 
 
 //        REASONS
@@ -312,24 +336,28 @@ public class HomeFragment extends BrowseSupportFragment {
         mViewModel.fetchVideoTestsDetails();
 
 //        CATEGORIES
-        LiveData<Resource<Category[]>> categoriesLiveData = mViewModel.fetchCategories(getApplication().getUser().subLanguage);
+        categoriesLiveData = mViewModel.fetchCategories();
         categoriesLiveData.removeObservers(getViewLifecycleOwner());
         categoriesLiveData.observe(getViewLifecycleOwner(), resource -> {
-            if (resource.status.equals(Resource.Status.LOADING)) {
+            Status status = resource.status;
+            VideoTopic[] data = resource.data;
+            String errorMessage = resource.message;
+
+            if (status.equals(Status.LOADING)) {
                 showLoading();
-            } else if (resource.status.equals(Resource.Status.SUCCESS)) {
-                if (resource.data != null) {
-                    categoriesRowSettings(resource.data);
+            } else if (status.equals(Status.SUCCESS)) {
+                if (data != null) {
+                    categoriesRowSettings(data);
                 } else verifyRowExistenceAndRemove(rowCategories);
 
 
                 if (DEBUG) Log.d(TAG, "task response: rowCategories");
 
                 dismissLoading();
-            } else if (resource.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
-                if (resource.message != null) {
-                    if (DEBUG) Log.d(TAG, resource.message);
+                if (errorMessage != null) {
+                    if (DEBUG) Log.d(TAG, errorMessage);
                 } else {
                     if (DEBUG) Log.d(TAG, "Status ERROR");
                 }
@@ -349,34 +377,40 @@ public class HomeFragment extends BrowseSupportFragment {
     private void initSettingsRow() {
         if (DEBUG) Log.d(TAG, "initSettingsRow()");
 
-        HeaderItem gridHeader = new HeaderItem(getString(R.string.title_preferences_category));
 
-        SingleLineCardPresenter mIconCardPresenter = new SingleLineCardPresenter(getActivity());
-        ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(mIconCardPresenter);
+        rowSettings = createListRow(getString(R.string.title_preferences_category), SETTINGS);
 
+        rowCategories = createListRow(getString(R.string.title_topics_category), TOPICS);
 
-        Card appSettingsCard = new Card();
-        appSettingsCard.setTitle(getString(R.string.pref_title_app_settings));
-        appSettingsCard.setLocalImageResource("ic_settings_app");
-        gridRowAdapter.add(appSettingsCard);
+        rowAllTasks = createListRow(getString(R.string.title_check_new_tasks_category), ALL);
+        rowMyListTasks = createListRow(getString(R.string.title_my_list_category), MY_LIST);
+        rowFinishedTasks = createListRow(getString(R.string.title_finished_category), FINISHED);
+        rowContinueTasks = createListRow(getString(R.string.title_continue_watching_category), CONTINUE);
+        rowTestTasks = createListRow(getString(R.string.title_test_category), TEST);
 
-        Card videoSettingsCard = new Card();
-        videoSettingsCard.setTitle(getString(R.string.pref_title_video_settings));
-        videoSettingsCard.setLocalImageResource("ic_settings_video");
-        gridRowAdapter.add(videoSettingsCard);
+    }
 
-        rowSettings = new ListRow(gridHeader, gridRowAdapter);
+    private ListRow createListRow(String title, Type category) {
 
+        switch (category) {
+            case SETTINGS:
+                ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(new CardPresenterSelector(getContext()));
 
-        rowCategories = new ListRow(new HeaderItem(getString(R.string.title_topics_category)), new ArrayObjectAdapter(new SingleLineCardPresenter(getActivity())));
+                gridRowAdapter.add(new Card(getString(R.string.pref_title_app_settings), Card.Type.ICON, ICON_SETTINGS_APP));
+                gridRowAdapter.add(new Card(getString(R.string.pref_title_video_settings), Card.Type.ICON, ICON_SETTINGS_VIDEO));
 
+                return new ListRow(new HeaderItem(title), gridRowAdapter);
 
-        rowAllTasks = new ListRow(new HeaderItem(getString(R.string.title_check_new_tasks_category)), new ArrayObjectAdapter(new SideInfoCardPresenter(getActivity())));
-        rowMyListTasks = new ListRow(new HeaderItem(getString(R.string.title_my_list_category)), new ArrayObjectAdapter(new SideInfoCardPresenter(getActivity())));
-        rowFinishedTasks = new ListRow(new HeaderItem(getString(R.string.title_finished_category)), new ArrayObjectAdapter(new SideInfoCardPresenter(getActivity())));
-        rowContinueTasks = new ListRow(new HeaderItem(getString(R.string.title_continue_watching_category)), new ArrayObjectAdapter(new SideInfoCardPresenter(getActivity())));
-        rowTestTasks = new ListRow(new HeaderItem(getString(R.string.title_test_category)), new ArrayObjectAdapter(new SideInfoCardPresenter(getActivity())));
-
+            case TOPICS:
+            case ALL:
+            case MY_LIST:
+            case FINISHED:
+            case CONTINUE:
+            case TEST:
+                return new ListRow(new HeaderItem(title), new ArrayObjectAdapter(new CardPresenterSelector(getContext())));
+            default:
+                throw new RuntimeException("VideoTopic " + category + " not contemplated");
+        }
     }
 
 
@@ -404,23 +438,21 @@ public class HomeFragment extends BrowseSupportFragment {
         if (updateUserLiveData != null)
             updateUserLiveData.removeObservers(getViewLifecycleOwner());
 
-    }
+        if (categoriesLiveData != null)
+            categoriesLiveData.removeObservers(getViewLifecycleOwner());
 
-
-    private DreamTVApp getApplication() {
-        return ((DreamTVApp) Objects.requireNonNull(getActivity()).getApplication());
     }
 
 
     private void setupVideosList() {
         if (DEBUG) Log.d(TAG, "setupVideosList()");
 
-        setBadgeDrawable(Objects.requireNonNull(getActivity()).getResources().getDrawable(R.drawable.dreamtv_logo, null));
+        setBadgeDrawable(getContext().getResources().getDrawable(R.drawable.dreamtv_logo, null));
         setHeadersTransitionOnBackEnabled(false);
 
 
         setOnSearchClickedListener(view -> {
-                    Intent intent = new Intent(getActivity(), SearchActivity.class);
+                    Intent intent = new Intent(getContext(), SearchActivity.class);
                     startActivity(intent);
                 }
         );
@@ -434,14 +466,14 @@ public class HomeFragment extends BrowseSupportFragment {
 
     private void loadVideos(TasksList tasksList) {
 
-        String category = tasksList.category;
+        Type category = tasksList.category;
 
-        if (DEBUG) Log.d(TAG, "Loading video => Category:" + category);
+        if (DEBUG) Log.d(TAG, "Loading video => VideoTopic:" + category);
 
         List<Card> cards = new ArrayList<>();
 
         for (Task task : tasksList.data) {
-            cards.add(new Card(task, tasksList.category));
+            cards.add(new Card(task, Card.Type.SIDE_INFO, tasksList.category));
         }
 
 
@@ -460,24 +492,23 @@ public class HomeFragment extends BrowseSupportFragment {
 
         ListRow listRow;
         switch (category) {
-            case TASKS_MY_LIST_CAT:
+            case MY_LIST:
                 listRow = rowMyListTasks;
                 break;
-            case TASKS_FINISHED_CAT:
+            case FINISHED:
                 listRow = rowFinishedTasks;
                 break;
-            case TASKS_CONTINUE_CAT:
+            case CONTINUE:
                 listRow = rowContinueTasks;
                 break;
-            case TASKS_ALL_CAT:
+            case ALL:
                 listRow = rowAllTasks;
                 break;
-            case TASKS_TEST_CAT:
+            case TEST:
                 listRow = rowTestTasks;
                 break;
             default:
-                listRow = rowAllTasks;
-                break;
+                throw new RuntimeException("Category " + category + " not contemplated!");
         }
 
 
@@ -500,7 +531,7 @@ public class HomeFragment extends BrowseSupportFragment {
 
     }
 
-    private void categoriesRowSettings(Category[] categories) {
+    private void categoriesRowSettings(VideoTopic[] categories) {
         List<Card> cards = new ArrayList<>();
 
 
@@ -517,11 +548,8 @@ public class HomeFragment extends BrowseSupportFragment {
         };
 
 
-        for (Category category : categories) {
-            Card card = new Card();
-            card.setTitle(category.name);
-//            card.setFooterColor("#c51162");
-            card.setLocalImageResource(category.imageName);
+        for (VideoTopic videoTopic : categories) {
+            Card card = new Card(videoTopic.name, Card.Type.SINGLE_LINE, videoTopic.imageName);
             cards.add(card);
 
         }
@@ -591,10 +619,11 @@ public class HomeFragment extends BrowseSupportFragment {
     }
 
     private void firebaseLoginEvents(String logEventName) {
-        boolean testingMode = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()))
-                .getBoolean(getActivity().getString(R.string.pref_key_testing_mode), false);
+        boolean testingMode = mViewModel.getTestingMode();
 
-        User user = getApplication().getUser();
+        User user = mViewModel.getUser();
+
+        Log.d(TAG, "User from firebaseLog: " + user);
 
         Bundle bundle = new Bundle();
 
@@ -621,19 +650,23 @@ public class HomeFragment extends BrowseSupportFragment {
 
     private void updateUser(User userUpdated) {
         updateUserLiveData = mViewModel.updateUser(userUpdated);
-
+        updateUserLiveData.removeObservers(getViewLifecycleOwner());
         updateUserLiveData.observe(getViewLifecycleOwner(), response -> {
-            if (response.status.equals(Resource.Status.SUCCESS)) {
+            Status status = response.status;
+            User data = response.data;
+            String message = response.message;
+
+            if (status.equals(Status.SUCCESS)) {
                 if (DEBUG) Log.d(TAG, "Response from userUpdate");
-                if (response.data != null) {
-                    if (DEBUG) Log.d(TAG, response.data.toString());
+                if (data != null) {
+                    if (DEBUG) Log.d(TAG, data.toString());
 
                     firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN);
                 }
-            } else if (response.status.equals(Resource.Status.ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something error
-                if (response.message != null) {
-                    if (DEBUG) Log.d(TAG, response.message);
+                if (message != null) {
+                    if (DEBUG) Log.d(TAG, message);
                 } else {
                     if (DEBUG) Log.d(TAG, "Status ERROR");
                 }
@@ -660,21 +693,20 @@ public class HomeFragment extends BrowseSupportFragment {
 
                 if (restart) {
                     //To update screen language
-                    Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
+                    getContext().recreate(); //Recreate activity
                     if (DEBUG)
                         Log.d(TAG, "REQUEST_APP_SETTINGS - Different language. Updating screen.");
                 } else {
                     //we check is we are not in testing mode. If the language screen does not recreate the activity,
                     // we manually delete the row testing
-                    boolean testingMode = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity()))
-                            .getBoolean(getActivity().getString(R.string.pref_key_testing_mode), false);
+                    boolean testingMode = mViewModel.getTestingMode();
 
                     if (!testingMode) {
                         verifyRowExistenceAndRemove(rowTestTasks);
                         if (DEBUG)
                             Log.d(TAG, "REQUEST_APP_SETTINGS - Removed test category.");
                     } else {
-                        mViewModel.updateTaskByCategory(TASKS_TEST_CAT);
+                        mViewModel.updateTaskByCategory(TEST);
                         if (DEBUG)
                             Log.d(TAG, "REQUEST_APP_SETTINGS - Added test category.");
                     }
@@ -689,18 +721,20 @@ public class HomeFragment extends BrowseSupportFragment {
                 boolean restart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
 
                 if (restart) {
+                    //we force to call firebaselog here, because otherwise the app restarts and the data get lost
+                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN);
                     //To update screen language
-                    Objects.requireNonNull(getActivity()).recreate(); //Recreate activity
+                    getContext().recreate(); //Recreate activity
                     if (DEBUG)
                         Log.d(TAG, "REQUEST_VIDEO_SETTINGS - Different video audio language. Updating screen.");
                 } else {
                     boolean callAllCategoriesTasks = data.getBooleanExtra(INTENT_EXTRA_CALL_TASKS, false);
                     if (callAllCategoriesTasks) {
-                        mViewModel.updateTaskByCategory(TASKS_ALL_CAT);
-                        mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT);
-                        mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT);
-                        mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT);
-                        mViewModel.updateTaskByCategory(TASKS_TEST_CAT);
+                        mViewModel.updateTaskByCategory(ALL);
+                        mViewModel.updateTaskByCategory(CONTINUE);
+                        mViewModel.updateTaskByCategory(FINISHED);
+                        mViewModel.updateTaskByCategory(MY_LIST);
+                        mViewModel.updateTaskByCategory(TEST);
                         if (DEBUG)
                             Log.d(TAG, "REQUEST_VIDEO_SETTINGS - Changed video duration. Call all Tasks again.");
                     }
@@ -717,7 +751,7 @@ public class HomeFragment extends BrowseSupportFragment {
     private void instantiateLoading() {
         if (DEBUG) Log.d(TAG, "instantiateLoading()");
 
-        loadingDialog = new LoadingDialog(getActivity(), getString(R.string.title_loading_retrieve_tasks));
+        loadingDialog = new LoadingDialog(getContext(), getString(R.string.title_loading_retrieve_tasks));
         loadingDialog.setCanceledOnTouchOutside(false);
     }
 
@@ -726,7 +760,7 @@ public class HomeFragment extends BrowseSupportFragment {
     }
 
     private void showLoading() {
-        if (!Objects.requireNonNull(getActivity()).isFinishing())
+        if (!getContext().isFinishing())
             loadingDialog.show();
 
     }
@@ -741,36 +775,36 @@ public class HomeFragment extends BrowseSupportFragment {
                 Card card = (Card) item;
                 if (row.getHeaderItem().getName().equals(getString(R.string.title_preferences_category))) {
                     if (card.getTitle().equals(getString(R.string.pref_title_video_settings))) {
-                        Intent intent = new Intent(getActivity(), VideoPreferencesActivity.class);
+                        Intent intent = new Intent(getContext(), VideoPreferencesActivity.class);
                         startActivityForResult(intent, REQUEST_VIDEO_SETTINGS);
                         firebaseLoginEvents(card.getTitle(), FIREBASE_LOG_EVENT_SETTINGS);
                     } else if (card.getTitle().equals(getString(R.string.pref_title_app_settings))) {
-                        Intent intent = new Intent(getActivity(), AppPreferencesActivity.class);
+                        Intent intent = new Intent(getContext(), AppPreferencesActivity.class);
                         startActivityForResult(intent, REQUEST_APP_SETTINGS);
                         firebaseLoginEvents(card.getTitle(), FIREBASE_LOG_EVENT_SETTINGS);
                     }
                 } else if (row.getHeaderItem().getName().equals(getString(R.string.title_topics_category))) {
-                    Intent intent = new Intent(getActivity(), CategoryActivity.class);
+                    Intent intent = new Intent(getContext(), CategoryActivity.class);
                     intent.putExtra(INTENT_EXTRA_TOPIC_NAME, card.getTitle());
                     startActivity(intent);
                     firebaseLoginEvents(card.getTitle(), FIREBASE_LOG_EVENT_CATEGORIES);
                 } else {
                     Task task = card.getTask();
 
-                    Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
+                    Intent intent = new Intent(getContext(), VideoDetailsActivity.class);
                     intent.putExtra(INTENT_TASK, task);
                     intent.putExtra(INTENT_CATEGORY, card.getCategory());
 
                     Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            Objects.requireNonNull(getActivity()), itemViewHolder.view,
+                            getContext(), itemViewHolder.view,
                             VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
 
                     startActivity(intent, bundle);
 
-                    firebaseLoginEvents(card.getCategory(), task.taskId, FIREBASE_LOG_EVENT_TASK_SELECTED);
+                    firebaseLoginEvents(card.getCategory().toString(), task.taskId, FIREBASE_LOG_EVENT_TASK_SELECTED);
                 }
             } else
-                Toast.makeText(getActivity(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();
         }
     }
 

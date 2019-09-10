@@ -34,13 +34,16 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.SubtitleResponse;
-import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.model.UserTask;
-import com.dream.dreamtv.model.VideoTests;
+import com.dream.dreamtv.ViewModelFactory;
+import com.dream.dreamtv.data.model.Category;
+import com.dream.dreamtv.data.model.api.Resource;
+import com.dream.dreamtv.data.model.api.Resource.Status;
+import com.dream.dreamtv.data.model.api.SubtitleResponse;
+import com.dream.dreamtv.data.model.api.Task;
+import com.dream.dreamtv.data.model.api.UserTask;
+import com.dream.dreamtv.data.model.api.VideoTest;
+import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.presenter.detailsPresenter.DetailsDescriptionPresenter;
 import com.dream.dreamtv.ui.playVideo.PlaybackVideoActivity;
 import com.dream.dreamtv.ui.playVideo.PlaybackVideoYoutubeActivity;
@@ -52,9 +55,11 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.util.List;
 import java.util.Objects;
 
-import static com.dream.dreamtv.model.Resource.Status.ERROR;
-import static com.dream.dreamtv.model.Resource.Status.LOADING;
-import static com.dream.dreamtv.model.Resource.Status.SUCCESS;
+import static com.dream.dreamtv.data.model.Category.Type.ALL;
+import static com.dream.dreamtv.data.model.Category.Type.CONTINUE;
+import static com.dream.dreamtv.data.model.Category.Type.FINISHED;
+import static com.dream.dreamtv.data.model.Category.Type.MY_LIST;
+import static com.dream.dreamtv.data.model.Category.Type.TEST;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_DURATION;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
@@ -69,13 +74,7 @@ import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
-import static com.dream.dreamtv.utils.Constants.TASKS_ALL_CAT;
-import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
-import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
-import static com.dream.dreamtv.utils.Constants.TASKS_MY_LIST_CAT;
-import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
 import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
-import static com.dream.dreamtv.utils.InjectorUtils.provideVideoDetailsViewModelFactory;
 
 
 /*
@@ -103,7 +102,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     private VideoDetailsViewModel mViewModel;
     private Task mSelectedTask;
-    private String mSelectedCategory;
+    private Category.Type mSelectedCategory;
     private SubtitleResponse mSubtitleResponse;
     private UserTask mUserTask;
     private LoadingDialog loadingDialog;
@@ -121,7 +120,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         prepareBackgroundManager();
 
         // Get the ViewModel from the factory
-        VideoDetailsViewModelFactory factory = provideVideoDetailsViewModelFactory(getContext());
+        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(getContext());
         mViewModel = ViewModelProviders.of(this, factory).get(VideoDetailsViewModel.class);
 
         // Obtain the FirebaseAnalytics instance.
@@ -152,7 +151,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void getValuesFromIntent() {
         mSelectedTask = getContext().getIntent().getParcelableExtra(INTENT_TASK);
 
-        mSelectedCategory = getContext().getIntent().getStringExtra(INTENT_CATEGORY);
+        mSelectedCategory = (Category.Type) getContext().getIntent().getSerializableExtra(INTENT_CATEGORY);
     }
 
 
@@ -398,27 +397,31 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         fetchSubtitleLiveData.removeObservers(getViewLifecycleOwner());
 
         fetchSubtitleLiveData.observe(getViewLifecycleOwner(), subtitleResponseResource -> {
-            Resource.Status status = subtitleResponseResource.status;
+            Status status = subtitleResponseResource.status;
             SubtitleResponse data = subtitleResponseResource.data;
 
-            if (status.equals(LOADING))
+            if (status.equals(Status.LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_retrieve_subtitle));
 
-            else if (status.equals(SUCCESS)) {
+            else if (status.equals(Status.SUCCESS)) {
                 Log.d(TAG, "Subtitle response");
 
                 if (data != null && mSelectedTask.video.title.equals(data.videoTitleOriginal)) {
                     mSubtitleResponse = data;
 
-                    mSelectedTask.videoTitleTranslated = mSubtitleResponse.videoTitleTranslated;
-                    mSelectedTask.videoDescriptionTranslated = mSubtitleResponse.videoDescriptionTranslated;
+//                    If the translated text are empty, we show the original title and description without updating them
+                    if (!mSubtitleResponse.videoTitleTranslated.isEmpty())
+                        mSelectedTask.videoTitleTranslated = mSubtitleResponse.videoTitleTranslated;
+
+                    if (!mSubtitleResponse.videoDescriptionTranslated.isEmpty())
+                        mSelectedTask.videoDescriptionTranslated = mSubtitleResponse.videoDescriptionTranslated;
                 }
 
                 dismissLoading();
 
                 setupDetailsOverview();
 
-            } else if (status.equals(ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (subtitleResponseResource.message != null)
                     Log.d(TAG, subtitleResponseResource.message);
@@ -466,13 +469,12 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     private String getSubtitleVersion() {
         String newestVersion = Constants.SUBTITLE_LAST_VERSION;
-        DreamTVApp dreamTVApp = ((DreamTVApp) getContext().getApplication());
-        List<VideoTests> videoTestsList = dreamTVApp.getVideoTests();
+        List<VideoTest> videoTestList = mViewModel.getVideoTests();
 
         // We first look is the video is a test video
-        for (VideoTests videoTests : videoTestsList)
-            if (videoTests.videoId.equals(mSelectedTask.video.videoId)) {
-                return String.valueOf(videoTests.subtitleVersion);
+        for (VideoTest videoTest : videoTestList)
+            if (videoTest.videoId.equals(mSelectedTask.video.videoId)) {
+                return String.valueOf(videoTest.subtitleVersion);
             }
 
         //If is it not a test video, we look if the task has already an userTask with the subtitle version
@@ -494,24 +496,28 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         createUserTaskLiveData.removeObservers(getViewLifecycleOwner());
 
         createUserTaskLiveData.observe(getViewLifecycleOwner(), userTaskResource -> {
-            if (userTaskResource.status.equals(LOADING))
+            Status status = userTaskResource.status;
+            UserTask data = userTaskResource.data;
+            String message = userTaskResource.message;
+
+            if (status.equals(Status.LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_preparing_task));
-            else if (userTaskResource.status.equals(SUCCESS)) {
+            else if (status.equals(Status.SUCCESS)) {
                 Log.d(TAG, "createUserTask() response");
 
-                if (userTaskResource.data != null && userTaskResource.data.getTaskId() == mSelectedTask.taskId) {
-                    mUserTask = userTaskResource.data;
+                if (data != null && data.getTaskId() == mSelectedTask.taskId) {
+                    mUserTask = data;
 
                     goToPlaybackVideo(playFromBeginning, logEventName);
 
-                    mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //update category after a new task was added
+                    mViewModel.updateTaskByCategory(CONTINUE); //update category after a new task was added
                 }
 
                 dismissLoading();
-            } else if (userTaskResource.status.equals(ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
-                if (userTaskResource.message != null)
-                    Log.d(TAG, userTaskResource.message);
+                if (message != null)
+                    Log.d(TAG, message);
                 else
                     Log.d(TAG, "Status ERROR");
 
@@ -531,10 +537,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         fetchUserTaskLiveData.removeObservers(getViewLifecycleOwner());
 
         fetchUserTaskLiveData.observe(getViewLifecycleOwner(), userTaskResource -> {
-            Resource.Status status = userTaskResource.status;
+            Status status = userTaskResource.status;
             UserTask data = userTaskResource.data;
 
-            if (status.equals(SUCCESS)) {
+            if (status.equals(Status.SUCCESS)) {
                 Log.d(TAG, "responseFromFetchUserTaskErrorDetails response");
 
                 if (data != null) {
@@ -544,18 +550,18 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                         setupContinueAction();
 
                         if (mUserTask.getCompleted() == VIDEO_COMPLETED_WATCHING_TRUE) { //After the user finished a video, we update all categories
-                            mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //trying to keep continue_category always updated
-                            mViewModel.updateTaskByCategory(TASKS_FINISHED_CAT); //trying to keep finished_category always updated
-                            mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT); //trying to keep mylist_category always updated
-                            mViewModel.updateTaskByCategory(TASKS_ALL_CAT); //trying to keep all_category always updated
-                            mViewModel.updateTaskByCategory(TASKS_TEST_CAT); //trying to keep test_category always updated
+                            mViewModel.updateTaskByCategory(CONTINUE); //trying to keep continue_category always updated
+                            mViewModel.updateTaskByCategory(FINISHED); //trying to keep finished_category always updated
+                            mViewModel.updateTaskByCategory(MY_LIST); //trying to keep mylist_category always updated
+                            mViewModel.updateTaskByCategory(ALL); //trying to keep all_category always updated
+                            mViewModel.updateTaskByCategory(TEST); //trying to keep test_category always updated
                         } else {
-                            mViewModel.updateTaskByCategory(TASKS_CONTINUE_CAT); //trying to keep continue_category always updated
+                            mViewModel.updateTaskByCategory(CONTINUE); //trying to keep continue_category always updated
                             mViewModel.updateTaskByCategory(mSelectedCategory); //we update only the current video category
                         }
                     }
                 }
-            } else if (status.equals(ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (userTaskResource.message != null)
                     Log.d(TAG, userTaskResource.message);
@@ -575,24 +581,24 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         addToListLiveData.removeObservers(getViewLifecycleOwner());
 
         addToListLiveData.observe(getViewLifecycleOwner(), booleanResource -> {
-            Resource.Status status = booleanResource.status;
-            if (status.equals(LOADING))
+            Status status = booleanResource.status;
+            if (status.equals(Status.LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_add_to_list));
-            else if (status.equals(SUCCESS)) {
+            else if (status.equals(Status.SUCCESS)) {
                 Log.d(TAG, "addVideoToMyList() response");
 
                 setActionPanel(ACTION_ADD_MY_LIST,
                         new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
 
 
-                mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT); //update category after a new task was added
+                mViewModel.updateTaskByCategory(MY_LIST); //update category after a new task was added
 
                 //Analytics Report Event
                 firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN);
 
 
                 dismissLoading();
-            } else if (status.equals(ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (booleanResource.message != null)
                     Log.d(TAG, booleanResource.message);
@@ -614,24 +620,24 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         removeFromListLiveData.removeObservers(getViewLifecycleOwner());
 
         removeFromListLiveData.observe(getViewLifecycleOwner(), booleanResource -> {
-            Resource.Status status = booleanResource.status;
-            if (status.equals(LOADING))
+            Status status = booleanResource.status;
+            if (status.equals(Status.LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_remove_from_list));
-            else if (status.equals(SUCCESS)) {
+            else if (status.equals(Status.SUCCESS)) {
                 Log.d(TAG, "removeVideoFromMyList() response");
 
                 setActionPanel(ACTION_REMOVE_MY_LIST,
                         new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
 
 
-                mViewModel.updateTaskByCategory(TASKS_MY_LIST_CAT); //update category after a task was removed
+                mViewModel.updateTaskByCategory(MY_LIST); //update category after a task was removed
 
 
                 //Analytics Report Event
                 firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN);
 
                 dismissLoading();
-            } else if (status.equals(ERROR)) {
+            } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (booleanResource.message != null)
                     Log.d(TAG, booleanResource.message);

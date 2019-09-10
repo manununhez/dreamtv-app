@@ -4,25 +4,16 @@ package com.dream.dreamtv.utils;
  * Created by manuel on 8/22/17.
  */
 
-public class Constants {
-    public static final String PREF_BEGINNER_INTERFACE_MODE = "beginner";
-    public static final String PREF_ADVANCED_INTERFACE_MODE = "advanced";
-    public static final String PREF_ABR_CHINESE = "zh";
-    public static final String PREF_ABR_ENGLISH = "en";
-    public static final String PREF_ABR_SPANISH = "es";
-    public static final String PREF_ABR_ARABIC = "ar";
-    public static final String PREF_ABR_FRENCH = "fr";
-    public static final String PREF_ABR_POLISH = "pl";
-    public static final String PREF_NONE_OPTIONS_CODE = "NN";
-    public static final String PREF_SUBTITLE_SMALL_SIZE = "25";
-    public static final String PREF_SUBTITLE_MEDIUM_SIZE = "30";
-    public static final String PREF_SUBTITLE_LARGE_SIZE = "40";
-    public static final String PREF_VIDEO_DURATION_ALL = "-1";
-    public static final String PREF_VIDEO_DURATION_MIN_0 = "0";
-    public static final String PREF_VIDEO_DURATION_MIN_5 = "300";
-    public static final String PREF_VIDEO_DURATION_MIN_10 = "600";
+public final class Constants {
+    public static final String BASE_URL = "http://www.dreamproject.pjwstk.edu.pl/api/";     // Facu Produccion
 
+    public static final String BEGINNER_INTERFACE_MODE = "beginner";
+    public static final String ADVANCED_INTERFACE_MODE = "advanced";
 
+    public static final String LANGUAGE_POLISH = "pl";
+
+    public static final String ARG_LIST_REASONS = "ARG_LIST_REASONS";
+    public static final String ARG_USER = "ARG_USER";
     public static final String ARG_SUBTITLE = "ARG_SUBTITLE";
     public static final String ARG_SUBTITLE_ORIGINAL_POSITION = "ARG_SUBTITLE_ORIGINAL_POSITION";
     public static final String ARG_SELECTED_TASK = "ARG_SELECTED_TASK";
@@ -41,16 +32,6 @@ public class Constants {
 
     public static final String EMPTY_ITEM = "Some item";
 
-
-    //Types of tasks and categories
-    public static final String TASKS_ALL_CAT = "all";
-    public static final String TASKS_CONTINUE_CAT = "continue";
-    public static final String TASKS_FINISHED_CAT = "finished";
-    public static final String TASKS_MY_LIST_CAT = "myList";
-    public static final String TASKS_TEST_CAT = "test";
-    public static final String SETTINGS_CAT = "preferences";
-
-    public static final int BACKGROUND_UPDATE_DELAY = 300;
 
     //    FIREBASE LOG EVENTS
 //    KEYS

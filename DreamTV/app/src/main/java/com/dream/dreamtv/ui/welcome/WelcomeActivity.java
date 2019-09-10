@@ -14,12 +14,13 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.dream.dreamtv.BuildConfig;
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.User;
+import com.dream.dreamtv.ViewModelFactory;
+import com.dream.dreamtv.data.model.api.Resource;
+import com.dream.dreamtv.data.model.api.Resource.Status;
+import com.dream.dreamtv.data.model.api.User;
+import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.ui.home.HomeActivity;
-import com.dream.dreamtv.utils.InjectorUtils;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.google.android.gms.common.AccountPicker;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -37,6 +38,7 @@ public class WelcomeActivity extends FragmentActivity {
     private ProgressBar progressLoading;
     private FirebaseAnalytics mFirebaseAnalytics;
     private WelcomeViewModel mViewModel;
+    private LiveData<Resource<User>> userDetailsLiveData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +46,8 @@ public class WelcomeActivity extends FragmentActivity {
 
         setContentView(R.layout.activity_welcome);
 
-        //        // Get the ViewModel from the factory
-        WelcomeViewModelFactory factory = InjectorUtils.provideWelcomeViewModelFactory(this);
+        // Get the ViewModel from the factory
+        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(this);
         mViewModel = ViewModelProviders.of(this, factory).get(WelcomeViewModel.class);
 
         // Obtain the FirebaseAnalytics instance.
@@ -70,36 +72,46 @@ public class WelcomeActivity extends FragmentActivity {
 
         if (DEBUG) Log.d(TAG, "userRegistration()");
 
-        String token = ((DreamTVApp) getApplication()).getToken();
-        User user = ((DreamTVApp) getApplication()).getUser();
-        if (token == null || user == null) //first time the app is initiated. The user has to select an account
+        String accessToken = mViewModel.getAccessToken();
+        User user = mViewModel.getUser();
+        if (accessToken == null || user == null) //first time the app is initiated. The user has to select an account
             pickUserAccount();
         else
             login(user.email);
 
 
-        LiveData<Resource<User>> userDetails = mViewModel.fetchUserDetails();
-        userDetails.observe(this, userResource -> {
-            if (userResource.status.equals(Resource.Status.LOADING)) {
+        userDetailsLiveData = mViewModel.fetchUserDetails();
+        userDetailsLiveData.removeObservers(this);
+        userDetailsLiveData.observe(this, userResource -> {
+            Status status = userResource.status;
+            User data = userResource.data;
+
+            if (status.equals(Status.LOADING)) {
                 showProgress();
-            } else if (userResource.status.equals(Resource.Status.SUCCESS)) {
+            } else if (status.equals(Status.SUCCESS)) {
 
-                if (userResource.data != null) {
-                    if (!userResource.data.subLanguage.equals(LocaleHelper.getLanguage(this))) {
+                if (data != null) {
+                    if (!data.subLanguage.equals(LocaleHelper.getLanguage(this))) {
                         if (DEBUG)
-                            Log.d(TAG, "fetchUserDetails() response!: userResource.data.subLanguage=" + userResource.data.subLanguage + " LocaleHelper.getLanguage(this):" + LocaleHelper.getLanguage(this));
+                            Log.d(TAG, "fetchUserDetails() response!: userResource.data.subLanguage=" + data.subLanguage + " LocaleHelper.getLanguage(this):" + LocaleHelper.getLanguage(this));
 
-                        LocaleHelper.setLocale(this, userResource.data.subLanguage);
-
+                        LocaleHelper.setLocale(this, data.subLanguage);
                     }
 
                     goHome();
-
                 }
+
                 dismissProgress();
             }
         });
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        userDetailsLiveData.removeObservers(this);
     }
 
     private void goHome() {
@@ -126,7 +138,7 @@ public class WelcomeActivity extends FragmentActivity {
 
     private void firebaseLoginEvents(String logEventName) {
 
-        User user = ((DreamTVApp) getApplication()).getUser();
+        User user = mViewModel.getUser();
 
         Bundle bundle = new Bundle();
 

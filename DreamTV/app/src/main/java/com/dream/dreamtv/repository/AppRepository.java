@@ -5,22 +5,28 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.dream.dreamtv.model.Category;
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.SubtitleResponse;
-import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.model.TasksList;
-import com.dream.dreamtv.model.User;
-import com.dream.dreamtv.model.UserTask;
-import com.dream.dreamtv.model.UserTaskError;
-import com.dream.dreamtv.network.NetworkDataSource;
+import com.dream.dreamtv.data.local.prefs.AppPreferencesHelper;
+import com.dream.dreamtv.data.model.Category;
+import com.dream.dreamtv.data.model.VideoDuration;
+import com.dream.dreamtv.data.model.api.AuthResponse;
+import com.dream.dreamtv.data.model.api.ErrorReason;
+import com.dream.dreamtv.data.model.api.Resource;
+import com.dream.dreamtv.data.model.api.Resource.Status;
+import com.dream.dreamtv.data.model.api.SubtitleResponse;
+import com.dream.dreamtv.data.model.api.Task;
+import com.dream.dreamtv.data.model.api.TaskRequest;
+import com.dream.dreamtv.data.model.api.TasksList;
+import com.dream.dreamtv.data.model.api.User;
+import com.dream.dreamtv.data.model.api.UserTask;
+import com.dream.dreamtv.data.model.api.UserTaskError;
+import com.dream.dreamtv.data.model.api.VideoTest;
+import com.dream.dreamtv.data.model.api.VideoTopic;
+import com.dream.dreamtv.data.networking.NetworkDataSourceImpl;
 import com.dream.dreamtv.utils.AppExecutors;
 
-import static com.dream.dreamtv.utils.Constants.TASKS_ALL_CAT;
-import static com.dream.dreamtv.utils.Constants.TASKS_CONTINUE_CAT;
-import static com.dream.dreamtv.utils.Constants.TASKS_FINISHED_CAT;
-import static com.dream.dreamtv.utils.Constants.TASKS_MY_LIST_CAT;
-import static com.dream.dreamtv.utils.Constants.TASKS_TEST_CAT;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class AppRepository {
     private final static String TAG = AppRepository.class.getSimpleName();
@@ -28,92 +34,164 @@ public class AppRepository {
 
     // For Singleton instantiation
     private static AppRepository INSTANCE;
-    private final NetworkDataSource mNetworkDataSource;
+    private final NetworkDataSourceImpl mNetworkDataSource;
+    private AppPreferencesHelper mPreferencesHelper;
     private boolean mInitialized = false;
     private AppExecutors mExecutors;
 
-    private AppRepository(NetworkDataSource networkDataSource) {
+    private AppRepository(NetworkDataSourceImpl networkDataSource, AppPreferencesHelper preferencesHelper) {
         mNetworkDataSource = networkDataSource;
+        mPreferencesHelper = preferencesHelper;
+
+        // As long as the repository exists, observe the network LiveData.
+        // If that LiveData changes, update the database.
+        // Group of current weathers that corresponds to the weather of all cities saved in the DB. Updated
+        // using job schedules
+        MutableLiveData<Resource<AuthResponse>> auth = getAuthResponse();
+        MutableLiveData<Resource<User>> newUser = fetchUserDetails();
+        MutableLiveData<Resource<User>> updatedUser = updateUserDetails();
+        MutableLiveData<Resource<ErrorReason[]>> reasonsResponse = fetchReasonsResponse();
+        MutableLiveData<Resource<VideoTest[]>> videoTestsResponse = fetchVideoTestsResponse();
+
+        newUser.observeForever(userResource -> {
+            if (userResource != null) {
+                Status status = userResource.status;
+                User data = userResource.data;
+
+                if (status.equals(Status.SUCCESS)) {
+                    // Insert our new user data into preferences
+
+                    mPreferencesHelper.setUser(data);
+
+                    Log.d(TAG, "New user data - setUser() called");
+                }
+            }
+        });
+
+        updatedUser.observeForever(userResource -> {
+            if (userResource != null) {
+                Status status = userResource.status;
+                User data = userResource.data;
+
+                if (status.equals(Status.SUCCESS)) {
+                    // Insert our new weather data into the database
+                    mPreferencesHelper.setUser(data);
+
+                    Log.d(TAG, "Update user data - setUser() called: subLanguage = " + data.subLanguage);
+                }
+            }
+        });
+
+        reasonsResponse.observeForever(reasonsResource -> {
+            if (reasonsResource != null) {
+                Status status = reasonsResource.status;
+                ErrorReason[] data = reasonsResource.data;
+
+                if (status.equals(Status.SUCCESS)) {
+                    // Insert our new weather data into the database
+                    mPreferencesHelper.setReasons(data);
+
+                    Log.d(TAG, "Reasons data - setReasons() called");
+                }
+            }
+        });
+
+        videoTestsResponse.observeForever(videoTestResource -> {
+            if (videoTestResource != null) {
+                Status status = videoTestResource.status;
+                VideoTest[] data = videoTestResource.data;
+
+                if (status.equals(Status.SUCCESS)) {
+                    // Insert our new weather data into the database
+                    mPreferencesHelper.setVideoTests(data);
+
+                    Log.d(TAG, "VideoTests data - setVideoTests() called");
+                }
+            }
+        });
+
+        auth.observeForever(resource -> {
+            if (resource != null) {
+                Status status = resource.status;
+                AuthResponse data = resource.data;
+
+                if (status.equals(Status.SUCCESS)) {
+                    // Insert our new weather data into the database
+                    if (data != null) {
+                        mPreferencesHelper.setAccessToken(data.token);
+                        Log.d(TAG, "AccessToken updated - setAccessToken() called");
+                    }
+                }
+            }
+        });
 
     }
 
 
     public synchronized static AppRepository getInstance(/*TaskDao taskDao,*/
-            NetworkDataSource networkDataSource,
-            AppExecutors executors) {
+            NetworkDataSourceImpl networkDataSource,
+            AppExecutors executors, AppPreferencesHelper preferencesHelper) {
         Log.d(TAG, "Getting the repository");
         if (INSTANCE == null) {
             synchronized (AppRepository.class) {
-                INSTANCE = new AppRepository(/*taskDao, */networkDataSource);
+                INSTANCE = new AppRepository(/*taskDao, */networkDataSource, preferencesHelper);
                 Log.d(TAG, "Made new repository");
             }
         }
         return INSTANCE;
     }
 
-
-    public LiveData<Resource<TasksList>> requestTaskByCategory(String category) {
+    /***************************
+     **  NETWORK DATA SOURCE  **
+     ***************************/
+    public LiveData<Resource<TasksList>> requestTaskByCategory(Category.Type category) {
         switch (category) {
-            case TASKS_MY_LIST_CAT:
+            case MY_LIST:
                 return mNetworkDataSource.responseFromFetchMyListTasks();
-            case TASKS_FINISHED_CAT:
+            case FINISHED:
                 return mNetworkDataSource.responseFromFetchFinishedTasks();
-            case TASKS_CONTINUE_CAT:
+            case CONTINUE:
                 return mNetworkDataSource.responseFromFetchContinueTasks();
-            case TASKS_ALL_CAT:
+            case ALL:
                 return mNetworkDataSource.responseFromFetchAllTasks();
-            case TASKS_TEST_CAT:
+            case TEST:
                 return mNetworkDataSource.responseFromFetchTestTasks();
             default:
-                return mNetworkDataSource.responseFromFetchAllTasks();
+                throw new RuntimeException("Category " + category + " not contemplated!");
 
         }
     }
 
+    public void updateTasksCategory(Category.Type category) {
+        VideoDuration videoDuration = getVideoDurationPref();
+        TaskRequest taskRequest = new TaskRequest(category, videoDuration);
 
-    public boolean verifyIfTaskIsInList(Task task) {
-
-        Resource<TasksList> results = mNetworkDataSource.responseFromFetchMyListTasks().getValue();
-        if (results != null && results.data != null && results.data.data != null) {
-            if (results.data.data.length > 0) {
-                for (Task entity : results.data.data) {
-                    if (task.taskId == entity.taskId)
-                        return true;
-                }
-            }
+        switch (category) {
+            case MY_LIST:
+                mNetworkDataSource.fetchMyListTaskCategory(taskRequest);
+                break;
+            case FINISHED:
+                mNetworkDataSource.fetchFinishedTaskCategory(taskRequest);
+                break;
+            case CONTINUE:
+                mNetworkDataSource.fetchContinueTaskCategory(taskRequest);
+                break;
+            case ALL:
+                mNetworkDataSource.fetchAllTaskCategory(taskRequest);
+                break;
+            case TEST:
+                mNetworkDataSource.fetchTestTaskCategory(taskRequest);
+                break;
+            default:
+                throw new RuntimeException("Category " + category + " not contemplated!");
         }
 
-        return false;
     }
 
 
     public void login(final String email, final String password) {
         //TODO Check login in DB first, and then in Server
         mNetworkDataSource.login(email, password);
-    }
-
-    public void updateTasksCategory(String category) {
-
-        switch (category) {
-            case TASKS_MY_LIST_CAT:
-                mNetworkDataSource.fetchMyListTaskCategory();
-                break;
-            case TASKS_FINISHED_CAT:
-                mNetworkDataSource.fetchFinishedTaskCategory();
-                break;
-            case TASKS_CONTINUE_CAT:
-                mNetworkDataSource.fetchContinueTaskCategory();
-                break;
-            case TASKS_ALL_CAT:
-                mNetworkDataSource.fetchAllTaskCategory();
-                break;
-            case TASKS_TEST_CAT:
-                mNetworkDataSource.fetchTestTaskCategory();
-                break;
-            default:
-                mNetworkDataSource.fetchAllTaskCategory();
-                break;
-        }
     }
 
 
@@ -135,7 +213,8 @@ public class AppRepository {
         return mNetworkDataSource.createUserTask(taskId, mSubtitleVersion);
     }
 
-    public MutableLiveData<Resource<Boolean>> requestAddToList(int taskId, String language, String primaryAudioLanguageCode) {
+    public MutableLiveData<Resource<Boolean>> requestAddToList(int taskId, String language,
+                                                               String primaryAudioLanguageCode) {
         return mNetworkDataSource.addTaskToList(taskId, language, primaryAudioLanguageCode);
 
     }
@@ -145,7 +224,8 @@ public class AppRepository {
     }
 
 
-    public MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(int taskId, int subtitleVersion, UserTaskError userTaskError, boolean saveError) {
+    public MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(int taskId, int subtitleVersion,
+                                                                   UserTaskError userTaskError, boolean saveError) {
         return mNetworkDataSource.errorsUpdate(taskId, subtitleVersion, userTaskError, saveError);
     }
 
@@ -157,16 +237,28 @@ public class AppRepository {
         return mNetworkDataSource.search(query);
     }
 
-    public LiveData<Resource<Category[]>> fetchCategories(String language){
-        return mNetworkDataSource.fetchCategories(language);
+    public LiveData<Resource<VideoTopic[]>> fetchCategories() {
+        return mNetworkDataSource.fetchCategories();
     }
 
-    public MutableLiveData<Resource<Task[]>> searchByKeywordCategory(String category){
+    public MutableLiveData<Resource<Task[]>> searchByKeywordCategory(String category) {
         return mNetworkDataSource.searchByKeywordCategory(category);
     }
 
-    public MutableLiveData<Resource<User>> fetchUserDetails(){
+    public MutableLiveData<Resource<User>> fetchUserDetails() {
         return mNetworkDataSource.responseFromFetchUserDetails();
+    }
+
+    public MutableLiveData<Resource<User>> updateUserDetails() {
+        return mNetworkDataSource.responseFromUserDetailsUpdate();
+    }
+
+    public MutableLiveData<Resource<ErrorReason[]>> fetchReasonsResponse() {
+        return mNetworkDataSource.responseFromFetchReasons();
+    }
+
+    public MutableLiveData<Resource<VideoTest[]>> fetchVideoTestsResponse() {
+        return mNetworkDataSource.responseFromVideoTests();
     }
 
     public void fetchReasons() {
@@ -175,5 +267,68 @@ public class AppRepository {
 
     public void fetchVideoTestsDetails() {
         mNetworkDataSource.fetchVideoTestsDetails();
+    }
+
+
+    private MutableLiveData<Resource<AuthResponse>> getAuthResponse() {
+        return mNetworkDataSource.responseFromAuth();
+    }
+
+
+    public boolean verifyIfTaskIsInList(Task task) {
+        Resource<TasksList> results = mNetworkDataSource.responseFromFetchMyListTasks().getValue();
+        if (results != null && results.data != null && results.data.data != null) {
+            if (results.data.data.length > 0) {
+                for (Task entity : results.data.data) {
+                    if (task.taskId == entity.taskId)
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    /**************************
+     **  LOCAL DATA SOURCE   **
+     **************************/
+    public VideoDuration getVideoDurationPref() {
+        return mPreferencesHelper.getVideoDurationPref();
+    }
+
+    public boolean getTestingModePref() {
+        return mPreferencesHelper.getTestingModePref();
+    }
+
+    public User getUser() {
+        return mPreferencesHelper.getUser();
+    }
+
+    public String getSubtitleSizePref() {
+        return mPreferencesHelper.getSubtitleSizePref();
+    }
+
+    public List<VideoTest> getVideoTests() {
+        return mPreferencesHelper.getVideoTests();
+    }
+
+    public String getAccessToken() {
+        return mPreferencesHelper.getAccessToken();
+    }
+
+    public String getAudioLanguagePref() {
+        return mPreferencesHelper.getAudioLanguagePref();
+    }
+
+    public String getInterfaceMode() {
+        return mPreferencesHelper.getInterfaceModePref();
+    }
+
+    public String getInterfaceAppLanguage() {
+        return mPreferencesHelper.getInterfaceLanguagePref();
+    }
+
+    public ArrayList<ErrorReason> getReasons() {
+        return mPreferencesHelper.getReasons();
     }
 }

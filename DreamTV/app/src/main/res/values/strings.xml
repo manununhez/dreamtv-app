@@ -2,11 +2,6 @@
 
     <!--NON-TRANSLATABLE-->
     <string name="app_name" translatable="false">DreamTV</string>
-    <!--SHAREDPREFERENCES-->
-    <string name="dreamTVApp_token" translatable="false">dreamTVApp_token</string>
-    <string name="user_preferences" translatable="false">user_preferences</string>
-    <string name="reasons_preferences" translatable="false">reasons_preferences</string>
-    <string name="video_tests_preferences" translatable="false">video_tests_preferences</string>
     <!--PREFERENCES KEYS-->
     <string name="pref_key_list_app_languages" translatable="false">listAppLanguage</string>
     <string name="pref_key_list_interface_mode" translatable="false">listInterfaceMode</string>
@@ -46,7 +41,7 @@
     <string name="hint_voice_google_input">Please, say your comment</string>
     <string name="title_current_time_video">%1$s / %2$s</string>
     <string name="title_video_details">%1$s | Audio: %2$s | Subtitle: %3$s | Duration: %4$s</string>
-    <string name="title_video_details_main">%1$s | Audio: %2$s | Subtitle: %3$ss</string>
+    <string name="title_video_details_main">%1$s | Audio: %2$s | Subtitle: %3$s</string>
     <string name="title_video_forward">+ %1$d secs</string>
     <string name="title_video_backward">- %1$d secs</string>
     <string name="title_reasons_others_selected">Selected in advanced mode: %1$s</string>

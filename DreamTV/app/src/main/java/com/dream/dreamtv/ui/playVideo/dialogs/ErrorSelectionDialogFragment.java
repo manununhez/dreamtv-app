@@ -8,7 +8,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.text.Html;
@@ -38,13 +37,13 @@ import androidx.core.content.ContextCompat;
 
 import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.model.ErrorReason;
-import com.dream.dreamtv.model.Subtitle;
-import com.dream.dreamtv.model.SubtitleResponse;
-import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.model.User;
-import com.dream.dreamtv.model.UserTask;
-import com.dream.dreamtv.model.UserTaskError;
+import com.dream.dreamtv.data.model.api.ErrorReason;
+import com.dream.dreamtv.data.model.api.Subtitle;
+import com.dream.dreamtv.data.model.api.SubtitleResponse;
+import com.dream.dreamtv.data.model.api.Task;
+import com.dream.dreamtv.data.model.api.User;
+import com.dream.dreamtv.data.model.api.UserTask;
+import com.dream.dreamtv.data.model.api.UserTaskError;
 import com.dream.dreamtv.utils.Constants;
 import com.google.gson.Gson;
 
@@ -54,12 +53,14 @@ import java.util.Locale;
 import java.util.Objects;
 
 import static android.util.TypedValue.applyDimension;
+import static com.dream.dreamtv.utils.Constants.ARG_LIST_REASONS;
 import static com.dream.dreamtv.utils.Constants.ARG_SELECTED_TASK;
 import static com.dream.dreamtv.utils.Constants.ARG_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.ARG_SUBTITLE_ORIGINAL_POSITION;
+import static com.dream.dreamtv.utils.Constants.ARG_USER;
 import static com.dream.dreamtv.utils.Constants.ARG_USER_TASK_ERROR;
 import static com.dream.dreamtv.utils.Constants.ARG_USER_TASK_ERROR_COMPLETE;
-import static com.dream.dreamtv.utils.Constants.PREF_BEGINNER_INTERFACE_MODE;
+import static com.dream.dreamtv.utils.Constants.BEGINNER_INTERFACE_MODE;
 
 
 public class ErrorSelectionDialogFragment extends DialogFragment {
@@ -69,7 +70,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private LinearLayout llComments;
     private LinearLayout llReasons;
     private RadioGroup rgReasons;
-    private UserTask userTask;
+    private UserTask mUserTask;
     private Button btnSave;
     private Button btnSaveChanges;
     private Button btnDeleteChanges;
@@ -77,7 +78,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private TextView tvTitle;
     private TextView tvSelectedSubtitle;
     private Dialog viewRoot;
-    private SubtitleResponse subtitle;
+    private SubtitleResponse mSubtitle;
     private ScrollView scrollViewAdvanced;
     private ScrollView scrollViewBeginner;
     private ScrollView scrollViewBeginnerEdition;
@@ -86,38 +87,45 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private Task mSelectedTask;
     private OnListener mCallback;
     private List<String> selectedReasons = new ArrayList<>();
-    private List<ErrorReason> errorReasonList;
-    private int subtitleOriginalPosition;
+    private int mSubtitleOriginalPosition;
     private LinearLayout llReasonsEdit;
+    private ArrayList<ErrorReason> mReasons;
+    private User mUser;
 
     public ErrorSelectionDialogFragment() {
         // Required empty public constructor
     }
 
-    public static ErrorSelectionDialogFragment newInstance(SubtitleResponse mSubtitleResponse, int subtitlePosition,
+    public static ErrorSelectionDialogFragment newInstance(ArrayList<ErrorReason> reasons,
+                                                           User user,
+                                                           SubtitleResponse mSubtitleResponse,
+                                                           int subtitlePosition,
                                                            Task mSelectedTask,
                                                            UserTask userTask,
                                                            ArrayList<UserTaskError> userTaskErrorList) {
-        ErrorSelectionDialogFragment f = new ErrorSelectionDialogFragment();
+
+        ErrorSelectionDialogFragment f = newInstance(reasons, user, mSubtitleResponse, subtitlePosition, mSelectedTask, userTask);
+
 
         // Supply num input as an argument.
-        Bundle args = new Bundle();
-        args.putParcelable(ARG_SUBTITLE, mSubtitleResponse);
-        args.putInt(ARG_SUBTITLE_ORIGINAL_POSITION, subtitlePosition);
-        args.putParcelable(ARG_SELECTED_TASK, mSelectedTask);
-        args.putParcelable(ARG_USER_TASK_ERROR_COMPLETE, userTask);
+        Bundle args = f.getArguments();
         args.putParcelableArrayList(ARG_USER_TASK_ERROR, userTaskErrorList);
         f.setArguments(args);
         return f;
     }
 
-    public static ErrorSelectionDialogFragment newInstance(SubtitleResponse mSubtitleResponse,
-                                                           int subtitlePosition, Task mSelectedTask,
+    public static ErrorSelectionDialogFragment newInstance(ArrayList<ErrorReason> reasons,
+                                                           User user,
+                                                           SubtitleResponse mSubtitleResponse,
+                                                           int subtitlePosition,
+                                                           Task mSelectedTask,
                                                            UserTask userTask) {
         ErrorSelectionDialogFragment f = new ErrorSelectionDialogFragment();
 
         // Supply num input as an argument.
         Bundle args = new Bundle();
+        args.putParcelableArrayList(ARG_LIST_REASONS, reasons);
+        args.putParcelable(ARG_USER, user);
         args.putParcelable(ARG_SUBTITLE, mSubtitleResponse);
         args.putInt(ARG_SUBTITLE_ORIGINAL_POSITION, subtitlePosition);
         args.putParcelable(ARG_SELECTED_TASK, mSelectedTask);
@@ -141,10 +149,13 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        subtitleOriginalPosition = getArguments().getInt(ARG_SUBTITLE_ORIGINAL_POSITION);
-        subtitle = getArguments().getParcelable(ARG_SUBTITLE);
+
+        mUser = getArguments().getParcelable(ARG_USER);
+        mReasons = getArguments().getParcelableArrayList(ARG_LIST_REASONS);
+        mSubtitleOriginalPosition = getArguments().getInt(ARG_SUBTITLE_ORIGINAL_POSITION);
+        mSubtitle = getArguments().getParcelable(ARG_SUBTITLE);
         mSelectedTask = getArguments().getParcelable(ARG_SELECTED_TASK);
-        userTask = getArguments().getParcelable(ARG_USER_TASK_ERROR_COMPLETE);
+        mUserTask = getArguments().getParcelable(ARG_USER_TASK_ERROR_COMPLETE);
     }
 
     @NonNull
@@ -172,15 +183,15 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         setupReasons();
 
 
-        setupSubtitleNavigationListView(subtitleOriginalPosition);
+        setupSubtitleNavigationListView(mSubtitleOriginalPosition);
 
-        repopulateFormWithUserTaskData(subtitleOriginalPosition); //To verify if we receive usertask, to repopulate the dialog
+        repopulateFormWithUserTaskData(mSubtitleOriginalPosition); //To verify if we receive usertask, to repopulate the dialog
 
 
-        //This is used to select one subtitle from the navigation list, and move the video forward or backward accorded to it
-        goToThisSelectedSubtitle = subtitle.subtitles.get(subtitleOriginalPosition - 1); //subtitleOriginalPosition is the subtitle order, and the index starts in 1. To get a specific subtitle from the list, the index start in 0.
-        //This is used to know which subtitle from the navigation list are we on, in order to perform save or update errors
-        selectedSubtitle = subtitle.subtitles.get(subtitleOriginalPosition - 1); //subtitleOriginalPosition is the subtitle order, and the index starts in 1. To get a specific subtitle from the list, the index start in 0.
+        //This is used to select one mSubtitle from the navigation list, and move the video forward or backward accorded to it
+        goToThisSelectedSubtitle = mSubtitle.subtitles.get(mSubtitleOriginalPosition - 1); //mSubtitleOriginalPosition is the mSubtitle order, and the index starts in 1. To get a specific mSubtitle from the list, the index start in 0.
+        //This is used to know which mSubtitle from the navigation list are we on, in order to perform save or update errors
+        selectedSubtitle = mSubtitle.subtitles.get(mSubtitleOriginalPosition - 1); //mSubtitleOriginalPosition is the mSubtitle order, and the index starts in 1. To get a specific mSubtitle from the list, the index start in 0.
 
         return viewRoot;
     }
@@ -217,7 +228,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        mCallback.onDialogClosed(goToThisSelectedSubtitle, subtitleOriginalPosition);
+        mCallback.onDialogClosed(goToThisSelectedSubtitle, mSubtitleOriginalPosition);
     }
 
     /**
@@ -239,7 +250,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         btnSave.setOnClickListener(view -> {
             UserTaskError userTaskError = prepareReasonsToSave();
             if (selectedReasons.size() > 0) {
-                mCallback.onSaveReasons(mSelectedTask.taskId, subtitle.versionNumber, userTaskError);
+                mCallback.onSaveReasons(mSelectedTask.taskId, mSubtitle.versionNumber, userTaskError);
                 dismiss();
             } else {
                 Toast.makeText(getActivity(), getActivity().getString(R.string.select_errors_to_save), Toast.LENGTH_LONG).show();
@@ -247,7 +258,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         });
         btnSaveChanges.setOnClickListener(view -> {
             UserTaskError userTaskError = prepareReasonsToSave();
-            mCallback.onUpdateReasons(mSelectedTask.taskId, subtitle.versionNumber, userTaskError);
+            mCallback.onUpdateReasons(mSelectedTask.taskId, mSubtitle.versionNumber, userTaskError);
             dismiss();
         });
 
@@ -258,7 +269,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
     }
 
-
     private DreamTVApp getApplication() {
         return ((DreamTVApp) getActivity().getApplication());
     }
@@ -268,8 +278,8 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         ListView mListView = viewRoot.findViewById(R.id.lv);
 
         // Initialize a new ArrayAdapter
-        MySubtitleAdapter mySubtitleAdapter = new MySubtitleAdapter(getActivity(), subtitle.subtitles,
-                subtitlePosition, userTask.getUserTaskErrorList());
+        MySubtitleAdapter mySubtitleAdapter = new MySubtitleAdapter(getActivity(), mSubtitle.subtitles,
+                subtitlePosition, mUserTask.getUserTaskErrorList());
 
         // Set the adapter for ListView
         mListView.setAdapter(mySubtitleAdapter);
@@ -280,7 +290,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
         mListView.setOnItemClickListener((adapterView, view, position, l) -> {
             goToThisSelectedSubtitle = (Subtitle) adapterView.getItemAtPosition(position);
-            Log.d(TAG, "CPRCurrentPosition: " + subtitleOriginalPosition);
+            Log.d(TAG, "CPRCurrentPosition: " + mSubtitleOriginalPosition);
             Log.d(TAG, "CPRNewPosition: " + (position + 1));
 
             setupSubtitleNavigationListView(position + 1);
@@ -338,14 +348,11 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
     private void setupReasons() {
 
-        errorReasonList = getApplication().getReasons();
 
-        Log.d(TAG, errorReasonList.toString());
+        Log.d(TAG, mReasons.toString());
 
-        //Interface mode preferences
-        User user = getApplication().getUser();
 
-        if (user.interfaceMode.equals(PREF_BEGINNER_INTERFACE_MODE))
+        if (mUser.interfaceMode.equals(BEGINNER_INTERFACE_MODE))
             setupReasonsRadioGroup();
         else
             setupReasonsCheck();
@@ -359,8 +366,8 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         scrollViewBeginnerEdition.setVisibility(View.GONE);
 
         llReasons.removeAllViews();
-        for (int i = 0; i < errorReasonList.size(); i++) {
-            ErrorReason errorReason = errorReasonList.get(i);
+        for (int i = 0; i < mReasons.size(); i++) {
+            ErrorReason errorReason = mReasons.get(i);
 
             int dpsToogle = 25;
             final float scale = getActivity().getResources().getDisplayMetrics().density;
@@ -412,8 +419,8 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         llReasonsEdit.removeAllViews();
 
 
-        for (int i = 0; i < errorReasonList.size(); i++) {
-            ErrorReason errorReason = errorReasonList.get(i);
+        for (int i = 0; i < mReasons.size(); i++) {
+            ErrorReason errorReason = mReasons.get(i);
 
             int dpsToogle = 25;
             final float scale = getActivity().getResources().getDisplayMetrics().density;
@@ -463,7 +470,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private void repopulateFormWithUserTaskData(int position) {
         clearOptions();
 
-        ArrayList<UserTaskError> errors = userTask.getUserTaskErrorsForASpecificSubtitlePosition(position + 1);
+        ArrayList<UserTaskError> errors = mUserTask.getUserTaskErrorsForASpecificSubtitlePosition(position + 1);
         Log.d(TAG, "repopulateFormWithUserTaskData()");
 
 
@@ -474,10 +481,8 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             btnSaveChanges.setVisibility(View.VISIBLE);
             btnDeleteChanges.setVisibility(View.VISIBLE);
 
-            //Interface mode preferences
-            User user = getApplication().getUser();
 
-            if (user.interfaceMode.equals(PREF_BEGINNER_INTERFACE_MODE)) { //PREF_BEGINNER_INTERFACE_MODE
+            if (mUser.interfaceMode.equals(BEGINNER_INTERFACE_MODE)) { //PREF_BEGINNER_INTERFACE_MODE
                 if (errors.size() == 1) {
 
                     rgReasons.setEnabled(false);
@@ -540,12 +545,10 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     }
 
     private void clearOptions() {
-        //Interface mode preferences
-        User user = getApplication().getUser();
 
         selectedReasons.clear(); //clear all previous selected reasons in checks
 
-        if (user.interfaceMode.equals(PREF_BEGINNER_INTERFACE_MODE)) { //BEGINNER MODE
+        if (mUser.interfaceMode.equals(BEGINNER_INTERFACE_MODE)) { //BEGINNER MODE
 
             scrollViewBeginner.setVisibility(View.VISIBLE);
             if (scrollViewBeginnerEdition.getVisibility() == View.VISIBLE)
@@ -570,11 +573,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         }
     }
 
-
     private UserTaskError prepareReasonsToSave() {
         //Interface mode preferences. We retrieve the selected value. The advanced mode is already in selectedReasons
-        User user = ((DreamTVApp) getActivity().getApplication()).getUser();
-        if (user.interfaceMode.equals(Constants.PREF_BEGINNER_INTERFACE_MODE)) {
+        if (mUser.interfaceMode.equals(Constants.BEGINNER_INTERFACE_MODE)) {
             for (int i = 0; i < rgReasons.getChildCount(); i++) {
                 RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
 
@@ -589,12 +590,11 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                 selectedSubtitle.position, voiceInput.getText().toString());
     }
 
-
     public String selectedErrorsListJson(List<String> selectedReasons) {
         List<ErrorReason> tempList = new ArrayList<>();
 
         for (String reasonCode : selectedReasons) {
-            for (ErrorReason errorReason : errorReasonList) {
+            for (ErrorReason errorReason : mReasons) {
                 if (reasonCode.equals(errorReason.reasonCode))
                     tempList.add(errorReason);
             }
@@ -659,49 +659,32 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                     holder.tvSubtitleError.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 9,
                             context.getResources().getDisplayMetrics()));
                     holder.tvSubtitleError.setText(Html.fromHtml(values.get(position).text));
-
-//                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
-//                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_found_error_background, null));
                 } else {
                     holder.tvSubtitle.setVisibility(View.GONE);
                     holder.tvSubtitleError.setVisibility(View.GONE);
                     holder.tvSubtitleSelected.setVisibility(View.VISIBLE);
-//                    holder.tvText.setTextAppearance(R.style.SubtitleStyleSelected);
                     holder.tvSubtitleSelected.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 9,
                             context.getResources().getDisplayMetrics()));
                     holder.tvSubtitleSelected.setText(Html.fromHtml(values.get(position).text));
-
-//                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_selected_background, null));
-//                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
                 }
             } else {
                 if (isPositionError(userTaskErrors, position)) {
                     holder.tvSubtitle.setVisibility(View.GONE);
                     holder.tvSubtitleSelected.setVisibility(View.GONE);
                     holder.tvSubtitleError.setVisibility(View.VISIBLE);
-//                    holder.tvText.setTextAppearance(R.style.SubtitleStyleError);
                     holder.tvSubtitleError.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
                             context.getResources().getDisplayMetrics()));
                     holder.tvSubtitleError.setText(Html.fromHtml(values.get(position).text));
-
-//                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.ITALIC);
-//                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_found_error_background, null));
                 } else {
                     holder.tvSubtitleSelected.setVisibility(View.GONE);
                     holder.tvSubtitleError.setVisibility(View.GONE);
                     holder.tvSubtitle.setVisibility(View.VISIBLE);
-//                    holder.tvText.setTextAppearance(R.style.SubtitleStyleWithoutError);
                     holder.tvSubtitle.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
                             context.getResources().getDisplayMetrics()));
                     holder.tvSubtitle.setText(Html.fromHtml(values.get(position).text));
-//                    holder.tvText.setTypeface(holder.tvText.getTypeface(), Typeface.NORMAL);
-//                    holder.tvText.setBackgroundColor(context.getResources().getColor(R.color.stt_list_nav_default_background, null));
                 }
 
             }
-
-
-//            holder.tvText.setText(Html.fromHtml(values.get(position).text));
 
             return convertView;
         }

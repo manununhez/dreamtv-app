@@ -7,23 +7,26 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import com.dream.dreamtv.model.Resource;
-import com.dream.dreamtv.model.SubtitleResponse;
-import com.dream.dreamtv.model.Task;
-import com.dream.dreamtv.model.UserTask;
+import com.dream.dreamtv.data.model.Category;
+import com.dream.dreamtv.data.model.api.Resource;
+import com.dream.dreamtv.data.model.api.SubtitleResponse;
+import com.dream.dreamtv.data.model.api.Task;
+import com.dream.dreamtv.data.model.api.UserTask;
+import com.dream.dreamtv.data.model.api.VideoTest;
 import com.dream.dreamtv.repository.AppRepository;
 import com.dream.dreamtv.utils.AbsentLiveData;
 
+import java.util.List;
 import java.util.Objects;
 
-class VideoDetailsViewModel extends ViewModel {
+public class VideoDetailsViewModel extends ViewModel {
     private static final String TAG = VideoDetailsViewModel.class.getSimpleName();
 
     private final AppRepository mRepository;
     private final MutableLiveData<SubtitleId> subtitleIdMLD;
     private final LiveData<Resource<SubtitleResponse>> subtitle;
 
-    VideoDetailsViewModel(AppRepository appRepository) {
+    public VideoDetailsViewModel(AppRepository appRepository) {
         mRepository = appRepository;
 
         this.subtitleIdMLD = new MutableLiveData<>();
@@ -70,12 +73,16 @@ class VideoDetailsViewModel extends ViewModel {
         this.subtitleIdMLD.setValue(update);
     }
 
-    void updateTaskByCategory(String category) {
+    void updateTaskByCategory(Category.Type category) {
         mRepository.updateTasksCategory(category);
     }
 
     boolean verifyIfTaskIsInList(Task task) {
         return mRepository.verifyIfTaskIsInList(task);
+    }
+
+    public List<VideoTest> getVideoTests() {
+        return mRepository.getVideoTests();
     }
 
 
