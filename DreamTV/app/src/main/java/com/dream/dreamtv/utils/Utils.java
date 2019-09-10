@@ -41,6 +41,7 @@ public class Utils {
      * Making sure public utility methods remain static
      */
     private Utils() {
+        //non-instantiable
     }
 
     public static AlertDialog.Builder getAlertDialog(Context context, String title, String message, String buttonPosstiveText, DialogInterface.OnCancelListener listener) {
@@ -95,7 +96,7 @@ public class Utils {
     }
 
     public static String getTimeFormatMinSecsDoublePoints(long millis) {
-        return String.format(Locale.getDefault(), "%d:%d",
+        return String.format(Locale.getDefault(), "%d:%02d",
                 TimeUnit.MILLISECONDS.toMinutes(millis),
                 TimeUnit.MILLISECONDS.toSeconds(millis) -
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
