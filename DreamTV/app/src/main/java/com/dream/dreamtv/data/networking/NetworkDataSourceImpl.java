@@ -23,7 +23,6 @@ import com.dream.dreamtv.data.model.api.VideoTest;
 import com.dream.dreamtv.data.model.api.VideoTopic;
 import com.dream.dreamtv.ui.home.HomeFragment;
 import com.dream.dreamtv.utils.AppExecutors;
-import com.dream.dreamtv.utils.JsonUtils;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
@@ -34,8 +33,7 @@ import static com.android.volley.Request.Method.GET;
 import static com.android.volley.Request.Method.POST;
 import static com.android.volley.Request.Method.PUT;
 import static com.dream.dreamtv.data.model.Category.Type.ALL;
-import static com.dream.dreamtv.data.networking.NetworkUtils.userErrorsURL;
-import static com.dream.dreamtv.data.networking.NetworkUtils.userTaskURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.addTaskToUserListURL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.getCategoriesURL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.getErrorReasonsURL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.getRegisterURL;
@@ -46,7 +44,8 @@ import static com.dream.dreamtv.data.networking.NetworkUtils.getVideoTestsURL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.removeTaskFromUserListURL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.searchByCategoryURL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.searchURL;
-import static com.dream.dreamtv.data.networking.NetworkUtils.addTaskToUserListURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.userErrorsURL;
+import static com.dream.dreamtv.data.networking.NetworkUtils.userTaskURL;
 import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE_CONFIG;
 import static com.dream.dreamtv.utils.Constants.PARAM_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.PARAM_COMPLETED;
@@ -115,7 +114,6 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         responseFromFetchUser = new MutableLiveData<>();
         responseFromUserUpdate = new MutableLiveData<>();
         responseFromFetchSubtitle = new MutableLiveData<>();
-        //TODO si se decide hacer sincrono, solo existiria una variable que agrupe los tasks y que luego insertaria en BD todo de una sola vez
         responseFromFetchFinishedTasks = new MutableLiveData<>();
         responseFromFetchMyListTasks = new MutableLiveData<>();
         responseFromFetchTestTasks = new MutableLiveData<>();
@@ -186,7 +184,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         responseFromAuth.setValue(Resource.loading(null));
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+        mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "login() Response JSON: " + response);
@@ -195,12 +193,9 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 };
                 JsonResponseBaseBean<AuthResponse> jsonResponse = getJsonResponse(response, type);
 
-
                 responseFromAuth.postValue(Resource.success(jsonResponse.data));
 
                 fetchUserDetails();
-
-
             }
 
             @Override
@@ -212,9 +207,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 register(email, password);
 
             }
-        };
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, responseListener));
+        }));
     }
 
     /**
@@ -236,7 +229,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         responseFromAuth.setValue(Resource.loading(null));
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+        mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "register() Response JSON: " + response);
@@ -244,7 +237,6 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 TypeToken type = new TypeToken<JsonResponseBaseBean<AuthResponse>>() {
                 };
                 JsonResponseBaseBean<AuthResponse> jsonResponse = getJsonResponse(response, type);
-
 
                 responseFromAuth.postValue(Resource.success(jsonResponse.data));
 
@@ -257,10 +249,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 login(email, password); //we try to login again
             }
-        };
-
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, responseListener));
+        }));
     }
 
     /**
@@ -275,7 +264,8 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         Log.d(TAG, "fetchUserDetails() Request URL: " + URL);
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, URL, null, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "fetchUserDetails() Response JSON: " + response);
@@ -284,15 +274,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 };
                 JsonResponseBaseBean<User> jsonResponse = getJsonResponse(response, type);
 
-
-                User user = jsonResponse.data;
-
-//                getApplication().setUser(user); //updating token
-
-//                syncData();
-
-
-                responseFromFetchUser.postValue(Resource.success(user)); //post the value to live data
+                responseFromFetchUser.postValue(Resource.success(jsonResponse.data)); //post the value to live data
 
             }
 
@@ -305,11 +287,8 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 Log.d(TAG, "fetchUserDetails() Response Error: " + error.getMessage());
             }
-        };
+        }));
 
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, URL, null, responseListener));
-
-//        ret urn responseFromFetchUser;
     }
 
 
@@ -329,7 +308,8 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 + "; subLanguage=>" + user.subLanguage
                 + "; audioLanguage=>" + user.audioLanguage);
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(PUT, userUri, null, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "updateUser() Response JSON: " + response);
@@ -337,10 +317,6 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
                 };
                 JsonResponseBaseBean<User> jsonResponse = getJsonResponse(response, type);
-
-
-//                getApplication().setUser(user); //updating token
-
 
                 responseFromUserUpdate.postValue(Resource.success(jsonResponse.data)); //post the value to live data
 
@@ -355,9 +331,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 Log.d(TAG, "updateUser() Response Error: " + error.getMessage());
             }
-        };
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(PUT, userUri, null, responseListener));
+        }));
 
         return responseFromUserUpdate;
     }
@@ -375,7 +349,8 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         responseFromFetchReasons.setValue(Resource.loading(null));
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, URL, null, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "fetchReasons() Response JSON: " + response);
@@ -384,11 +359,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 };
                 JsonResponseBaseBean<ErrorReason[]> jsonResponse = getJsonResponse(response, type);
 
-
-//                getApplication().setReasons(jsonResponse.data);
-
                 responseFromFetchReasons.postValue(Resource.success(jsonResponse.data));
-
 
             }
 
@@ -399,10 +370,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 responseFromFetchReasons.postValue(Resource.error(error.getMessage(), null));
 
             }
-        };
-
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, URL, null, responseListener));
+        }));
     }
 
     /**
@@ -418,7 +386,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         Log.d(TAG, "fetchCategories() Request URL: " + categoriesUri);
 
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, categoriesUri, null, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "fetchCategories() Response JSON: " + response);
@@ -427,10 +395,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 };
                 JsonResponseBaseBean<VideoTopic[]> jsonResponse = getJsonResponse(response, type);
 
-                VideoTopic[] categories = jsonResponse.data;
-
-                responseFromCategories.postValue(Resource.success(categories));
-
+                responseFromCategories.postValue(Resource.success(jsonResponse.data));
 
             }
 
@@ -443,10 +408,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 Log.d(TAG, "fetchCategories() Response Error: " + error.getMessage());
             }
-        };
-
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, categoriesUri, null, responseListener));
+        }));
 
         return responseFromCategories;
     }
@@ -463,7 +425,8 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         responseFromFetchVideoTests.setValue(Resource.loading(null));
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, URL, null, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "fetchVideoTestsDetails() Response JSON: " + response);
@@ -471,9 +434,6 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 TypeToken type = new TypeToken<JsonResponseBaseBean<VideoTest[]>>() {
                 };
                 JsonResponseBaseBean<VideoTest[]> jsonResponse = getJsonResponse(response, type);
-
-
-//                getApplication().setVideoTests(jsonResponse.data);
 
                 responseFromFetchVideoTests.postValue(Resource.success(jsonResponse.data));
 
@@ -486,10 +446,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 responseFromFetchVideoTests.postValue(Resource.error(error.getMessage(), null));
 
             }
-        };
-
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, URL, null, responseListener));
+        }));
     }
 
 
@@ -511,17 +468,17 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 + "; " + PARAM_LANG_CODE + "=>" + languageCode
                 + "; " + PARAM_VERSION + "=>" + version);
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, subtitleUri, null, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "fetchSubtitle() Response JSON: " + response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<SubtitleResponse>>() {
                 };
-                JsonResponseBaseBean<SubtitleResponse> jsonResponse = JsonUtils.getJsonResponse(response, type);
+                JsonResponseBaseBean<SubtitleResponse> jsonResponse = getJsonResponse(response, type);
 
-                SubtitleResponse subtitleResponse = jsonResponse.data;
-                responseFromFetchSubtitle.postValue(Resource.success(subtitleResponse)); //post the value to live data
+                responseFromFetchSubtitle.postValue(Resource.success(jsonResponse.data)); //post the value to live data
 
             }
 
@@ -534,10 +491,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 Log.d(TAG, "fetchSubtitle() Response Error: " + error.getMessage());
             }
-        };
-
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, subtitleUri, null, responseListener));
+        }));
 
         return responseFromFetchSubtitle;
     }
@@ -563,14 +517,14 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 + "; " + PARAM_TYPE + "=>" + taskRequest.getCategory());
 
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, tasksUri, null, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
+                Log.d(TAG, "fetchTasksByCategory() Response JSON: " + response);
+
                 TypeToken type = new TypeToken<JsonResponseBaseBean<TasksList>>() {
                 };
                 JsonResponseBaseBean<TasksList> jsonResponse = getJsonResponse(response, type);
-
-                Log.d(TAG, "fetchTasksByCategory() Response JSON: " + response);
 
                 TasksList taskResponse = jsonResponse.data;
                 taskResponse.category = ALL;
@@ -596,9 +550,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 Log.d(TAG, "all tasks response: " + error.getMessage());
             }
-        };
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, tasksUri, null, responseListener));
+        }));
     }
 
 
@@ -618,14 +570,16 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         Log.d(TAG, "fetchTasksByCategory() Request URL: " + tasksUri + " Params: " + PARAM_TYPE + "=>" + paramType);
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, tasksUri, null, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
+                Log.d(TAG, paramType + "fetchTasksByCategory() Response JSON: " + response);
+
+
                 TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
                 };
                 JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
-
-                Log.d(TAG, paramType + "fetchTasksByCategory() Response JSON: " + response);
 
                 Task[] tasks = jsonResponse.data;
 
@@ -646,9 +600,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 Log.d(TAG, paramType + "fetchTasksByCategory() Response Error: " + error.getMessage());
             }
-        };
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, tasksUri, null, responseListener));
+        }));
     }
 
     /**
@@ -666,19 +618,17 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         Log.d(TAG, "searchByKeywordCategory() Request URL: " + searchUri
                 + " Params: " + PARAM_CATEGORY + "=>" + category);
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, searchUri, null, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
+                Log.d(TAG, "searchByKeywordCategory() Response JSON: " + response);
+
                 TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
                 };
                 JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
 
-                Log.d(TAG, "searchByKeywordCategory() Response JSON: " + response);
-
-                Task[] tasks = jsonResponse.data;
-
-
-                responseFromSearchByKeywordCategory.postValue(Resource.success(tasks)); //post the value to live data
+                responseFromSearchByKeywordCategory.postValue(Resource.success(jsonResponse.data)); //post the value to live data
 
             }
 
@@ -691,9 +641,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 Log.d(TAG, "searchByKeywordCategory() Response Error: " + error.getMessage());
             }
-        };
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, searchUri, null, responseListener));
+        }));
 
         return responseFromSearchByKeywordCategory;
     }
@@ -712,18 +660,18 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         Log.d(TAG, "search() Request URL: " + searchUri + " Params: " + PARAM_QUERY + "=>" + query);
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, searchUri, null, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
+
+                Log.d(TAG, "search() Response JSON: " + response);
+
                 TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
                 };
                 JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
 
-                Log.d(TAG, "search() Response JSON: " + response);
-
-                Task[] tasks = jsonResponse.data;
-
-                responseFromSearch.postValue(Resource.success(tasks)); //post the value to live data
+                responseFromSearch.postValue(Resource.success(jsonResponse.data)); //post the value to live data
 
             }
 
@@ -736,9 +684,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 Log.d(TAG, "search() Response Error: " + error.getMessage());
             }
-        };
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, searchUri, null, responseListener));
+        }));
 
         return responseFromSearch;
     }
@@ -764,7 +710,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 + "; " + PARAM_SUB_VERSION + " => " + mSubtitleVersion);
 
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+        mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
                 Log.d(TAG, "createUserTask() Response JSON: " + response);
@@ -773,9 +719,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 };
                 JsonResponseBaseBean<UserTask> jsonResponse = getJsonResponse(response, type);
 
-                UserTask userTasks = jsonResponse.data;
-
-                responseFromCreateUserTask.postValue(Resource.success(userTasks)); //post the value to live data
+                responseFromCreateUserTask.postValue(Resource.success(jsonResponse.data)); //post the value to live data
 
             }
 
@@ -788,10 +732,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 Log.d(TAG, "createUserTask() Response Error: " + error.getMessage());
             }
-        };
-
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, responseListener));
+        }));
 
         return responseFromCreateUserTask;
     }
@@ -804,34 +745,32 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
 
     /**
-     * @param taskId              taskId
-     * @param subLanguageConfig   subLanguageConfig
-     * @param audioLanguageConfig audioLanguageConfig
+     * @param taskId        taskId
+     * @param subLanguage   subLanguageConfig
+     * @param audioLanguage audioLanguageConfig
      */
     @Override
-    public MutableLiveData<Resource<Boolean>> addTaskToList(int taskId, String subLanguageConfig, String audioLanguageConfig) {
+    public MutableLiveData<Resource<Boolean>> addTaskToList(int taskId, String subLanguage, String audioLanguage) {
 
         String URL = addTaskToUserListURL();
 
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_TASK_ID, String.valueOf(taskId));
-        params.put(PARAM_SUB_LANGUAGE_CONFIG, subLanguageConfig);
-        params.put(PARAM_AUDIO_LANGUAGE_CONFIG, audioLanguageConfig);
+        params.put(PARAM_SUB_LANGUAGE_CONFIG, subLanguage);
+        params.put(PARAM_AUDIO_LANGUAGE_CONFIG, audioLanguage);
 
         Log.d(TAG, "addTaskToList() Request URL: " + URL + " Params: " + PARAM_TASK_ID + "=>" + taskId
-                + "; " + PARAM_SUB_LANGUAGE_CONFIG + "=>" + subLanguageConfig
-                + "; " + PARAM_AUDIO_LANGUAGE_CONFIG + "=>" + audioLanguageConfig);
+                + "; " + PARAM_SUB_LANGUAGE_CONFIG + "=>" + subLanguage
+                + "; " + PARAM_AUDIO_LANGUAGE_CONFIG + "=>" + audioLanguage);
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
 
                 Log.d(TAG, "addTaskToList() Response JSON: " + response);
 
-
                 responseFromAddToListTasks.postValue(Resource.success(true));
-
-
             }
 
             @Override
@@ -840,9 +779,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 responseFromAddToListTasks.postValue(Resource.error(error.getMessage(), null));
             }
-        };
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, responseListener));
+        }));
 
         return responseFromAddToListTasks;
 
@@ -857,7 +794,8 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         Log.d(TAG, "removeTaskFromList() Request URL: " + removeFromListUri + " Params: " + PARAM_TASK_ID + "=>" + taskId);
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(DELETE, removeFromListUri, null, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
 
@@ -865,8 +803,6 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
 
                 responseFromRemoveFromListTasks.postValue(Resource.success(true));
-
-
             }
 
             @Override
@@ -877,9 +813,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
             }
 
-        };
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(DELETE, removeFromListUri, null, responseListener));
+        }));
 
         return responseFromRemoveFromListTasks;
 
@@ -902,22 +836,18 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         Log.d(TAG, "updateUserTask() Request URL: " + URL + " Params: " + PARAM_TASK_ID + "=>" + userTask.getTaskId()
                 + "; " + PARAM_SUB_VERSION + " => " + userTask.getSubtitleVersion());
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+
+        mExecutors.networkIO().execute(() -> mVolley.requestString(PUT, URL, params, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
 
                 Log.d(TAG, "updateUserTask() Response JSON: " + response);
 
-
                 TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask>>() {
                 };
                 JsonResponseBaseBean<UserTask> jsonResponse = getJsonResponse(response, type);
 
-                UserTask userTasks = jsonResponse.data;
-
-                responseFromFetchUserTask.postValue(Resource.success(userTasks)); //to update the userTask value in VideoDetailsFragment
-
-
+                responseFromFetchUserTask.postValue(Resource.success(jsonResponse.data)); //to update the userTask value in VideoDetailsFragment
             }
 
             @Override
@@ -926,19 +856,20 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
             }
 
-        };
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(PUT, URL, params, responseListener));
+        }));
 
     }
 
 
     /**
-     * @param userTaskError userTaskError
+     * @param taskId
+     * @param subtitleVersion
+     * @param userTaskError
+     * @return
      */
     @Override
     @SuppressWarnings("unchecked")
-    public MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(int taskId, int subtitleVersion, UserTaskError userTaskError, boolean saveError) {
+    public MutableLiveData<Resource<UserTaskError[]>> updateErrorReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
         String URL = userErrorsURL();
 
         responseFromErrorsUpdate.postValue(Resource.loading(null));
@@ -950,38 +881,73 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         params.put(PARAM_SUB_VERSION, String.valueOf(subtitleVersion));
 
 
-        if (saveError)
-            Log.d(TAG, "saveErrors() Request URL: " + URL + " Params: " + PARAM_TASK_ID + "=>" + taskId
-                    + "; " + PARAM_SUB_VERSION + " => " + subtitleVersion
-                    + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
-                    + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
-        else
-            Log.d(TAG, "updateErrors() Request URL: " + URL + " Params: " + PARAM_TASK_ID + "=>" + taskId
-                    + "; " + PARAM_SUB_VERSION + " => " + subtitleVersion
-                    + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
-                    + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
+        Log.d(TAG, "updateErrors() Request URL: " + URL + " Params: " + PARAM_TASK_ID + "=>" + taskId
+                + "; " + PARAM_SUB_VERSION + " => " + subtitleVersion
+                + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
+                + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
 
 
-        ResponseListener responseListener = new ResponseListener(mContext) {
+        mExecutors.networkIO().execute(() -> mVolley.requestString(PUT, URL, params, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
 
+                Log.d(TAG, "updateErrors() Response JSON: " + response);
 
                 TypeToken type = new TypeToken<JsonResponseBaseBean<UserTaskError[]>>() {
                 };
                 JsonResponseBaseBean<UserTaskError[]> jsonResponse = getJsonResponse(response, type);
 
-                if (saveError)
-                    Log.d(TAG, "saveErrors() Response JSON: " + response);
-                else
-                    Log.d(TAG, "updateErrors() Response JSON: " + response);
+                responseFromErrorsUpdate.postValue(Resource.success(jsonResponse.data));
+            }
+
+            @Override
+            public void processError(VolleyError error) {
+                super.processError(error);
+
+                responseFromErrorsUpdate.postValue(Resource.error(error.getMessage(), null));
+            }
+
+        }));
+
+        return responseFromErrorsUpdate;
+    }
+
+    /**
+     * @param taskId
+     * @param subtitleVersion
+     * @param userTaskError
+     * @return
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public MutableLiveData<Resource<UserTaskError[]>> saveErrorReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
+        String URL = userErrorsURL();
+
+        responseFromErrorsUpdate.postValue(Resource.loading(null));
+
+        Map<String, String> params = new HashMap<>();
+        params.put(PARAM_TASK_ID, String.valueOf(taskId));
+        params.put(PARAM_REASON_CODE, userTaskError.getReasonCode());
+        params.put(PARAM_SUB_POSITION, String.valueOf(userTaskError.getSubtitlePosition()));
+        params.put(PARAM_SUB_VERSION, String.valueOf(subtitleVersion));
 
 
-                UserTaskError[] userTaskErrors = jsonResponse.data;
+        Log.d(TAG, "saveErrors() Request URL: " + URL + " Params: " + PARAM_TASK_ID + "=>" + taskId
+                + "; " + PARAM_SUB_VERSION + " => " + subtitleVersion
+                + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
+                + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
 
-                responseFromErrorsUpdate.postValue(Resource.success(userTaskErrors));
 
+        mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, new ResponseListener(mContext) {
+            @Override
+            protected void processResponse(String response) {
+                Log.d(TAG, "saveErrors() Response JSON: " + response);
 
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTaskError[]>>() {
+                };
+                JsonResponseBaseBean<UserTaskError[]> jsonResponse = getJsonResponse(response, type);
+
+                responseFromErrorsUpdate.postValue(Resource.success(jsonResponse.data));
             }
 
             @Override
@@ -992,13 +958,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
             }
 
-        };
-
-        if (saveError)
-            mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, responseListener));
-        else //update Error
-            mExecutors.networkIO().execute(() -> mVolley.requestString(PUT, URL, params, responseListener));
-
+        }));
 
         return responseFromErrorsUpdate;
     }

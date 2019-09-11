@@ -127,31 +127,29 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
 
 
-        getValuesFromIntent();
-
-        if (mSelectedTask != null) {
-            setupDetailsOverview();
-            fetchUserTasksObserver();
-            fetchSubtitle();
-
-            if (mSelectedTask.userTasks != null && mSelectedTask.userTasks.length > 0) {
-                mUserTask = mSelectedTask.userTasks[0]; //TODO what happened is there is more than one UserTask
-                setupContinueAction();
-            }
-        } else {
-            getContext().finish(); //back to HomeActivity
-        }
-    }
-
-
-    public FragmentActivity getContext() {
-        return Objects.requireNonNull(getActivity());
-    }
-
-    private void getValuesFromIntent() {
         mSelectedTask = getContext().getIntent().getParcelableExtra(INTENT_TASK);
 
         mSelectedCategory = (Category.Type) getContext().getIntent().getSerializableExtra(INTENT_CATEGORY);
+
+
+        setupDetailsOverview();
+        fetchUserTasksObserver();
+        fetchSubtitle();
+
+        initializePanel();
+
+
+    }
+
+    private void initializePanel(){
+        if (mSelectedTask.userTasks != null && mSelectedTask.userTasks.length > 0) {
+            mUserTask = mSelectedTask.userTasks[0]; //TODO what happened is there is more than one UserTask
+            setupContinueAction();
+        }
+    }
+
+    public FragmentActivity getContext() {
+        return Objects.requireNonNull(getActivity());
     }
 
 
@@ -400,10 +398,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             Status status = subtitleResponseResource.status;
             SubtitleResponse data = subtitleResponseResource.data;
 
-            if (status.equals(Status.LOADING))
-                instantiateAndShowLoading(getString(R.string.title_loading_retrieve_subtitle));
-
-            else if (status.equals(Status.SUCCESS)) {
+             if (status.equals(Status.SUCCESS)) {
                 Log.d(TAG, "Subtitle response");
 
                 if (data != null && mSelectedTask.video.title.equals(data.videoTitleOriginal)) {
@@ -417,8 +412,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                         mSelectedTask.videoDescriptionTranslated = mSubtitleResponse.videoDescriptionTranslated;
                 }
 
-                dismissLoading();
-
                 setupDetailsOverview();
 
             } else if (status.equals(Status.ERROR)) {
@@ -427,9 +420,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                     Log.d(TAG, subtitleResponseResource.message);
                 else
                     Log.d(TAG, "Status ERROR");
-
-                dismissLoading();
-            }
+             }
         });
 
     }

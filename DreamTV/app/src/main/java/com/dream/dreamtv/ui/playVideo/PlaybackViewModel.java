@@ -11,7 +11,6 @@ import com.dream.dreamtv.data.model.api.UserTaskError;
 import com.dream.dreamtv.repository.AppRepository;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class PlaybackViewModel extends ViewModel {
 
@@ -25,21 +24,24 @@ public class PlaybackViewModel extends ViewModel {
         mRepository.updateUserTask(userTask);
     }
 
-    LiveData<Resource<UserTaskError[]>> errorsUpdate(int taskId, int subtitleVersion, UserTaskError userTaskError, boolean saveError) {
-        return mRepository.errorsUpdate(taskId, subtitleVersion, userTaskError, saveError);
-    }
-
-
-    String getListSubtitleSize(){
+    String getListSubtitleSize() {
         return mRepository.getSubtitleSizePref();
     }
 
-    ArrayList<ErrorReason> getReasons(){
+    ArrayList<ErrorReason> getReasons() {
         return mRepository.getReasons();
     }
 
-    User getUser(){
+    User getUser() {
         return mRepository.getUser();
+    }
+
+    public LiveData<Resource<UserTaskError[]>> saveErrorReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
+        return mRepository.saveErrorReasons(taskId, subtitleVersion, userTaskError);
+    }
+
+    public LiveData<Resource<UserTaskError[]>> updateErrorReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
+        return mRepository.saveErrorReasons(taskId, subtitleVersion, userTaskError);
     }
 }
 

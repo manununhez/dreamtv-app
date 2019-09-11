@@ -7,6 +7,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.RequestQueue.RequestFinishedListener;
+import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.dream.dreamtv.data.local.prefs.AppPreferencesHelper;
 
@@ -63,7 +64,7 @@ public class VolleyController {
 
     public void requestString(int method, final String webserviceUrl, final Map<String, String> params,
                               ResponseListener responseListener) {
-
+        
         StringRequest stringRequest = new StringRequest(method, webserviceUrl, responseListener, responseListener) {
 
             @Override

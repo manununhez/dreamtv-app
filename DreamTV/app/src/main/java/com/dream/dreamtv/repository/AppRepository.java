@@ -194,6 +194,17 @@ public class AppRepository {
         mNetworkDataSource.login(email, password);
     }
 
+    public void fetchReasons() {
+        mNetworkDataSource.fetchReasons();
+    }
+
+    public void fetchVideoTestsDetails() {
+        mNetworkDataSource.fetchVideoTestsDetails();
+    }
+
+    public void updateUserTask(UserTask userTask) {
+        mNetworkDataSource.updateUserTask(userTask);
+    }
 
     public LiveData<Resource<User>> updateUser(final User user) {
         return mNetworkDataSource.updateUser(user);
@@ -213,27 +224,18 @@ public class AppRepository {
         return mNetworkDataSource.createUserTask(taskId, mSubtitleVersion);
     }
 
-    public MutableLiveData<Resource<Boolean>> requestAddToList(int taskId, String language,
-                                                               String primaryAudioLanguageCode) {
+    public LiveData<Resource<Boolean>> requestAddToList(int taskId, String language,
+                                                        String primaryAudioLanguageCode) {
         return mNetworkDataSource.addTaskToList(taskId, language, primaryAudioLanguageCode);
 
     }
 
-    public MutableLiveData<Resource<Boolean>> requestRemoveFromList(int taskId) {
+    public LiveData<Resource<Boolean>> requestRemoveFromList(int taskId) {
         return mNetworkDataSource.removeTaskFromList(taskId);
     }
 
 
-    public MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(int taskId, int subtitleVersion,
-                                                                   UserTaskError userTaskError, boolean saveError) {
-        return mNetworkDataSource.errorsUpdate(taskId, subtitleVersion, userTaskError, saveError);
-    }
-
-    public void updateUserTask(UserTask userTask) {
-        mNetworkDataSource.updateUserTask(userTask);
-    }
-
-    public MutableLiveData<Resource<Task[]>> search(String query) {
+    public LiveData<Resource<Task[]>> search(String query) {
         return mNetworkDataSource.search(query);
     }
 
@@ -241,8 +243,18 @@ public class AppRepository {
         return mNetworkDataSource.fetchCategories();
     }
 
-    public MutableLiveData<Resource<Task[]>> searchByKeywordCategory(String category) {
+    public LiveData<Resource<Task[]>> searchByKeywordCategory(String category) {
         return mNetworkDataSource.searchByKeywordCategory(category);
+    }
+
+
+    public LiveData<Resource<UserTaskError[]>> saveErrorReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
+        return mNetworkDataSource.saveErrorReasons(taskId, subtitleVersion, userTaskError);
+    }
+
+    public LiveData<Resource<UserTaskError[]>> updateErrorReasons(int taskId, int subtitleVersion,
+                                                                  UserTaskError userTaskError) {
+        return mNetworkDataSource.updateErrorReasons(taskId, subtitleVersion, userTaskError);
     }
 
     public MutableLiveData<Resource<User>> fetchUserDetails() {
@@ -260,15 +272,6 @@ public class AppRepository {
     public MutableLiveData<Resource<VideoTest[]>> fetchVideoTestsResponse() {
         return mNetworkDataSource.responseFromVideoTests();
     }
-
-    public void fetchReasons() {
-        mNetworkDataSource.fetchReasons();
-    }
-
-    public void fetchVideoTestsDetails() {
-        mNetworkDataSource.fetchVideoTestsDetails();
-    }
-
 
     private MutableLiveData<Resource<AuthResponse>> getAuthResponse() {
         return mNetworkDataSource.responseFromAuth();
@@ -292,6 +295,11 @@ public class AppRepository {
     /**************************
      **  LOCAL DATA SOURCE   **
      **************************/
+
+    public ArrayList<ErrorReason> getReasons() {
+        return mPreferencesHelper.getReasons();
+    }
+
     public VideoDuration getVideoDurationPref() {
         return mPreferencesHelper.getVideoDurationPref();
     }
@@ -326,9 +334,5 @@ public class AppRepository {
 
     public String getInterfaceAppLanguage() {
         return mPreferencesHelper.getInterfaceLanguagePref();
-    }
-
-    public ArrayList<ErrorReason> getReasons() {
-        return mPreferencesHelper.getReasons();
     }
 }

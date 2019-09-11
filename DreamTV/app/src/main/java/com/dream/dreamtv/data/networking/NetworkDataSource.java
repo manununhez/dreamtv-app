@@ -40,7 +40,10 @@ public interface NetworkDataSource {
 
     MutableLiveData<Resource<Boolean>> removeTaskFromList(int taskId);
 
-    MutableLiveData<Resource<UserTaskError[]>> errorsUpdate(int taskId, int subtitleVersion,
-                                                            UserTaskError userTaskError, boolean saveError);
+    MutableLiveData<Resource<UserTaskError[]>> updateErrorReasons(int taskId, int subtitleVersion,
+                                                            UserTaskError userTaskError);
+
+    MutableLiveData<Resource<UserTaskError[]>> saveErrorReasons(int taskId, int subtitleVersion,
+                                                            UserTaskError userTaskError);
 
 }

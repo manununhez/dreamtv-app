@@ -9,15 +9,18 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
+import com.dream.dreamtv.data.model.api.AuthResponse;
 import com.dream.dreamtv.data.model.api.JsonResponseBaseBean;
 import com.dream.dreamtv.utils.JsonUtils;
 import com.google.gson.reflect.TypeToken;
+
+import static com.dream.dreamtv.utils.JsonUtils.getJsonResponse;
 
 
 /**
  * Created by gbogarin on 29/11/2015.
  */
-public abstract class ResponseListener implements Listener<String>, ErrorListener, RequestQueue.RequestFinishedListener {
+public abstract class ResponseListener implements Listener<String>, ErrorListener {
     private static final String TAG = ResponseListener.class.getSimpleName();
 
     private final Context context;
@@ -36,7 +39,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
 
         if (errorMessage != null && !errorMessage.isEmpty()) {
             Log.d(TAG, errorMessage);
-            Toast.makeText(context.getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
         }
 
         processError(error);
@@ -45,11 +48,10 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
     @Override
     public void onResponse(String response) {
         Log.d(TAG, "Response: onResponse() " + response);
-//
-        TypeToken typeToken = new TypeToken<JsonResponseBaseBean>() {
+
+        TypeToken type = new TypeToken<JsonResponseBaseBean>() {
         };
-        final JsonResponseBaseBean jsonResponse =
-                JsonUtils.getJsonResponse(response, typeToken, false);
+        JsonResponseBaseBean jsonResponse = getJsonResponse(response, type);
 
         if (jsonResponse != null && jsonResponse.success != null) {
             if (jsonResponse.success) {
@@ -58,8 +60,11 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
                 processError();
             }
         } else {
-            processResponse(response);
+            processError();
         }
+//        else {
+//            processResponse(response);
+//        }
     }
 
     protected abstract void processResponse(String response);
@@ -70,7 +75,4 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
     public void processError() {
     }
 
-    @Override
-    public void onRequestFinished(Request request) {
-    }
 }

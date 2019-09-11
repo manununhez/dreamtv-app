@@ -739,7 +739,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     public void onSaveReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
         Log.d(TAG, "onSaveReasons() =>" + userTaskError.toString());
 
-        saveErrorsLiveData = mViewModel.errorsUpdate(taskId, subtitleVersion, userTaskError, true);
+        saveErrorsLiveData = mViewModel.saveErrorReasons(taskId, subtitleVersion, userTaskError);
 
         saveErrorsLiveData.removeObservers(this);
 
@@ -773,7 +773,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     public void onUpdateReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
         Log.d(TAG, "onUpdateReasons() =>" + userTaskError.toString());
 
-        updateErrorsLiveData = mViewModel.errorsUpdate(taskId, subtitleVersion, userTaskError, false);
+        updateErrorsLiveData = mViewModel.updateErrorReasons(taskId, subtitleVersion, userTaskError);
 
         updateErrorsLiveData.removeObservers(this);
 
