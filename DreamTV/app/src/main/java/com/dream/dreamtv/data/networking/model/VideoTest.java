@@ -1,4 +1,4 @@
-package com.dream.dreamtv.data.model.api;
+package com.dream.dreamtv.data.networking.model;
 
 import com.google.gson.annotations.SerializedName;
 

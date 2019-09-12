@@ -1,7 +1,7 @@
 package com.dream.dreamtv.ui.playVideo;
 
-import com.dream.dreamtv.data.model.api.UserTask;
-import com.dream.dreamtv.data.model.api.UserTaskError;
+import com.dream.dreamtv.data.networking.model.UserTask;
+import com.dream.dreamtv.data.networking.model.UserTaskError;
 
 import java.util.ArrayList;
 

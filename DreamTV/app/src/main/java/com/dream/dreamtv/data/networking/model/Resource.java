@@ -1,12 +1,12 @@
-package com.dream.dreamtv.data.model.api;
+package com.dream.dreamtv.data.networking.model;
 
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import static com.dream.dreamtv.data.model.api.Resource.Status.ERROR;
-import static com.dream.dreamtv.data.model.api.Resource.Status.LOADING;
-import static com.dream.dreamtv.data.model.api.Resource.Status.SUCCESS;
+import static com.dream.dreamtv.data.networking.model.Resource.Status.ERROR;
+import static com.dream.dreamtv.data.networking.model.Resource.Status.LOADING;
+import static com.dream.dreamtv.data.networking.model.Resource.Status.SUCCESS;
 
 
 /**

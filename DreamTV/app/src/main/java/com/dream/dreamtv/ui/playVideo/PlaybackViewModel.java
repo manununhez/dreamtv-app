@@ -3,11 +3,11 @@ package com.dream.dreamtv.ui.playVideo;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.dream.dreamtv.data.model.api.ErrorReason;
-import com.dream.dreamtv.data.model.api.Resource;
-import com.dream.dreamtv.data.model.api.User;
-import com.dream.dreamtv.data.model.api.UserTask;
-import com.dream.dreamtv.data.model.api.UserTaskError;
+import com.dream.dreamtv.data.networking.model.ErrorReason;
+import com.dream.dreamtv.data.networking.model.Resource;
+import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.networking.model.UserTask;
+import com.dream.dreamtv.data.networking.model.UserTaskError;
 import com.dream.dreamtv.repository.AppRepository;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class PlaybackViewModel extends ViewModel {
     }
 
     public LiveData<Resource<UserTaskError[]>> updateErrorReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
-        return mRepository.saveErrorReasons(taskId, subtitleVersion, userTaskError);
+        return mRepository.updateErrorReasons(taskId, subtitleVersion, userTaskError);
     }
 }
 

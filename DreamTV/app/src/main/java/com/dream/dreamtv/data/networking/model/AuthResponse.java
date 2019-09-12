@@ -1,4 +1,4 @@
-package com.dream.dreamtv.data.model.api;
+package com.dream.dreamtv.data.networking.model;
 
 public class AuthResponse {
     public String token;

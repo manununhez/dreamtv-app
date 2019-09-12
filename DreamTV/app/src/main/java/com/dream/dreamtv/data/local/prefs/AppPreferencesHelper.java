@@ -6,9 +6,9 @@ import android.preference.PreferenceManager;
 
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.data.model.VideoDuration;
-import com.dream.dreamtv.data.model.api.ErrorReason;
-import com.dream.dreamtv.data.model.api.User;
-import com.dream.dreamtv.data.model.api.VideoTest;
+import com.dream.dreamtv.data.networking.model.ErrorReason;
+import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.networking.model.VideoTest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

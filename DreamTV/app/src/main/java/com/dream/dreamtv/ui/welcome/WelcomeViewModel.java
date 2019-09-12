@@ -4,8 +4,8 @@ package com.dream.dreamtv.ui.welcome;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.dream.dreamtv.data.model.api.Resource;
-import com.dream.dreamtv.data.model.api.User;
+import com.dream.dreamtv.data.networking.model.Resource;
+import com.dream.dreamtv.data.networking.model.User;
 import com.dream.dreamtv.repository.AppRepository;
 
 public class WelcomeViewModel extends ViewModel {

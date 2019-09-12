@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,17 +22,17 @@ import androidx.leanback.widget.RowPresenter;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.dream.dreamtv.BuildConfig;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
 import com.dream.dreamtv.data.model.Card;
+import com.dream.dreamtv.data.model.Category;
 import com.dream.dreamtv.data.model.Category.Type;
-import com.dream.dreamtv.data.model.api.Resource;
-import com.dream.dreamtv.data.model.api.Resource.Status;
-import com.dream.dreamtv.data.model.api.Task;
-import com.dream.dreamtv.data.model.api.TasksList;
-import com.dream.dreamtv.data.model.api.User;
-import com.dream.dreamtv.data.model.api.VideoTopic;
+import com.dream.dreamtv.data.networking.model.Resource;
+import com.dream.dreamtv.data.networking.model.Resource.Status;
+import com.dream.dreamtv.data.networking.model.Task;
+import com.dream.dreamtv.data.networking.model.TasksList;
+import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.networking.model.VideoTopicSchema;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.presenter.CardPresenterSelector;
 import com.dream.dreamtv.ui.categories.CategoryActivity;
@@ -47,6 +46,8 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import timber.log.Timber;
 
 import static com.dream.dreamtv.data.model.Category.Type.ALL;
 import static com.dream.dreamtv.data.model.Category.Type.CONTINUE;
@@ -77,11 +78,8 @@ import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 
 
 public class HomeFragment extends BrowseSupportFragment {
-    public static final String ICON_SETTINGS_APP = "ic_settings_app";
-    public static final String ICON_SETTINGS_VIDEO = "ic_settings_video";
-    private static final String TAG = HomeFragment.class.getSimpleName();
-    private static final boolean DEBUG = BuildConfig.DEBUG;
-    //    private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
+    private static final String ICON_SETTINGS_APP = "ic_settings_app";
+    private static final String ICON_SETTINGS_VIDEO = "ic_settings_video";
     private static final int REQUEST_APP_SETTINGS = 45690;
     private static final int REQUEST_VIDEO_SETTINGS = 45710;
     private ArrayObjectAdapter mRowsAdapter;
@@ -101,20 +99,20 @@ public class HomeFragment extends BrowseSupportFragment {
     private LiveData<Resource<TasksList>> testTaskLiveData;
     private FirebaseAnalytics mFirebaseAnalytics;
     private LiveData<Resource<User>> updateUserLiveData;
-    private LiveData<Resource<VideoTopic[]>> categoriesLiveData;
+    private LiveData<Resource<VideoTopicSchema[]>> categoriesLiveData;
 
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        Log.i(TAG, "onAttach()");
+        Timber.i("onAttach()");
 
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.i(TAG, "onActivityCreated()");
+        Timber.i("onActivityCreated()");
 
 //        // Get the ViewModel from the factory
         ViewModelFactory factory = InjectorUtils.provideViewModelFactory(getContext());
@@ -127,23 +125,18 @@ public class HomeFragment extends BrowseSupportFragment {
 
         instantiateLoading();
 
-        initSettingsRow();
+        initCategoriesRow();
 
-        syncData();
+        addRowSettings();
+
+        setupObservers();
     }
 
     public FragmentActivity getContext() {
         return Objects.requireNonNull(getActivity());
     }
 
-    private void syncData() {
-        if (DEBUG) Log.d(TAG, "syncData()");
-
-
-        boolean testingMode = mViewModel.getTestingMode();
-
-        addRowSettings();
-
+    private void setupObservers() {
 //------- ALL TASKS
         allTaskLiveData = mViewModel.requestTasksByCategory(ALL);
         allTaskLiveData.removeObservers(getViewLifecycleOwner());
@@ -158,25 +151,24 @@ public class HomeFragment extends BrowseSupportFragment {
                 if (data != null) {
                     if (data.data != null && data.data.length > 0)
                         loadVideos(data);
-                    else verifyRowExistenceAndRemove(rowAllTasks);
+                    else verifyRowExistenceAndRemove(ALL);
                 }
 
-                if (DEBUG) Log.d(TAG, "task response: rowAllTasks");
+                Timber.d("task response: rowAllTasks");
 
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (errorMessage != null) {
-                    if (DEBUG) Log.d(TAG, errorMessage);
+                    Timber.d(errorMessage);
                 } else {
-                    if (DEBUG) Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
                 }
 
                 dismissLoading();
             }
 
         });
-        mViewModel.updateTaskByCategory(ALL);
 
 
 //------- CONTINUE TASKS
@@ -193,27 +185,25 @@ public class HomeFragment extends BrowseSupportFragment {
                 if (data != null) {
                     if (data.data != null && data.data.length > 0)
                         loadVideos(data);
-                    else verifyRowExistenceAndRemove(rowContinueTasks);
+                    else verifyRowExistenceAndRemove(CONTINUE);
                 }
 
-                if (DEBUG) Log.d(TAG, "task response: rowContinueTasks");
+                Timber.d("task response: rowContinueTasks");
 
 
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (errorMessage != null) {
-                    if (DEBUG) Log.d(TAG, errorMessage);
+                    Timber.d(errorMessage);
                 } else {
-                    if (DEBUG) Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
                 }
 
                 dismissLoading();
             }
 
         });
-
-        mViewModel.updateTaskByCategory(CONTINUE);
 
 
 //------- FINISHED TASKS
@@ -230,18 +220,18 @@ public class HomeFragment extends BrowseSupportFragment {
                 if (data != null) {
                     if (data.data != null && data.data.length > 0)
                         loadVideos(data);
-                    else verifyRowExistenceAndRemove(rowFinishedTasks);
+                    else verifyRowExistenceAndRemove(FINISHED);
                 }
 
-                if (DEBUG) Log.d(TAG, "task response: rowFinishedTasks");
+                Timber.d("task response: rowFinishedTasks");
 
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (errorMessage != null) {
-                    if (DEBUG) Log.d(TAG, errorMessage);
+                    Timber.d(errorMessage);
                 } else {
-                    if (DEBUG) Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
                 }
 
                 dismissLoading();
@@ -250,8 +240,6 @@ public class HomeFragment extends BrowseSupportFragment {
             // TODO throw new RuntimeException("Get list sorted of finished tasks");
 
         });
-
-        mViewModel.updateTaskByCategory(FINISHED);
 
 
 //------- MY LIST TASKS
@@ -268,19 +256,19 @@ public class HomeFragment extends BrowseSupportFragment {
                 if (data != null) {
                     if (data.data != null && data.data.length > 0) {
                         loadVideos(data);
-                    } else verifyRowExistenceAndRemove(rowMyListTasks);
+                    } else verifyRowExistenceAndRemove(MY_LIST);
                 }
 
-                if (DEBUG) Log.d(TAG, "task response: rowMyListTasks");
+                Timber.d("task response: rowMyListTasks");
 
 
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (errorMessage != null) {
-                    if (DEBUG) Log.d(TAG, errorMessage);
+                    Timber.d(errorMessage);
                 } else {
-                    if (DEBUG) Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
                 }
 
                 dismissLoading();
@@ -289,8 +277,6 @@ public class HomeFragment extends BrowseSupportFragment {
             //  TODO throw new RuntimeException("Get list sorted of my list tasks");
 
         });
-
-        mViewModel.updateTaskByCategory(MY_LIST);
 
 
 //------- TEST TASKS
@@ -307,40 +293,42 @@ public class HomeFragment extends BrowseSupportFragment {
                 if (data != null) {
                     if (data.data != null && data.data.length > 0)
                         loadVideos(data);
-                    else verifyRowExistenceAndRemove(rowTestTasks);
+                    else verifyRowExistenceAndRemove(TEST);
                 }
 
-                if (DEBUG) Log.d(TAG, "task response: rowTestTasks");
+                Timber.d("task response: rowTestTasks");
 
 
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (errorMessage != null) {
-                    if (DEBUG) Log.d(TAG, errorMessage);
-                } else if (DEBUG) Log.d(TAG, "Status ERROR");
+                    Timber.d(errorMessage);
+                } else Timber.d("Status ERROR");
 
                 dismissLoading();
             }
 
         });
 
-        if (testingMode)
-            mViewModel.updateTaskByCategory(TEST);
+//        boolean testingMode = mViewModel.getTestingMode();
+//
+//        if (testingMode)
+//            mViewModel.updateTaskByCategory(TEST);
+//
 
-
-//        REASONS
-        mViewModel.fetchReasons();
-
-//        VIDEO TESTS
-        mViewModel.fetchVideoTestsDetails();
+////        REASONS
+//        mViewModel.fetchReasons();
+//
+////        VIDEO TESTS
+//        mViewModel.fetchVideoTestsDetails();
 
 //        CATEGORIES
         categoriesLiveData = mViewModel.fetchCategories();
         categoriesLiveData.removeObservers(getViewLifecycleOwner());
         categoriesLiveData.observe(getViewLifecycleOwner(), resource -> {
             Status status = resource.status;
-            VideoTopic[] data = resource.data;
+            VideoTopicSchema[] data = resource.data;
             String errorMessage = resource.message;
 
             if (status.equals(Status.LOADING)) {
@@ -348,18 +336,18 @@ public class HomeFragment extends BrowseSupportFragment {
             } else if (status.equals(Status.SUCCESS)) {
                 if (data != null) {
                     categoriesRowSettings(data);
-                } else verifyRowExistenceAndRemove(rowCategories);
+                } else verifyRowExistenceAndRemove(TOPICS);
 
 
-                if (DEBUG) Log.d(TAG, "task response: rowCategories");
+                Timber.d("task response: rowCategories");
 
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (errorMessage != null) {
-                    if (DEBUG) Log.d(TAG, errorMessage);
+                    Timber.d(errorMessage);
                 } else {
-                    if (DEBUG) Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
                 }
 
                 dismissLoading();
@@ -374,8 +362,8 @@ public class HomeFragment extends BrowseSupportFragment {
         setHeadersState(HEADERS_DISABLED);
     }
 
-    private void initSettingsRow() {
-        if (DEBUG) Log.d(TAG, "initSettingsRow()");
+    private void initCategoriesRow() {
+        Timber.d("initCategoriesRow()");
 
 
         rowSettings = createListRow(getString(R.string.title_preferences_category), SETTINGS);
@@ -418,7 +406,7 @@ public class HomeFragment extends BrowseSupportFragment {
     public void onDestroyView() {
         super.onDestroyView();
 
-        if (DEBUG) Log.d(TAG, "onDestroyView");
+        Timber.d("onDestroyView");
 
         if (allTaskLiveData != null)
             allTaskLiveData.removeObservers(getViewLifecycleOwner());
@@ -445,7 +433,7 @@ public class HomeFragment extends BrowseSupportFragment {
 
 
     private void setupVideosList() {
-        if (DEBUG) Log.d(TAG, "setupVideosList()");
+        Timber.d("setupVideosList()");
 
         setBadgeDrawable(getContext().getResources().getDrawable(R.drawable.dreamtv_logo, null));
         setHeadersTransitionOnBackEnabled(false);
@@ -468,7 +456,7 @@ public class HomeFragment extends BrowseSupportFragment {
 
         Type category = tasksList.category;
 
-        if (DEBUG) Log.d(TAG, "Loading video => VideoTopic:" + category);
+        Timber.d("Loading video => VideoTopic:" + category);
 
         List<Card> cards = new ArrayList<>();
 
@@ -490,26 +478,7 @@ public class HomeFragment extends BrowseSupportFragment {
         };
 
 
-        ListRow listRow;
-        switch (category) {
-            case MY_LIST:
-                listRow = rowMyListTasks;
-                break;
-            case FINISHED:
-                listRow = rowFinishedTasks;
-                break;
-            case CONTINUE:
-                listRow = rowContinueTasks;
-                break;
-            case ALL:
-                listRow = rowAllTasks;
-                break;
-            case TEST:
-                listRow = rowTestTasks;
-                break;
-            default:
-                throw new RuntimeException("Category " + category + " not contemplated!");
-        }
+        ListRow listRow = getListRowForCategory(tasksList.category);
 
 
         int indexOfRow = mRowsAdapter.indexOf(listRow);
@@ -531,7 +500,37 @@ public class HomeFragment extends BrowseSupportFragment {
 
     }
 
-    private void categoriesRowSettings(VideoTopic[] categories) {
+    private ListRow getListRowForCategory(Type category) {
+        ListRow listRow;
+        switch (category) {
+            case TOPICS:
+                listRow = rowCategories;
+                break;
+            case SETTINGS:
+                listRow = rowSettings;
+                break;
+            case MY_LIST:
+                listRow = rowMyListTasks;
+                break;
+            case FINISHED:
+                listRow = rowFinishedTasks;
+                break;
+            case CONTINUE:
+                listRow = rowContinueTasks;
+                break;
+            case ALL:
+                listRow = rowAllTasks;
+                break;
+            case TEST:
+                listRow = rowTestTasks;
+                break;
+            default:
+                throw new RuntimeException("Category " + category + " not contemplated!");
+        }
+        return listRow;
+    }
+
+    private void categoriesRowSettings(VideoTopicSchema[] categories) {
         List<Card> cards = new ArrayList<>();
 
 
@@ -548,7 +547,7 @@ public class HomeFragment extends BrowseSupportFragment {
         };
 
 
-        for (VideoTopic videoTopic : categories) {
+        for (VideoTopicSchema videoTopic : categories) {
             Card card = new Card(videoTopic.name, Card.Type.SINGLE_LINE, videoTopic.imageName);
             cards.add(card);
 
@@ -585,7 +584,9 @@ public class HomeFragment extends BrowseSupportFragment {
         setAdapter(mRowsAdapter);
     }
 
-    private void verifyRowExistenceAndRemove(ListRow listRow) {
+    private void verifyRowExistenceAndRemove(Category.Type category) {
+
+        ListRow listRow = getListRowForCategory(category);
 
         if (mRowsAdapter.indexOf(listRow) != -1) {
             ((ArrayObjectAdapter) listRow.getAdapter()).clear();//clear elements from row
@@ -623,7 +624,7 @@ public class HomeFragment extends BrowseSupportFragment {
 
         User user = mViewModel.getUser();
 
-        Log.d(TAG, "User from firebaseLog: " + user);
+        Timber.d("User from firebaseLog: %s", user);
 
         Bundle bundle = new Bundle();
 
@@ -657,18 +658,18 @@ public class HomeFragment extends BrowseSupportFragment {
             String message = response.message;
 
             if (status.equals(Status.SUCCESS)) {
-                if (DEBUG) Log.d(TAG, "Response from userUpdate");
+                Timber.d("Response from userUpdate");
                 if (data != null) {
-                    if (DEBUG) Log.d(TAG, data.toString());
+                    Timber.d(data.toString());
 
                     firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN);
                 }
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something error
                 if (message != null) {
-                    if (DEBUG) Log.d(TAG, message);
+                    Timber.d(message);
                 } else {
-                    if (DEBUG) Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
                 }
             }
 
@@ -694,21 +695,21 @@ public class HomeFragment extends BrowseSupportFragment {
                 if (restart) {
                     //To update screen language
                     getContext().recreate(); //Recreate activity
-                    if (DEBUG)
-                        Log.d(TAG, "REQUEST_APP_SETTINGS - Different language. Updating screen.");
+
+                    Timber.d("REQUEST_APP_SETTINGS - Different language. Updating screen.");
                 } else {
                     //we check is we are not in testing mode. If the language screen does not recreate the activity,
                     // we manually delete the row testing
                     boolean testingMode = mViewModel.getTestingMode();
 
                     if (!testingMode) {
-                        verifyRowExistenceAndRemove(rowTestTasks);
-                        if (DEBUG)
-                            Log.d(TAG, "REQUEST_APP_SETTINGS - Removed test category.");
+                        verifyRowExistenceAndRemove(TEST);
+
+                        Timber.d("REQUEST_APP_SETTINGS - Removed test category.");
                     } else {
                         mViewModel.updateTaskByCategory(TEST);
-                        if (DEBUG)
-                            Log.d(TAG, "REQUEST_APP_SETTINGS - Added test category.");
+
+                        Timber.d("REQUEST_APP_SETTINGS - Added test category.");
                     }
                 }
             } else if (requestCode == REQUEST_VIDEO_SETTINGS) {
@@ -725,8 +726,8 @@ public class HomeFragment extends BrowseSupportFragment {
                     firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN);
                     //To update screen language
                     getContext().recreate(); //Recreate activity
-                    if (DEBUG)
-                        Log.d(TAG, "REQUEST_VIDEO_SETTINGS - Different video audio language. Updating screen.");
+
+                    Timber.d("REQUEST_VIDEO_SETTINGS - Different video audio language. Updating screen.");
                 } else {
                     boolean callAllCategoriesTasks = data.getBooleanExtra(INTENT_EXTRA_CALL_TASKS, false);
                     if (callAllCategoriesTasks) {
@@ -735,8 +736,8 @@ public class HomeFragment extends BrowseSupportFragment {
                         mViewModel.updateTaskByCategory(FINISHED);
                         mViewModel.updateTaskByCategory(MY_LIST);
                         mViewModel.updateTaskByCategory(TEST);
-                        if (DEBUG)
-                            Log.d(TAG, "REQUEST_VIDEO_SETTINGS - Changed video duration. Call all Tasks again.");
+
+                        Timber.d("REQUEST_VIDEO_SETTINGS - Changed video duration. Call all Tasks again.");
                     }
                 }
 
@@ -749,7 +750,7 @@ public class HomeFragment extends BrowseSupportFragment {
     // Loading and progress bar related functions
     //********************************************
     private void instantiateLoading() {
-        if (DEBUG) Log.d(TAG, "instantiateLoading()");
+        Timber.d("instantiateLoading()");
 
         loadingDialog = new LoadingDialog(getContext(), getString(R.string.title_loading_retrieve_tasks));
         loadingDialog.setCanceledOnTouchOutside(false);

@@ -1,27 +1,25 @@
 package com.dream.dreamtv.ui.videoDetails;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.dream.dreamtv.data.model.Category;
-import com.dream.dreamtv.data.model.api.Resource;
-import com.dream.dreamtv.data.model.api.SubtitleResponse;
-import com.dream.dreamtv.data.model.api.Task;
-import com.dream.dreamtv.data.model.api.UserTask;
-import com.dream.dreamtv.data.model.api.VideoTest;
+import com.dream.dreamtv.data.networking.model.Resource;
+import com.dream.dreamtv.data.networking.model.SubtitleResponse;
+import com.dream.dreamtv.data.networking.model.Task;
+import com.dream.dreamtv.data.networking.model.UserTask;
+import com.dream.dreamtv.data.networking.model.VideoTest;
 import com.dream.dreamtv.repository.AppRepository;
 import com.dream.dreamtv.utils.AbsentLiveData;
 
 import java.util.List;
 import java.util.Objects;
 
-public class VideoDetailsViewModel extends ViewModel {
-    private static final String TAG = VideoDetailsViewModel.class.getSimpleName();
+import timber.log.Timber;
 
+public class VideoDetailsViewModel extends ViewModel {
     private final AppRepository mRepository;
     private final MutableLiveData<SubtitleId> subtitleIdMLD;
     private final LiveData<Resource<SubtitleResponse>> subtitle;
@@ -66,10 +64,10 @@ public class VideoDetailsViewModel extends ViewModel {
         SubtitleId update = new SubtitleId(videoId, languageCode, version);
 
         if (Objects.equals(subtitleIdMLD.getValue(), update)) {
-            Log.d(TAG, "Getting old subtitle");
+            Timber.d("Getting old subtitle");
             return;
         }
-        Log.d(TAG, "Getting new subtitle");
+        Timber.d("Getting new subtitle");
         this.subtitleIdMLD.setValue(update);
     }
 

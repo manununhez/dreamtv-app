@@ -1,43 +1,39 @@
 package com.dream.dreamtv.repository;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.dream.dreamtv.data.local.prefs.AppPreferencesHelper;
 import com.dream.dreamtv.data.model.Category;
 import com.dream.dreamtv.data.model.VideoDuration;
-import com.dream.dreamtv.data.model.api.AuthResponse;
-import com.dream.dreamtv.data.model.api.ErrorReason;
-import com.dream.dreamtv.data.model.api.Resource;
-import com.dream.dreamtv.data.model.api.Resource.Status;
-import com.dream.dreamtv.data.model.api.SubtitleResponse;
-import com.dream.dreamtv.data.model.api.Task;
-import com.dream.dreamtv.data.model.api.TaskRequest;
-import com.dream.dreamtv.data.model.api.TasksList;
-import com.dream.dreamtv.data.model.api.User;
-import com.dream.dreamtv.data.model.api.UserTask;
-import com.dream.dreamtv.data.model.api.UserTaskError;
-import com.dream.dreamtv.data.model.api.VideoTest;
-import com.dream.dreamtv.data.model.api.VideoTopic;
 import com.dream.dreamtv.data.networking.NetworkDataSourceImpl;
+import com.dream.dreamtv.data.networking.model.AuthResponse;
+import com.dream.dreamtv.data.networking.model.ErrorReason;
+import com.dream.dreamtv.data.networking.model.Resource;
+import com.dream.dreamtv.data.networking.model.Resource.Status;
+import com.dream.dreamtv.data.networking.model.SubtitleResponse;
+import com.dream.dreamtv.data.networking.model.Task;
+import com.dream.dreamtv.data.networking.model.TaskRequest;
+import com.dream.dreamtv.data.networking.model.TasksList;
+import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.networking.model.UserTask;
+import com.dream.dreamtv.data.networking.model.UserTaskError;
+import com.dream.dreamtv.data.networking.model.VideoTest;
+import com.dream.dreamtv.data.networking.model.VideoTopicSchema;
 import com.dream.dreamtv.utils.AppExecutors;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import timber.log.Timber;
+
 
 public class AppRepository {
-    private final static String TAG = AppRepository.class.getSimpleName();
-    private static final int SYNC_INTERVAL_HOURS = 1;
 
     // For Singleton instantiation
     private static AppRepository INSTANCE;
     private final NetworkDataSourceImpl mNetworkDataSource;
     private AppPreferencesHelper mPreferencesHelper;
-    private boolean mInitialized = false;
-    private AppExecutors mExecutors;
 
     private AppRepository(NetworkDataSourceImpl networkDataSource, AppPreferencesHelper preferencesHelper) {
         mNetworkDataSource = networkDataSource;
@@ -63,7 +59,7 @@ public class AppRepository {
 
                     mPreferencesHelper.setUser(data);
 
-                    Log.d(TAG, "New user data - setUser() called");
+                    Timber.d("New user data - setUser() called");
                 }
             }
         });
@@ -77,7 +73,7 @@ public class AppRepository {
                     // Insert our new weather data into the database
                     mPreferencesHelper.setUser(data);
 
-                    Log.d(TAG, "Update user data - setUser() called: subLanguage = " + data.subLanguage);
+                    Timber.d("Update user data - setUser() called: subLanguage = %s", data.subLanguage);
                 }
             }
         });
@@ -91,7 +87,7 @@ public class AppRepository {
                     // Insert our new weather data into the database
                     mPreferencesHelper.setReasons(data);
 
-                    Log.d(TAG, "Reasons data - setReasons() called");
+                    Timber.d("Reasons data - setReasons() called");
                 }
             }
         });
@@ -105,7 +101,7 @@ public class AppRepository {
                     // Insert our new weather data into the database
                     mPreferencesHelper.setVideoTests(data);
 
-                    Log.d(TAG, "VideoTests data - setVideoTests() called");
+                    Timber.d("VideoTests data - setVideoTests() called");
                 }
             }
         });
@@ -119,7 +115,7 @@ public class AppRepository {
                     // Insert our new weather data into the database
                     if (data != null) {
                         mPreferencesHelper.setAccessToken(data.token);
-                        Log.d(TAG, "AccessToken updated - setAccessToken() called");
+                        Timber.d("AccessToken updated - setAccessToken() called");
                     }
                 }
             }
@@ -131,11 +127,11 @@ public class AppRepository {
     public synchronized static AppRepository getInstance(/*TaskDao taskDao,*/
             NetworkDataSourceImpl networkDataSource,
             AppExecutors executors, AppPreferencesHelper preferencesHelper) {
-        Log.d(TAG, "Getting the repository");
+        Timber.d("Getting the repository");
         if (INSTANCE == null) {
             synchronized (AppRepository.class) {
                 INSTANCE = new AppRepository(/*taskDao, */networkDataSource, preferencesHelper);
-                Log.d(TAG, "Made new repository");
+                Timber.d("Made new repository");
             }
         }
         return INSTANCE;
@@ -239,7 +235,7 @@ public class AppRepository {
         return mNetworkDataSource.search(query);
     }
 
-    public LiveData<Resource<VideoTopic[]>> fetchCategories() {
+    public LiveData<Resource<VideoTopicSchema[]>> fetchCategories() {
         return mNetworkDataSource.fetchCategories();
     }
 

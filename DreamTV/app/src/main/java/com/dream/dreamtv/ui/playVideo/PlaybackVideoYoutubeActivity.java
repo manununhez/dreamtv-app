@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.text.Html;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Chronometer;
@@ -23,13 +22,13 @@ import androidx.lifecycle.ViewModelProviders;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
 import com.dream.dreamtv.data.model.Category;
-import com.dream.dreamtv.data.model.api.Resource;
-import com.dream.dreamtv.data.model.api.Resource.Status;
-import com.dream.dreamtv.data.model.api.Subtitle;
-import com.dream.dreamtv.data.model.api.SubtitleResponse;
-import com.dream.dreamtv.data.model.api.Task;
-import com.dream.dreamtv.data.model.api.UserTask;
-import com.dream.dreamtv.data.model.api.UserTaskError;
+import com.dream.dreamtv.data.networking.model.Resource;
+import com.dream.dreamtv.data.networking.model.Resource.Status;
+import com.dream.dreamtv.data.networking.model.Subtitle;
+import com.dream.dreamtv.data.networking.model.SubtitleResponse;
+import com.dream.dreamtv.data.networking.model.Task;
+import com.dream.dreamtv.data.networking.model.UserTask;
+import com.dream.dreamtv.data.networking.model.UserTaskError;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment;
 import com.dream.dreamtv.ui.playVideo.dialogs.RatingDialogFragment;
@@ -44,6 +43,7 @@ import fr.bmartel.youtubetv.YoutubeTvView;
 import fr.bmartel.youtubetv.listener.IPlayerListener;
 import fr.bmartel.youtubetv.model.VideoInfo;
 import fr.bmartel.youtubetv.model.VideoState;
+import timber.log.Timber;
 
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_RATING;
@@ -92,8 +92,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         IPlayerListener, IPlayBackVideoListener, IReasonsDialogListener, ISubtitlePlayBackListener,
         RatingDialogFragment.OnListener {
 
-    private static final String TAG = PlaybackVideoYoutubeActivity.class.getSimpleName();
-
     private static final int POSITION_OFFSET = 7;//7 secs
     private static final int SUBTITLE_DELAY_IN_MS = 100;
     private static final int DELAY_IN_MS = 1000;
@@ -138,8 +136,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Log.d(TAG, "$$ onCreate()");
 
         setContentView(R.layout.activity_playback_videos_youtube);
 
@@ -299,13 +295,13 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     public void onPlayerStateChange(VideoState state, long position, float speed, float duration, VideoInfo videoInfo) {
 
         if (state.toString().equals(STATE_VIDEO_CUED)) {
-            Log.d(TAG, "State : " + state.toString());
+            Timber.d("State : %s", state.toString());
             dismissLoading();
         } else if (state.toString().equals(STATE_UNSTARTED) || state.toString().equals(STATE_BUFFERING)) {
-            Log.d(TAG, "State : " + state.toString());
+            Timber.d("State : %s", state.toString());
             showLoading();
         } else if (state.toString().equals(STATE_PLAY)) {
-            Log.d(TAG, "State : " + STATE_PLAY);
+            Timber.d("State : %s", STATE_PLAY);
             dismissLoading();
 
             //start sync subtitles
@@ -313,13 +309,13 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
 
             if (!mPlayFromBeginning && !hasAlreadyPlayFromBeginning) { //To continue playing a video, we first play and then seek to an specific time
-                Log.d(TAG, "$$ Seeking video()");
+                Timber.d("$$ Seeking video()");
                 hasAlreadyPlayFromBeginning = true;
                 mYoutubeView.seekTo(mUserTask.getTimeWatchedInSecs());
             }
 
         } else if (state.toString().equals(STATE_PAUSED)) {
-            Log.d(TAG, "State : " + STATE_PAUSED);
+            Timber.d("State : %s", STATE_PAUSED);
 
             dismissLoading();
 
@@ -330,7 +326,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
 
         if (state.toString().equals(STATE_ENDED)) {//at this moment we are in the end of the video. Duration in ms
-            Log.d(TAG, "State : " + STATE_ENDED);
+            Timber.d("State : %s", STATE_ENDED);
 
             stopVideo();
             showRatingDialog();
@@ -353,7 +349,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     //Called when player is ready.
     @Override
     public void onPlayerReady(VideoInfo videoInfo) {
-        Log.d(TAG, "$$ onPlayerReady() -> playVideoMode()");
+        Timber.d("$$ onPlayerReady() -> playVideoMode()");
         subtitleHandlerSyncConfig();
         playVideoMode();
     }
@@ -368,7 +364,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 if (action == KeyEvent.ACTION_UP) {
-                    Log.d(TAG, "KEYCODE_DPAD_RIGHT");
+                    Timber.d("KEYCODE_DPAD_RIGHT");
 
                     showPlayerProgress();
 
@@ -379,7 +375,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                         counterClicks = 1;
 
 
-                    Log.d(TAG, "Consecutive clicks =" + counterClicks);
+                    Timber.d("Consecutive clicks =%s", counterClicks);
 
                     mLastClickTime = SystemClock.elapsedRealtime();
 
@@ -395,7 +391,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 }
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 if (action == KeyEvent.ACTION_UP) {
-                    Log.d(TAG, "KEYCODE_DPAD_LEFT");
+                    Timber.d("KEYCODE_DPAD_LEFT");
 
                     showPlayerProgress();
 
@@ -406,7 +402,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                         counterClicks = 1;
 
 
-                    Log.d(TAG, "Consecutive clicks =" + counterClicks);
+                    Timber.d("Consecutive clicks =%s", counterClicks);
 
                     mLastClickTime = SystemClock.elapsedRealtime();
 
@@ -437,7 +433,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 if (action == KeyEvent.ACTION_UP) {
-                    Log.d(TAG, "KEYCODE_DPAD_CENTER - dispatchKeyEvent");
+                    Timber.d("KEYCODE_DPAD_CENTER - dispatchKeyEvent");
 
                     if (mYoutubeView.isPlaying()) {
                         timeStoppedTemp = chronometer.getBase();
@@ -450,7 +446,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 }
             case KeyEvent.KEYCODE_BACK:
                 if (action == KeyEvent.ACTION_UP) {
-                    Log.d(TAG, "$$ dispatchKeyEvent() - KeyEvent.KEYCODE_BACK");
+                    Timber.d("$$ dispatchKeyEvent() - KeyEvent.KEYCODE_BACK");
                     stopVideo();
                     mYoutubeView.closePlayer();
                     finish();
@@ -487,7 +483,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public void playVideo(Integer seekToSecs) {
-        Log.d(TAG, "$$ playVideo()");
+        Timber.d("$$ playVideo()");
 
         mYoutubeView.start();
 
@@ -497,7 +493,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public void pauseVideo(Long position) {
-        Log.d(TAG, "$$ pauseVideo()");
+        Timber.d("$$ pauseVideo()");
 
         stopSyncSubtitle();
 
@@ -515,7 +511,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public void stopVideo() {
-        Log.d(TAG, "$$ stopVideo()");
+        Timber.d("$$ stopVideo()");
         stopSyncSubtitle();
 
         updateUserTimeWatched();
@@ -531,7 +527,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         long time = elapsedRealtimeTemp - timeStoppedTemp;
         //Update current time of the video
         if (time > 0) { //For some reason, youtube player sometimes restart with the current time in 0, after the correct current time was saved
-            Log.d(TAG, "stopVideo() => Time (mYoutubeView)" + time);
+            Timber.d("stopVideo() => Time (mYoutubeView)%s", time);
 
             mUserTask.setTimeWatched((int) time);
 
@@ -721,7 +717,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
         }
 
-        Log.d(TAG, "$$ onDialogClosePlay()");
+        Timber.d("$$ onDialogClosePlay()");
 
         playVideo(null);
 
@@ -737,7 +733,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public void onSaveReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
-        Log.d(TAG, "onSaveReasons() =>" + userTaskError.toString());
+        Timber.d("onSaveReasons() =>%s", userTaskError.toString());
 
         saveErrorsLiveData = mViewModel.saveErrorReasons(taskId, subtitleVersion, userTaskError);
 
@@ -749,7 +745,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             String message = errorsResource.message;
 
             if (status.equals(Status.SUCCESS)) {
-                Log.d(TAG, "errorsUpdate response");
+                Timber.d("errorsUpdate response");
 
                 mUserTask.setUserTaskErrorList(data);
 
@@ -758,9 +754,9 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (message != null)
-                    Log.d(TAG, message);
+                    Timber.d(message);
                 else
-                    Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
 
 
 //                dismissLoading();
@@ -771,7 +767,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public void onUpdateReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
-        Log.d(TAG, "onUpdateReasons() =>" + userTaskError.toString());
+        Timber.d("onUpdateReasons() =>%s", userTaskError.toString());
 
         updateErrorsLiveData = mViewModel.updateErrorReasons(taskId, subtitleVersion, userTaskError);
 
@@ -783,7 +779,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             String message = errorsResource.message;
 
             if (status.equals(Status.SUCCESS)) {
-                Log.d(TAG, "errorsUpdate response");
+                Timber.d("errorsUpdate response");
 
                 mUserTask.setUserTaskErrorList(data);
 
@@ -792,9 +788,9 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (message != null)
-                    Log.d(TAG, message);
+                    Timber.d(message);
                 else
-                    Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
 
 //                dismissLoading();
             }

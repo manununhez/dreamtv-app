@@ -30,7 +30,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.data.model.Card;
-import com.dream.dreamtv.data.model.api.Task;
+import com.dream.dreamtv.data.networking.model.Task;
 import com.dream.dreamtv.utils.Utils;
 
 import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;

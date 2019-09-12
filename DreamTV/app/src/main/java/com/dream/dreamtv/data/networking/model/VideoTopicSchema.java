@@ -1,8 +1,8 @@
-package com.dream.dreamtv.data.model.api;
+package com.dream.dreamtv.data.networking.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class VideoTopic {
+public class VideoTopicSchema {
     @SerializedName("name")
     public String name;
     @SerializedName("language")

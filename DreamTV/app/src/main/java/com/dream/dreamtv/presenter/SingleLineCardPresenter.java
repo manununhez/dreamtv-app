@@ -16,10 +16,11 @@ package com.dream.dreamtv.presenter;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.util.Log;
 
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.data.model.Card;
+
+import timber.log.Timber;
 
 /**
  * This Presenter will display a card which consists of a big image followed by a colored footer.
@@ -36,7 +37,7 @@ public class SingleLineCardPresenter extends ImageCardViewPresenter {
     public void onBindViewHolder(Card card, ImageCardView cardView) {
         super.onBindViewHolder(card, cardView);
         TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(R.styleable.lbImageCardView);
-        Log.d("SHAAN", "lbImageCardViewType =" + typedArray.getInt(R.styleable.lbImageCardView_lbImageCardViewType, -1));
+        Timber.d("lbImageCardViewType =%s", typedArray.getInt(R.styleable.lbImageCardView_lbImageCardViewType, -1));
 //        cardView.setInfoAreaBackgroundColor(card.getFooterColor());
     }
 

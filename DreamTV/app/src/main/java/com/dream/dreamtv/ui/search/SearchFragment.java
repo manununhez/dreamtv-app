@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.leanback.app.SearchSupportFragment;
@@ -24,13 +23,12 @@ import androidx.leanback.widget.RowPresenter;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.dream.dreamtv.BuildConfig;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
 import com.dream.dreamtv.data.model.Card;
-import com.dream.dreamtv.data.model.api.Resource;
-import com.dream.dreamtv.data.model.api.Resource.Status;
-import com.dream.dreamtv.data.model.api.Task;
+import com.dream.dreamtv.data.networking.model.Resource;
+import com.dream.dreamtv.data.networking.model.Resource.Status;
+import com.dream.dreamtv.data.networking.model.Task;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.presenter.CardPresenterSelector;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsActivity;
@@ -40,6 +38,8 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import timber.log.Timber;
 
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_QUERY;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_CATEGORY_SELECTED;
@@ -54,8 +54,6 @@ import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
  */
 public class SearchFragment extends SearchSupportFragment
         implements SearchSupportFragment.SearchResultProvider {
-    private static final String TAG = "SearchFragment";
-    private static final boolean DEBUG = BuildConfig.DEBUG;
     private static final boolean FINISH_ON_RECOGNIZER_CANCELED = true;
     private static final int REQUEST_SPEECH = 0x00000010;
 
@@ -84,20 +82,16 @@ public class SearchFragment extends SearchSupportFragment
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
 
         setOnItemViewClickedListener(new ItemViewClickedListener());
-        if (DEBUG) {
-            Log.d(TAG, "User is initiating a search. Do we have RECORD_AUDIO permission? " +
-                    hasPermission(Manifest.permission.RECORD_AUDIO));
-        }
+        Timber.d("User is initiating a search. Do we have RECORD_AUDIO permission? %s", hasPermission(Manifest.permission.RECORD_AUDIO));
+
         if (!hasPermission(Manifest.permission.RECORD_AUDIO)) {
-            if (DEBUG) {
-                Log.d(TAG, "Does not have RECORD_AUDIO, using SpeechRecognitionCallback");
-            }
+            Timber.d("Does not have RECORD_AUDIO, using SpeechRecognitionCallback");
             // SpeechRecognitionCallback is not required and if not provided recognition will be
             // handled using internal speech recognizer, in which case you must have RECORD_AUDIO
             // permission
 //            startRecognition();
-        } else if (DEBUG) {
-            Log.d(TAG, "We DO have RECORD_AUDIO");
+        } else {
+            Timber.d("We DO have RECORD_AUDIO");
         }
     }
 
@@ -115,7 +109,7 @@ public class SearchFragment extends SearchSupportFragment
             } else {// If recognizer is canceled or failed, keep focus on the search orb
                 if (FINISH_ON_RECOGNIZER_CANCELED) {
                     if (!hasResults()) {
-                        if (DEBUG) Log.v(TAG, "Voice search canceled");
+                        Timber.v("Voice search canceled");
                         getView().findViewById(R.id.lb_search_bar_speech_orb).requestFocus();
                     }
                 }
@@ -130,14 +124,14 @@ public class SearchFragment extends SearchSupportFragment
 
     @Override
     public boolean onQueryTextChange(String newQuery) {
-        if (DEBUG) Log.i(TAG, String.format("Search text changed: %s", newQuery));
+        Timber.i("Search text changed: %s", newQuery);
         loadQuery(newQuery);
         return true;
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        if (DEBUG) Log.i(TAG, String.format("Search text submitted: %s", query));
+        Timber.i("Search text submitted: %s", query);
         loadQuery(query);
         return true;
     }
@@ -188,14 +182,14 @@ public class SearchFragment extends SearchSupportFragment
 
                 firebaseLoginEvents(query, FIREBASE_LOG_EVENT_SEARCH);
 
-                if (DEBUG) Log.d(TAG, "task response");
+                Timber.d("task response");
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (message != null) {
-                    if (DEBUG) Log.d(TAG, message);
+                    Timber.d(message);
                 } else {
-                    if (DEBUG) Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
                 }
 
                 dismissLoading();

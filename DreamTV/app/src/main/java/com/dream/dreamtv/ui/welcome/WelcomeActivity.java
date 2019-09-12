@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -13,17 +12,18 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.dream.dreamtv.BuildConfig;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
-import com.dream.dreamtv.data.model.api.Resource;
-import com.dream.dreamtv.data.model.api.Resource.Status;
-import com.dream.dreamtv.data.model.api.User;
+import com.dream.dreamtv.data.networking.model.Resource;
+import com.dream.dreamtv.data.networking.model.Resource.Status;
+import com.dream.dreamtv.data.networking.model.User;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.ui.home.HomeActivity;
 import com.dream.dreamtv.utils.LocaleHelper;
 import com.google.android.gms.common.AccountPicker;
 import com.google.firebase.analytics.FirebaseAnalytics;
+
+import timber.log.Timber;
 
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_EMAIL;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PASSWORD;
@@ -31,8 +31,6 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_LOGIN;
 
 
 public class WelcomeActivity extends FragmentActivity {
-    private static final String TAG = WelcomeActivity.class.getSimpleName();
-    private static final boolean DEBUG = BuildConfig.DEBUG;
     private static final int REQUEST_CODE_PICK_ACCOUNT = 45687;
 
     private ProgressBar progressLoading;
@@ -70,7 +68,7 @@ public class WelcomeActivity extends FragmentActivity {
 
     private void userRegistration() {
 
-        if (DEBUG) Log.d(TAG, "userRegistration()");
+        Timber.d("userRegistration()");
 
         String accessToken = mViewModel.getAccessToken();
         User user = mViewModel.getUser();
@@ -92,8 +90,8 @@ public class WelcomeActivity extends FragmentActivity {
 
                 if (data != null) {
                     if (!data.subLanguage.equals(LocaleHelper.getLanguage(this))) {
-                        if (DEBUG)
-                            Log.d(TAG, "fetchUserDetails() response!: userResource.data.subLanguage=" + data.subLanguage + " LocaleHelper.getLanguage(this):" + LocaleHelper.getLanguage(this));
+
+                        Timber.d("fetchUserDetails() response!: userResource.data.subLanguage=" + data.subLanguage + " LocaleHelper.getLanguage(this):" + LocaleHelper.getLanguage(this));
 
                         LocaleHelper.setLocale(this, data.subLanguage);
                     }
@@ -125,7 +123,7 @@ public class WelcomeActivity extends FragmentActivity {
     }
 
     private void pickUserAccount() {
-        if (DEBUG) Log.d(TAG, "pickUserAccount()");
+        Timber.d("pickUserAccount()");
 
         /*This will list all available accounts on device without any filtering*/
 
@@ -159,7 +157,7 @@ public class WelcomeActivity extends FragmentActivity {
 
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
-                if (DEBUG) Log.d(TAG, "onActivityResult() - Result from pickAccount()");
+                Timber.d("onActivityResult() - Result from pickAccount()");
 
                 // Receiving a result from the AccountPicker
                 login(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
@@ -170,7 +168,7 @@ public class WelcomeActivity extends FragmentActivity {
     }
 
     private void login(String email) {
-        if (DEBUG) Log.d(TAG, ">>>REQUEST LOGIN");
+        Timber.d(">>>REQUEST LOGIN");
 
         mViewModel.login(email, email); //TODO change password
 

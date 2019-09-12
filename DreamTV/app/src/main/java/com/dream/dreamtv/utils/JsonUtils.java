@@ -1,12 +1,11 @@
 package com.dream.dreamtv.utils;
 
-import android.util.Log;
-
-
-import com.dream.dreamtv.data.model.api.JsonResponseBaseBean;
+import com.dream.dreamtv.data.networking.model.JsonResponseBaseBean;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+
+import timber.log.Timber;
 
 
 /**
@@ -14,7 +13,6 @@ import com.google.gson.reflect.TypeToken;
  * Clase para trabajar con JSON
  */
 public class JsonUtils {
-    private static final String TAG = JsonUtils.class.getSimpleName();
 
     private JsonUtils() {
     }
@@ -31,7 +29,7 @@ public class JsonUtils {
 
         Gson gson = new Gson();
         String jsonRequest = gson.toJson(jsonBean);
-        Log.d(TAG,"JsonRequest generado: " + jsonRequest);
+        Timber.d("JsonRequest generado: %s", jsonRequest);
 
         return jsonRequest;
     }
@@ -51,11 +49,11 @@ public class JsonUtils {
         try {
             jsonObject = gson.fromJson(jsonResponse, typeToken.getType());
         } catch (JsonSyntaxException e) {
-            Log.d(TAG,"No se pudo serializar el json: " + e.getMessage());
+            Timber.d("No se pudo serializar el json: %s", e.getMessage());
             jsonObject = new JsonResponseBaseBean();
             jsonObject.success = false;
         }
-        Log.d(TAG,"JsonResponse generado: " + jsonObject.toString());
+        Timber.d("JsonResponse generado: %s", jsonObject.toString());
 
         return jsonObject;
     }
@@ -69,20 +67,20 @@ public class JsonUtils {
      * @return Un {@link JsonResponseBaseBean}
      */
     @SuppressWarnings("unchecked")
-    public static <T> JsonResponseBaseBean  getJsonResponse(
+    public static <T> JsonResponseBaseBean getJsonResponse(
             String jsonResponse, TypeToken<JsonResponseBaseBean<T>> typeToken, boolean logResponse) {
         Gson gson = new Gson();
         JsonResponseBaseBean<T> jsonObject;
         try {
             jsonObject = gson.fromJson(jsonResponse, typeToken.getType());
         } catch (JsonSyntaxException e) {
-            Log.d(TAG,"No se pudo serializar el json: " + e.getMessage());
+            Timber.d("No se pudo serializar el json: %s", e.getMessage());
             jsonObject = new JsonResponseBaseBean();
             jsonObject.success = false;
         }
 
         if (logResponse)
-            Log.d(TAG,"JsonResponse generado: " + jsonObject.toString());
+            Timber.d("JsonResponse generado: %s", jsonObject.toString());
 
         return jsonObject;
     }

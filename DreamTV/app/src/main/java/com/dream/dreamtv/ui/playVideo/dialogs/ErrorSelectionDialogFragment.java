@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.text.Html;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -35,15 +34,14 @@ import android.widget.ToggleButton;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
-import com.dream.dreamtv.DreamTVApp;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.data.model.api.ErrorReason;
-import com.dream.dreamtv.data.model.api.Subtitle;
-import com.dream.dreamtv.data.model.api.SubtitleResponse;
-import com.dream.dreamtv.data.model.api.Task;
-import com.dream.dreamtv.data.model.api.User;
-import com.dream.dreamtv.data.model.api.UserTask;
-import com.dream.dreamtv.data.model.api.UserTaskError;
+import com.dream.dreamtv.data.networking.model.ErrorReason;
+import com.dream.dreamtv.data.networking.model.Subtitle;
+import com.dream.dreamtv.data.networking.model.SubtitleResponse;
+import com.dream.dreamtv.data.networking.model.Task;
+import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.networking.model.UserTask;
+import com.dream.dreamtv.data.networking.model.UserTaskError;
 import com.dream.dreamtv.utils.Constants;
 import com.google.gson.Gson;
 
@@ -51,6 +49,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+
+import timber.log.Timber;
 
 import static android.util.TypedValue.applyDimension;
 import static com.dream.dreamtv.utils.Constants.ARG_LIST_REASONS;
@@ -64,7 +64,6 @@ import static com.dream.dreamtv.utils.Constants.BEGINNER_INTERFACE_MODE;
 
 
 public class ErrorSelectionDialogFragment extends DialogFragment {
-    private static final String TAG = ErrorSelectionDialogFragment.class.getSimpleName();
     private static final int REQ_CODE_SPEECH_INPUT = 100;
     private static final String SPEECH_NOT_SUPPORTED = "speech_not_supported";
     private LinearLayout llComments;
@@ -205,13 +204,13 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             switch (keyCode) {
 
                 case KeyEvent.KEYCODE_VOICE_ASSIST:
-                    Log.d(TAG, "KEYCODE_VOICE_ASSIST - onKeyUp");
+                    Timber.d("KEYCODE_VOICE_ASSIST - onKeyUp");
                     // Do something...
 
                     return true;
 
                 case KeyEvent.KEYCODE_SEARCH:
-                    Log.d(TAG, "KEYCODE_SEARCH - onKeyUp");
+                    Timber.d("KEYCODE_SEARCH - onKeyUp");
                     // Do something...
                     promptSpeechInput();
                     return true;
@@ -262,16 +261,10 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             dismiss();
         });
 
-        btnDeleteChanges.setOnClickListener(view -> {
-            clearOptions();
-
-        });
+        btnDeleteChanges.setOnClickListener(view -> clearOptions());
 
     }
 
-    private DreamTVApp getApplication() {
-        return ((DreamTVApp) getActivity().getApplication());
-    }
 
     private void setupSubtitleNavigationListView(int subtitlePosition) {
 
@@ -290,8 +283,8 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
         mListView.setOnItemClickListener((adapterView, view, position, l) -> {
             goToThisSelectedSubtitle = (Subtitle) adapterView.getItemAtPosition(position);
-            Log.d(TAG, "CPRCurrentPosition: " + mSubtitleOriginalPosition);
-            Log.d(TAG, "CPRNewPosition: " + (position + 1));
+            Timber.d("CPRCurrentPosition: %s", mSubtitleOriginalPosition);
+            Timber.d("CPRNewPosition: %s", (position + 1));
 
             setupSubtitleNavigationListView(position + 1);
 
@@ -302,7 +295,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         mListView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                Log.d(TAG, "OnItemSelected - Position: " + position);
+                Timber.d("OnItemSelected - Position: %s", position);
                 selectedSubtitle = (Subtitle) adapterView.getItemAtPosition(position);
 
                 tvSelectedSubtitle.setText(Html.fromHtml(selectedSubtitle.text));
@@ -349,7 +342,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private void setupReasons() {
 
 
-        Log.d(TAG, mReasons.toString());
+        Timber.d(mReasons.toString());
 
 
         if (mUser.interfaceMode.equals(BEGINNER_INTERFACE_MODE))
@@ -471,7 +464,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         clearOptions();
 
         ArrayList<UserTaskError> errors = mUserTask.getUserTaskErrorsForASpecificSubtitlePosition(position + 1);
-        Log.d(TAG, "repopulateFormWithUserTaskData()");
+        Timber.d("repopulateFormWithUserTaskData()");
 
 
         if (errors.size() > 0) { //if at least there are one error

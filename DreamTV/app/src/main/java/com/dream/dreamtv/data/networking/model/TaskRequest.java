@@ -1,4 +1,4 @@
-package com.dream.dreamtv.data.model.api;
+package com.dream.dreamtv.data.networking.model;
 
 import com.dream.dreamtv.data.model.Category;
 import com.dream.dreamtv.data.model.VideoDuration;

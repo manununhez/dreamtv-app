@@ -15,18 +15,19 @@
 package com.dream.dreamtv.presenter;
 
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.ViewGroup;
+
+import androidx.core.content.ContextCompat;
+import androidx.leanback.widget.Presenter;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.data.model.api.Task;
+import com.dream.dreamtv.data.networking.model.Task;
 
-import androidx.core.content.ContextCompat;
-import androidx.leanback.widget.Presenter;
+import timber.log.Timber;
 
 
 /*
@@ -52,7 +53,7 @@ public class VideoCardPresenter extends Presenter {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
-        Log.d(TAG, "onCreateViewHolder");
+        Timber.d("onCreateViewHolder");
 
         sDefaultBackgroundColor = ContextCompat.getColor(parent.getContext(), R.color.default_background);
         sSelectedBackgroundColor = ContextCompat.getColor(parent.getContext(), R.color.default_background);
@@ -77,7 +78,7 @@ public class VideoCardPresenter extends Presenter {
         Task task = ((Task) item);
         ImageCardView cardView = (ImageCardView) viewHolder.view;
 
-        Log.d(TAG, "onBindViewHolder");
+        Timber.d("onBindViewHolder");
 //        String videoTypeTitle = video.video_type != null ? ("[" + video.video_type.toLowerCase() + "] ") : "";
         cardView.setTitleText(task.videoTitleTranslated);
         cardView.setContentText(task.videoDescriptionTranslated);
@@ -103,7 +104,7 @@ public class VideoCardPresenter extends Presenter {
 
     @Override
     public void onUnbindViewHolder(ViewHolder viewHolder) {
-        Log.d(TAG, "onUnbindViewHolder");
+        Timber.d("onUnbindViewHolder");
         ImageCardView cardView = (ImageCardView) viewHolder.view;
         // Remove references to images so that the garbage collector can free up memory
         cardView.setBadgeImage(null);

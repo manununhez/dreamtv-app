@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -37,12 +36,12 @@ import com.bumptech.glide.request.transition.Transition;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
 import com.dream.dreamtv.data.model.Category;
-import com.dream.dreamtv.data.model.api.Resource;
-import com.dream.dreamtv.data.model.api.Resource.Status;
-import com.dream.dreamtv.data.model.api.SubtitleResponse;
-import com.dream.dreamtv.data.model.api.Task;
-import com.dream.dreamtv.data.model.api.UserTask;
-import com.dream.dreamtv.data.model.api.VideoTest;
+import com.dream.dreamtv.data.networking.model.Resource;
+import com.dream.dreamtv.data.networking.model.Resource.Status;
+import com.dream.dreamtv.data.networking.model.SubtitleResponse;
+import com.dream.dreamtv.data.networking.model.Task;
+import com.dream.dreamtv.data.networking.model.UserTask;
+import com.dream.dreamtv.data.networking.model.VideoTest;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.presenter.detailsPresenter.DetailsDescriptionPresenter;
 import com.dream.dreamtv.ui.playVideo.PlaybackVideoActivity;
@@ -54,6 +53,8 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.List;
 import java.util.Objects;
+
+import timber.log.Timber;
 
 import static com.dream.dreamtv.data.model.Category.Type.ALL;
 import static com.dream.dreamtv.data.model.Category.Type.CONTINUE;
@@ -83,7 +84,6 @@ import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
  */
 public class VideoDetailsFragment extends DetailsSupportFragment {
 
-    private static final String TAG = "VideoDetailsFragment";
     private static final int ACTION_PLAY_VIDEO = 1;
     private static final int ACTION_CONTINUE_VIDEO = 2;
     private static final int ACTION_PLAY_VIDEO_FROM_BEGGINING = 3;
@@ -141,7 +141,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     }
 
-    private void initializePanel(){
+    private void initializePanel() {
         if (mSelectedTask.userTasks != null && mSelectedTask.userTasks.length > 0) {
             mUserTask = mSelectedTask.userTasks[0]; //TODO what happened is there is more than one UserTask
             setupContinueAction();
@@ -372,7 +372,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void setupContinueAction() {
-        Log.d(TAG, mUserTask.toString());
+        Timber.d(mUserTask.toString());
         if (mUserTask.getTimeWatchedInSecs() > 0) { //To avoid messages like "0 min, 0 secs"
             String timeFormatted = Utils.getTimeFormatMinSecs(mUserTask.getTimeWatched());
 
@@ -398,8 +398,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             Status status = subtitleResponseResource.status;
             SubtitleResponse data = subtitleResponseResource.data;
 
-             if (status.equals(Status.SUCCESS)) {
-                Log.d(TAG, "Subtitle response");
+            if (status.equals(Status.SUCCESS)) {
+                Timber.d("Subtitle response");
 
                 if (data != null && mSelectedTask.video.title.equals(data.videoTitleOriginal)) {
                     mSubtitleResponse = data;
@@ -417,10 +417,10 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (subtitleResponseResource.message != null)
-                    Log.d(TAG, subtitleResponseResource.message);
+                    Timber.d(subtitleResponseResource.message);
                 else
-                    Log.d(TAG, "Status ERROR");
-             }
+                    Timber.d("Status ERROR");
+            }
         });
 
     }
@@ -494,7 +494,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             if (status.equals(Status.LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_preparing_task));
             else if (status.equals(Status.SUCCESS)) {
-                Log.d(TAG, "createUserTask() response");
+                Timber.d("createUserTask() response");
 
                 if (data != null && data.getTaskId() == mSelectedTask.taskId) {
                     mUserTask = data;
@@ -508,9 +508,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (message != null)
-                    Log.d(TAG, message);
+                    Timber.d(message);
                 else
-                    Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
 
                 dismissLoading();
             }
@@ -532,7 +532,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             UserTask data = userTaskResource.data;
 
             if (status.equals(Status.SUCCESS)) {
-                Log.d(TAG, "responseFromFetchUserTaskErrorDetails response");
+                Timber.d("responseFromFetchUserTaskErrorDetails response");
 
                 if (data != null) {
                     if (mSelectedTask.taskId == data.getTaskId()) { //TODO this is a bug of the livedata. It keeps getting the last saved value from different calls
@@ -555,9 +555,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (userTaskResource.message != null)
-                    Log.d(TAG, userTaskResource.message);
+                    Timber.d(userTaskResource.message);
                 else
-                    Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
             }
         });
     }
@@ -576,7 +576,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             if (status.equals(Status.LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_add_to_list));
             else if (status.equals(Status.SUCCESS)) {
-                Log.d(TAG, "addVideoToMyList() response");
+                Timber.d("addVideoToMyList() response");
 
                 setActionPanel(ACTION_ADD_MY_LIST,
                         new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
@@ -592,9 +592,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (booleanResource.message != null)
-                    Log.d(TAG, booleanResource.message);
+                    Timber.d(booleanResource.message);
                 else
-                    Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
 
                 dismissLoading();
             }
@@ -615,7 +615,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             if (status.equals(Status.LOADING))
                 instantiateAndShowLoading(getString(R.string.title_loading_remove_from_list));
             else if (status.equals(Status.SUCCESS)) {
-                Log.d(TAG, "removeVideoFromMyList() response");
+                Timber.d("removeVideoFromMyList() response");
 
                 setActionPanel(ACTION_REMOVE_MY_LIST,
                         new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
@@ -631,9 +631,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (booleanResource.message != null)
-                    Log.d(TAG, booleanResource.message);
+                    Timber.d(booleanResource.message);
                 else
-                    Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
 
                 dismissLoading();
             }

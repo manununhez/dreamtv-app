@@ -2,13 +2,13 @@ package com.dream.dreamtv.data.networking;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.dream.dreamtv.data.model.api.Resource;
-import com.dream.dreamtv.data.model.api.SubtitleResponse;
-import com.dream.dreamtv.data.model.api.Task;
-import com.dream.dreamtv.data.model.api.User;
-import com.dream.dreamtv.data.model.api.UserTask;
-import com.dream.dreamtv.data.model.api.UserTaskError;
-import com.dream.dreamtv.data.model.api.VideoTopic;
+import com.dream.dreamtv.data.networking.model.Resource;
+import com.dream.dreamtv.data.networking.model.SubtitleResponse;
+import com.dream.dreamtv.data.networking.model.Task;
+import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.networking.model.UserTask;
+import com.dream.dreamtv.data.networking.model.UserTaskError;
+import com.dream.dreamtv.data.networking.model.VideoTopicSchema;
 
 public interface NetworkDataSource {
     void login(String email, String password);
@@ -23,7 +23,7 @@ public interface NetworkDataSource {
 
     MutableLiveData<Resource<User>> updateUser(User user);
 
-    MutableLiveData<Resource<VideoTopic[]>> fetchCategories();
+    MutableLiveData<Resource<VideoTopicSchema[]>> fetchCategories();
 
     MutableLiveData<Resource<SubtitleResponse>> fetchSubtitle(String videoId,
                                                               String languageCode, String version);

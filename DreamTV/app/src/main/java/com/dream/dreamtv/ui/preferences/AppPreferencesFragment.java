@@ -16,7 +16,7 @@ import androidx.preference.PreferenceScreen;
 
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
-import com.dream.dreamtv.data.model.api.User;
+import com.dream.dreamtv.data.networking.model.User;
 import com.dream.dreamtv.di.InjectorUtils;
 
 import java.util.Objects;

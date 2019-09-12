@@ -15,12 +15,13 @@
 package com.dream.dreamtv.data.model;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.dream.dreamtv.data.model.api.Task;
+import com.dream.dreamtv.data.networking.model.Task;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import timber.log.Timber;
 
 /**
  * This is a generic example of a custom data object, containing info we might want to keep with
@@ -132,7 +133,7 @@ public class Card {
         try {
             return new URI(getImageUrl());
         } catch (URISyntaxException e) {
-            Log.d("URI exception: ", getImageUrl());
+            Timber.d(getImageUrl());
             return null;
         }
     }

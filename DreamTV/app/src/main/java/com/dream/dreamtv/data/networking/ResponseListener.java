@@ -1,18 +1,15 @@
 package com.dream.dreamtv.data.networking;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.dream.dreamtv.data.model.api.AuthResponse;
-import com.dream.dreamtv.data.model.api.JsonResponseBaseBean;
-import com.dream.dreamtv.utils.JsonUtils;
+import com.dream.dreamtv.data.networking.model.JsonResponseBaseBean;
 import com.google.gson.reflect.TypeToken;
+
+import timber.log.Timber;
 
 import static com.dream.dreamtv.utils.JsonUtils.getJsonResponse;
 
@@ -21,8 +18,6 @@ import static com.dream.dreamtv.utils.JsonUtils.getJsonResponse;
  * Created by gbogarin on 29/11/2015.
  */
 public abstract class ResponseListener implements Listener<String>, ErrorListener {
-    private static final String TAG = ResponseListener.class.getSimpleName();
-
     private final Context context;
 
 
@@ -33,12 +28,12 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
 
     @Override
     public void onErrorResponse(VolleyError error) {
-        Log.d(TAG, "Response: onErrorResponse() " + error.getMessage());
+        Timber.d("Response: onErrorResponse() %s", error.getMessage());
 
         String errorMessage = VolleyErrorHelper.getMessage(error, context);
 
         if (errorMessage != null && !errorMessage.isEmpty()) {
-            Log.d(TAG, errorMessage);
+            Timber.d(errorMessage);
             Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
         }
 
@@ -47,7 +42,7 @@ public abstract class ResponseListener implements Listener<String>, ErrorListene
 
     @Override
     public void onResponse(String response) {
-        Log.d(TAG, "Response: onResponse() " + response);
+        Timber.d("Response: onResponse() %s", response);
 
         TypeToken type = new TypeToken<JsonResponseBaseBean>() {
         };

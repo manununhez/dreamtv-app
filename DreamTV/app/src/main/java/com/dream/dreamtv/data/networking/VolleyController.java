@@ -1,18 +1,18 @@
 package com.dream.dreamtv.data.networking;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.RequestQueue.RequestFinishedListener;
-import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.dream.dreamtv.data.local.prefs.AppPreferencesHelper;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import timber.log.Timber;
 
 import static com.android.volley.toolbox.Volley.newRequestQueue;
 
@@ -56,7 +56,7 @@ public class VolleyController {
 
     private void cancelPendingRequests(Object tag) {
         if (mRequestQueue != null) {
-            Log.d(TAG, "Cancel pending request for: " + tag.toString());
+            Timber.d("Cancel pending request for: %s", tag.toString());
             mRequestQueue.cancelAll(tag);
         }
     }
@@ -64,14 +64,13 @@ public class VolleyController {
 
     public void requestString(int method, final String webserviceUrl, final Map<String, String> params,
                               ResponseListener responseListener) {
-        
+
         StringRequest stringRequest = new StringRequest(method, webserviceUrl, responseListener, responseListener) {
 
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> map = new HashMap<>();
                 String string = "Bearer " + mPreferencesHelper.getAccessToken();
-//                Log.d(TAG, "TOKEN: " + string);
                 map.put("Authorization", string);
                 return map;
             }

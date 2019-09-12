@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.text.Html;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -24,13 +23,13 @@ import androidx.lifecycle.ViewModelProviders;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
 import com.dream.dreamtv.data.model.Category;
-import com.dream.dreamtv.data.model.api.Resource;
-import com.dream.dreamtv.data.model.api.Resource.Status;
-import com.dream.dreamtv.data.model.api.Subtitle;
-import com.dream.dreamtv.data.model.api.SubtitleResponse;
-import com.dream.dreamtv.data.model.api.Task;
-import com.dream.dreamtv.data.model.api.UserTask;
-import com.dream.dreamtv.data.model.api.UserTaskError;
+import com.dream.dreamtv.data.networking.model.Resource;
+import com.dream.dreamtv.data.networking.model.Resource.Status;
+import com.dream.dreamtv.data.networking.model.Subtitle;
+import com.dream.dreamtv.data.networking.model.SubtitleResponse;
+import com.dream.dreamtv.data.networking.model.Task;
+import com.dream.dreamtv.data.networking.model.UserTask;
+import com.dream.dreamtv.data.networking.model.UserTaskError;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment;
 import com.dream.dreamtv.ui.playVideo.dialogs.RatingDialogFragment;
@@ -40,6 +39,8 @@ import com.dream.dreamtv.utils.Utils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
+
+import timber.log.Timber;
 
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_RATING;
@@ -76,8 +77,6 @@ import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
  */
 public class PlaybackVideoActivity extends FragmentActivity implements ErrorSelectionDialogFragment.OnListener,
         IPlayBackVideoListener, IReasonsDialogListener, ISubtitlePlayBackListener, RatingDialogFragment.OnListener {
-
-    private static final String TAG = PlaybackVideoActivity.class.getSimpleName();
 
     private static final int SUBTITLE_DELAY_IN_MS = 100;
     private static final int DELAY_IN_MS = 1000;
@@ -126,7 +125,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playback_videos);
 
-        Log.d(TAG, "$$ onCreate");
+        Timber.d("$$ onCreate");
 
         if (savedInstanceState != null) {
             mSelectedTask = savedInstanceState.getParcelable(INTENT_TASK);
@@ -271,7 +270,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 if (action == KeyEvent.ACTION_UP) {
-                    Log.d(TAG, "KEYCODE_DPAD_RIGHT");
+                    Timber.d("KEYCODE_DPAD_RIGHT");
 
                     showPlayerProgress();
 
@@ -282,7 +281,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                         counterClicks = 1;
 
 
-                    Log.d(TAG, "Consecutive clicks =" + counterClicks);
+                    Timber.d("Consecutive clicks =%s", counterClicks);
 
                     mLastClickTime = SystemClock.elapsedRealtime();
 
@@ -302,7 +301,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
                     showPlayerProgress();
 
-                    Log.d(TAG, "KEYCODE_DPAD_LEFT");
+                    Timber.d("KEYCODE_DPAD_LEFT");
 
                     // Handling multiple clicks, using threshold of 1 second
                     if (SystemClock.elapsedRealtime() - mLastClickTime < DELAY_IN_MS)
@@ -311,7 +310,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                         counterClicks = 1;
 
 
-                    Log.d(TAG, "Consecutive clicks =" + counterClicks);
+                    Timber.d("Consecutive clicks =%s", counterClicks);
 
                     mLastClickTime = SystemClock.elapsedRealtime();
 
@@ -358,7 +357,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
             case KeyEvent.KEYCODE_BACK:
                 if (action == KeyEvent.ACTION_UP) {
-                    Log.d(TAG, "$$ dispatchKeyEvent() - KeyEvent.KEYCODE_BACK");
+                    Timber.d("$$ dispatchKeyEvent() - KeyEvent.KEYCODE_BACK");
                     stopVideo();
                     mVideoView.suspend();
                     finish();
@@ -396,16 +395,16 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         mVideoView.setOnPreparedListener(mp -> {
             mp.setOnInfoListener((mp1, what, extra) -> {
                 if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
-                    Log.d(TAG, "OnPreparedListener - MEDIA_INFO_BUFFERING_START");
+                    Timber.d("OnPreparedListener - MEDIA_INFO_BUFFERING_START");
                     showLoading();
                 }
                 if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
-                    Log.d(TAG, "OnPreparedListener - MEDIA_INFO_BUFFERING_END");
+                    Timber.d("OnPreparedListener - MEDIA_INFO_BUFFERING_END");
                     dismissLoading();
                 }
 
                 if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
-                    Log.d(TAG, "OnPreparedListener - MEDIA_INFO_VIDEO_RENDERING_START");
+                    Timber.d("OnPreparedListener - MEDIA_INFO_VIDEO_RENDERING_START");
                     dismissLoading();
                 }
 
@@ -509,7 +508,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         if (mVideoView != null) {
             if (mVideoView.getCurrentPosition() > 0) {
                 //Update current time of the video
-                Log.d(TAG, "stopVideo() => Time" + mVideoView.getCurrentPosition());
+                Timber.d("stopVideo() => Time%s", mVideoView.getCurrentPosition());
                 mUserTask.setTimeWatched(mVideoView.getCurrentPosition());
 
                 updateUserTask(mUserTask);
@@ -555,7 +554,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public void startSyncSubtitle(Long base) {
-        Log.d(TAG, "$$ startSyncSubtitle()");
+        Timber.d("$$ startSyncSubtitle()");
 
         handlerRunning = true;
         handler.post(myRunnable);
@@ -563,7 +562,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public void stopSyncSubtitle() {
-        Log.d(TAG, "$$ stopSyncSubtitle()");
+        Timber.d("$$ stopSyncSubtitle()");
 
         handlerRunning = false;
 
@@ -622,7 +621,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     @Override
     public void showSubtitle(Subtitle subtitle, ArrayList<UserTaskError> userTaskErrorListForSttlPos) {
         if (userTaskErrorListForSttlPos.size() > 0) {
-//            Log.d(TAG, "Position = " + subtitle.position + " List: " + userTaskErrorListForSttlPos.toString());
+//            Timber.d("Position = " + subtitle.position + " List: " + userTaskErrorListForSttlPos.toString());
             showSubtitleWithErrors(subtitle);
         } else
             showSubtitle(subtitle);
@@ -723,7 +722,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public void onSaveReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
-        Log.d(TAG, "onSaveReasons() =>" + userTaskError.toString());
+        Timber.d("onSaveReasons() =>%s", userTaskError.toString());
 
         saveErrorsLiveData = mViewModel.saveErrorReasons(taskId, subtitleVersion, userTaskError);
 
@@ -735,7 +734,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             String message = errorsResource.message;
 
             if (status.equals(Status.SUCCESS)) {
-                Log.d(TAG, "errorsUpdate response");
+                Timber.d("errorsUpdate response");
 
                 mUserTask.setUserTaskErrorList(data);
 
@@ -745,9 +744,9 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (message != null)
-                    Log.d(TAG, message);
+                    Timber.d(message);
                 else
-                    Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
 
 //                dismissLoading();
             }
@@ -757,10 +756,9 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     }
 
 
-
     @Override
     public void onUpdateReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
-        Log.d(TAG, "onUpdateReasons() =>" + userTaskError.toString());
+        Timber.d("onUpdateReasons() =>%s", userTaskError.toString());
 
         updateErrorsLiveData = mViewModel.updateErrorReasons(taskId, subtitleVersion, userTaskError);
 
@@ -772,7 +770,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             String message = errorsResource.message;
 
             if (status.equals(Status.SUCCESS)) {
-                Log.d(TAG, "errorsUpdate response");
+                Timber.d("errorsUpdate response");
 
                 mUserTask.setUserTaskErrorList(data);
 
@@ -781,9 +779,9 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             } else if (status.equals(Status.ERROR)) {
                 //TODO do something
                 if (message != null)
-                    Log.d(TAG, message);
+                    Timber.d(message);
                 else
-                    Log.d(TAG, "Status ERROR");
+                    Timber.d("Status ERROR");
 
 //                dismissLoading();
             }

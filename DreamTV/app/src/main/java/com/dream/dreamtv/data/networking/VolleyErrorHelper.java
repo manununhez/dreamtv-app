@@ -11,7 +11,7 @@ import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.data.model.api.JsonResponseBaseBean;
+import com.dream.dreamtv.data.networking.model.JsonResponseBaseBean;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

@@ -5,6 +5,8 @@ import android.content.Context;
 
 import com.dream.dreamtv.utils.LocaleHelper;
 
+import timber.log.Timber;
+
 import static com.dream.dreamtv.utils.Constants.LANGUAGE_POLISH;
 
 
@@ -13,17 +15,18 @@ import static com.dream.dreamtv.utils.Constants.LANGUAGE_POLISH;
  */
 public class DreamTVApp extends Application {
 
-
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(LocaleHelper.onAttach(base, LANGUAGE_POLISH));
     }
 
-
     @Override
     public void onCreate() {
         super.onCreate();
 
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        }
     }
 
 }

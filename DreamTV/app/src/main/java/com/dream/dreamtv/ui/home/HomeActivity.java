@@ -18,7 +18,6 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -27,12 +26,13 @@ import com.dream.dreamtv.R;
 import com.dream.dreamtv.ui.home.dialogs.ExitDialogFragment;
 import com.dream.dreamtv.utils.LocaleHelper;
 
+import timber.log.Timber;
+
 
 /*
  * HomeActivity class that loads HomeFragment
  */
 public class HomeActivity extends FragmentActivity implements ExitDialogFragment.OnListener {
-    private static final String TAG = HomeActivity.class.getSimpleName();
 
     /**
      * Called when the activity is first created.
@@ -56,7 +56,7 @@ public class HomeActivity extends FragmentActivity implements ExitDialogFragment
 
     @Override
     public void onBackPressed() {
-        Log.d(TAG, "onBackPressed()");
+        Timber.d("onBackPressed()");
         showExitDialog();
 //        super.onBackPressed();
     }
