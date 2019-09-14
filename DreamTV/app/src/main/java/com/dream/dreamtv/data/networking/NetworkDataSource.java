@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.dream.dreamtv.data.networking.model.Resource;
 import com.dream.dreamtv.data.networking.model.SubtitleResponse;
 import com.dream.dreamtv.data.networking.model.Task;
-import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.data.networking.model.UserTask;
 import com.dream.dreamtv.data.networking.model.UserTaskError;
 import com.dream.dreamtv.data.networking.model.VideoTopicSchema;

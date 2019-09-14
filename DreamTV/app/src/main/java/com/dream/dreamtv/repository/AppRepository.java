@@ -15,7 +15,7 @@ import com.dream.dreamtv.data.networking.model.SubtitleResponse;
 import com.dream.dreamtv.data.networking.model.Task;
 import com.dream.dreamtv.data.networking.model.TaskRequest;
 import com.dream.dreamtv.data.networking.model.TasksList;
-import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.data.networking.model.UserTask;
 import com.dream.dreamtv.data.networking.model.UserTaskError;
 import com.dream.dreamtv.data.networking.model.VideoTest;
@@ -57,7 +57,7 @@ public class AppRepository {
                 if (status.equals(Status.SUCCESS)) {
                     // Insert our new user data into preferences
 
-                    mPreferencesHelper.setUser(data);
+                    setUser(data);
 
                     Timber.d("New user data - setUser() called");
                 }
@@ -71,9 +71,9 @@ public class AppRepository {
 
                 if (status.equals(Status.SUCCESS)) {
                     // Insert our new weather data into the database
-                    mPreferencesHelper.setUser(data);
+                    setUser(data);
 
-                    Timber.d("Update user data - setUser() called: subLanguage = %s", data.subLanguage);
+                    Timber.d("Update user data - setUser() called: subLanguage = %s", data.getSubLanguage());
                 }
             }
         });
@@ -330,5 +330,9 @@ public class AppRepository {
 
     public String getInterfaceAppLanguage() {
         return mPreferencesHelper.getInterfaceLanguagePref();
+    }
+
+    public void setUser(User user) {
+        mPreferencesHelper.setUser(user);
     }
 }

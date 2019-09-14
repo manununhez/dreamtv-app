@@ -16,7 +16,7 @@ import androidx.preference.PreferenceScreen;
 
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
-import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.di.InjectorUtils;
 
 import java.util.Objects;
@@ -86,7 +86,7 @@ public class VideoPreferencesFragment extends LeanbackSettingsFragmentCompat {
             if (user != null) {
                 ListPreference listAudioPreference = findPreference(getString(R.string.pref_key_list_audio_languages));
                 if (listAudioPreference != null) {
-                    listAudioPreference.setValue(user.audioLanguage);
+                    listAudioPreference.setValue(user.getAudioLanguage());
                 }
             }
 

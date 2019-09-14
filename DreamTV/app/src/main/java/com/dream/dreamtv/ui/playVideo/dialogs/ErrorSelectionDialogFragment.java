@@ -39,7 +39,7 @@ import com.dream.dreamtv.data.networking.model.ErrorReason;
 import com.dream.dreamtv.data.networking.model.Subtitle;
 import com.dream.dreamtv.data.networking.model.SubtitleResponse;
 import com.dream.dreamtv.data.networking.model.Task;
-import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.data.networking.model.UserTask;
 import com.dream.dreamtv.data.networking.model.UserTaskError;
 import com.dream.dreamtv.utils.Constants;
@@ -345,7 +345,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         Timber.d(mReasons.toString());
 
 
-        if (mUser.interfaceMode.equals(BEGINNER_INTERFACE_MODE))
+        if (mUser.getInterfaceMode().equals(BEGINNER_INTERFACE_MODE))
             setupReasonsRadioGroup();
         else
             setupReasonsCheck();
@@ -475,7 +475,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             btnDeleteChanges.setVisibility(View.VISIBLE);
 
 
-            if (mUser.interfaceMode.equals(BEGINNER_INTERFACE_MODE)) { //PREF_BEGINNER_INTERFACE_MODE
+            if (mUser.getInterfaceMode().equals(BEGINNER_INTERFACE_MODE)) { //PREF_BEGINNER_INTERFACE_MODE
                 if (errors.size() == 1) {
 
                     rgReasons.setEnabled(false);
@@ -541,7 +541,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
         selectedReasons.clear(); //clear all previous selected reasons in checks
 
-        if (mUser.interfaceMode.equals(BEGINNER_INTERFACE_MODE)) { //BEGINNER MODE
+        if (mUser.getInterfaceMode().equals(BEGINNER_INTERFACE_MODE)) { //BEGINNER MODE
 
             scrollViewBeginner.setVisibility(View.VISIBLE);
             if (scrollViewBeginnerEdition.getVisibility() == View.VISIBLE)
@@ -568,7 +568,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
     private UserTaskError prepareReasonsToSave() {
         //Interface mode preferences. We retrieve the selected value. The advanced mode is already in selectedReasons
-        if (mUser.interfaceMode.equals(Constants.BEGINNER_INTERFACE_MODE)) {
+        if (mUser.getInterfaceMode().equals(Constants.BEGINNER_INTERFACE_MODE)) {
             for (int i = 0; i < rgReasons.getChildCount(); i++) {
                 RadioButton radioButton = (RadioButton) rgReasons.getChildAt(i);
 
@@ -608,7 +608,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
     public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
 
-        private final String CHARS_S = "chars/s";
         private final Context context;
         private final List<Subtitle> values;
         private final Integer currentSubtitlePosition;

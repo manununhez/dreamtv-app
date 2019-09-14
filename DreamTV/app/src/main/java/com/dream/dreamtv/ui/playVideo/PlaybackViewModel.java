@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.dream.dreamtv.data.networking.model.ErrorReason;
 import com.dream.dreamtv.data.networking.model.Resource;
-import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.data.networking.model.UserTask;
 import com.dream.dreamtv.data.networking.model.UserTaskError;
 import com.dream.dreamtv.repository.AppRepository;

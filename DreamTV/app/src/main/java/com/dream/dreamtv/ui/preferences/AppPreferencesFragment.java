@@ -16,7 +16,7 @@ import androidx.preference.PreferenceScreen;
 
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
-import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.di.InjectorUtils;
 
 import java.util.Objects;
@@ -87,12 +87,12 @@ public class AppPreferencesFragment extends LeanbackSettingsFragmentCompat {
                 //TODO set settings value from Shared USER
                 ListPreference listAppLanguagePreference = findPreference(getString(R.string.pref_key_list_app_languages));
                 if (listAppLanguagePreference != null) {
-                    listAppLanguagePreference.setValue(user.subLanguage);
+                    listAppLanguagePreference.setValue(user.getSubLanguage());
                 }
 
                 ListPreference listInterfaceModePreference = findPreference(getString(R.string.pref_key_list_interface_mode));
                 if (listInterfaceModePreference != null) {
-                    listInterfaceModePreference.setValue(user.interfaceMode);
+                    listInterfaceModePreference.setValue(user.getInterfaceMode());
                 }
 
             }

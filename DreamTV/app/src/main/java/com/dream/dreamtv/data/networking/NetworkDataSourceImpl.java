@@ -15,7 +15,8 @@ import com.dream.dreamtv.data.networking.model.SubtitleResponse;
 import com.dream.dreamtv.data.networking.model.Task;
 import com.dream.dreamtv.data.networking.model.TaskRequest;
 import com.dream.dreamtv.data.networking.model.TasksList;
-import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.model.User;
+import com.dream.dreamtv.data.networking.model.UserSchema;
 import com.dream.dreamtv.data.networking.model.UserTask;
 import com.dream.dreamtv.data.networking.model.UserTaskError;
 import com.dream.dreamtv.data.networking.model.VideoTest;
@@ -268,11 +269,14 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
             protected void processResponse(String response) {
                 Timber.d("fetchUserDetails() Response JSON: %s", response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserSchema>>() {
                 };
-                JsonResponseBaseBean<User> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<UserSchema> jsonResponse = getJsonResponse(response, type);
 
-                responseFromFetchUser.postValue(Resource.success(jsonResponse.data)); //post the value to live data
+                UserSchema userSchema = jsonResponse.data;
+                User user = getUserFromSchema(userSchema);
+
+                responseFromFetchUser.postValue(Resource.success(user)); //post the value to live data
 
             }
 
@@ -288,7 +292,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         }));
 
     }
-    
+
 
     /**
      * Used in {@link HomeFragment}
@@ -300,11 +304,11 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     public MutableLiveData<Resource<User>> updateUser(User user) {
         responseFromUserUpdate.setValue(Resource.loading(null));
 
-        String userUri = getUserURL(user.interfaceMode, user.subLanguage, user.audioLanguage);
+        String userUri = getUserURL(user.getInterfaceMode(), user.getSubLanguage(), user.getAudioLanguage());
 
-        Timber.d("updateUser() Request URL: " + userUri + " Params: interfaceMode=>" + user.interfaceMode
-                + "; subLanguage=>" + user.subLanguage
-                + "; audioLanguage=>" + user.audioLanguage);
+        Timber.d("updateUser() Request URL: " + userUri + " Params: interfaceMode=>" + user.getInterfaceMode()
+                + "; subLanguage=>" + user.getSubLanguage()
+                + "; audioLanguage=>" + user.getAudioLanguage());
 
 
         mExecutors.networkIO().execute(() -> mVolley.requestString(PUT, userUri, null, new ResponseListener(mContext) {
@@ -312,11 +316,14 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
             protected void processResponse(String response) {
                 Timber.d("updateUser() Response JSON: %s", response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<User>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserSchema>>() {
                 };
-                JsonResponseBaseBean<User> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<UserSchema> jsonResponse = getJsonResponse(response, type);
 
-                responseFromUserUpdate.postValue(Resource.success(jsonResponse.data)); //post the value to live data
+                UserSchema userSchema = jsonResponse.data;
+                User user = getUserFromSchema(userSchema);
+
+                responseFromUserUpdate.postValue(Resource.success(user)); //post the value to live data
 
             }
 
@@ -1015,5 +1022,14 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
     public MutableLiveData<Resource<AuthResponse>> responseFromAuth() {
         return responseFromAuth;
+    }
+
+
+    /*******************
+     * DATA MAPPER
+     *******************/
+    private User getUserFromSchema(UserSchema userSchema) {
+        return new User(userSchema.email, userSchema.password, userSchema.subLanguage, userSchema.audioLanguage,
+                userSchema.interfaceMode);
     }
 }

@@ -16,7 +16,7 @@ import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
 import com.dream.dreamtv.data.networking.model.Resource;
 import com.dream.dreamtv.data.networking.model.Resource.Status;
-import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.ui.home.HomeActivity;
 import com.dream.dreamtv.utils.LocaleHelper;
@@ -75,7 +75,7 @@ public class WelcomeActivity extends FragmentActivity {
         if (accessToken == null || user == null) //first time the app is initiated. The user has to select an account
             pickUserAccount();
         else
-            login(user.email);
+            login(user.getEmail());
 
 
         userDetailsLiveData = mViewModel.fetchUserDetails();
@@ -89,11 +89,11 @@ public class WelcomeActivity extends FragmentActivity {
             } else if (status.equals(Status.SUCCESS)) {
 
                 if (data != null) {
-                    if (!data.subLanguage.equals(LocaleHelper.getLanguage(this))) {
+                    if (!data.getSubLanguage().equals(LocaleHelper.getLanguage(this))) {
 
-                        Timber.d("fetchUserDetails() response!: userResource.data.subLanguage=" + data.subLanguage + " LocaleHelper.getLanguage(this):" + LocaleHelper.getLanguage(this));
+                        Timber.d("fetchUserDetails() response!: userResource.data.subLanguage=" + data.getSubLanguage() + " LocaleHelper.getLanguage(this):" + LocaleHelper.getLanguage(this));
 
-                        LocaleHelper.setLocale(this, data.subLanguage);
+                        LocaleHelper.setLocale(this, data.getSubLanguage());
                     }
 
                     goHome();
@@ -140,8 +140,8 @@ public class WelcomeActivity extends FragmentActivity {
 
         Bundle bundle = new Bundle();
 
-        String email = (user == null || user.email == null) ? "" : user.email;
-        String password = (user == null || user.password == null) ? "" : user.password;
+        String email = (user == null || user.getEmail() == null) ? "" : user.getEmail();
+        String password = (user == null || user.getPassword() == null) ? "" : user.getPassword();
 
         if (FIREBASE_LOG_EVENT_LOGIN.equals(logEventName)) {
             bundle.putString(FIREBASE_KEY_EMAIL, email);

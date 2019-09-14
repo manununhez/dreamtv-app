@@ -7,7 +7,7 @@ import android.preference.PreferenceManager;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.data.model.VideoDuration;
 import com.dream.dreamtv.data.networking.model.ErrorReason;
-import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.data.networking.model.VideoTest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -81,7 +81,7 @@ public class AppPreferencesHelper {
         ArrayList<ErrorReason> newList = new ArrayList<>();
 
         for (ErrorReason error : list) {
-            if (error.language.equals(user.subLanguage))
+            if (error.language.equals(user.getSubLanguage()))
                 newList.add(error);
         }
 
