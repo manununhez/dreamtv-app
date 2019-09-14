@@ -39,6 +39,26 @@ public class VideoDetailsViewModel extends ViewModel {
     }
 
 
+    void setSubtitleId(String videoId, String languageCode, String version) {
+        SubtitleId update = new SubtitleId(videoId, languageCode, version);
+
+        if (Objects.equals(subtitleIdMLD.getValue(), update)) {
+            Timber.d("Getting old subtitle");
+            return;
+        }
+        Timber.d("Getting new subtitle");
+        this.subtitleIdMLD.setValue(update);
+    }
+
+    void updateTaskByCategory(Category.Type category) {
+        mRepository.updateTasksCategory(category);
+    }
+
+    boolean verifyIfTaskIsInList(Task task) {
+        return mRepository.verifyIfTaskIsInList(task);
+    }
+
+
     LiveData<Resource<Boolean>> requestAddToList(Task task) {
         return mRepository.requestAddToList(task.taskId, task.subLanguage, task.video.primaryAudioLanguageCode);
     }
@@ -60,26 +80,7 @@ public class VideoDetailsViewModel extends ViewModel {
         return mRepository.createUserTask(task.taskId, mSubtitleVersion);
     }
 
-    void setSubtitleId(String videoId, String languageCode, String version) {
-        SubtitleId update = new SubtitleId(videoId, languageCode, version);
-
-        if (Objects.equals(subtitleIdMLD.getValue(), update)) {
-            Timber.d("Getting old subtitle");
-            return;
-        }
-        Timber.d("Getting new subtitle");
-        this.subtitleIdMLD.setValue(update);
-    }
-
-    void updateTaskByCategory(Category.Type category) {
-        mRepository.updateTasksCategory(category);
-    }
-
-    boolean verifyIfTaskIsInList(Task task) {
-        return mRepository.verifyIfTaskIsInList(task);
-    }
-
-    public List<VideoTest> getVideoTests() {
+    List<VideoTest> getVideoTests() {
         return mRepository.getVideoTests();
     }
 

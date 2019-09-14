@@ -14,7 +14,6 @@ public class SearchViewModel extends ViewModel {
 
     public SearchViewModel(AppRepository appRepository) {
         mRepository = appRepository;
-
     }
 
     LiveData<Resource<Task[]>> search(String query) {

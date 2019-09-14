@@ -10,23 +10,21 @@ public class PreferencesViewModel extends ViewModel {
 
     public PreferencesViewModel(AppRepository appRepository) {
         mRepository = appRepository;
-
     }
-
 
     public User getUser() {
         return mRepository.getUser();
     }
 
-    public String getAudioLanguagePref() {
+    String getAudioLanguagePref() {
         return mRepository.getAudioLanguagePref();
     }
 
-    public String getInterfaceAppLanguage() {
+    String getInterfaceAppLanguage() {
         return mRepository.getInterfaceAppLanguage();
     }
 
-    public String getInterfaceMode() {
+    String getInterfaceMode() {
         return mRepository.getInterfaceMode();
     }
 }

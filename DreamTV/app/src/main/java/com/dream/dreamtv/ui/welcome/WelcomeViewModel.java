@@ -22,17 +22,16 @@ public class WelcomeViewModel extends ViewModel {
         mRepository.login(email, password);
     }
 
-    LiveData<Resource<User>> fetchUserDetails() {
-        return mRepository.fetchUserDetails();
-    }
-
-    public String getAccessToken() {
+    String getAccessToken() {
         return mRepository.getAccessToken();
     }
 
-
     public User getUser() {
         return mRepository.getUser();
+    }
+
+    LiveData<Resource<User>> fetchUserDetails() {
+        return mRepository.fetchUserDetails();
     }
 }
 

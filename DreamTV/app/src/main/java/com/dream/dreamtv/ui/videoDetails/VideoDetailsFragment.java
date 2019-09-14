@@ -136,9 +136,15 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         fetchUserTasksObserver();
         fetchSubtitle();
 
+    }
+
+    private void setupDetailsOverview() {
+        setupAdapter();
+        setupDetailsOverviewRow();
+        initActionPanel();
+        updateBackground();
+
         initializePanel();
-
-
     }
 
     private void initializePanel() {
@@ -174,12 +180,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     }
 
-    private void setupDetailsOverview() {
-        setupAdapter();
-        setupDetailsOverviewRow();
-        initActionPanel();
-        updateBackground();
-    }
 
     private void prepareBackgroundManager() {
         mBackgroundManager = BackgroundManager.getInstance(getContext());

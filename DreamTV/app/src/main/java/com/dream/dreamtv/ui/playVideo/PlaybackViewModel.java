@@ -36,11 +36,11 @@ public class PlaybackViewModel extends ViewModel {
         return mRepository.getUser();
     }
 
-    public LiveData<Resource<UserTaskError[]>> saveErrorReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
+    LiveData<Resource<UserTaskError[]>> saveErrorReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
         return mRepository.saveErrorReasons(taskId, subtitleVersion, userTaskError);
     }
 
-    public LiveData<Resource<UserTaskError[]>> updateErrorReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
+    LiveData<Resource<UserTaskError[]>> updateErrorReasons(int taskId, int subtitleVersion, UserTaskError userTaskError) {
         return mRepository.updateErrorReasons(taskId, subtitleVersion, userTaskError);
     }
 }
