@@ -17,12 +17,9 @@ public class HomeViewModel extends ViewModel {
 
     public HomeViewModel(AppRepository appRepository) {
         mRepository = appRepository;
-
-        initSyncData();
-
     }
 
-    private void initSyncData() {
+    void initSyncData() {
         mRepository.fetchReasons();
         mRepository.fetchVideoTestsDetails();
 
@@ -33,6 +30,19 @@ public class HomeViewModel extends ViewModel {
 
         if (getTestingMode())
             mRepository.updateTasksCategory(Type.TEST);
+    }
+
+    void updateTaskByCategory(Type category) {
+        mRepository.updateTasksCategory(category);
+    }
+
+
+    boolean getTestingMode() {
+        return mRepository.getTestingModePref();
+    }
+
+    public User getUser() {
+        return mRepository.getUser();
     }
 
     LiveData<Resource<TasksList>> requestTasksByCategory(Type category) {
@@ -48,17 +58,6 @@ public class HomeViewModel extends ViewModel {
         return mRepository.updateUser(userData);
     }
 
-    void updateTaskByCategory(Type category) {
-        mRepository.updateTasksCategory(category);
-    }
 
-
-    boolean getTestingMode() {
-        return mRepository.getTestingModePref();
-    }
-
-    public User getUser() {
-        return mRepository.getUser();
-    }
 }
 

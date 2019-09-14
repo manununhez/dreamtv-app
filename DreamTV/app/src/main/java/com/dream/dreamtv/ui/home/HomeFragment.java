@@ -121,6 +121,8 @@ public class HomeFragment extends BrowseSupportFragment {
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
 
+        initSyncData();
+
         setupVideosList();
 
         instantiateLoading();
@@ -130,6 +132,10 @@ public class HomeFragment extends BrowseSupportFragment {
         addRowSettings();
 
         setupObservers();
+    }
+
+    private void initSyncData() {
+        mViewModel.initSyncData();
     }
 
     public FragmentActivity getContext() {
