@@ -22,10 +22,11 @@ public final class Constants {
     public static final String INTENT_SUBTITLE = "INTENT_SUBTITLE";
     public static final String INTENT_USER_TASK = "INTENT_USER_TASK";
     public static final String INTENT_EXTRA_CALL_TASKS = "INTENT_EXTRA_CALL_TASKS";
-    public static final String INTENT_EXTRA_USER_UPDATED = "INTENT_EXTRA_USER_UPDATED";
-    public static final String INTENT_EXTRA_RESTART = "restart";
+    public static final String INTENT_EXTRA_RESTART = "INTENT_EXTRA_RESTART";
+    public static final String INTENT_EXTRA_UPDATE_USER = "INTENT_EXTRA_UPDATE_USER";
+    public static final String INTENT_EXTRA_TESTING_MODE = "INTENT_EXTRA_TESTING_MODE";
     public static final String INTENT_EXTRA_TOPIC_NAME = "CategoryName";
-    public static final String INTENT_PLAY_FROM_BEGINNING = "from_beginning";
+    public static final String INTENT_PLAY_FROM_BEGINNING = "INTENT_PLAY_FROM_BEGINNING";
     public static final String INTENT_CATEGORY = "INTENT_CATEGORY";
 
     public static final String EMPTY_ITEM = "Some item";

@@ -12,17 +12,18 @@ import androidx.preference.PreferenceManager;
 
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
-import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.utils.LocaleHelper;
 
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_CALL_TASKS;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
-import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_USER_UPDATED;
+import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_UPDATE_USER;
 
 public class VideoPreferencesActivity extends FragmentActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
     private boolean restart = false;
     private boolean callAllTaskAgain = false;
+    private boolean updateUser = false;
     private PreferencesViewModel mViewModel;
 
     @Override
@@ -85,12 +86,12 @@ public class VideoPreferencesActivity extends FragmentActivity implements Shared
 
     @Override
     public void onBackPressed() {
-        User userUpdated = saveUserData();
+        saveUserData();
 
         Intent returnIntent = new Intent();
         returnIntent.putExtra(INTENT_EXTRA_RESTART, restart);
+        returnIntent.putExtra(INTENT_EXTRA_UPDATE_USER, updateUser);
         returnIntent.putExtra(INTENT_EXTRA_CALL_TASKS, callAllTaskAgain);
-        returnIntent.putExtra(INTENT_EXTRA_USER_UPDATED, userUpdated);
         setResult(RESULT_OK, returnIntent);
         finish();
 
@@ -98,28 +99,28 @@ public class VideoPreferencesActivity extends FragmentActivity implements Shared
 
     }
 
-
-    private User saveUserData() {
-        //   pref_key_video_duration
-        //   pref_key_list_audio_languages
-
+    /**
+     * This function obtains the user cached data and update its audio language.
+     * In case the audio language has been changed, the app will restart in order to apply the new settings,
+     * and save the new user data (local and remote).
+     */
+    private void saveUserData() {
         //Save user data
-        User userCached = mViewModel.getUser();
+        User user = mViewModel.getUser();
 
-        String audioLanguage = mViewModel.getAudioLanguagePref();
+        String previousAudioLanguage = user.getAudioLanguage();
 
+        String currentAudioLanguage = mViewModel.getAudioLanguagePref();
 
-        User userUpdated = new User();
-        userUpdated.email = userCached.email;
-        userUpdated.password = userCached.password;
-        userUpdated.subLanguage = userCached.subLanguage;
-        userUpdated.interfaceMode = userCached.interfaceMode;
-//        userUpdated.interfaceLanguage = userCached.interfaceLanguage;
-        userUpdated.audioLanguage = audioLanguage; //audio updated
+        restart = !previousAudioLanguage.equals(currentAudioLanguage);
+        updateUser = restart;
 
+        //update audiolanguage
+        user.setAudioLanguage(currentAudioLanguage);
 
-        restart = !userCached.audioLanguage.equals(audioLanguage);
+        if (updateUser)
+            //caching the updated user
+            mViewModel.setUser(user);
 
-        return userUpdated;
     }
 }

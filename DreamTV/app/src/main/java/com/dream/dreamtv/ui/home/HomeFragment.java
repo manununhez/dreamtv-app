@@ -1,7 +1,6 @@
 package com.dream.dreamtv.ui.home;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -27,11 +26,12 @@ import com.dream.dreamtv.ViewModelFactory;
 import com.dream.dreamtv.data.model.Card;
 import com.dream.dreamtv.data.model.Category;
 import com.dream.dreamtv.data.model.Category.Type;
+import com.dream.dreamtv.data.model.User;
+import com.dream.dreamtv.data.model.VideoDuration;
 import com.dream.dreamtv.data.networking.model.Resource;
 import com.dream.dreamtv.data.networking.model.Resource.Status;
 import com.dream.dreamtv.data.networking.model.Task;
 import com.dream.dreamtv.data.networking.model.TasksList;
-import com.dream.dreamtv.data.networking.model.User;
 import com.dream.dreamtv.data.networking.model.VideoTopicSchema;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.presenter.CardPresenterSelector;
@@ -72,8 +72,9 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_TASK_SELECTED
 import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_CALL_TASKS;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_RESTART;
+import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_TESTING_MODE;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_TOPIC_NAME;
-import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_USER_UPDATED;
+import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_UPDATE_USER;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 
 
@@ -103,18 +104,11 @@ public class HomeFragment extends BrowseSupportFragment {
 
 
     @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        Timber.i("onAttach()");
-
-    }
-
-    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Timber.i("onActivityCreated()");
 
-//        // Get the ViewModel from the factory
+        // Get the ViewModel from the factory
         ViewModelFactory factory = InjectorUtils.provideViewModelFactory(getContext());
         mViewModel = ViewModelProviders.of(this, factory).get(HomeViewModel.class);
 
@@ -133,6 +127,119 @@ public class HomeFragment extends BrowseSupportFragment {
 
         setupObservers();
     }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setHeadersState(HEADERS_DISABLED);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        Timber.d("onDestroyView");
+
+        if (allTaskLiveData != null)
+            allTaskLiveData.removeObservers(getViewLifecycleOwner());
+
+        if (continueTaskLiveData != null)
+            continueTaskLiveData.removeObservers(getViewLifecycleOwner());
+
+        if (finishedTaskLiveData != null)
+            finishedTaskLiveData.removeObservers(getViewLifecycleOwner());
+
+        if (myListTaskLiveData != null)
+            myListTaskLiveData.removeObservers(getViewLifecycleOwner());
+
+        if (testTaskLiveData != null)
+            testTaskLiveData.removeObservers(getViewLifecycleOwner());
+
+        if (updateUserLiveData != null)
+            updateUserLiveData.removeObservers(getViewLifecycleOwner());
+
+        if (categoriesLiveData != null)
+            categoriesLiveData.removeObservers(getViewLifecycleOwner());
+
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == REQUEST_APP_SETTINGS) {
+                // Parameters considered here:
+                // pref_key_list_app_languages
+                // pref_key_list_interface_mode
+                // pref_key_testing_mode
+
+                boolean extraIntentRestart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
+                boolean extraIntentUpdateUser = data.getBooleanExtra(INTENT_EXTRA_UPDATE_USER, false);
+
+                if (extraIntentUpdateUser)
+                    updateUserObserver(mViewModel.getUser());
+
+                if (extraIntentRestart) {
+                    //we force to call firebaselog here, because otherwise the app restarts and the data get lost
+//                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN);
+                    //To update screen language
+                    getContext().recreate(); //Recreate activity
+
+                    Timber.d("REQUEST_APP_SETTINGS - Different language. Updating screen.");
+                } else {
+                    boolean extraIntentTestingMode = data.getBooleanExtra(INTENT_EXTRA_TESTING_MODE, false);
+                    //we check is we are not in testing mode. If the language screen does not recreate the activity,
+                    // we manually delete the row testing
+
+                    if (extraIntentTestingMode) {
+                        boolean testingMode = mViewModel.getTestingMode();
+
+                        if (!testingMode) {
+                            verifyRowExistenceAndRemove(TEST);
+
+                            Timber.d("REQUEST_APP_SETTINGS - Removed test category.");
+                        } else {
+                            mViewModel.updateTaskByCategory(TEST);
+
+                            Timber.d("REQUEST_APP_SETTINGS - Added test category.");
+                        }
+                    }
+                }
+            } else if (requestCode == REQUEST_VIDEO_SETTINGS) {
+                // Parameters considered here:
+                // pref_key_video_duration
+                // pref_key_list_audio_languages
+
+                boolean extraIntentRestart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
+                boolean extraIntentUpdateUser = data.getBooleanExtra(INTENT_EXTRA_UPDATE_USER, false);
+
+                if (extraIntentUpdateUser)
+                    updateUserObserver(mViewModel.getUser());
+
+                if (extraIntentRestart) {
+                    //we force to call firebaselog here, because otherwise the app restarts and the data get lost
+//                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN);
+                    //To update screen language
+                    getContext().recreate(); //Recreate activity
+
+                    Timber.d("REQUEST_VIDEO_SETTINGS - Different video audio language. Updating screen.");
+                } else {
+                    boolean extraIntentCallAllCategoriesTasks = data.getBooleanExtra(INTENT_EXTRA_CALL_TASKS, false);
+                    if (extraIntentCallAllCategoriesTasks) {
+                        mViewModel.syncAllCategories();
+
+                        Timber.d("REQUEST_VIDEO_SETTINGS - Changed video duration. Call all Tasks again.");
+                    }
+                }
+
+            }
+        }
+
+    }
+
 
     private void initSyncData() {
         mViewModel.initSyncData();
@@ -317,17 +424,6 @@ public class HomeFragment extends BrowseSupportFragment {
 
         });
 
-//        boolean testingMode = mViewModel.getTestingMode();
-//
-//        if (testingMode)
-//            mViewModel.updateTaskByCategory(TEST);
-//
-
-////        REASONS
-//        mViewModel.fetchReasons();
-//
-////        VIDEO TESTS
-//        mViewModel.fetchVideoTestsDetails();
 
 //        CATEGORIES
         categoriesLiveData = mViewModel.fetchCategories();
@@ -359,13 +455,6 @@ public class HomeFragment extends BrowseSupportFragment {
                 dismissLoading();
             }
         });
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setHeadersState(HEADERS_DISABLED);
     }
 
     private void initCategoriesRow() {
@@ -401,40 +490,11 @@ public class HomeFragment extends BrowseSupportFragment {
             case FINISHED:
             case CONTINUE:
             case TEST:
-                return new ListRow(new HeaderItem(title), new ArrayObjectAdapter(new CardPresenterSelector(getContext())));
+                return new ListRow(new HeaderItem(title),
+                        new ArrayObjectAdapter(new CardPresenterSelector(getContext())));
             default:
                 throw new RuntimeException("VideoTopic " + category + " not contemplated");
         }
-    }
-
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        Timber.d("onDestroyView");
-
-        if (allTaskLiveData != null)
-            allTaskLiveData.removeObservers(getViewLifecycleOwner());
-
-        if (continueTaskLiveData != null)
-            continueTaskLiveData.removeObservers(getViewLifecycleOwner());
-
-        if (finishedTaskLiveData != null)
-            finishedTaskLiveData.removeObservers(getViewLifecycleOwner());
-
-        if (myListTaskLiveData != null)
-            myListTaskLiveData.removeObservers(getViewLifecycleOwner());
-
-        if (testTaskLiveData != null)
-            testTaskLiveData.removeObservers(getViewLifecycleOwner());
-
-        if (updateUserLiveData != null)
-            updateUserLiveData.removeObservers(getViewLifecycleOwner());
-
-        if (categoriesLiveData != null)
-            categoriesLiveData.removeObservers(getViewLifecycleOwner());
-
     }
 
 
@@ -628,6 +688,9 @@ public class HomeFragment extends BrowseSupportFragment {
     private void firebaseLoginEvents(String logEventName) {
         boolean testingMode = mViewModel.getTestingMode();
 
+        String subtitleSize = mViewModel.getSubtitleSize();
+        VideoDuration videoDuration = mViewModel.getVideoDuration();
+
         User user = mViewModel.getUser();
 
         Timber.d("User from firebaseLog: %s", user);
@@ -635,27 +698,27 @@ public class HomeFragment extends BrowseSupportFragment {
         Bundle bundle = new Bundle();
 
         // FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN
-        if (FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN.equals(logEventName)) {
+        if (logEventName.equals(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN)) {
             if (testingMode)
                 bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, true);
             else
                 bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, false);
 
             //User Settings Saved
-            bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
-            bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
-            bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
+            bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.getSubLanguage());
+            bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.getAudioLanguage());
+            bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.getInterfaceMode());
         } else {//User Settings Saved - Analytics Report Event
-            bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.subLanguage);
-            bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.audioLanguage);
-            bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.interfaceMode);
+            bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.getSubLanguage());
+            bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.getAudioLanguage());
+            bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.getInterfaceMode());
         }
 
         mFirebaseAnalytics.logEvent(logEventName, bundle);
 
     }
 
-    private void updateUser(User userUpdated) {
+    private void updateUserObserver(User userUpdated) {
         updateUserLiveData = mViewModel.updateUser(userUpdated);
         updateUserLiveData.removeObservers(getViewLifecycleOwner());
         updateUserLiveData.observe(getViewLifecycleOwner(), response -> {
@@ -681,75 +744,6 @@ public class HomeFragment extends BrowseSupportFragment {
 
 
         });
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == REQUEST_APP_SETTINGS) {
-                // Parameters considered here:
-                // pref_key_list_app_languages
-                // pref_key_list_interface_mode
-                // pref_key_testing_mode
-                User userToUpdate = data.getParcelableExtra(INTENT_EXTRA_USER_UPDATED);
-                updateUser(userToUpdate);
-
-                boolean restart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
-
-                if (restart) {
-                    //To update screen language
-                    getContext().recreate(); //Recreate activity
-
-                    Timber.d("REQUEST_APP_SETTINGS - Different language. Updating screen.");
-                } else {
-                    //we check is we are not in testing mode. If the language screen does not recreate the activity,
-                    // we manually delete the row testing
-                    boolean testingMode = mViewModel.getTestingMode();
-
-                    if (!testingMode) {
-                        verifyRowExistenceAndRemove(TEST);
-
-                        Timber.d("REQUEST_APP_SETTINGS - Removed test category.");
-                    } else {
-                        mViewModel.updateTaskByCategory(TEST);
-
-                        Timber.d("REQUEST_APP_SETTINGS - Added test category.");
-                    }
-                }
-            } else if (requestCode == REQUEST_VIDEO_SETTINGS) {
-                // Parameters considered here:
-                // pref_key_video_duration
-                // pref_key_list_audio_languages
-                User userToUpdate = data.getParcelableExtra(INTENT_EXTRA_USER_UPDATED);
-                updateUser(userToUpdate);
-
-                boolean restart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
-
-                if (restart) {
-                    //we force to call firebaselog here, because otherwise the app restarts and the data get lost
-                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN);
-                    //To update screen language
-                    getContext().recreate(); //Recreate activity
-
-                    Timber.d("REQUEST_VIDEO_SETTINGS - Different video audio language. Updating screen.");
-                } else {
-                    boolean callAllCategoriesTasks = data.getBooleanExtra(INTENT_EXTRA_CALL_TASKS, false);
-                    if (callAllCategoriesTasks) {
-                        mViewModel.updateTaskByCategory(ALL);
-                        mViewModel.updateTaskByCategory(CONTINUE);
-                        mViewModel.updateTaskByCategory(FINISHED);
-                        mViewModel.updateTaskByCategory(MY_LIST);
-                        mViewModel.updateTaskByCategory(TEST);
-
-                        Timber.d("REQUEST_VIDEO_SETTINGS - Changed video duration. Call all Tasks again.");
-                    }
-                }
-
-            }
-        }
-
     }
 
     //********************************************

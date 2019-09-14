@@ -2,7 +2,7 @@ package com.dream.dreamtv.ui.preferences;
 
 import androidx.lifecycle.ViewModel;
 
-import com.dream.dreamtv.data.networking.model.User;
+import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.repository.AppRepository;
 
 public class PreferencesViewModel extends ViewModel {
@@ -26,5 +26,9 @@ public class PreferencesViewModel extends ViewModel {
 
     String getInterfaceMode() {
         return mRepository.getInterfaceMode();
+    }
+
+    public void setUser(User user) {
+        mRepository.setUser(user);
     }
 }
