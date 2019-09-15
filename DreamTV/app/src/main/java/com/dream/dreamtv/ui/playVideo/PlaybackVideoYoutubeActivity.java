@@ -133,7 +133,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     private LiveData<Resource<UserTaskError[]>> saveErrorsLiveData;
     private LiveData<Resource<UserTaskError[]>> updateErrorsLiveData;
 
-
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -182,17 +182,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         setupVideoPlayer();
     }
 
-    private void setupInfoPlayer() {
-        tvVideoTitle.setText(mSubtitleResponse.videoTitleTranslated);
-        tvTotalTime.setText(TimeUtils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs()));
-        if (mPlayFromBeginning)
-            tvCurrentTime.setText(TimeUtils.getTimeFormat(this, 0));
-        else
-            tvCurrentTime.setText(TimeUtils.getTimeFormat(this, mUserTask.getTimeWatched()));
-
-    }
-
-
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -214,82 +203,10 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         mUserTask = savedInstanceState.getParcelable(INTENT_USER_TASK);
     }
 
-    private void firebaseLoginEvents(String logEventName) {
-        Bundle bundle = new Bundle();
-
-        switch (logEventName) {
-            case FIREBASE_LOG_EVENT_UPDATE_USER_TASK:
-                bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
-                break;
-            case FIREBASE_LOG_EVENT_RATING_VIDEO:
-                bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
-                bundle.putInt(FIREBASE_KEY_RATING, mUserTask.getRating());
-                break;
-            case FIREBASE_LOG_EVENT_PRESSED_SAVED_ERRORS:
-            case FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS:
-                bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
-                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
-                break;
-            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY:
-            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE:
-            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP:
-            case FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS:
-            case FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO:
-            case FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO:
-            case FIREBASE_LOG_EVENT_PRESSED_SHOW_PROGRESS_PLAYER:
-            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_PROGRESS_PLAYER:
-            case FIREBASE_LOG_EVENT_PRESSED_REMOTE_BACK_BTN:
-            case FIREBASE_LOG_EVENT_VIDEO_COMPLETED:
-                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                break;
-            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T:
-                logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
-                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
-                break;
-            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F:
-                logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
-                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
-                bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
-                break;
-            default:
-                break;
-
-        }
-
-        mFirebaseAnalytics.logEvent(logEventName, bundle);
-
-    }
-
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(LocaleHelper.onAttach(base));
     }
-
-
-    private void instantiateLoading() {
-        loadingDialog = new LoadingDialog(PlaybackVideoYoutubeActivity.this, getString(R.string.title_loading_buffering));
-        loadingDialog.setCanceledOnTouchOutside(false);
-    }
-
-    private void showLoading() {
-        if (!isFinishing()) {
-            if (!loadingDialog.isShowing())
-                loadingDialog.show();
-        }
-    }
-
-    private void dismissLoading() {
-        if (loadingDialog.isShowing())
-            loadingDialog.dismiss();
-    }
-
 
     @Override
     public void onPlayerStateChange(VideoState state, long position, float speed, float duration, VideoInfo videoInfo) {
@@ -336,16 +253,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     }
 
-    private void showRatingDialog() {
-
-        RatingDialogFragment ratingDialogFragment = new RatingDialogFragment();
-        if (!isFinishing()) {
-            FragmentManager fm = getFragmentManager();
-            FragmentTransaction transaction = fm.beginTransaction();
-            ratingDialogFragment.show(transaction, "Sample Fragment");
-        }
-    }
-
     //Called when player is ready.
     @Override
     public void onPlayerReady(VideoInfo videoInfo) {
@@ -353,7 +260,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         subtitleHandlerSyncConfig();
         playVideoMode();
     }
-
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
@@ -523,18 +429,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP);
     }
 
-    private void updateUserTimeWatched() {
-        long time = elapsedRealtimeTemp - timeStoppedTemp;
-        //Update current time of the video
-        if (time > 0) { //For some reason, youtube player sometimes restart with the current time in 0, after the correct current time was saved
-            Timber.d("stopVideo() => Time (mYoutubeView)%s", time);
-
-            mUserTask.setTimeWatched((int) time);
-
-            updateUserTask(mUserTask);
-        }
-    }
-
     @Override
     public void subtitleHandlerSyncConfig() {
         handler = new Handler();
@@ -570,44 +464,12 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     }
 
     @Override
-    public void startSyncSubtitle(Long base) {
-        dismissPlayerInfoOnPause();
-
-        chronometer.setBase(base);
-        chronometer.start();
-        handler.post(myRunnable);
-
-    }
-
-    @Override
     public void stopSyncSubtitle() {
         chronometer.stop();
 
         if (handler != null) {
             handler.removeCallbacks(null);
             handler.removeCallbacksAndMessages(null);
-        }
-    }
-
-    void showPlayerInfoOnPause() {
-        rlVideoPlayerInfo.setVisibility(View.VISIBLE);
-    }
-
-    void dismissPlayerInfoOnPause() {
-        rlVideoPlayerInfo.setVisibility(View.GONE);
-    }
-
-    void showPlayerProgress() {
-        if (rlVideoPlayerProgress.getVisibility() == View.GONE) {
-            mLastProgressPlayerTime = SystemClock.elapsedRealtime();
-            rlVideoPlayerProgress.setVisibility(View.VISIBLE);
-        }
-    }
-
-    void dismissPlayerProgress() {
-        if (rlVideoPlayerProgress.getVisibility() == View.VISIBLE) {
-            mLastProgressPlayerTime = 0;
-            rlVideoPlayerProgress.setVisibility(View.GONE);
         }
     }
 
@@ -727,8 +589,11 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     protected void onDestroy() {
         super.onDestroy();
 
-        saveErrorsLiveData.removeObservers(this);
-        updateErrorsLiveData.removeObservers(this);
+        if (saveErrorsLiveData != null)
+            saveErrorsLiveData.removeObservers(this);
+
+        if (updateErrorsLiveData != null)
+            updateErrorsLiveData.removeObservers(this);
     }
 
     @Override
@@ -797,13 +662,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         });
     }
 
-    private void updateUserTask(UserTask userTask) {
-        //Update values and exit from the video
-        mViewModel.updateUserTask(userTask);
-        firebaseLoginEvents(FIREBASE_LOG_EVENT_UPDATE_USER_TASK);
-    }
-
-
     @Override
     public void setRating(int rating) {
         mUserTask.setRating(rating);
@@ -817,5 +675,145 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         firebaseLoginEvents(FIREBASE_LOG_EVENT_RATING_VIDEO);
 
         finish();
+    }
+
+    @Override
+    public void startSyncSubtitle(Long base) {
+        dismissPlayerInfoOnPause();
+
+        chronometer.setBase(base);
+        chronometer.start();
+        handler.post(myRunnable);
+
+    }
+
+    private void setupInfoPlayer() {
+        tvVideoTitle.setText(mSubtitleResponse.videoTitleTranslated);
+        tvTotalTime.setText(TimeUtils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs()));
+        if (mPlayFromBeginning)
+            tvCurrentTime.setText(TimeUtils.getTimeFormat(this, 0));
+        else
+            tvCurrentTime.setText(TimeUtils.getTimeFormat(this, mUserTask.getTimeWatched()));
+
+    }
+
+    private void firebaseLoginEvents(String logEventName) {
+        Bundle bundle = new Bundle();
+
+        switch (logEventName) {
+            case FIREBASE_LOG_EVENT_UPDATE_USER_TASK:
+                bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
+                break;
+            case FIREBASE_LOG_EVENT_RATING_VIDEO:
+                bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
+                bundle.putInt(FIREBASE_KEY_RATING, mUserTask.getRating());
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_SAVED_ERRORS:
+            case FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS:
+                bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY:
+            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE:
+            case FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP:
+            case FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS:
+            case FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO:
+            case FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO:
+            case FIREBASE_LOG_EVENT_PRESSED_SHOW_PROGRESS_PLAYER:
+            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_PROGRESS_PLAYER:
+            case FIREBASE_LOG_EVENT_PRESSED_REMOTE_BACK_BTN:
+            case FIREBASE_LOG_EVENT_VIDEO_COMPLETED:
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T:
+                logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
+                break;
+            case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F:
+                logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
+                break;
+            default:
+                break;
+
+        }
+
+        mFirebaseAnalytics.logEvent(logEventName, bundle);
+
+    }
+
+    private void instantiateLoading() {
+        loadingDialog = new LoadingDialog(PlaybackVideoYoutubeActivity.this, getString(R.string.title_loading_buffering));
+        loadingDialog.setCanceledOnTouchOutside(false);
+    }
+
+    private void showLoading() {
+        if (!isFinishing()) {
+            if (!loadingDialog.isShowing())
+                loadingDialog.show();
+        }
+    }
+
+    private void dismissLoading() {
+        if (loadingDialog.isShowing())
+            loadingDialog.dismiss();
+    }
+
+    private void showRatingDialog() {
+
+        RatingDialogFragment ratingDialogFragment = new RatingDialogFragment();
+        if (!isFinishing()) {
+            FragmentManager fm = getFragmentManager();
+            FragmentTransaction transaction = fm.beginTransaction();
+            ratingDialogFragment.show(transaction, "Sample Fragment");
+        }
+    }
+
+    private void updateUserTimeWatched() {
+        long time = elapsedRealtimeTemp - timeStoppedTemp;
+        //Update current time of the video
+        if (time > 0) { //For some reason, youtube player sometimes restart with the current time in 0, after the correct current time was saved
+            Timber.d("stopVideo() => Time (mYoutubeView)%s", time);
+
+            mUserTask.setTimeWatched((int) time);
+
+            updateUserTask(mUserTask);
+        }
+    }
+
+    private void showPlayerInfoOnPause() {
+        rlVideoPlayerInfo.setVisibility(View.VISIBLE);
+    }
+
+    private void dismissPlayerInfoOnPause() {
+        rlVideoPlayerInfo.setVisibility(View.GONE);
+    }
+
+    private void showPlayerProgress() {
+        if (rlVideoPlayerProgress.getVisibility() == View.GONE) {
+            mLastProgressPlayerTime = SystemClock.elapsedRealtime();
+            rlVideoPlayerProgress.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void dismissPlayerProgress() {
+        if (rlVideoPlayerProgress.getVisibility() == View.VISIBLE) {
+            mLastProgressPlayerTime = 0;
+            rlVideoPlayerProgress.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateUserTask(UserTask userTask) {
+        //Update values and exit from the video
+        mViewModel.updateUserTask(userTask);
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_UPDATE_USER_TASK);
     }
 }

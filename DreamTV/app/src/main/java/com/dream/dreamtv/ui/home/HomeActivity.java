@@ -34,9 +34,6 @@ import timber.log.Timber;
  */
 public class HomeActivity extends FragmentActivity implements ExitDialogFragment.OnListener {
 
-    /**
-     * Called when the activity is first created.
-     */
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

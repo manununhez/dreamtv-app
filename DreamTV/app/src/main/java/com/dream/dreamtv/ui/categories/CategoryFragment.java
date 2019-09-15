@@ -105,7 +105,8 @@ public class CategoryFragment extends VerticalGridSupportFragment {
     public void onDestroyView() {
         super.onDestroyView();
 
-        categoryLiveData.removeObservers(getViewLifecycleOwner());
+        if (categoryLiveData != null)
+            categoryLiveData.removeObservers(getViewLifecycleOwner());
     }
 
     //********************************************

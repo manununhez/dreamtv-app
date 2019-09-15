@@ -2,6 +2,7 @@ package com.dream.dreamtv.ui.welcome;
 
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -57,6 +58,35 @@ public class WelcomeActivity extends FragmentActivity {
 
     }
 
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleHelper.onAttach(base));
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (userDetailsLiveData != null)
+            userDetailsLiveData.removeObservers(this);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
+                Timber.d("onActivityResult() - Result from pickAccount()");
+
+                // Receiving a result from the AccountPicker
+                login(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
+            }
+        } else {
+            finish();
+        }
+    }
 
     private void showProgress() {
         progressLoading.setVisibility(View.VISIBLE);
@@ -105,13 +135,6 @@ public class WelcomeActivity extends FragmentActivity {
 
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        userDetailsLiveData.removeObservers(this);
-    }
-
     private void goHome() {
         Intent intent = new Intent(WelcomeActivity.this, HomeActivity.class);
         intent.setAction(Intent.ACTION_VIEW);
@@ -133,7 +156,6 @@ public class WelcomeActivity extends FragmentActivity {
         startActivityForResult(intent, REQUEST_CODE_PICK_ACCOUNT);
     }
 
-
     private void firebaseLoginEvents() {
 
         User user = mViewModel.getUser();
@@ -148,22 +170,6 @@ public class WelcomeActivity extends FragmentActivity {
 
 
         mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_LOGIN, bundle);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
-                Timber.d("onActivityResult() - Result from pickAccount()");
-
-                // Receiving a result from the AccountPicker
-                login(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
-            }
-        } else {
-            finish();
-        }
     }
 
     private void login(String email) {

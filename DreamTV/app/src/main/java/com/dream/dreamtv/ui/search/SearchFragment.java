@@ -203,7 +203,8 @@ public class SearchFragment extends SearchSupportFragment
     public void onDestroyView() {
         super.onDestroyView();
 
-        searchLiveData.removeObservers(getViewLifecycleOwner());
+        if (searchLiveData != null)
+            searchLiveData.removeObservers(getViewLifecycleOwner());
     }
 
     private void loadVideos(Task[] results) {

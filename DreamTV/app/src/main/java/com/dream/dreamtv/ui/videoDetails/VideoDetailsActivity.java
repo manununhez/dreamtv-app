@@ -30,19 +30,14 @@ public class VideoDetailsActivity extends FragmentActivity {
 
     public static final String SHARED_ELEMENT_NAME = "VideoDetails";
 
-    /**
-     * Called when the activity is first created.
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_details);
     }
 
-
     @Override
     protected void attachBaseContext(Context base) {
-//        super.attachBaseContext(LocaleHelper.onAttach(base, PREF_ABR_POLISH));
         super.attachBaseContext(LocaleHelper.onAttach(base));
     }
 }
