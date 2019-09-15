@@ -51,7 +51,10 @@ public final class Constants {
     public static final String FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE = "primary_audio_language";
     public static final String FIREBASE_KEY_VIDEO_PROJECT_NAME = "project";
     public static final String FIREBASE_KEY_VIDEO_DURATION = "duration";
+    public static final String FIREBASE_KEY_MIN_VIDEO_DURATION_PREFS = "min_video_duration_config";
+    public static final String FIREBASE_KEY_MAX_VIDEO_DURATION_PREFS = "max_video_duration_config";
     public static final String FIREBASE_KEY_TASK_ID = "task_id";
+    public static final String FIREBASE_KEY_SUBTITLE_SIZE_PREFS = "subtitle_size";
     public static final String FIREBASE_KEY_USER_TASK_ID = "user_task_id";
     public static final String FIREBASE_KEY_RATING = "rating";
     //    LOG EVENT NAMES

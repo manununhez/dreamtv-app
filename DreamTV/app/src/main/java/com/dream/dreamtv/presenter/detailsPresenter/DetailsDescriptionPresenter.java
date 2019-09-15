@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.data.networking.model.Task;
-import com.dream.dreamtv.utils.Utils;
+import com.dream.dreamtv.utils.TimeUtils;
 
 
 public class DetailsDescriptionPresenter extends CustomAbstractDetailsDescriptionPresenter {
@@ -16,7 +16,7 @@ public class DetailsDescriptionPresenter extends CustomAbstractDetailsDescriptio
         Context context = viewHolder.view.getContext();
 
         if (task.video != null) {
-            String timeFormatted = Utils.getTimeFormatMinSecs(task.video.getVideoDurationInMs());
+            String timeFormatted = TimeUtils.getTimeFormatMinSecs(task.video.getVideoDurationInMs());
 
             viewHolder.getTitle().setText(task.videoTitleTranslated);
             viewHolder.getSubtitle().setText(context.getString(R.string.title_video_details, task.video.project,

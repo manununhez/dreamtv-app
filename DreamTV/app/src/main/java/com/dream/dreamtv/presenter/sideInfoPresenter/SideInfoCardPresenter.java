@@ -31,7 +31,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.data.model.Card;
 import com.dream.dreamtv.data.networking.model.Task;
-import com.dream.dreamtv.utils.Utils;
+import com.dream.dreamtv.utils.TimeUtils;
 
 import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
 
@@ -116,7 +116,7 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
 //        extraText.setText(card.getExtraText());
 
         //-------------- VIDEO DURATION
-        String timeFormatted = Utils.getTimeFormatMinSecsDoublePoints(task.video.getVideoDurationInMs());
+        String timeFormatted = TimeUtils.getTimeFormatMinSecsDoublePoints(task.video.getVideoDurationInMs());
         TextView tvVideoDuration = cardView.findViewById(R.id.tvVideoDuration);
         tvVideoDuration.setText(timeFormatted);
 

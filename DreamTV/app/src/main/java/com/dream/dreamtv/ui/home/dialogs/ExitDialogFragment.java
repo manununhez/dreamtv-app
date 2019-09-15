@@ -23,8 +23,6 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_EXIT_
 
 
 public class ExitDialogFragment extends DialogFragment {
-    private static final String TAG = ExitDialogFragment.class.getSimpleName();
-
 
     private OnListener mCallback;
     private RatingBar rtBar;

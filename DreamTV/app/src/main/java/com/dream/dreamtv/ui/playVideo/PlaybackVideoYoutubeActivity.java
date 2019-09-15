@@ -34,7 +34,7 @@ import com.dream.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment;
 import com.dream.dreamtv.ui.playVideo.dialogs.RatingDialogFragment;
 import com.dream.dreamtv.utils.LoadingDialog;
 import com.dream.dreamtv.utils.LocaleHelper;
-import com.dream.dreamtv.utils.Utils;
+import com.dream.dreamtv.utils.TimeUtils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
@@ -184,11 +184,11 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     private void setupInfoPlayer() {
         tvVideoTitle.setText(mSubtitleResponse.videoTitleTranslated);
-        tvTotalTime.setText(Utils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs()));
+        tvTotalTime.setText(TimeUtils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs()));
         if (mPlayFromBeginning)
-            tvCurrentTime.setText(Utils.getTimeFormat(this, 0));
+            tvCurrentTime.setText(TimeUtils.getTimeFormat(this, 0));
         else
-            tvCurrentTime.setText(Utils.getTimeFormat(this, mUserTask.getTimeWatched()));
+            tvCurrentTime.setText(TimeUtils.getTimeFormat(this, mUserTask.getTimeWatched()));
 
     }
 
@@ -497,8 +497,8 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
         stopSyncSubtitle();
 
-        String currentTime = Utils.getTimeFormat(this, position);
-        String videoDuration = Utils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs());
+        String currentTime = TimeUtils.getTimeFormat(this, position);
+        String videoDuration = TimeUtils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs());
 
         tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
         showPlayerInfoOnPause();
@@ -548,7 +548,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                         dismissPlayerProgress();
 
                     //Updating progress
-                    tvCurrentTime.setText(Utils.getTimeFormat(this, elapsedRealtimeTemp - timeStoppedTemp));
+                    tvCurrentTime.setText(TimeUtils.getTimeFormat(this, elapsedRealtimeTemp - timeStoppedTemp));
                     int videoProgress = (int) ((((float) elapsedRealtimeTemp - timeStoppedTemp) / (float) mSelectedTask.video.getVideoDurationInMs()) * 100);
                     pbProgress.setProgress(videoProgress);
                     pbProgress.setSecondaryProgress(videoProgress + BUFFER_VALUE_PB);

@@ -48,7 +48,7 @@ import com.dream.dreamtv.ui.playVideo.PlaybackVideoActivity;
 import com.dream.dreamtv.ui.playVideo.PlaybackVideoYoutubeActivity;
 import com.dream.dreamtv.utils.Constants;
 import com.dream.dreamtv.utils.LoadingDialog;
-import com.dream.dreamtv.utils.Utils;
+import com.dream.dreamtv.utils.TimeUtils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.List;
@@ -374,7 +374,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private void setupContinueAction() {
         Timber.d(mUserTask.toString());
         if (mUserTask.getTimeWatchedInSecs() > 0) { //To avoid messages like "0 min, 0 secs"
-            String timeFormatted = Utils.getTimeFormatMinSecs(mUserTask.getTimeWatched());
+            String timeFormatted = TimeUtils.getTimeFormatMinSecs(mUserTask.getTimeWatched());
 
             setActionPanel(ACTION_PLAY_VIDEO,
                     new Action(ACTION_CONTINUE_VIDEO, getString(R.string.btn_continue_watching, timeFormatted)),

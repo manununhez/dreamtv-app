@@ -164,14 +164,12 @@ public class CategoryFragment extends VerticalGridSupportFragment {
         mAdapter.addAll(0, cards);
     }
 
-    private void firebaseLoginEvents(String category, int taskId, String logEventName) {
+    private void firebaseLoginEvents(String category, int taskId) {
         Bundle bundle = new Bundle();
 
-        if (logEventName.equals(FIREBASE_LOG_EVENT_TASK_SELECTED)) {
-            bundle.putString(FIREBASE_KEY_TASK_CATEGORY_SELECTED, category);
-            bundle.putInt(FIREBASE_KEY_TASK_SELECTED, taskId);
-            mFirebaseAnalytics.logEvent(logEventName, bundle);
-        }
+        bundle.putString(FIREBASE_KEY_TASK_CATEGORY_SELECTED, category);
+        bundle.putInt(FIREBASE_KEY_TASK_SELECTED, taskId);
+        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_TASK_SELECTED, bundle);
 
     }
 
@@ -190,7 +188,7 @@ public class CategoryFragment extends VerticalGridSupportFragment {
 
                 startActivity(intent);
 
-                firebaseLoginEvents(title, task.taskId, FIREBASE_LOG_EVENT_TASK_SELECTED);
+                firebaseLoginEvents(title, task.taskId);
 
             } else
                 Toast.makeText(getActivity(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();

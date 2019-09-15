@@ -59,12 +59,16 @@ import static com.dream.dreamtv.data.model.Category.Type.TOPICS;
 import static com.dream.dreamtv.utils.Constants.EMPTY_ITEM;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_CATEGORY_SELECTED;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_MODE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_MAX_VIDEO_DURATION_PREFS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SETTINGS_CATEGORY_SELECTED;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_SIZE_PREFS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUB_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_CATEGORY_SELECTED;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_SELECTED;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TESTING_MODE;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_MIN_VIDEO_DURATION_PREFS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_CATEGORIES;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_SETTINGS;
@@ -98,9 +102,8 @@ public class HomeFragment extends BrowseSupportFragment {
     private LiveData<Resource<TasksList>> finishedTaskLiveData;
     private LiveData<Resource<TasksList>> myListTaskLiveData;
     private LiveData<Resource<TasksList>> testTaskLiveData;
-    private FirebaseAnalytics mFirebaseAnalytics;
-    private LiveData<Resource<User>> updateUserLiveData;
     private LiveData<Resource<VideoTopicSchema[]>> categoriesLiveData;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
 
     @Override
@@ -156,9 +159,6 @@ public class HomeFragment extends BrowseSupportFragment {
         if (testTaskLiveData != null)
             testTaskLiveData.removeObservers(getViewLifecycleOwner());
 
-        if (updateUserLiveData != null)
-            updateUserLiveData.removeObservers(getViewLifecycleOwner());
-
         if (categoriesLiveData != null)
             categoriesLiveData.removeObservers(getViewLifecycleOwner());
 
@@ -179,12 +179,12 @@ public class HomeFragment extends BrowseSupportFragment {
                 boolean extraIntentRestart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
                 boolean extraIntentUpdateUser = data.getBooleanExtra(INTENT_EXTRA_UPDATE_USER, false);
 
-                if (extraIntentUpdateUser)
-                    updateUserObserver(mViewModel.getUser());
+                if (extraIntentUpdateUser) {
+                    mViewModel.updateUser(mViewModel.getUser());
+                    firebaseLogEvents_SettingsUpdate();
+                }
 
                 if (extraIntentRestart) {
-                    //we force to call firebaselog here, because otherwise the app restarts and the data get lost
-//                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN);
                     //To update screen language
                     getContext().recreate(); //Recreate activity
 
@@ -216,12 +216,12 @@ public class HomeFragment extends BrowseSupportFragment {
                 boolean extraIntentRestart = data.getBooleanExtra(INTENT_EXTRA_RESTART, false);
                 boolean extraIntentUpdateUser = data.getBooleanExtra(INTENT_EXTRA_UPDATE_USER, false);
 
-                if (extraIntentUpdateUser)
-                    updateUserObserver(mViewModel.getUser());
+                if (extraIntentUpdateUser) {
+                    mViewModel.updateUser(mViewModel.getUser());
+                    firebaseLogEvents_SettingsUpdate();
+                }
 
                 if (extraIntentRestart) {
-                    //we force to call firebaselog here, because otherwise the app restarts and the data get lost
-//                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN);
                     //To update screen language
                     getContext().recreate(); //Recreate activity
 
@@ -256,7 +256,6 @@ public class HomeFragment extends BrowseSupportFragment {
         allTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
             Status status = tasksListResource.status;
             TasksList data = tasksListResource.data;
-            String errorMessage = tasksListResource.message;
 
             if (status.equals(Status.LOADING))
                 showLoading();
@@ -267,16 +266,11 @@ public class HomeFragment extends BrowseSupportFragment {
                     else verifyRowExistenceAndRemove(ALL);
                 }
 
-                Timber.d("task response: rowAllTasks");
-
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (errorMessage != null) {
-                    Timber.d(errorMessage);
-                } else {
-                    Timber.d("Status ERROR");
-                }
+                String errorMessage = tasksListResource.message != null ? tasksListResource.message : "Status ERROR";
+
+                Timber.d(errorMessage);
 
                 dismissLoading();
             }
@@ -290,7 +284,6 @@ public class HomeFragment extends BrowseSupportFragment {
         continueTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
             Status status = tasksListResource.status;
             TasksList data = tasksListResource.data;
-            String errorMessage = tasksListResource.message;
 
             if (status.equals(Status.LOADING))
                 showLoading();
@@ -301,17 +294,11 @@ public class HomeFragment extends BrowseSupportFragment {
                     else verifyRowExistenceAndRemove(CONTINUE);
                 }
 
-                Timber.d("task response: rowContinueTasks");
-
-
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (errorMessage != null) {
-                    Timber.d(errorMessage);
-                } else {
-                    Timber.d("Status ERROR");
-                }
+                String errorMessage = tasksListResource.message != null ? tasksListResource.message : "Status ERROR";
+
+                Timber.d(errorMessage);
 
                 dismissLoading();
             }
@@ -325,7 +312,6 @@ public class HomeFragment extends BrowseSupportFragment {
         finishedTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
             Status status = tasksListResource.status;
             TasksList data = tasksListResource.data;
-            String errorMessage = tasksListResource.message;
 
             if (status.equals(Status.LOADING))
                 showLoading();
@@ -336,22 +322,14 @@ public class HomeFragment extends BrowseSupportFragment {
                     else verifyRowExistenceAndRemove(FINISHED);
                 }
 
-                Timber.d("task response: rowFinishedTasks");
-
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (errorMessage != null) {
-                    Timber.d(errorMessage);
-                } else {
-                    Timber.d("Status ERROR");
-                }
+                String errorMessage = tasksListResource.message != null ? tasksListResource.message : "Status ERROR";
+
+                Timber.d(errorMessage);
 
                 dismissLoading();
             }
-
-            // TODO throw new RuntimeException("Get list sorted of finished tasks");
-
         });
 
 
@@ -361,7 +339,6 @@ public class HomeFragment extends BrowseSupportFragment {
         myListTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
             Status status = tasksListResource.status;
             TasksList data = tasksListResource.data;
-            String errorMessage = tasksListResource.message;
 
             if (status.equals(Status.LOADING))
                 showLoading();
@@ -372,23 +349,14 @@ public class HomeFragment extends BrowseSupportFragment {
                     } else verifyRowExistenceAndRemove(MY_LIST);
                 }
 
-                Timber.d("task response: rowMyListTasks");
-
-
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (errorMessage != null) {
-                    Timber.d(errorMessage);
-                } else {
-                    Timber.d("Status ERROR");
-                }
+                String errorMessage = tasksListResource.message != null ? tasksListResource.message : "Status ERROR";
+
+                Timber.d(errorMessage);
 
                 dismissLoading();
             }
-
-            //  TODO throw new RuntimeException("Get list sorted of my list tasks");
-
         });
 
 
@@ -398,7 +366,6 @@ public class HomeFragment extends BrowseSupportFragment {
         testTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
             Status status = tasksListResource.status;
             TasksList data = tasksListResource.data;
-            String errorMessage = tasksListResource.message;
 
             if (status.equals(Status.LOADING))
                 showLoading();
@@ -409,15 +376,11 @@ public class HomeFragment extends BrowseSupportFragment {
                     else verifyRowExistenceAndRemove(TEST);
                 }
 
-                Timber.d("task response: rowTestTasks");
-
-
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (errorMessage != null) {
-                    Timber.d(errorMessage);
-                } else Timber.d("Status ERROR");
+                String errorMessage = tasksListResource.message != null ? tasksListResource.message : "Status ERROR";
+
+                Timber.d(errorMessage);
 
                 dismissLoading();
             }
@@ -431,7 +394,6 @@ public class HomeFragment extends BrowseSupportFragment {
         categoriesLiveData.observe(getViewLifecycleOwner(), resource -> {
             Status status = resource.status;
             VideoTopicSchema[] data = resource.data;
-            String errorMessage = resource.message;
 
             if (status.equals(Status.LOADING)) {
                 showLoading();
@@ -445,12 +407,9 @@ public class HomeFragment extends BrowseSupportFragment {
 
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (errorMessage != null) {
-                    Timber.d(errorMessage);
-                } else {
-                    Timber.d("Status ERROR");
-                }
+                String errorMessage = resource.message != null ? resource.message : "Status ERROR";
+
+                Timber.d(errorMessage);
 
                 dismissLoading();
             }
@@ -522,7 +481,7 @@ public class HomeFragment extends BrowseSupportFragment {
 
         Type category = tasksList.category;
 
-        Timber.d("Loading video => VideoTopic:" + category);
+        Timber.d("Loading video => VideoTopic:%s", category);
 
         List<Card> cards = new ArrayList<>();
 
@@ -662,7 +621,7 @@ public class HomeFragment extends BrowseSupportFragment {
     }
 
 
-    private void firebaseLoginEvents(String value, String logEventName) {
+    private void firebaseLogEvents(String value, String logEventName) {
         Bundle bundle = new Bundle();
 
         if (logEventName.equals(FIREBASE_LOG_EVENT_CATEGORIES)) {
@@ -674,18 +633,17 @@ public class HomeFragment extends BrowseSupportFragment {
 
     }
 
-    private void firebaseLoginEvents(String category, int taskId, String logEventName) {
+    private void firebaseLogEvents_TaskSelected(String category, int taskId) {
         Bundle bundle = new Bundle();
 
-        if (logEventName.equals(FIREBASE_LOG_EVENT_TASK_SELECTED)) {
-            bundle.putString(FIREBASE_KEY_TASK_CATEGORY_SELECTED, category);
-            bundle.putInt(FIREBASE_KEY_TASK_SELECTED, taskId);
-            mFirebaseAnalytics.logEvent(logEventName, bundle);
-        }
+        bundle.putString(FIREBASE_KEY_TASK_CATEGORY_SELECTED, category);
+        bundle.putInt(FIREBASE_KEY_TASK_SELECTED, taskId);
+        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_TASK_SELECTED, bundle);
+
 
     }
 
-    private void firebaseLoginEvents(String logEventName) {
+    private void firebaseLogEvents_SettingsUpdate() {
         boolean testingMode = mViewModel.getTestingMode();
 
         String subtitleSize = mViewModel.getSubtitleSize();
@@ -698,53 +656,21 @@ public class HomeFragment extends BrowseSupportFragment {
         Bundle bundle = new Bundle();
 
         // FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN
-        if (logEventName.equals(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN)) {
-            if (testingMode)
-                bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, true);
-            else
-                bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, false);
+        bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, testingMode);
 
-            //User Settings Saved
-            bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.getSubLanguage());
-            bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.getAudioLanguage());
-            bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.getInterfaceMode());
-        } else {//User Settings Saved - Analytics Report Event
-            bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.getSubLanguage());
-            bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.getAudioLanguage());
-            bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.getInterfaceMode());
-        }
+        bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.getSubLanguage());
+        bundle.putString(FIREBASE_KEY_INTERFACE_LANGUAGE, user.getSubLanguage());
+        bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.getAudioLanguage());
+        bundle.putString(FIREBASE_KEY_INTERFACE_MODE, user.getInterfaceMode());
+        bundle.putString(FIREBASE_KEY_SUBTITLE_SIZE_PREFS, subtitleSize);
+        bundle.putInt(FIREBASE_KEY_MIN_VIDEO_DURATION_PREFS, videoDuration.getMinDuration());
+        bundle.putInt(FIREBASE_KEY_MAX_VIDEO_DURATION_PREFS, videoDuration.getMaxDuration());
 
-        mFirebaseAnalytics.logEvent(logEventName, bundle);
+
+        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN, bundle);
 
     }
 
-    private void updateUserObserver(User userUpdated) {
-        updateUserLiveData = mViewModel.updateUser(userUpdated);
-        updateUserLiveData.removeObservers(getViewLifecycleOwner());
-        updateUserLiveData.observe(getViewLifecycleOwner(), response -> {
-            Status status = response.status;
-            User data = response.data;
-            String message = response.message;
-
-            if (status.equals(Status.SUCCESS)) {
-                Timber.d("Response from userUpdate");
-                if (data != null) {
-                    Timber.d(data.toString());
-
-                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN);
-                }
-            } else if (status.equals(Status.ERROR)) {
-                //TODO do something error
-                if (message != null) {
-                    Timber.d(message);
-                } else {
-                    Timber.d("Status ERROR");
-                }
-            }
-
-
-        });
-    }
 
     //********************************************
     // Loading and progress bar related functions
@@ -778,17 +704,17 @@ public class HomeFragment extends BrowseSupportFragment {
                     if (card.getTitle().equals(getString(R.string.pref_title_video_settings))) {
                         Intent intent = new Intent(getContext(), VideoPreferencesActivity.class);
                         startActivityForResult(intent, REQUEST_VIDEO_SETTINGS);
-                        firebaseLoginEvents(card.getTitle(), FIREBASE_LOG_EVENT_SETTINGS);
+                        firebaseLogEvents(card.getTitle(), FIREBASE_LOG_EVENT_SETTINGS);
                     } else if (card.getTitle().equals(getString(R.string.pref_title_app_settings))) {
                         Intent intent = new Intent(getContext(), AppPreferencesActivity.class);
                         startActivityForResult(intent, REQUEST_APP_SETTINGS);
-                        firebaseLoginEvents(card.getTitle(), FIREBASE_LOG_EVENT_SETTINGS);
+                        firebaseLogEvents(card.getTitle(), FIREBASE_LOG_EVENT_SETTINGS);
                     }
                 } else if (row.getHeaderItem().getName().equals(getString(R.string.title_topics_category))) {
                     Intent intent = new Intent(getContext(), CategoryActivity.class);
                     intent.putExtra(INTENT_EXTRA_TOPIC_NAME, card.getTitle());
                     startActivity(intent);
-                    firebaseLoginEvents(card.getTitle(), FIREBASE_LOG_EVENT_CATEGORIES);
+                    firebaseLogEvents(card.getTitle(), FIREBASE_LOG_EVENT_CATEGORIES);
                 } else {
                     Task task = card.getTask();
 
@@ -802,7 +728,7 @@ public class HomeFragment extends BrowseSupportFragment {
 
                     startActivity(intent, bundle);
 
-                    firebaseLoginEvents(card.getCategory().toString(), task.taskId, FIREBASE_LOG_EVENT_TASK_SELECTED);
+                    firebaseLogEvents_TaskSelected(card.getCategory().toString(), task.taskId);
                 }
             } else
                 Toast.makeText(getContext(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();
