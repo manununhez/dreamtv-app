@@ -15,15 +15,9 @@
 package com.dream.dreamtv.utils;
 
 import android.content.Context;
-import android.content.DialogInterface;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.dream.dreamtv.R;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;

@@ -7,16 +7,21 @@
     android:gravity="center"
     tools:context="com.dream.dreamtv.ui.playVideo.dialogs.RatingDialogFragment">
 
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/btnSaveAndExit"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:text="@string/alert_msg_video_terminated"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="19sp" />
+        android:layout_below="@id/rtBar"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="25dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/button_focusable_selector"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:padding="10dp"
+        android:text="@string/btn_save_exit"
+        android:textColor="@color/white" />
 
     <RatingBar
         android:id="@+id/rtBar"
@@ -33,19 +38,14 @@
         android:stepSize="1"
         android:theme="@style/RatingBar" />
 
-    <Button
-        android:id="@+id/btnSaveAndExit"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/rtBar"
-        android:layout_gravity="center"
-        android:layout_marginTop="25dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/button_focusable_selector"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:padding="10dp"
-        android:layout_centerHorizontal="true"
-        android:text="@string/btn_save_exit"
-        android:textColor="@color/white" />
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:text="@string/alert_msg_video_terminated"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="19sp" />
 </RelativeLayout>

@@ -14,9 +14,9 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
+import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.data.networking.model.Resource;
 import com.dream.dreamtv.data.networking.model.Resource.Status;
-import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.ui.home.HomeActivity;
 import com.dream.dreamtv.utils.LocaleHelper;
@@ -134,7 +134,7 @@ public class WelcomeActivity extends FragmentActivity {
     }
 
 
-    private void firebaseLoginEvents(String logEventName) {
+    private void firebaseLoginEvents() {
 
         User user = mViewModel.getUser();
 
@@ -143,12 +143,11 @@ public class WelcomeActivity extends FragmentActivity {
         String email = (user == null || user.getEmail() == null) ? "" : user.getEmail();
         String password = (user == null || user.getPassword() == null) ? "" : user.getPassword();
 
-        if (FIREBASE_LOG_EVENT_LOGIN.equals(logEventName)) {
-            bundle.putString(FIREBASE_KEY_EMAIL, email);
-            bundle.putString(FIREBASE_KEY_PASSWORD, password);
-        }
+        bundle.putString(FIREBASE_KEY_EMAIL, email);
+        bundle.putString(FIREBASE_KEY_PASSWORD, password);
 
-        mFirebaseAnalytics.logEvent(logEventName, bundle);
+
+        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_LOGIN, bundle);
     }
 
     @Override
@@ -172,7 +171,7 @@ public class WelcomeActivity extends FragmentActivity {
 
         mViewModel.login(email, email); //TODO change password
 
-        firebaseLoginEvents(FIREBASE_LOG_EVENT_LOGIN);
+        firebaseLoginEvents();
     }
 
 
