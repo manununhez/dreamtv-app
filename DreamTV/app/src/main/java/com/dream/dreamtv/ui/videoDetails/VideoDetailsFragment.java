@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -183,33 +184,39 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     private void prepareBackgroundManager() {
         mBackgroundManager = BackgroundManager.getInstance(getContext());
-        mBackgroundManager.attach(getContext().getWindow());
+        Window window = getContext().getWindow();
+//        window.setLayout(ViewGroup.MarginLayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        mBackgroundManager.attach(window);
+
         mDefaultBackground = getResources().getDrawable(R.drawable.default_background, null);
-        mMetrics = new DisplayMetrics();
-        getContext().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
+//        mMetrics = new DisplayMetrics();
+//        getContext().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
     }
 
     private void updateBackground() {
-        int resourceId = getContext().getResources()
-                .getIdentifier(BACKGROUND_DEFAULT_IMAGE,
-                        TYPE_DRAWABLE, getContext().getPackageName());
+        mBackgroundManager.setDrawable(getResources().getDrawable(R.drawable.ic_video_details_background, null));
 
-        RequestOptions options = new RequestOptions()
-                .centerInside()
-                .error(mDefaultBackground);
 
-        Glide.with(this)
-                .asBitmap()
-                .load(resourceId)
-                .apply(options)
-                .into(new SimpleTarget<Bitmap>(mMetrics.widthPixels, mMetrics.heightPixels) {
-                    @Override
-                    public void onResourceReady(
-                            @NonNull Bitmap resource,
-                            Transition<? super Bitmap> transition) {
-                        mBackgroundManager.setBitmap(resource);
-                    }
-                });
+//        int resourceId = getContext().getResources()
+//                .getIdentifier("dreamtv_logo",
+//                        TYPE_DRAWABLE, getContext().getPackageName());
+//
+//        RequestOptions options = new RequestOptions()
+//                .fitCenter()
+//                .error(mDefaultBackground);
+//
+//        Glide.with(this)
+//                .asBitmap()
+//                .load(resourceId)
+//                .apply(options)
+//                .into(new SimpleTarget<Bitmap>(500, 500) {
+//                    @Override
+//                    public void onResourceReady(
+//                            @NonNull Bitmap resource,
+//                            Transition<? super Bitmap> transition) {
+//                        mBackgroundManager.setBitmap(resource);
+//                    }
+//                });
     }
 
     private void setupAdapter() {

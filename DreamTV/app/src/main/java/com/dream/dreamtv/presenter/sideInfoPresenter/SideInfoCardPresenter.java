@@ -18,6 +18,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -89,7 +90,7 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
             int mDefaultCardImage = R.drawable.movie;
 
             RequestOptions options = new RequestOptions()
-                    .centerCrop()
+                    .centerInside()
                     .placeholder(mDefaultCardImage)
                     .error(mDefaultCardImage)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -145,12 +146,13 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
             pbContinueWatching.setVisibility(View.GONE);
 
         //-------------- RATING
+        LinearLayout llTask = cardView.findViewById(R.id.llTask);
         RatingBar rbTask = cardView.findViewById(R.id.rbTask);
 
         if (task.userTasks.length > 0 && task.userTasks[0].getRating() > 0)
             rbTask.setRating(task.userTasks[0].getRating());
         else
-            rbTask.setVisibility(View.GONE);
+            llTask.setVisibility(View.GONE);
 
     }
 

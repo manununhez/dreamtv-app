@@ -37,16 +37,16 @@
     <string name="select_errors_to_save">Wybierz jakąś obcję, aby anulować kliknij &lt;- </string>
 
     <plurals name="errors_found_finished">
-        <item quantity="one">Znalazłeś %d błąd</item>
-        <item quantity="few">Znalazłeś %d błędy</item>
-        <item quantity="many">Znalazłeś %d błędy</item>
-        <item quantity="other">Znalazłeś %d błędy</item>
+        <item quantity="one">Znalezione błędy: %d</item>
+        <item quantity="few">Znalezione błędy: %d</item>
+        <item quantity="many">Znalezione błędy: %d</item>
+        <item quantity="other">Znalezione błędy: %d</item>
     </plurals>
     <plurals name="errors_found_continue">
-        <item quantity="one">Dotychczas %d błąd</item>
-        <item quantity="few">Do tej pory %d błędy</item>
-        <item quantity="many">Do tej pory %d błędy</item>
-        <item quantity="other">Do tej pory %d błędy</item>
+        <item quantity="one">Już znalezione błędy: %d</item>
+        <item quantity="few">Już znalezione błędy: %d</item>
+        <item quantity="many">Już znalezione błędy: %d</item>
+        <item quantity="other">Już znalezione błędy: %d</item>
     </plurals>
 
     <!--search-->

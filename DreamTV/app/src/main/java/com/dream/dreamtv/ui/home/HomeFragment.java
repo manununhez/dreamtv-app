@@ -250,6 +250,8 @@ public class HomeFragment extends BrowseSupportFragment {
     }
 
     private void setupObservers() {
+
+//        Recommended videos, continue watching, my videos, categories, newest videos, see again, settings
 //------- ALL TASKS
         allTaskLiveData = mViewModel.requestTasksByCategory(ALL);
         allTaskLiveData.removeObservers(getViewLifecycleOwner());
