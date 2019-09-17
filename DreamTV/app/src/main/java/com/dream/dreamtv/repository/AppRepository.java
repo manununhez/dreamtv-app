@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.dream.dreamtv.data.local.prefs.AppPreferencesHelper;
 import com.dream.dreamtv.data.model.Category;
+import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.data.model.VideoDuration;
 import com.dream.dreamtv.data.networking.NetworkDataSourceImpl;
 import com.dream.dreamtv.data.networking.model.AuthResponse;
@@ -15,7 +16,6 @@ import com.dream.dreamtv.data.networking.model.SubtitleResponse;
 import com.dream.dreamtv.data.networking.model.Task;
 import com.dream.dreamtv.data.networking.model.TaskRequest;
 import com.dream.dreamtv.data.networking.model.TasksList;
-import com.dream.dreamtv.data.model.User;
 import com.dream.dreamtv.data.networking.model.UserTask;
 import com.dream.dreamtv.data.networking.model.UserTaskError;
 import com.dream.dreamtv.data.networking.model.VideoTest;
@@ -178,6 +178,9 @@ public class AppRepository {
             case TEST:
                 mNetworkDataSource.fetchTestTaskCategory(taskRequest);
                 break;
+            case TOPICS:
+                mNetworkDataSource.fetchCategories();
+                break;
             default:
                 throw new RuntimeException("Category " + category + " not contemplated!");
         }
@@ -236,7 +239,7 @@ public class AppRepository {
     }
 
     public LiveData<Resource<VideoTopicSchema[]>> fetchCategories() {
-        return mNetworkDataSource.fetchCategories();
+        return mNetworkDataSource.responseFromFetchCategories();
     }
 
     public LiveData<Resource<Task[]>> searchByKeywordCategory(String category) {
@@ -308,6 +311,10 @@ public class AppRepository {
         return mPreferencesHelper.getUser();
     }
 
+    public void setUser(User user) {
+        mPreferencesHelper.setUser(user);
+    }
+
     public String getSubtitleSizePref() {
         return mPreferencesHelper.getSubtitleSizePref();
     }
@@ -330,9 +337,5 @@ public class AppRepository {
 
     public String getInterfaceAppLanguage() {
         return mPreferencesHelper.getInterfaceLanguagePref();
-    }
-
-    public void setUser(User user) {
-        mPreferencesHelper.setUser(user);
     }
 }

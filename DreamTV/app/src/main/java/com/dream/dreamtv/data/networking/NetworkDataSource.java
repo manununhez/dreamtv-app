@@ -21,9 +21,9 @@ public interface NetworkDataSource {
 
     void updateUserTask(UserTask userTask);
 
-    MutableLiveData<Resource<User>> updateUser(User user);
+    void fetchCategories();
 
-    MutableLiveData<Resource<VideoTopicSchema[]>> fetchCategories();
+    MutableLiveData<Resource<User>> updateUser(User user);
 
     MutableLiveData<Resource<SubtitleResponse>> fetchSubtitle(String videoId,
                                                               String languageCode, String version);

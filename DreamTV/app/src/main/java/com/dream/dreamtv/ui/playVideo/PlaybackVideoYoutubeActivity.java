@@ -79,6 +79,7 @@ import static com.dream.dreamtv.utils.Constants.STATE_PAUSED;
 import static com.dream.dreamtv.utils.Constants.STATE_PLAY;
 import static com.dream.dreamtv.utils.Constants.STATE_UNSTARTED;
 import static com.dream.dreamtv.utils.Constants.STATE_VIDEO_CUED;
+import static com.dream.dreamtv.utils.Constants.STATUS_ERROR;
 import static com.dream.dreamtv.utils.Constants.YOUTUBE_AUTOPLAY;
 import static com.dream.dreamtv.utils.Constants.YOUTUBE_CLOSED_CAPTIONS;
 import static com.dream.dreamtv.utils.Constants.YOUTUBE_DEBUG;
@@ -617,14 +618,8 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SAVED_ERRORS);
 
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (message != null)
-                    Timber.d(message);
-                else
-                    Timber.d("Status ERROR");
+                Timber.d(message != null ? message : STATUS_ERROR);
 
-
-//                dismissLoading();
             }
         });
 
@@ -651,13 +646,8 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS);
 
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (message != null)
-                    Timber.d(message);
-                else
-                    Timber.d("Status ERROR");
+                Timber.d(message != null ? message : STATUS_ERROR);
 
-//                dismissLoading();
             }
         });
     }

@@ -163,11 +163,8 @@ public class WelcomeActivity extends FragmentActivity {
         Bundle bundle = new Bundle();
 
         String email = (user == null || user.getEmail() == null) ? "" : user.getEmail();
-        String password = (user == null || user.getPassword() == null) ? "" : user.getPassword();
 
         bundle.putString(FIREBASE_KEY_EMAIL, email);
-        bundle.putString(FIREBASE_KEY_PASSWORD, password);
-
 
         mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_LOGIN, bundle);
     }

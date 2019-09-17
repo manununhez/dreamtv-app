@@ -110,6 +110,7 @@
     <string name="pref_title_testing_mode_settings_description">Display videos for testing</string>
     <string name="pref_title_video_duration_settings">Video duration</string>
     <string name="subtitle_not_found_alert">Subtitle not found</string>
+    <string name="subtitle_waiting_response">Waiting for subtitles. Please, try again in a moment.</string>
     <string name="task_image_content_desc">Image Card corresponding to a video task</string>
 
 

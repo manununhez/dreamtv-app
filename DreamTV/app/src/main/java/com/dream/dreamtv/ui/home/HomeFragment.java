@@ -5,12 +5,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
-import androidx.leanback.widget.DiffCallback;
 import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.ListRowPresenter;
@@ -62,13 +60,13 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_CATEGORY_SELECTED;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_INTERFACE_MODE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_MAX_VIDEO_DURATION_PREFS;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_MIN_VIDEO_DURATION_PREFS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SETTINGS_CATEGORY_SELECTED;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_SIZE_PREFS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUB_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_CATEGORY_SELECTED;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_SELECTED;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TESTING_MODE;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_MIN_VIDEO_DURATION_PREFS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_CATEGORIES;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_SETTINGS;
@@ -80,6 +78,7 @@ import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_TESTING_MODE;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_TOPIC_NAME;
 import static com.dream.dreamtv.utils.Constants.INTENT_EXTRA_UPDATE_USER;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
+import static com.dream.dreamtv.utils.Constants.STATUS_ERROR;
 
 
 public class HomeFragment extends BrowseSupportFragment {
@@ -118,8 +117,6 @@ public class HomeFragment extends BrowseSupportFragment {
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(getContext());
 
-        initSyncData();
-
         setupVideosList();
 
         instantiateLoading();
@@ -129,6 +126,8 @@ public class HomeFragment extends BrowseSupportFragment {
         addRowSettings();
 
         setupObservers();
+
+        initSyncData();
     }
 
     @Override
@@ -252,31 +251,120 @@ public class HomeFragment extends BrowseSupportFragment {
     private void setupObservers() {
 
 //        Recommended videos, continue watching, my videos, categories, newest videos, see again, settings
+
+        //------- FINISHED TASKS
+        finishedTaskLiveData = mViewModel.requestTasksByCategory(FINISHED);
+        finishedTaskLiveData.removeObservers(getViewLifecycleOwner());
+        finishedTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
+            Status status = tasksListResource.status;
+            TasksList data = tasksListResource.data;
+            String message = tasksListResource.message;
+
+            if (status.equals(Status.LOADING))
+                showLoading();
+            else if (status.equals(Status.SUCCESS)) {
+                if (data != null) {
+                    verifyRowExistenceAndRemove(FINISHED);
+
+                    if (data.data != null && data.data.length > 0)
+                        loadVideos(data);
+                }
+
+                //Call newest videos
+                mViewModel.updateTaskByCategory(ALL);
+
+                //dismissLoading();
+            } else if (status.equals(Status.ERROR)) {
+                Timber.d(message != null ? message : STATUS_ERROR);
+
+                dismissLoading();
+            }
+        });
+
 //------- ALL TASKS
         allTaskLiveData = mViewModel.requestTasksByCategory(ALL);
         allTaskLiveData.removeObservers(getViewLifecycleOwner());
         allTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
             Status status = tasksListResource.status;
             TasksList data = tasksListResource.data;
+            String message = tasksListResource.message;
 
             if (status.equals(Status.LOADING))
                 showLoading();
             else if (status.equals(Status.SUCCESS)) {
                 if (data != null) {
+                    verifyRowExistenceAndRemove(ALL);
+
                     if (data.data != null && data.data.length > 0)
                         loadVideos(data);
-                    else verifyRowExistenceAndRemove(ALL);
                 }
 
-                dismissLoading();
-            } else if (status.equals(Status.ERROR)) {
-                String errorMessage = tasksListResource.message != null ? tasksListResource.message : "Status ERROR";
+                //Calling categories
+                mViewModel.updateTaskByCategory(TOPICS);
 
-                Timber.d(errorMessage);
+                //dismissLoading();
+            } else if (status.equals(Status.ERROR)) {
+                Timber.d(message != null ? message : STATUS_ERROR);
 
                 dismissLoading();
             }
 
+        });
+
+        //        CATEGORIES
+        categoriesLiveData = mViewModel.fetchCategories();
+        categoriesLiveData.removeObservers(getViewLifecycleOwner());
+        categoriesLiveData.observe(getViewLifecycleOwner(), resource -> {
+            Status status = resource.status;
+            VideoTopicSchema[] data = resource.data;
+            String message = resource.message;
+
+            if (status.equals(Status.LOADING)) {
+                showLoading();
+            } else if (status.equals(Status.SUCCESS)) {
+                verifyRowExistenceAndRemove(TOPICS);
+
+                if (data != null)
+                    loadCategoriesTopics(data);
+
+                //Calling my videos
+                mViewModel.updateTaskByCategory(MY_LIST);
+
+                // dismissLoading();
+            } else if (status.equals(Status.ERROR)) {
+                Timber.d(message != null ? message : STATUS_ERROR);
+
+                dismissLoading();
+            }
+        });
+
+        //------- MY LIST TASKS
+        myListTaskLiveData = mViewModel.requestTasksByCategory(MY_LIST);
+        myListTaskLiveData.removeObservers(getViewLifecycleOwner());
+        myListTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
+            Status status = tasksListResource.status;
+            TasksList data = tasksListResource.data;
+            String message = tasksListResource.message;
+
+            if (status.equals(Status.LOADING))
+                showLoading();
+            else if (status.equals(Status.SUCCESS)) {
+                if (data != null) {
+                    verifyRowExistenceAndRemove(MY_LIST);
+
+                    if (data.data != null && data.data.length > 0)
+                        loadVideos(data);
+                }
+
+                //Calling continue categories
+                mViewModel.updateTaskByCategory(CONTINUE);
+
+                // dismissLoading();
+            } else if (status.equals(Status.ERROR)) {
+                Timber.d(message != null ? message : STATUS_ERROR);
+
+                dismissLoading();
+            }
         });
 
 
@@ -286,79 +374,29 @@ public class HomeFragment extends BrowseSupportFragment {
         continueTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
             Status status = tasksListResource.status;
             TasksList data = tasksListResource.data;
+            String message = tasksListResource.message;
 
             if (status.equals(Status.LOADING))
                 showLoading();
             else if (status.equals(Status.SUCCESS)) {
                 if (data != null) {
+                    verifyRowExistenceAndRemove(CONTINUE);
+
                     if (data.data != null && data.data.length > 0)
                         loadVideos(data);
-                    else verifyRowExistenceAndRemove(CONTINUE);
                 }
+
+                //Calling test videos
+                if (mViewModel.getTestingMode())
+                    mViewModel.updateTaskByCategory(TEST);
 
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
-                String errorMessage = tasksListResource.message != null ? tasksListResource.message : "Status ERROR";
-
-                Timber.d(errorMessage);
+                Timber.d(message != null ? message : STATUS_ERROR);
 
                 dismissLoading();
             }
 
-        });
-
-
-//------- FINISHED TASKS
-        finishedTaskLiveData = mViewModel.requestTasksByCategory(FINISHED);
-        finishedTaskLiveData.removeObservers(getViewLifecycleOwner());
-        finishedTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
-            Status status = tasksListResource.status;
-            TasksList data = tasksListResource.data;
-
-            if (status.equals(Status.LOADING))
-                showLoading();
-            else if (status.equals(Status.SUCCESS)) {
-                if (data != null) {
-                    if (data.data != null && data.data.length > 0)
-                        loadVideos(data);
-                    else verifyRowExistenceAndRemove(FINISHED);
-                }
-
-                dismissLoading();
-            } else if (status.equals(Status.ERROR)) {
-                String errorMessage = tasksListResource.message != null ? tasksListResource.message : "Status ERROR";
-
-                Timber.d(errorMessage);
-
-                dismissLoading();
-            }
-        });
-
-
-//------- MY LIST TASKS
-        myListTaskLiveData = mViewModel.requestTasksByCategory(MY_LIST);
-        myListTaskLiveData.removeObservers(getViewLifecycleOwner());
-        myListTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
-            Status status = tasksListResource.status;
-            TasksList data = tasksListResource.data;
-
-            if (status.equals(Status.LOADING))
-                showLoading();
-            else if (status.equals(Status.SUCCESS)) {
-                if (data != null) {
-                    if (data.data != null && data.data.length > 0) {
-                        loadVideos(data);
-                    } else verifyRowExistenceAndRemove(MY_LIST);
-                }
-
-                dismissLoading();
-            } else if (status.equals(Status.ERROR)) {
-                String errorMessage = tasksListResource.message != null ? tasksListResource.message : "Status ERROR";
-
-                Timber.d(errorMessage);
-
-                dismissLoading();
-            }
         });
 
 
@@ -368,21 +406,21 @@ public class HomeFragment extends BrowseSupportFragment {
         testTaskLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
             Status status = tasksListResource.status;
             TasksList data = tasksListResource.data;
+            String message = tasksListResource.message;
 
             if (status.equals(Status.LOADING))
                 showLoading();
             else if (status.equals(Status.SUCCESS)) {
                 if (data != null) {
+                    verifyRowExistenceAndRemove(TEST);
+
                     if (data.data != null && data.data.length > 0)
                         loadVideos(data);
-                    else verifyRowExistenceAndRemove(TEST);
                 }
 
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
-                String errorMessage = tasksListResource.message != null ? tasksListResource.message : "Status ERROR";
-
-                Timber.d(errorMessage);
+                Timber.d(message != null ? message : STATUS_ERROR);
 
                 dismissLoading();
             }
@@ -390,32 +428,6 @@ public class HomeFragment extends BrowseSupportFragment {
         });
 
 
-//        CATEGORIES
-        categoriesLiveData = mViewModel.fetchCategories();
-        categoriesLiveData.removeObservers(getViewLifecycleOwner());
-        categoriesLiveData.observe(getViewLifecycleOwner(), resource -> {
-            Status status = resource.status;
-            VideoTopicSchema[] data = resource.data;
-
-            if (status.equals(Status.LOADING)) {
-                showLoading();
-            } else if (status.equals(Status.SUCCESS)) {
-                if (data != null) {
-                    categoriesRowSettings(data);
-                } else verifyRowExistenceAndRemove(TOPICS);
-
-
-                Timber.d("task response: rowCategories");
-
-                dismissLoading();
-            } else if (status.equals(Status.ERROR)) {
-                String errorMessage = resource.message != null ? resource.message : "Status ERROR";
-
-                Timber.d(errorMessage);
-
-                dismissLoading();
-            }
-        });
     }
 
     private void initCategoriesRow() {
@@ -492,36 +504,31 @@ public class HomeFragment extends BrowseSupportFragment {
         }
 
 
-        DiffCallback<Card> diffCallback = new DiffCallback<Card>() {
-            @Override
-            public boolean areItemsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
-                return oldItem.getTask().taskId == newItem.getTask().taskId;
-            }
-
-            @Override
-            public boolean areContentsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
-                return Objects.equals(oldItem.getTask(), newItem.getTask());
-            }
-        };
-
-
         ListRow listRow = getListRowForCategory(tasksList.category);
 
-
-        int indexOfRow = mRowsAdapter.indexOf(listRow);
-
         ArrayObjectAdapter arrayObjectAdapter = ((ArrayObjectAdapter) listRow.getAdapter());
+        arrayObjectAdapter.clear(); //clear row before add new ones
+        arrayObjectAdapter.addAll(arrayObjectAdapter.size(), cards);
 
-        if (indexOfRow != -1)
-            arrayObjectAdapter.setItems(cards, diffCallback);
-        else {
+        mRowsAdapter.add(0, listRow);
 
-            arrayObjectAdapter.clear(); //clear row before add new ones
+        setAdapter(mRowsAdapter);
 
-            arrayObjectAdapter.addAll(arrayObjectAdapter.size(), cards);
+    }
 
-            mRowsAdapter.add(0, listRow);
+    private void loadCategoriesTopics(VideoTopicSchema[] categories) {
+        List<Card> cards = new ArrayList<>();
+
+        for (VideoTopicSchema videoTopic : categories) {
+            Card card = new Card(videoTopic.name, Card.Type.SINGLE_LINE, videoTopic.imageName);
+            cards.add(card);
         }
+
+        ArrayObjectAdapter arrayObjectAdapter = ((ArrayObjectAdapter) rowCategories.getAdapter());
+        arrayObjectAdapter.clear(); //clear row before add new ones
+        arrayObjectAdapter.addAll(arrayObjectAdapter.size(), cards);
+
+        mRowsAdapter.add(0, rowCategories);
 
         setAdapter(mRowsAdapter);
 
@@ -555,49 +562,6 @@ public class HomeFragment extends BrowseSupportFragment {
                 throw new RuntimeException("Category " + category + " not contemplated!");
         }
         return listRow;
-    }
-
-    private void categoriesRowSettings(VideoTopicSchema[] categories) {
-        List<Card> cards = new ArrayList<>();
-
-
-        DiffCallback<Card> diffCallback = new DiffCallback<Card>() {
-            @Override
-            public boolean areItemsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
-                return oldItem.getTitle().equals(newItem.getTitle());
-            }
-
-            @Override
-            public boolean areContentsTheSame(@NonNull Card oldItem, @NonNull Card newItem) {
-                return Objects.equals(oldItem, newItem);
-            }
-        };
-
-
-        for (VideoTopicSchema videoTopic : categories) {
-            Card card = new Card(videoTopic.name, Card.Type.SINGLE_LINE, videoTopic.imageName);
-            cards.add(card);
-
-        }
-
-        int indexOfRow = mRowsAdapter.indexOf(rowCategories);
-
-        ArrayObjectAdapter arrayObjectAdapter = ((ArrayObjectAdapter) rowCategories.getAdapter());
-
-        if (indexOfRow != -1)
-            arrayObjectAdapter.setItems(cards, diffCallback);
-        else {
-
-            arrayObjectAdapter.clear(); //clear row before add new ones
-
-            arrayObjectAdapter.addAll(arrayObjectAdapter.size(), cards);
-
-            mRowsAdapter.add(0, rowCategories);
-        }
-
-
-        setAdapter(mRowsAdapter);
-
     }
 
 
@@ -659,7 +623,6 @@ public class HomeFragment extends BrowseSupportFragment {
 
         // FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN
         bundle.putBoolean(FIREBASE_KEY_TESTING_MODE, testingMode);
-
         bundle.putString(FIREBASE_KEY_SUB_LANGUAGE, user.getSubLanguage());
         bundle.putString(FIREBASE_KEY_INTERFACE_LANGUAGE, user.getSubLanguage());
         bundle.putString(FIREBASE_KEY_AUDIO_LANGUAGE, user.getAudioLanguage());
@@ -693,7 +656,6 @@ public class HomeFragment extends BrowseSupportFragment {
             loadingDialog.show();
 
     }
-
 
     public final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override

@@ -48,6 +48,7 @@ import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_SEARCH;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_TASK_SELECTED;
 import static com.dream.dreamtv.utils.Constants.INTENT_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
+import static com.dream.dreamtv.utils.Constants.STATUS_ERROR;
 
 /*
  * This class demonstrates how to do in-app search
@@ -56,7 +57,6 @@ public class SearchFragment extends SearchSupportFragment
         implements SearchSupportFragment.SearchResultProvider {
     private static final boolean FINISH_ON_RECOGNIZER_CANCELED = true;
     private static final int REQUEST_SPEECH = 0x00000010;
-
     private final Handler mHandler = new Handler();
     private ArrayObjectAdapter mRowsAdapter;
     private String mQuery;
@@ -185,12 +185,7 @@ public class SearchFragment extends SearchSupportFragment
                 Timber.d("task response");
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (message != null) {
-                    Timber.d(message);
-                } else {
-                    Timber.d("Status ERROR");
-                }
+                Timber.d(message != null ? message : STATUS_ERROR);
 
                 dismissLoading();
             }

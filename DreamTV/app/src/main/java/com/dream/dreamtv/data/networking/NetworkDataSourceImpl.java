@@ -383,7 +383,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public MutableLiveData<Resource<VideoTopicSchema[]>> fetchCategories() {
+    public void fetchCategories() {
         responseFromCategories.setValue(Resource.loading(null));
 
         String categoriesUri = getCategoriesURL();
@@ -414,8 +414,6 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 Timber.d("fetchCategories() Response Error: %s", error.getMessage());
             }
         }));
-
-        return responseFromCategories;
     }
 
     /**
@@ -1018,6 +1016,10 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
     public MutableLiveData<Resource<VideoTest[]>> responseFromVideoTests() {
         return responseFromFetchVideoTests;
+    }
+
+    public MutableLiveData<Resource<VideoTopicSchema[]>> responseFromFetchCategories() {
+        return responseFromCategories;
     }
 
     public MutableLiveData<Resource<AuthResponse>> responseFromAuth() {

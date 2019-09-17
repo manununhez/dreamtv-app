@@ -28,15 +28,15 @@ public class HomeViewModel extends ViewModel {
     }
 
     void syncAllCategories() {
-        //        Recommended videos, continue watching, my videos, categories, newest videos, see again, settings
+        // Recommended videos, continue watching, my videos, categories, newest videos, see again, settings
 
-        if (getTestingMode())
-            mRepository.updateTasksCategory(Type.TEST);
-        
-        mRepository.updateTasksCategory(Type.ALL);
+//        if (getTestingMode())
+//            mRepository.updateTasksCategory(Type.TEST);
+//
+//        mRepository.updateTasksCategory(Type.ALL);
         mRepository.updateTasksCategory(Type.FINISHED);
-        mRepository.updateTasksCategory(Type.CONTINUE);
-        mRepository.updateTasksCategory(Type.MY_LIST);
+//        mRepository.updateTasksCategory(Type.CONTINUE);
+//        mRepository.updateTasksCategory(Type.MY_LIST);
 
     }
 

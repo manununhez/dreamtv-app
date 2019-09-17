@@ -59,14 +59,15 @@ public final class Constants {
     public static final String FIREBASE_KEY_RATING = "rating";
     //    LOG EVENT NAMES
     public static final String FIREBASE_LOG_EVENT_LOGIN = "login_event_started";
+    public static final String FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN = "settings_configuration_saved";
     public static final String FIREBASE_LOG_EVENT_SETTINGS = "settings_event_enter";
     public static final String FIREBASE_LOG_EVENT_CATEGORIES = "categories_event_enter";
+
     public static final String FIREBASE_LOG_EVENT_TASK_SELECTED = "task_selected_event_enter";
     public static final String FIREBASE_LOG_EVENT_PRESSED_CANCEL_EXITDIALOG = "pressed_exitdialog_cancel_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_EXIT_EXITDIALOG = "pressed_exitdialog_exit_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN = "pressed_add_video_my_list_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_REMOVE_VIDEO_MY_LIST_BTN = "pressed_remove_video_my_list_btn";
-    public static final String FIREBASE_LOG_EVENT_PRESSED_SAVE_SETTINGS_BTN = "settings_configuration_saved";
     public static final String FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN = "pressed_play_video_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE = "pressed_playback_video_pause_btn";
     public static final String FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY = "pressed_playback_video_play_btn";
@@ -138,4 +139,7 @@ public final class Constants {
     public static final int VIDEO_COMPLETED_WATCHING_FALSE = 0;
 
     public static final String SUBTITLE_LAST_VERSION = "last";
+
+    public static final String STATUS_ERROR = "Status ERROR";
+
 }

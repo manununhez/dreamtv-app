@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -57,11 +56,9 @@ import java.util.Objects;
 
 import timber.log.Timber;
 
-import static com.dream.dreamtv.data.model.Category.Type.ALL;
 import static com.dream.dreamtv.data.model.Category.Type.CONTINUE;
 import static com.dream.dreamtv.data.model.Category.Type.FINISHED;
 import static com.dream.dreamtv.data.model.Category.Type.MY_LIST;
-import static com.dream.dreamtv.data.model.Category.Type.TEST;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_DURATION;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
@@ -76,7 +73,7 @@ import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
-import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
+import static com.dream.dreamtv.utils.Constants.STATUS_ERROR;
 
 
 /*
@@ -90,9 +87,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private static final int ACTION_PLAY_VIDEO_FROM_BEGGINING = 3;
     private static final int ACTION_ADD_MY_LIST = 4;
     private static final int ACTION_REMOVE_MY_LIST = 5;
-    private static final String BACKGROUND_DEFAULT_IMAGE = "ic_endless_constellation";
+    private static final String BACKGROUND_DEFAULT_IMAGE2 = "ic_endless_constellation";
+    private static final String BACKGROUND_DEFAULT_IMAGE = "ic_video_details_background";
     private static final String TYPE_DRAWABLE = "drawable";
-
     private BackgroundManager mBackgroundManager;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;
@@ -132,10 +129,11 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         mSelectedCategory = (Category.Type) getContext().getIntent().getSerializableExtra(INTENT_CATEGORY);
 
-
         setupDetailsOverview();
         fetchUserTasksObserver();
+
         fetchSubtitle();
+
 
     }
 
@@ -184,39 +182,33 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
     private void prepareBackgroundManager() {
         mBackgroundManager = BackgroundManager.getInstance(getContext());
-        Window window = getContext().getWindow();
-//        window.setLayout(ViewGroup.MarginLayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        mBackgroundManager.attach(window);
-
+        mBackgroundManager.attach(getContext().getWindow());
         mDefaultBackground = getResources().getDrawable(R.drawable.default_background, null);
-//        mMetrics = new DisplayMetrics();
-//        getContext().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
+        mMetrics = new DisplayMetrics();
+        getContext().getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
     }
 
     private void updateBackground() {
-        mBackgroundManager.setDrawable(getResources().getDrawable(R.drawable.ic_video_details_background, null));
+        int resourceId = getContext().getResources()
+                .getIdentifier(BACKGROUND_DEFAULT_IMAGE,
+                        TYPE_DRAWABLE, getContext().getPackageName());
 
+        RequestOptions options = new RequestOptions()
+                .centerInside()
+                .error(mDefaultBackground);
 
-//        int resourceId = getContext().getResources()
-//                .getIdentifier("dreamtv_logo",
-//                        TYPE_DRAWABLE, getContext().getPackageName());
-//
-//        RequestOptions options = new RequestOptions()
-//                .fitCenter()
-//                .error(mDefaultBackground);
-//
-//        Glide.with(this)
-//                .asBitmap()
-//                .load(resourceId)
-//                .apply(options)
-//                .into(new SimpleTarget<Bitmap>(500, 500) {
-//                    @Override
-//                    public void onResourceReady(
-//                            @NonNull Bitmap resource,
-//                            Transition<? super Bitmap> transition) {
-//                        mBackgroundManager.setBitmap(resource);
-//                    }
-//                });
+        Glide.with(this)
+                .asBitmap()
+                .load(resourceId)
+                .apply(options)
+                .into(new SimpleTarget<Bitmap>(mMetrics.widthPixels, mMetrics.heightPixels) {
+                    @Override
+                    public void onResourceReady(
+                            @NonNull Bitmap resource,
+                            Transition<? super Bitmap> transition) {
+                        mBackgroundManager.setBitmap(resource);
+                    }
+                });
     }
 
     private void setupAdapter() {
@@ -379,7 +371,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     }
 
     private void setupContinueAction() {
-        Timber.d(mUserTask.toString());
         if (mUserTask.getTimeWatchedInSecs() > 0) { //To avoid messages like "0 min, 0 secs"
             String timeFormatted = TimeUtils.getTimeFormatMinSecs(mUserTask.getTimeWatched());
 
@@ -404,6 +395,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         fetchSubtitleLiveData.observe(getViewLifecycleOwner(), subtitleResponseResource -> {
             Status status = subtitleResponseResource.status;
             SubtitleResponse data = subtitleResponseResource.data;
+            String message = subtitleResponseResource.message;
 
             if (status.equals(Status.SUCCESS)) {
                 Timber.d("Subtitle response");
@@ -422,26 +414,30 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 setupDetailsOverview();
 
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (subtitleResponseResource.message != null)
-                    Timber.d(subtitleResponseResource.message);
-                else
-                    Timber.d("Status ERROR");
+                Timber.d(message != null ? message : STATUS_ERROR);
             }
         });
 
     }
 
     private void playVideo(boolean playFromBeginning, String logEventName) {
-        if (mSubtitleResponse.subtitles == null)
-            Toast.makeText(getContext(), getContext().getString(R.string.subtitle_not_found_alert), Toast.LENGTH_SHORT).show();
-        else {
-            //PLAY VIDEO
-            if (mUserTask == null) //the are not user tasks for this video, so we need to create a new one
-                createUserTask(playFromBeginning, logEventName);
-            else
-                goToPlaybackVideo(playFromBeginning, logEventName);
+        if (mSubtitleResponse == null) {
+            Toast.makeText(getContext(), getContext().getString(R.string.subtitle_waiting_response), Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        if (mSubtitleResponse.subtitles == null) {
+            Toast.makeText(getContext(), getContext().getString(R.string.subtitle_not_found_alert), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
+        //PLAY VIDEO
+        if (mUserTask == null) //the are not user tasks for this video, so we need to create a new one
+            createUserTask(playFromBeginning, logEventName);
+        else
+            goToPlaybackVideo(playFromBeginning, logEventName);
+
     }
 
     private void goToPlaybackVideo(boolean playFromBeginning, String logEventName) {
@@ -489,6 +485,11 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
      * @param logEventName
      */
     private void createUserTask(boolean playFromBeginning, String logEventName) {
+        if (mSubtitleResponse == null) {
+            Toast.makeText(getContext(), getContext().getString(R.string.subtitle_waiting_response), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         createUserTaskLiveData = mViewModel.createUserTask(mSelectedTask, mSubtitleResponse.versionNumber);
 
         createUserTaskLiveData.removeObservers(getViewLifecycleOwner());
@@ -513,12 +514,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (message != null)
-                    Timber.d(message);
-                else
-                    Timber.d("Status ERROR");
-
+                Timber.d(message != null ? message : STATUS_ERROR);
                 dismissLoading();
             }
 
@@ -547,24 +543,12 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                         setupContinueAction();
 
-                        if (mUserTask.getCompleted() == VIDEO_COMPLETED_WATCHING_TRUE) { //After the user finished a video, we update all categories
-                            mViewModel.updateTaskByCategory(CONTINUE); //trying to keep continue_category always updated
-                            mViewModel.updateTaskByCategory(FINISHED); //trying to keep finished_category always updated
-                            mViewModel.updateTaskByCategory(MY_LIST); //trying to keep mylist_category always updated
-                            mViewModel.updateTaskByCategory(ALL); //trying to keep all_category always updated
-                            mViewModel.updateTaskByCategory(TEST); //trying to keep test_category always updated
-                        } else {
-                            mViewModel.updateTaskByCategory(CONTINUE); //trying to keep continue_category always updated
-                            mViewModel.updateTaskByCategory(mSelectedCategory); //we update only the current video category
-                        }
+                        //Actualizamos toda la pantalla, desde finished hasta continue. Empezamos la cadena de calls con este
+                        mViewModel.updateTaskByCategory(FINISHED); //trying to keep finished_category always updated
                     }
                 }
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (userTaskResource.message != null)
-                    Timber.d(userTaskResource.message);
-                else
-                    Timber.d("Status ERROR");
+                Timber.d(userTaskResource.message != null ? userTaskResource.message : STATUS_ERROR);
             }
         });
     }
@@ -597,12 +581,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (booleanResource.message != null)
-                    Timber.d(booleanResource.message);
-                else
-                    Timber.d("Status ERROR");
-
+                Timber.d(booleanResource.message != null ? booleanResource.message : STATUS_ERROR);
                 dismissLoading();
             }
         });
@@ -636,11 +615,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                 dismissLoading();
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (booleanResource.message != null)
-                    Timber.d(booleanResource.message);
-                else
-                    Timber.d("Status ERROR");
+                Timber.d(booleanResource.message != null ? booleanResource.message : STATUS_ERROR);
 
                 dismissLoading();
             }

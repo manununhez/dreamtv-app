@@ -55,7 +55,6 @@ public class HomeActivity extends FragmentActivity implements ExitDialogFragment
     public void onBackPressed() {
         Timber.d("onBackPressed()");
         showExitDialog();
-//        super.onBackPressed();
     }
 
 

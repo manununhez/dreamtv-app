@@ -70,6 +70,7 @@ import static com.dream.dreamtv.utils.Constants.INTENT_PLAY_FROM_BEGINNING;
 import static com.dream.dreamtv.utils.Constants.INTENT_SUBTITLE;
 import static com.dream.dreamtv.utils.Constants.INTENT_TASK;
 import static com.dream.dreamtv.utils.Constants.INTENT_USER_TASK;
+import static com.dream.dreamtv.utils.Constants.STATUS_ERROR;
 import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
 
 /**
@@ -86,7 +87,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private static final int POSITION_OFFSET_IN_MS = 7000;//7 secs in ms
     private static final int BUFFER_VALUE_PB = 2;
     private static final int PLAYER_PROGRESS_SHOW_DELAY = 5000;
-
     private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
     private boolean mPlayFromBeginning;
     private long mLastClickTime = 0;
@@ -615,13 +615,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
 
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (message != null)
-                    Timber.d(message);
-                else
-                    Timber.d("Status ERROR");
-
-//                dismissLoading();
+                Timber.d(message != null ? message : STATUS_ERROR);
             }
         });
 
@@ -649,13 +643,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
                 firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS);
 
             } else if (status.equals(Status.ERROR)) {
-                //TODO do something
-                if (message != null)
-                    Timber.d(message);
-                else
-                    Timber.d("Status ERROR");
-
-//                dismissLoading();
+                Timber.d(message != null ? message : STATUS_ERROR);
             }
         });
 
