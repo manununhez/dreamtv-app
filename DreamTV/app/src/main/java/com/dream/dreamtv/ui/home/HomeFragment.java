@@ -606,7 +606,6 @@ public class HomeFragment extends BrowseSupportFragment {
         bundle.putInt(FIREBASE_KEY_TASK_SELECTED, taskId);
         mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_TASK_SELECTED, bundle);
 
-
     }
 
     private void firebaseLogEvents_SettingsUpdate() {

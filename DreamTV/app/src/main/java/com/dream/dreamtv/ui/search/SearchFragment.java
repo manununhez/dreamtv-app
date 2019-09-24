@@ -180,7 +180,7 @@ public class SearchFragment extends SearchSupportFragment
             else if (status.equals(Status.SUCCESS)) {
                 loadVideos(data);
 
-                firebaseLoginEvents(query, FIREBASE_LOG_EVENT_SEARCH);
+                firebaseLoginEvents(query);
 
                 Timber.d("task response");
                 dismissLoading();
@@ -232,25 +232,19 @@ public class SearchFragment extends SearchSupportFragment
         getView().findViewById(R.id.lb_search_bar).requestFocus();
     }
 
-    private void firebaseLoginEvents(String category, int taskId, String logEventName) {
+    private void firebaseLoginEvents(String category, int taskId) {
         Bundle bundle = new Bundle();
 
-        if (logEventName.equals(FIREBASE_LOG_EVENT_TASK_SELECTED)) {
-            bundle.putString(FIREBASE_KEY_TASK_CATEGORY_SELECTED, category);
-            bundle.putInt(FIREBASE_KEY_TASK_SELECTED, taskId);
-            mFirebaseAnalytics.logEvent(logEventName, bundle);
-        }
-
+        bundle.putString(FIREBASE_KEY_TASK_CATEGORY_SELECTED, category);
+        bundle.putInt(FIREBASE_KEY_TASK_SELECTED, taskId);
+        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_TASK_SELECTED, bundle);
     }
 
-    private void firebaseLoginEvents(String value, String logEventName) {
+    private void firebaseLoginEvents(String value) {
         Bundle bundle = new Bundle();
 
-        if (logEventName.equals(FIREBASE_LOG_EVENT_SEARCH)) {
-            bundle.putString(FIREBASE_KEY_QUERY, value);
-            mFirebaseAnalytics.logEvent(logEventName, bundle);
-        }
-
+        bundle.putString(FIREBASE_KEY_QUERY, value);
+        mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_SEARCH, bundle);
     }
 
     public final class ItemViewClickedListener implements OnItemViewClickedListener {
@@ -268,7 +262,7 @@ public class SearchFragment extends SearchSupportFragment
 
                 startActivity(intent);
 
-                firebaseLoginEvents(card.getTitle(), task.taskId, FIREBASE_LOG_EVENT_TASK_SELECTED);
+                firebaseLoginEvents(card.getTitle(), task.taskId);
 
             } else
                 Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT).show();

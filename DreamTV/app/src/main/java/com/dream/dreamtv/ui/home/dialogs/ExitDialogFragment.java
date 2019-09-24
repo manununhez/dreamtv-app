@@ -18,8 +18,8 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import java.util.Objects;
 
 import static android.util.TypedValue.applyDimension;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_CANCEL_EXITDIALOG;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_EXIT_EXITDIALOG;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_CANCEL_EXIT_DIALOG;
+import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_PRESSED_EXIT_EXIT_DIALOG;
 
 
 public class ExitDialogFragment extends DialogFragment {
@@ -68,11 +68,11 @@ public class ExitDialogFragment extends DialogFragment {
 
 
         btnCancel.setOnClickListener(v -> {
-            mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_CANCEL_EXITDIALOG, new Bundle());
+            mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_CANCEL_EXIT_DIALOG, new Bundle());
             dismiss();
         });
         btnExit.setOnClickListener(v -> {
-            mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_EXIT_EXITDIALOG, new Bundle());
+            mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_PRESSED_EXIT_EXIT_DIALOG, new Bundle());
             mCallback.exit();
         });
 
