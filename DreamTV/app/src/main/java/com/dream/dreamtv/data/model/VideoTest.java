@@ -1,20 +1,21 @@
-package com.dream.dreamtv.data.networking.model;
-
-import com.google.gson.annotations.SerializedName;
+package com.dream.dreamtv.data.model;
 
 /**
  * Created by manuel on 7/18/17.
  */
 
 public class VideoTest {
-    @SerializedName("id")
     public int id;
-    @SerializedName("video_id")
     public String videoId;
-    @SerializedName("subtitle_version")
     public int subtitleVersion;
-    @SerializedName("subtitle_language_code")
     public String subtitleLanguageCode;
+
+    public VideoTest(int id, String videoId, int subtitleVersion, String subtitleLanguageCode) {
+        this.id = id;
+        this.videoId = videoId;
+        this.subtitleVersion = subtitleVersion;
+        this.subtitleLanguageCode = subtitleLanguageCode;
+    }
 
     @Override
     public String toString() {

@@ -3,7 +3,7 @@ package com.dream.dreamtv.presenter.detailsPresenter;
 import android.content.Context;
 
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.data.networking.model.Task;
+import com.dream.dreamtv.data.model.Task;
 import com.dream.dreamtv.utils.TimeUtils;
 
 
@@ -15,13 +15,13 @@ public class DetailsDescriptionPresenter extends CustomAbstractDetailsDescriptio
 
         Context context = viewHolder.view.getContext();
 
-        if (task.video != null) {
-            String timeFormatted = TimeUtils.getTimeFormatMinSecs(task.video.getVideoDurationInMs());
+        if (task.getVideo() != null) {
+            String timeFormatted = TimeUtils.getTimeFormatMinSecs(task.getVideo().getVideoDurationInMs());
 
-            viewHolder.getTitle().setText(task.videoTitleTranslated);
-            viewHolder.getSubtitle().setText(context.getString(R.string.title_video_details, task.video.project,
-                    task.video.primaryAudioLanguageCode, task.subLanguage, timeFormatted));
-            viewHolder.getBody().setText(task.videoDescriptionTranslated);
+            viewHolder.getTitle().setText(task.getVideoTitleTranslated());
+            viewHolder.getSubtitle().setText(context.getString(R.string.title_video_details, task.getVideo().project,
+                    task.getVideo().primaryAudioLanguageCode, task.getSubLanguage(), timeFormatted));
+            viewHolder.getBody().setText(task.getVideoDescriptionTranslated());
         }
     }
 }

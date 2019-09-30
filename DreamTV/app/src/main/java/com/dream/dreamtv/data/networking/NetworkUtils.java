@@ -33,7 +33,7 @@ import static com.dream.dreamtv.utils.Constants.PARAM_TYPE;
 import static com.dream.dreamtv.utils.Constants.PARAM_VERSION;
 import static com.dream.dreamtv.utils.Constants.PARAM_VIDEO_ID;
 
-public class NetworkUtils {
+class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
     private static final String BASE_URL = "http://www.dreamproject.pjwstk.edu.pl/api/";
 

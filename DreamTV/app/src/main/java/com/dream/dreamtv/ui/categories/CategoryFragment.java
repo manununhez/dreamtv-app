@@ -34,9 +34,9 @@ import androidx.lifecycle.ViewModelProviders;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
 import com.dream.dreamtv.data.model.Card;
+import com.dream.dreamtv.data.model.Task;
 import com.dream.dreamtv.data.networking.model.Resource;
 import com.dream.dreamtv.data.networking.model.Resource.Status;
-import com.dream.dreamtv.data.networking.model.Task;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.presenter.CardPresenterSelector;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsActivity;
@@ -45,7 +45,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static com.dream.dreamtv.utils.Constants.EMPTY_ITEM;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_TASK_CATEGORY_SELECTED;
@@ -73,11 +72,11 @@ public class CategoryFragment extends VerticalGridSupportFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(Objects.requireNonNull(getActivity()));
+        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(requireActivity());
         CategoryViewModel mViewModel = ViewModelProviders.of(this, factory).get(CategoryViewModel.class);
 
         // Obtain the FirebaseAnalytics instance.
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireActivity());
 
         instantiateLoading();
 
@@ -122,14 +121,15 @@ public class CategoryFragment extends VerticalGridSupportFragment {
     }
 
     private void showLoading() {
-        if (!Objects.requireNonNull(getActivity()).isFinishing())
+        if (!requireActivity().isFinishing())
             loadingDialog.show();
     }
 
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        title = Objects.requireNonNull(getActivity()).getIntent().getStringExtra(INTENT_EXTRA_TOPIC_NAME);
+        title = requireActivity().getIntent().getStringExtra(INTENT_EXTRA_TOPIC_NAME);
 
         setTitle(title);
 
@@ -189,7 +189,7 @@ public class CategoryFragment extends VerticalGridSupportFragment {
 
                 startActivity(intent);
 
-                firebaseLoginEvents(title, task.taskId);
+                firebaseLoginEvents(title, task.getTaskId());
 
             } else
                 Toast.makeText(getActivity(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();

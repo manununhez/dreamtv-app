@@ -35,15 +35,14 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.data.networking.model.ErrorReason;
-import com.dream.dreamtv.data.networking.model.Subtitle;
-import com.dream.dreamtv.data.networking.model.SubtitleResponse;
-import com.dream.dreamtv.data.networking.model.Task;
+import com.dream.dreamtv.data.model.ErrorReason;
+import com.dream.dreamtv.data.model.Subtitle;
+import com.dream.dreamtv.data.model.Subtitle.SubtitleText;
+import com.dream.dreamtv.data.model.Task;
 import com.dream.dreamtv.data.model.User;
-import com.dream.dreamtv.data.networking.model.UserTask;
-import com.dream.dreamtv.data.networking.model.UserTaskError;
+import com.dream.dreamtv.data.model.UserTask;
+import com.dream.dreamtv.data.model.UserTaskError;
 import com.dream.dreamtv.utils.Constants;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,12 +76,12 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private TextView tvTitle;
     private TextView tvSelectedSubtitle;
     private Dialog viewRoot;
-    private SubtitleResponse mSubtitle;
+    private Subtitle mSubtitle;
     private ScrollView scrollViewAdvanced;
     private ScrollView scrollViewBeginner;
     private ScrollView scrollViewBeginnerEdition;
-    private Subtitle selectedSubtitle;
-    private Subtitle goToThisSelectedSubtitle;
+    private SubtitleText selectedSubtitle;
+    private SubtitleText goToThisSelectedSubtitle;
     private Task mSelectedTask;
     private OnListener mCallback;
     private List<String> selectedReasons = new ArrayList<>();
@@ -97,13 +96,14 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
     public static ErrorSelectionDialogFragment newInstance(ArrayList<ErrorReason> reasons,
                                                            User user,
-                                                           SubtitleResponse mSubtitleResponse,
+                                                           Subtitle mSubtitleResponse,
                                                            int subtitlePosition,
                                                            Task mSelectedTask,
                                                            UserTask userTask,
                                                            ArrayList<UserTaskError> userTaskErrorList) {
 
-        ErrorSelectionDialogFragment f = newInstance(reasons, user, mSubtitleResponse, subtitlePosition, mSelectedTask, userTask);
+        ErrorSelectionDialogFragment f = newInstance(reasons, user, mSubtitleResponse,
+                subtitlePosition, mSelectedTask, userTask);
 
 
         // Supply num input as an argument.
@@ -115,7 +115,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
     public static ErrorSelectionDialogFragment newInstance(ArrayList<ErrorReason> reasons,
                                                            User user,
-                                                           SubtitleResponse mSubtitleResponse,
+                                                           Subtitle mSubtitleResponse,
                                                            int subtitlePosition,
                                                            Task mSelectedTask,
                                                            UserTask userTask) {
@@ -188,9 +188,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
 
         //This is used to select one mSubtitle from the navigation list, and move the video forward or backward accorded to it
-        goToThisSelectedSubtitle = mSubtitle.subtitles.get(mSubtitleOriginalPosition - 1); //mSubtitleOriginalPosition is the mSubtitle order, and the index starts in 1. To get a specific mSubtitle from the list, the index start in 0.
+        goToThisSelectedSubtitle = mSubtitle.getSubtitles().get(mSubtitleOriginalPosition - 1); //mSubtitleOriginalPosition is the mSubtitle order, and the index starts in 1. To get a specific mSubtitle from the list, the index start in 0.
         //This is used to know which mSubtitle from the navigation list are we on, in order to perform save or update errors
-        selectedSubtitle = mSubtitle.subtitles.get(mSubtitleOriginalPosition - 1); //mSubtitleOriginalPosition is the mSubtitle order, and the index starts in 1. To get a specific mSubtitle from the list, the index start in 0.
+        selectedSubtitle = mSubtitle.getSubtitles().get(mSubtitleOriginalPosition - 1); //mSubtitleOriginalPosition is the mSubtitle order, and the index starts in 1. To get a specific mSubtitle from the list, the index start in 0.
 
         return viewRoot;
     }
@@ -249,7 +249,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         btnSave.setOnClickListener(view -> {
             UserTaskError userTaskError = prepareReasonsToSave();
             if (selectedReasons.size() > 0) {
-                mCallback.onSaveReasons(mSelectedTask.taskId, mSubtitle.versionNumber, userTaskError);
+                mCallback.onSaveReasons(mSelectedTask.getTaskId(), mSubtitle.getVersionNumber(), userTaskError);
                 dismiss();
             } else {
                 Toast.makeText(getActivity(), getActivity().getString(R.string.select_errors_to_save), Toast.LENGTH_LONG).show();
@@ -257,7 +257,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         });
         btnSaveChanges.setOnClickListener(view -> {
             UserTaskError userTaskError = prepareReasonsToSave();
-            mCallback.onUpdateReasons(mSelectedTask.taskId, mSubtitle.versionNumber, userTaskError);
+            mCallback.onUpdateReasons(mSelectedTask.getTaskId(), mSubtitle.getVersionNumber(), userTaskError);
             dismiss();
         });
 
@@ -271,7 +271,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         ListView mListView = viewRoot.findViewById(R.id.lv);
 
         // Initialize a new ArrayAdapter
-        MySubtitleAdapter mySubtitleAdapter = new MySubtitleAdapter(getActivity(), mSubtitle.subtitles,
+        MySubtitleAdapter mySubtitleAdapter = new MySubtitleAdapter(getActivity(), mSubtitle.getSubtitles(),
                 subtitlePosition, mUserTask.getUserTaskErrorList());
 
         // Set the adapter for ListView
@@ -282,7 +282,7 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         }
 
         mListView.setOnItemClickListener((adapterView, view, position, l) -> {
-            goToThisSelectedSubtitle = (Subtitle) adapterView.getItemAtPosition(position);
+            goToThisSelectedSubtitle = (SubtitleText) adapterView.getItemAtPosition(position);
             Timber.d("CPRCurrentPosition: %s", mSubtitleOriginalPosition);
             Timber.d("CPRNewPosition: %s", (position + 1));
 
@@ -296,9 +296,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 Timber.d("OnItemSelected - Position: %s", position);
-                selectedSubtitle = (Subtitle) adapterView.getItemAtPosition(position);
+                selectedSubtitle = (SubtitleText) adapterView.getItemAtPosition(position);
 
-                tvSelectedSubtitle.setText(Html.fromHtml(selectedSubtitle.text));
+                tvSelectedSubtitle.setText(Html.fromHtml(selectedSubtitle.getText()));
 
                 repopulateFormWithUserTaskData(position);
             }
@@ -375,10 +375,10 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             toggleButton.setTextColor(ContextCompat.getColor(getActivity(), R.color.white));
             RadioGroup.LayoutParams layoutParams = new RadioGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, pixels);
             layoutParams.setMargins(0, 0, 0, 15);
-            toggleButton.setContentDescription(errorReason.reasonCode); //instead of setId
-            toggleButton.setTextOn(errorReason.name);
-            toggleButton.setTextOff(errorReason.name);
-            toggleButton.setText(errorReason.name);
+            toggleButton.setContentDescription(errorReason.getReasonCode()); //instead of setId
+            toggleButton.setTextOn(errorReason.getName());
+            toggleButton.setTextOff(errorReason.getName());
+            toggleButton.setText(errorReason.getName());
             toggleButton.setLayoutParams(layoutParams);
             toggleButton.setAllCaps(true);
             toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_1));
@@ -420,9 +420,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             int pixels = (int) (dpsToogle * scale + 0.5f);
 
             RadioButton radioButton = new RadioButton(getActivity());
-            radioButton.setText(errorReason.name);
+            radioButton.setText(errorReason.getName());
             radioButton.setAllCaps(true);
-            radioButton.setContentDescription(errorReason.reasonCode); //instead of setId
+            radioButton.setContentDescription(errorReason.getReasonCode()); //instead of setId
             radioButton.setGravity(Gravity.CENTER);
             radioButton.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.selector_1));
 
@@ -442,10 +442,10 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
             toggleButton.setBackgroundResource(R.color.colorAccent);
             toggleButton.setTextColor(ContextCompat.getColor(getActivity(), R.color.white));
             layoutParams.setMargins(0, 0, 0, 15);
-            toggleButton.setContentDescription(errorReason.reasonCode); //instead of setId
-            toggleButton.setTextOn(errorReason.name);
-            toggleButton.setTextOff(errorReason.name);
-            toggleButton.setText(errorReason.name);
+            toggleButton.setContentDescription(errorReason.getReasonCode()); //instead of setId
+            toggleButton.setTextOn(errorReason.getName());
+            toggleButton.setTextOff(errorReason.getName());
+            toggleButton.setText(errorReason.getName());
             toggleButton.setLayoutParams(layoutParams);
             toggleButton.setAllCaps(true);
             toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.selector_1));
@@ -580,40 +580,40 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         }
 
         return new UserTaskError(selectedErrorsListJson(selectedReasons),
-                selectedSubtitle.position, voiceInput.getText().toString());
+                selectedSubtitle.getPosition(), voiceInput.getText().toString());
     }
 
-    public String selectedErrorsListJson(List<String> selectedReasons) {
+    public List<ErrorReason> selectedErrorsListJson(List<String> selectedReasons) {
         List<ErrorReason> tempList = new ArrayList<>();
 
         for (String reasonCode : selectedReasons) {
             for (ErrorReason errorReason : mReasons) {
-                if (reasonCode.equals(errorReason.reasonCode))
+                if (reasonCode.equals(errorReason.getReasonCode()))
                     tempList.add(errorReason);
             }
         }
 
-        return new Gson().toJson(tempList);
+        return tempList;
     }
 
 
     // Container Activity must implement this interface
     public interface OnListener {
-        void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition);
+        void onDialogClosed(SubtitleText selectedSubtitle, int subtitleOriginalPosition);
 
         void onSaveReasons(int taskId, int subtitleVersion, UserTaskError userTaskError);
 
         void onUpdateReasons(int taskId, int subtitleVersion, UserTaskError userTaskError);
     }
 
-    public class MySubtitleAdapter extends ArrayAdapter<Subtitle> {
+    public class MySubtitleAdapter extends ArrayAdapter<SubtitleText> {
 
         private final Context context;
-        private final List<Subtitle> values;
+        private final List<SubtitleText> values;
         private final Integer currentSubtitlePosition;
         private UserTaskError[] userTaskErrors;
 
-        MySubtitleAdapter(Context context, List<Subtitle> values, int currentSubtitlePosition,
+        MySubtitleAdapter(Context context, List<SubtitleText> values, int currentSubtitlePosition,
                           UserTaskError[] userTaskErrors) {
             super(context, -1, values);
             this.context = context;
@@ -650,14 +650,14 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                     holder.tvSubtitleError.setVisibility(View.VISIBLE);
                     holder.tvSubtitleError.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 9,
                             context.getResources().getDisplayMetrics()));
-                    holder.tvSubtitleError.setText(Html.fromHtml(values.get(position).text));
+                    holder.tvSubtitleError.setText(Html.fromHtml(values.get(position).getText()));
                 } else {
                     holder.tvSubtitle.setVisibility(View.GONE);
                     holder.tvSubtitleError.setVisibility(View.GONE);
                     holder.tvSubtitleSelected.setVisibility(View.VISIBLE);
                     holder.tvSubtitleSelected.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 9,
                             context.getResources().getDisplayMetrics()));
-                    holder.tvSubtitleSelected.setText(Html.fromHtml(values.get(position).text));
+                    holder.tvSubtitleSelected.setText(Html.fromHtml(values.get(position).getText()));
                 }
             } else {
                 if (isPositionError(userTaskErrors, position)) {
@@ -666,14 +666,14 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
                     holder.tvSubtitleError.setVisibility(View.VISIBLE);
                     holder.tvSubtitleError.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
                             context.getResources().getDisplayMetrics()));
-                    holder.tvSubtitleError.setText(Html.fromHtml(values.get(position).text));
+                    holder.tvSubtitleError.setText(Html.fromHtml(values.get(position).getText()));
                 } else {
                     holder.tvSubtitleSelected.setVisibility(View.GONE);
                     holder.tvSubtitleError.setVisibility(View.GONE);
                     holder.tvSubtitle.setVisibility(View.VISIBLE);
                     holder.tvSubtitle.setTextSize(applyDimension(TypedValue.COMPLEX_UNIT_SP, 8,
                             context.getResources().getDisplayMetrics()));
-                    holder.tvSubtitle.setText(Html.fromHtml(values.get(position).text));
+                    holder.tvSubtitle.setText(Html.fromHtml(values.get(position).getText()));
                 }
 
             }

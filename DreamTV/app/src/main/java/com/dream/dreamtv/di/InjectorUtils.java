@@ -14,12 +14,12 @@ import com.dream.dreamtv.utils.AppExecutors;
  */
 public class InjectorUtils {
 
-    public static VolleyController provideVolley(Context context) {
+    private static VolleyController provideVolley(Context context) {
         AppPreferencesHelper appPreferencesHelper = providePreferencesHelper(context);
         return new VolleyController(context, appPreferencesHelper);
     }
 
-    public static AppRepository provideRepository(Context context) {
+    private static AppRepository provideRepository(Context context) {
         AppExecutors executors = AppExecutors.getInstance();
         VolleyController volley = provideVolley(context);
         NetworkDataSourceImpl networkDataSource = NetworkDataSourceImpl.getInstance(context.getApplicationContext(),

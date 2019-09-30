@@ -2,30 +2,43 @@ package com.dream.dreamtv.data.networking;
 
 import android.content.Context;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.android.volley.VolleyError;
 import com.dream.dreamtv.data.model.Category;
+import com.dream.dreamtv.data.model.ErrorReason;
+import com.dream.dreamtv.data.model.Subtitle;
+import com.dream.dreamtv.data.model.Subtitle.SubtitleText;
+import com.dream.dreamtv.data.model.Task;
+import com.dream.dreamtv.data.model.TasksList;
+import com.dream.dreamtv.data.model.User;
+import com.dream.dreamtv.data.model.UserTask;
+import com.dream.dreamtv.data.model.UserTaskError;
+import com.dream.dreamtv.data.model.Video;
+import com.dream.dreamtv.data.model.VideoDuration;
+import com.dream.dreamtv.data.model.VideoTest;
+import com.dream.dreamtv.data.model.VideoTopic;
 import com.dream.dreamtv.data.networking.model.AuthResponse;
-import com.dream.dreamtv.data.networking.model.ErrorReason;
+import com.dream.dreamtv.data.networking.model.ErrorReasonSchema;
 import com.dream.dreamtv.data.networking.model.JsonResponseBaseBean;
 import com.dream.dreamtv.data.networking.model.Resource;
-import com.dream.dreamtv.data.networking.model.SubtitleResponse;
-import com.dream.dreamtv.data.networking.model.Task;
-import com.dream.dreamtv.data.networking.model.TaskRequest;
-import com.dream.dreamtv.data.networking.model.TasksList;
-import com.dream.dreamtv.data.model.User;
+import com.dream.dreamtv.data.networking.model.SubtitleSchema;
+import com.dream.dreamtv.data.networking.model.TaskSchema;
+import com.dream.dreamtv.data.networking.model.TasksListSchema;
 import com.dream.dreamtv.data.networking.model.UserSchema;
-import com.dream.dreamtv.data.networking.model.UserTask;
-import com.dream.dreamtv.data.networking.model.UserTaskError;
-import com.dream.dreamtv.data.networking.model.VideoTest;
+import com.dream.dreamtv.data.networking.model.UserTaskErrorSchema;
+import com.dream.dreamtv.data.networking.model.UserTaskSchema;
+import com.dream.dreamtv.data.networking.model.VideoSchema;
+import com.dream.dreamtv.data.networking.model.VideoTestSchema;
 import com.dream.dreamtv.data.networking.model.VideoTopicSchema;
 import com.dream.dreamtv.ui.home.HomeFragment;
 import com.dream.dreamtv.utils.AppExecutors;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import timber.log.Timber;
@@ -34,7 +47,6 @@ import static com.android.volley.Request.Method.DELETE;
 import static com.android.volley.Request.Method.GET;
 import static com.android.volley.Request.Method.POST;
 import static com.android.volley.Request.Method.PUT;
-import static com.dream.dreamtv.data.model.Category.Type.ALL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.addTaskToUserListURL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.getCategoriesURL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.getErrorReasonsURL;
@@ -48,12 +60,12 @@ import static com.dream.dreamtv.data.networking.NetworkUtils.searchByCategoryURL
 import static com.dream.dreamtv.data.networking.NetworkUtils.searchURL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.userErrorsURL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.userTaskURL;
+import static com.dream.dreamtv.data.networking.model.SubtitleSchema.SubtitleTextSchema;
 import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE_CONFIG;
 import static com.dream.dreamtv.utils.Constants.PARAM_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.PARAM_COMPLETED;
 import static com.dream.dreamtv.utils.Constants.PARAM_EMAIL;
 import static com.dream.dreamtv.utils.Constants.PARAM_LANG_CODE;
-import static com.dream.dreamtv.utils.Constants.PARAM_PAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_PASSWORD;
 import static com.dream.dreamtv.utils.Constants.PARAM_QUERY;
 import static com.dream.dreamtv.utils.Constants.PARAM_RATING;
@@ -77,26 +89,21 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     private final AppExecutors mExecutors;
     private final VolleyController mVolley;
     // VolleyController requestQueue
-    private MutableLiveData<Resource<TasksList>> responseFromFetchAllTasks;
-    private MutableLiveData<Resource<TasksList>> responseFromFetchContinueTasks;
-    private MutableLiveData<Resource<TasksList>> responseFromFetchTestTasks;
-    private MutableLiveData<Resource<TasksList>> responseFromFetchFinishedTasks;
-    private MutableLiveData<Resource<TasksList>> responseFromFetchMyListTasks;
+    private MutableLiveData<Resource<TasksList[]>> responseFromFetchTasks;
     private MutableLiveData<Resource<Task[]>> responseFromSearch;
     private MutableLiveData<Resource<Task[]>> responseFromSearchByKeywordCategory;
     private MutableLiveData<Resource<Boolean>> responseFromAddToListTasks;
     private MutableLiveData<Resource<Boolean>> responseFromRemoveFromListTasks;
     private MutableLiveData<Resource<User>> responseFromFetchUser;
     private MutableLiveData<Resource<User>> responseFromUserUpdate;
-    private MutableLiveData<Resource<SubtitleResponse>> responseFromFetchSubtitle;
+    private MutableLiveData<Resource<Subtitle>> responseFromFetchSubtitle;
     private MutableLiveData<Resource<UserTask>> responseFromFetchUserTask;
     private MutableLiveData<Resource<UserTask>> responseFromCreateUserTask;
     private MutableLiveData<Resource<UserTaskError[]>> responseFromErrorsUpdate;
-    private MutableLiveData<Resource<VideoTopicSchema[]>> responseFromCategories;
+    private MutableLiveData<Resource<VideoTopic[]>> responseFromCategories;
     private MutableLiveData<Resource<ErrorReason[]>> responseFromFetchReasons;
     private MutableLiveData<Resource<VideoTest[]>> responseFromFetchVideoTests;
     private MutableLiveData<Resource<AuthResponse>> responseFromAuth;
-    private int currentPage = 1;
 
     private NetworkDataSourceImpl(Context context, AppExecutors executors, VolleyController volley) {
         mContext = context;
@@ -108,21 +115,17 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         responseFromFetchVideoTests = new MutableLiveData<>();
         responseFromFetchReasons = new MutableLiveData<>();
         responseFromSearchByKeywordCategory = new MutableLiveData<>();
-        responseFromCategories = new MutableLiveData<>();
         responseFromSearch = new MutableLiveData<>();
         responseFromFetchUser = new MutableLiveData<>();
         responseFromUserUpdate = new MutableLiveData<>();
         responseFromFetchSubtitle = new MutableLiveData<>();
-        responseFromFetchFinishedTasks = new MutableLiveData<>();
-        responseFromFetchMyListTasks = new MutableLiveData<>();
-        responseFromFetchTestTasks = new MutableLiveData<>();
-        responseFromFetchAllTasks = new MutableLiveData<>();
-        responseFromFetchContinueTasks = new MutableLiveData<>();
+        responseFromFetchTasks = new MutableLiveData<>();
         responseFromFetchUserTask = new MutableLiveData<>();
         responseFromCreateUserTask = new MutableLiveData<>();
         responseFromAddToListTasks = new MutableLiveData<>();
         responseFromRemoveFromListTasks = new MutableLiveData<>();
         responseFromErrorsUpdate = new MutableLiveData<>();
+        responseFromCategories = new MutableLiveData<>();
 
     }
 
@@ -138,29 +141,10 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     }
 
 
-    /******************
-     ** NETWORK CALLS **
-     *******************/
+    //****************
+    //** NETWORK CALLS **
+    //*******************/
 
-    public void fetchAllTaskCategory(TaskRequest taskRequest) {
-        fetchTasksByCategory(taskRequest, responseFromFetchAllTasks, 1);
-    }
-
-    public void fetchContinueTaskCategory(TaskRequest taskRequest) {
-        fetchTasksByCategory(taskRequest, responseFromFetchContinueTasks);
-    }
-
-    public void fetchMyListTaskCategory(TaskRequest taskRequest) {
-        fetchTasksByCategory(taskRequest, responseFromFetchMyListTasks);
-    }
-
-    public void fetchFinishedTaskCategory(TaskRequest taskRequest) {
-        fetchTasksByCategory(taskRequest, responseFromFetchFinishedTasks);
-    }
-
-    public void fetchTestTaskCategory(TaskRequest taskRequest) {
-        fetchTasksByCategory(taskRequest, responseFromFetchTestTasks);
-    }
 
     /**
      * Login. Used in {@link HomeFragment} to implement the ...
@@ -215,8 +199,9 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
      * @param email    Email
      * @param password Password
      */
+    @Override
     @SuppressWarnings("unchecked")
-    private void register(final String email, final String password) {
+    public void register(final String email, final String password) {
         String URL = getRegisterURL();
 
         Map<String, String> params = new HashMap<>();
@@ -297,7 +282,8 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     /**
      * Used in {@link HomeFragment}
      *
-     * @param user User
+     * @param user user
+     * @return MutableLiveData<Resource < User>>
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -360,11 +346,13 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
             protected void processResponse(String response) {
                 Timber.d("fetchReasons() Response JSON: %s", response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<ErrorReason[]>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<ErrorReasonSchema[]>>() {
                 };
-                JsonResponseBaseBean<ErrorReason[]> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<ErrorReasonSchema[]> jsonResponse = getJsonResponse(response, type);
 
-                responseFromFetchReasons.postValue(Resource.success(jsonResponse.data));
+                ErrorReason[] errorReasons = getReasonsFromSchema(jsonResponse.data);
+
+                responseFromFetchReasons.postValue(Resource.success(errorReasons));
 
             }
 
@@ -379,11 +367,11 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     }
 
     /**
-     *
+     * @return MutableLiveData<Resource < VideoTopicSchema [ ]>>
      */
     @Override
     @SuppressWarnings("unchecked")
-    public void fetchCategories() {
+    public MutableLiveData<Resource<VideoTopic[]>> fetchCategories() {
         responseFromCategories.setValue(Resource.loading(null));
 
         String categoriesUri = getCategoriesURL();
@@ -400,7 +388,9 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 };
                 JsonResponseBaseBean<VideoTopicSchema[]> jsonResponse = getJsonResponse(response, type);
 
-                responseFromCategories.postValue(Resource.success(jsonResponse.data));
+                VideoTopic[] videoTopics = getTopicFromSchema(jsonResponse.data);
+
+                responseFromCategories.postValue(Resource.success(videoTopics));
 
             }
 
@@ -414,6 +404,9 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 Timber.d("fetchCategories() Response Error: %s", error.getMessage());
             }
         }));
+
+        return responseFromCategories;
+
     }
 
     /**
@@ -434,11 +427,12 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
             protected void processResponse(String response) {
                 Timber.d("fetchVideoTestsDetails() Response JSON: %s", response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<VideoTest[]>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<VideoTestSchema[]>>() {
                 };
-                JsonResponseBaseBean<VideoTest[]> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<VideoTestSchema[]> jsonResponse = getJsonResponse(response, type);
 
-                responseFromFetchVideoTests.postValue(Resource.success(jsonResponse.data));
+                VideoTest[] videoTests = getVideoTestFromSchema(jsonResponse.data);
+                responseFromFetchVideoTests.postValue(Resource.success(videoTests));
 
             }
 
@@ -456,13 +450,14 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     /**
      * FetchSubtitle
      *
-     * @param videoId      Video id
-     * @param languageCode LanguageCode
+     * @param videoId      videoId
+     * @param languageCode languageCode
      * @param version      version
+     * @return MutableLiveData<Resource < SubtitleResponse>>
      */
     @Override
     @SuppressWarnings("unchecked")
-    public MutableLiveData<Resource<SubtitleResponse>> fetchSubtitle(String videoId, String languageCode, String version) {
+    public MutableLiveData<Resource<Subtitle>> fetchSubtitle(String videoId, String languageCode, String version) {
         responseFromFetchSubtitle.postValue(Resource.loading(null));
 
         String subtitleUri = getSubtitleURL(videoId, languageCode, version);
@@ -477,11 +472,13 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
             protected void processResponse(String response) {
                 Timber.d("fetchSubtitle() Response JSON: %s", response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<SubtitleResponse>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<SubtitleSchema>>() {
                 };
-                JsonResponseBaseBean<SubtitleResponse> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<SubtitleSchema> jsonResponse = getJsonResponse(response, type);
 
-                responseFromFetchSubtitle.postValue(Resource.success(jsonResponse.data)); //post the value to live data
+                Subtitle subtitle = getSubtitleFromSchema(jsonResponse.data);
+
+                responseFromFetchSubtitle.postValue(Resource.success(subtitle)); //post the value to live data
 
             }
 
@@ -501,96 +498,37 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
 
     /**
-     * fetchTasksByCategory used to get All Tasks
+     * fetchTasks used to get Tasks by categories
      *
-     * @param responseMutable Reference to MutableLiveData
-     * @param page            Pagination value
+     * @param category      category
+     * @param videoDuration videoDuration
+     * @return MutableLiveData<Resource < TasksList [ ]>>
      */
+    @Override
     @SuppressWarnings("unchecked")
-    private void fetchTasksByCategory(final TaskRequest taskRequest, final MutableLiveData<Resource<TasksList>> responseMutable, int page) {
-
-        responseMutable.setValue(Resource.loading(null));
-
-        if (page == -1) return;
-
-        String tasksUri = getTasksURL(taskRequest.getCategory(), page, taskRequest.getVideoDuration());
+    public MutableLiveData<Resource<TasksList[]>> fetchTasks(Category.Type category, VideoDuration videoDuration) {
 
 
-        Timber.d("fetchTasksByCategory() Request URL: " + tasksUri + " Params: " + PARAM_PAGE + "=>" + page
-                + "; " + PARAM_TYPE + "=>" + taskRequest.getCategory());
+        responseFromFetchTasks.setValue(Resource.loading(null));
+
+        String tasksUri = getTasksURL(category, videoDuration);
+
+        Timber.d("fetchTasks() Request URL: " + tasksUri + " Params: " + PARAM_TYPE + "=>" + category);
 
 
         mExecutors.networkIO().execute(() -> mVolley.requestString(GET, tasksUri, null, new ResponseListener(mContext) {
             @Override
             protected void processResponse(String response) {
-                Timber.d("fetchTasksByCategory() Response JSON: %s", response);
+                Timber.d(category + "fetchTasks() Response JSON: " + response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<TasksList>>() {
+
+                TypeToken type = new TypeToken<JsonResponseBaseBean<TasksListSchema[]>>() {
                 };
-                JsonResponseBaseBean<TasksList> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<TasksListSchema[]> jsonResponse = getJsonResponse(response, type);
 
-                TasksList taskResponse = jsonResponse.data;
-                taskResponse.category = ALL;
+                TasksList[] tasksList = getTasksListFromSchema(jsonResponse.data);
 
-
-                responseMutable.postValue(Resource.success(taskResponse)); //post the value to live data
-
-
-                if (taskResponse.current_page < taskResponse.last_page) //Pagination
-                    currentPage++;
-                else
-                    currentPage = -1;
-
-            }
-
-
-            @Override
-            public void processError(VolleyError error) {
-                super.processError(error);
-
-                //TODO do something error
-                responseFromFetchAllTasks.postValue(Resource.error(error.getMessage(), null));
-
-                Timber.d("all tasks response: %s", error.getMessage());
-            }
-        }));
-    }
-
-
-    /**
-     * fetchTasksByCategory used to get Tasks by categories
-     *
-     * @param responseMutable Reference to MutableLiveData
-     */
-    @SuppressWarnings("unchecked")
-    private void fetchTasksByCategory(final TaskRequest taskRequest, final MutableLiveData<Resource<TasksList>> responseMutable) {
-
-        responseMutable.setValue(Resource.loading(null));
-
-        Category.Type paramType = taskRequest.getCategory();
-
-        String tasksUri = getTasksURL(taskRequest.getCategory(), taskRequest.getVideoDuration());
-
-        Timber.d("fetchTasksByCategory() Request URL: " + tasksUri + " Params: " + PARAM_TYPE + "=>" + paramType);
-
-
-        mExecutors.networkIO().execute(() -> mVolley.requestString(GET, tasksUri, null, new ResponseListener(mContext) {
-            @Override
-            protected void processResponse(String response) {
-                Timber.d(paramType + "fetchTasksByCategory() Response JSON: " + response);
-
-
-                TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
-                };
-                JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
-
-                Task[] tasks = jsonResponse.data;
-
-                TasksList tasksList = new TasksList();
-                tasksList.data = tasks;
-                tasksList.category = paramType;
-
-                responseMutable.postValue(Resource.success(tasksList)); //post the value to live data
+                responseFromFetchTasks.postValue(Resource.success(tasksList)); //post the value to live data
 
             }
 
@@ -599,11 +537,13 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
                 super.processError(error);
 
                 //TODO do something error
-                responseMutable.postValue(Resource.error(error.getMessage(), null));
+                responseFromFetchTasks.postValue(Resource.error(error.getMessage(), null));
 
-                Timber.d(paramType + "fetchTasksByCategory() Response Error: " + error.getMessage());
+                Timber.d(category + "fetchTasks() Response Error: " + error.getMessage());
             }
         }));
+
+        return responseFromFetchTasks;
     }
 
     /**
@@ -627,11 +567,13 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
             protected void processResponse(String response) {
                 Timber.d("searchByKeywordCategory() Response JSON: %s", response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskSchema[]>>() {
                 };
-                JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<TaskSchema[]> jsonResponse = getJsonResponse(response, type);
 
-                responseFromSearchByKeywordCategory.postValue(Resource.success(jsonResponse.data)); //post the value to live data
+                Task[] tasks = getTasksFromSchema(jsonResponse.data);
+
+                responseFromSearchByKeywordCategory.postValue(Resource.success(tasks)); //post the value to live data
 
             }
 
@@ -670,11 +612,13 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 Timber.d("search() Response JSON: %s", response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<Task[]>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<TaskSchema[]>>() {
                 };
-                JsonResponseBaseBean<Task[]> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<TaskSchema[]> jsonResponse = getJsonResponse(response, type);
 
-                responseFromSearch.postValue(Resource.success(jsonResponse.data)); //post the value to live data
+                Task[] tasks = getTasksFromSchema(jsonResponse.data);
+
+                responseFromSearch.postValue(Resource.success(tasks)); //post the value to live data
 
             }
 
@@ -692,10 +636,10 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         return responseFromSearch;
     }
 
-
     /**
      * @param taskId           taskId
      * @param mSubtitleVersion mSubtitleVersion
+     * @return MutableLiveData<Resource < UserTask>>
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -718,11 +662,13 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
             protected void processResponse(String response) {
                 Timber.d("createUserTask() Response JSON: %s", response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTaskSchema>>() {
                 };
-                JsonResponseBaseBean<UserTask> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<UserTaskSchema> jsonResponse = getJsonResponse(response, type);
 
-                responseFromCreateUserTask.postValue(Resource.success(jsonResponse.data)); //post the value to live data
+                UserTask userTask = getUserTaskFromSchema(jsonResponse.data);
+
+                responseFromCreateUserTask.postValue(Resource.success(userTask)); //post the value to live data
 
             }
 
@@ -740,17 +686,21 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         return responseFromCreateUserTask;
     }
 
+
+    /**
+     * @return MutableLiveData<Resource < UserTask>>
+     */
     @Override
     public MutableLiveData<Resource<UserTask>> fetchUserTask() {
         return responseFromFetchUserTask;
 
     }
 
-
     /**
      * @param taskId        taskId
-     * @param subLanguage   subLanguageConfig
-     * @param audioLanguage audioLanguageConfig
+     * @param subLanguage   subLanguage
+     * @param audioLanguage audioLanguage
+     * @return MutableLiveData<Resource < Boolean>>
      */
     @Override
     public MutableLiveData<Resource<Boolean>> addTaskToList(int taskId, String subLanguage, String audioLanguage) {
@@ -790,6 +740,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
     /**
      * @param taskId taskId
+     * @return MutableLiveData<Resource < Boolean>>
      */
     @Override
     public MutableLiveData<Resource<Boolean>> removeTaskFromList(int taskId) {
@@ -822,7 +773,9 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
     }
 
-
+    /**
+     * @param userTask userTask
+     */
     @Override
     @SuppressWarnings("unchecked")
     public void updateUserTask(UserTask userTask) {
@@ -846,11 +799,13 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 Timber.d("updateUserTask() Response JSON: %s", response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTask>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTaskSchema>>() {
                 };
-                JsonResponseBaseBean<UserTask> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<UserTaskSchema> jsonResponse = getJsonResponse(response, type);
 
-                responseFromFetchUserTask.postValue(Resource.success(jsonResponse.data)); //to update the userTask value in VideoDetailsFragment
+                UserTask userTask = getUserTaskFromSchema(jsonResponse.data);
+
+                responseFromFetchUserTask.postValue(Resource.success(userTask)); //to update the userTask value in VideoDetailsFragment
             }
 
             @Override
@@ -863,12 +818,11 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
     }
 
-
     /**
-     * @param taskId
-     * @param subtitleVersion
-     * @param userTaskError
-     * @return
+     * @param taskId          taskId
+     * @param subtitleVersion subtitleVersion
+     * @param userTaskError   userTaskError
+     * @return MutableLiveData<Resource < UserTaskError [ ]>>
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -877,9 +831,11 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         responseFromErrorsUpdate.postValue(Resource.loading(null));
 
+        String errorReasonList = getErrorReasonListSchemaFromModel(userTaskError.getErrorReasonList());
+
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_TASK_ID, String.valueOf(taskId));
-        params.put(PARAM_REASON_CODE, userTaskError.getReasonCode());
+        params.put(PARAM_REASON_CODE, errorReasonList);
         params.put(PARAM_SUB_POSITION, String.valueOf(userTaskError.getSubtitlePosition()));
         params.put(PARAM_SUB_VERSION, String.valueOf(subtitleVersion));
 
@@ -887,7 +843,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         Timber.d("updateErrors() Request URL: " + URL + " Params: " + PARAM_TASK_ID + "=>" + taskId
                 + "; " + PARAM_SUB_VERSION + " => " + subtitleVersion
                 + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
-                + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
+                + "; " + PARAM_REASON_CODE + " => " + errorReasonList);
 
 
         mExecutors.networkIO().execute(() -> mVolley.requestString(PUT, URL, params, new ResponseListener(mContext) {
@@ -896,11 +852,13 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
                 Timber.d("updateErrors() Response JSON: %s", response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTaskError[]>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTaskErrorSchema[]>>() {
                 };
-                JsonResponseBaseBean<UserTaskError[]> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<UserTaskErrorSchema[]> jsonResponse = getJsonResponse(response, type);
 
-                responseFromErrorsUpdate.postValue(Resource.success(jsonResponse.data));
+                UserTaskError[] userTaskErrors = getUserTaskErrorsFromSchema(jsonResponse.data);
+
+                responseFromErrorsUpdate.postValue(Resource.success(userTaskErrors));
             }
 
             @Override
@@ -915,11 +873,12 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         return responseFromErrorsUpdate;
     }
 
+
     /**
-     * @param taskId
-     * @param subtitleVersion
-     * @param userTaskError
-     * @return
+     * @param taskId          taskId
+     * @param subtitleVersion subtitleVersion
+     * @param userTaskError   userTaskError
+     * @return MutableLiveData<Resource < UserTaskError [ ]>>
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -928,9 +887,11 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         responseFromErrorsUpdate.postValue(Resource.loading(null));
 
+        String errorReasonList = getErrorReasonListSchemaFromModel(userTaskError.getErrorReasonList());
+
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_TASK_ID, String.valueOf(taskId));
-        params.put(PARAM_REASON_CODE, userTaskError.getReasonCode());
+        params.put(PARAM_REASON_CODE, errorReasonList);
         params.put(PARAM_SUB_POSITION, String.valueOf(userTaskError.getSubtitlePosition()));
         params.put(PARAM_SUB_VERSION, String.valueOf(subtitleVersion));
 
@@ -938,7 +899,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         Timber.d("saveErrors() Request URL: " + URL + " Params: " + PARAM_TASK_ID + "=>" + taskId
                 + "; " + PARAM_SUB_VERSION + " => " + subtitleVersion
                 + "; " + PARAM_SUB_POSITION + " => " + userTaskError.getSubtitlePosition()
-                + "; " + PARAM_REASON_CODE + " => " + userTaskError.getReasonCode());
+                + "; " + PARAM_REASON_CODE + " => " + errorReasonList);
 
 
         mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, new ResponseListener(mContext) {
@@ -946,11 +907,14 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
             protected void processResponse(String response) {
                 Timber.d("saveErrors() Response JSON: %s", response);
 
-                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTaskError[]>>() {
+                TypeToken type = new TypeToken<JsonResponseBaseBean<UserTaskErrorSchema[]>>() {
                 };
-                JsonResponseBaseBean<UserTaskError[]> jsonResponse = getJsonResponse(response, type);
+                JsonResponseBaseBean<UserTaskErrorSchema[]> jsonResponse = getJsonResponse(response, type);
 
-                responseFromErrorsUpdate.postValue(Resource.success(jsonResponse.data));
+                UserTaskError[] userTaskErrors = getUserTaskErrorsFromSchema(jsonResponse.data);
+
+
+                responseFromErrorsUpdate.postValue(Resource.success(userTaskErrors));
             }
 
             @Override
@@ -966,41 +930,6 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         return responseFromErrorsUpdate;
     }
 
-
-    /**
-     * @return {@link LiveData} representing the response of the request requestCurrentWeathersByCityIDs()
-     */
-    public LiveData<Resource<TasksList>> responseFromFetchAllTasks() {
-        return responseFromFetchAllTasks;
-    }
-
-    /**
-     *
-     */
-    public LiveData<Resource<TasksList>> responseFromFetchContinueTasks() {
-        return responseFromFetchContinueTasks;
-    }
-
-    /**
-     *
-     */
-    public LiveData<Resource<TasksList>> responseFromFetchTestTasks() {
-        return responseFromFetchTestTasks;
-    }
-
-    /**
-     *
-     */
-    public LiveData<Resource<TasksList>> responseFromFetchFinishedTasks() {
-        return responseFromFetchFinishedTasks;
-    }
-
-    /**
-     *
-     */
-    public LiveData<Resource<TasksList>> responseFromFetchMyListTasks() {
-        return responseFromFetchMyListTasks;
-    }
 
     public MutableLiveData<Resource<User>> responseFromFetchUserDetails() {
         return responseFromFetchUser;
@@ -1018,8 +947,8 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         return responseFromFetchVideoTests;
     }
 
-    public MutableLiveData<Resource<VideoTopicSchema[]>> responseFromFetchCategories() {
-        return responseFromCategories;
+    public MutableLiveData<Resource<TasksList[]>> responseFromFetchTasks() {
+        return responseFromFetchTasks;
     }
 
     public MutableLiveData<Resource<AuthResponse>> responseFromAuth() {
@@ -1030,8 +959,120 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     /*******************
      * DATA MAPPER
      *******************/
+
+    //*******SCHEMA TO Model************
     private User getUserFromSchema(UserSchema userSchema) {
         return new User(userSchema.email, userSchema.password, userSchema.subLanguage, userSchema.audioLanguage,
                 userSchema.interfaceMode);
     }
+
+    private VideoTopic[] getTopicFromSchema(VideoTopicSchema[] videoTopicSchemas) {
+        VideoTopic[] videoTopics = new VideoTopic[videoTopicSchemas.length];
+
+        for (int i = 0; i < videoTopicSchemas.length; i++) {
+            videoTopics[i] = new VideoTopic(videoTopicSchemas[i].imageName, videoTopicSchemas[i].language,
+                    videoTopicSchemas[i].name);
+        }
+
+        return videoTopics;
+    }
+
+    private TasksList[] getTasksListFromSchema(TasksListSchema[] tasksListSchemas) {
+        TasksList[] tasksLists = new TasksList[tasksListSchemas.length];
+        for (int i = 0; i < tasksListSchemas.length; i++) {
+            tasksLists[i] = new TasksList(getTasksFromSchema(tasksListSchemas[i].tasks),
+                    new Category(tasksListSchemas[i].category.orderIndex,
+                            tasksListSchemas[i].category.name, tasksListSchemas[i].category.visible));
+        }
+
+        return tasksLists;
+    }
+
+    private ErrorReason[] getReasonsFromSchema(ErrorReasonSchema[] errorReasonSchemas) {
+        ErrorReason[] errorReasons = new ErrorReason[errorReasonSchemas.length];
+
+        for (int i = 0; i < errorReasonSchemas.length; i++) {
+            errorReasons[i] = new ErrorReason(errorReasonSchemas[i].reasonCode, errorReasonSchemas[i].name,
+                    errorReasonSchemas[i].description, errorReasonSchemas[i].language);
+        }
+
+        return errorReasons;
+    }
+
+    private Task[] getTasksFromSchema(TaskSchema[] taskSchemas) {
+        Task[] tasks = new Task[taskSchemas.length];
+
+        for (int i = 0; i < taskSchemas.length; i++) {
+            tasks[i] = new Task(taskSchemas[i].taskId, taskSchemas[i].videoId, taskSchemas[i].videoTitleTranslated,
+                    taskSchemas[i].videoDescriptionTranslated, taskSchemas[i].subLanguage, taskSchemas[i].type, getVideoFromSchema(taskSchemas[i].video),
+                    getUserTasksFromSchema(taskSchemas[i].userTasks));
+        }
+        return tasks;
+    }
+
+    private UserTask[] getUserTasksFromSchema(UserTaskSchema[] userTaskSchemas) {
+        UserTask[] userTasks = new UserTask[userTaskSchemas.length];
+        for (int i = 0; i < userTaskSchemas.length; i++) {
+            userTasks[i] = getUserTaskFromSchema(userTaskSchemas[i]);
+        }
+
+        return userTasks;
+    }
+
+    private UserTask getUserTaskFromSchema(UserTaskSchema userTaskSchema) {
+        return new UserTask(userTaskSchema.id, userTaskSchema.userId, userTaskSchema.taskId, userTaskSchema.completed,
+                userTaskSchema.rating, userTaskSchema.timeWatched, userTaskSchema.subtitleVersion, getUserTaskErrorsFromSchema(userTaskSchema.userTaskErrorList));
+    }
+
+    private UserTaskError[] getUserTaskErrorsFromSchema(UserTaskErrorSchema[] userTaskErrorSchemas) {
+        UserTaskError[] userTaskErrors = new UserTaskError[userTaskErrorSchemas.length];
+
+        for (int i = 0; i < userTaskErrorSchemas.length; i++) {
+            userTaskErrors[i] = new UserTaskError(userTaskErrorSchemas[i].reasonCode,
+                    userTaskErrorSchemas[i].subtitlePosition, userTaskErrorSchemas[i].comment);
+        }
+
+        return userTaskErrors;
+    }
+
+    private Video getVideoFromSchema(VideoSchema videoSchema) {
+        return new Video(videoSchema.videoId, videoSchema.primaryAudioLanguageCode, videoSchema.speakerName,
+                videoSchema.title, videoSchema.description, videoSchema.duration, videoSchema.thumbnail,
+                videoSchema.team, videoSchema.project, videoSchema.videoUrl);
+    }
+
+    private Subtitle getSubtitleFromSchema(SubtitleSchema subtitleSchema) {
+        return new Subtitle(subtitleSchema.versionNumber, getSubtitleTextFromSchema(subtitleSchema.subtitles), subtitleSchema.subFormat, subtitleSchema.videoTitleTranslated,
+                subtitleSchema.videoDescriptionTranslated, subtitleSchema.videoTitleOriginal, subtitleSchema.videoDescriptionOriginal);
+    }
+
+    private List<SubtitleText> getSubtitleTextFromSchema(List<SubtitleTextSchema> subtitleTextSchema) {
+        List<SubtitleText> subtitleTextList = new ArrayList<>();
+        for (SubtitleTextSchema textSchema : subtitleTextSchema) {
+            subtitleTextList.add(new SubtitleText(textSchema.getText(), textSchema.getPosition(),
+                    textSchema.getStart(), textSchema.getEnd()));
+        }
+        return subtitleTextList;
+    }
+
+    private VideoTest[] getVideoTestFromSchema(VideoTestSchema[] data) {
+        VideoTest[] videoTests = new VideoTest[data.length];
+        for (int i = 0; i < data.length; i++) {
+            videoTests[i] = new VideoTest(data[i].id, data[i].videoId, data[i].subtitleVersion,
+                    data[i].subtitleLanguageCode);
+        }
+        return videoTests;
+    }
+
+
+    private String getErrorReasonListSchemaFromModel(List<ErrorReason> errorReasonList) {
+        List<ErrorReasonSchema> errorReasonSchemas = new ArrayList<>();
+        for (ErrorReason errorReason : errorReasonList) {
+            errorReasonSchemas.add(new ErrorReasonSchema(errorReason.getReasonCode(), errorReason.getName(),
+                    errorReason.getDescription(),
+                    errorReason.getLanguage()));
+        }
+        return new Gson().toJson(errorReasonSchemas);
+    }
+
 }

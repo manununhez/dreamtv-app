@@ -27,7 +27,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import timber.log.Timber;
 
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_EMAIL;
-import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PASSWORD;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_LOG_EVENT_LOGIN;
 
 

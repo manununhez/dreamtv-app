@@ -1,10 +1,8 @@
-package com.dream.dreamtv.data.networking.model;
+package com.dream.dreamtv.data.model;
 
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by manuel on 6/12/17.
@@ -12,50 +10,6 @@ import com.google.gson.annotations.SerializedName;
 
 public class Video implements Parcelable {
 
-
-    private static final String YOUTUBE_COM = "youtube.com";
-    private static final String QUERY_PARAMETER = "v";
-
-    @SerializedName("video_id")
-    public String videoId;
-    @SerializedName("primary_audio_language_code")
-    public String primaryAudioLanguageCode;
-    @SerializedName("speaker_name")
-    public String speakerName;
-    @SerializedName("title")
-    public String title;
-    @SerializedName("description")
-    public String description;
-    @SerializedName("duration")
-    public int duration; //secs
-    @SerializedName("thumbnail")
-    public String thumbnail;
-    @SerializedName("team")
-    public String team;
-    @SerializedName("project")
-    public String project;
-    @SerializedName("video_url")
-    public String videoUrl;
-    @SerializedName("created_at")
-    public String created_at;
-    @SerializedName("updated_at")
-    public String updated_at;
-
-
-    protected Video(Parcel in) {
-        videoId = in.readString();
-        primaryAudioLanguageCode = in.readString();
-        speakerName = in.readString();
-        title = in.readString();
-        description = in.readString();
-        duration = in.readInt();
-        thumbnail = in.readString();
-        team = in.readString();
-        project = in.readString();
-        videoUrl = in.readString();
-        created_at = in.readString();
-        updated_at = in.readString();
-    }
 
     public static final Creator<Video> CREATOR = new Creator<Video>() {
         @Override
@@ -68,6 +22,45 @@ public class Video implements Parcelable {
             return new Video[size];
         }
     };
+    private static final String YOUTUBE_COM = "youtube.com";
+    private static final String QUERY_PARAMETER = "v";
+    public String videoId;
+    public String primaryAudioLanguageCode;
+    public String speakerName;
+    public String title;
+    public String description;
+    public int duration; //secs
+    public String thumbnail;
+    public String team;
+    public String project;
+    public String videoUrl;
+
+    public Video(String videoId, String primaryAudioLanguageCode, String speakerName, String title, String description,
+                 int duration, String thumbnail, String team, String project, String videoUrl) {
+        this.videoId = videoId;
+        this.primaryAudioLanguageCode = primaryAudioLanguageCode;
+        this.speakerName = speakerName;
+        this.title = title;
+        this.description = description;
+        this.duration = duration;
+        this.thumbnail = thumbnail;
+        this.team = team;
+        this.project = project;
+        this.videoUrl = videoUrl;
+    }
+
+    protected Video(Parcel in) {
+        videoId = in.readString();
+        primaryAudioLanguageCode = in.readString();
+        speakerName = in.readString();
+        title = in.readString();
+        description = in.readString();
+        duration = in.readInt();
+        thumbnail = in.readString();
+        team = in.readString();
+        project = in.readString();
+        videoUrl = in.readString();
+    }
 
     public boolean isUrlFromYoutube() {
         return this.videoUrl.contains(YOUTUBE_COM);
@@ -105,8 +98,6 @@ public class Video implements Parcelable {
         dest.writeString(team);
         dest.writeString(project);
         dest.writeString(videoUrl);
-        dest.writeString(created_at);
-        dest.writeString(updated_at);
     }
 
     @Override
@@ -122,8 +113,6 @@ public class Video implements Parcelable {
                 ", team='" + team + '\'' +
                 ", project='" + project + '\'' +
                 ", videoUrl='" + videoUrl + '\'' +
-                ", created_at='" + created_at + '\'' +
-                ", updated_at='" + updated_at + '\'' +
                 '}';
     }
 }

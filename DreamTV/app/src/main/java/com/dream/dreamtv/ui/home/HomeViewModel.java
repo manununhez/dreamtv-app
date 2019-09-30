@@ -2,46 +2,58 @@ package com.dream.dreamtv.ui.home;
 
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.dream.dreamtv.data.model.Category.Type;
-import com.dream.dreamtv.data.model.VideoDuration;
-import com.dream.dreamtv.data.networking.model.Resource;
-import com.dream.dreamtv.data.networking.model.TasksList;
+import com.dream.dreamtv.data.model.TasksList;
 import com.dream.dreamtv.data.model.User;
-import com.dream.dreamtv.data.networking.model.VideoTopicSchema;
+import com.dream.dreamtv.data.model.VideoDuration;
+import com.dream.dreamtv.data.model.VideoTopic;
+import com.dream.dreamtv.data.networking.model.Resource;
 import com.dream.dreamtv.repository.AppRepository;
 
 public class HomeViewModel extends ViewModel {
 
     private final AppRepository mRepository;
+    private final LiveData<Resource<VideoTopic[]>> categoriesLD;
+    private LiveData<Resource<TasksList[]>> tasksLD;
+    private MutableLiveData<Boolean> reloadTrigger;
 
     public HomeViewModel(AppRepository appRepository) {
         mRepository = appRepository;
-    }
 
-    void initSyncData() {
+        reloadTrigger = new MutableLiveData<>();
+
+        //initSyncData
         mRepository.fetchReasons();
         mRepository.fetchVideoTestsDetails();
 
-        syncAllCategories();
-    }
+        categoriesLD = mRepository.fetchCategories();
 
-    void syncAllCategories() {
-        // Recommended videos, continue watching, my videos, categories, newest videos, see again, settings
-
-//        if (getTestingMode())
-//            mRepository.updateTasksCategory(Type.TEST);
+//        tasksLD = Transformations.switchMap(reloadTrigger, input -> {
+//            if (!input)
+//                return AbsentLiveData.create();
 //
-//        mRepository.updateTasksCategory(Type.ALL);
-        mRepository.updateTasksCategory(Type.FINISHED);
-//        mRepository.updateTasksCategory(Type.CONTINUE);
-//        mRepository.updateTasksCategory(Type.MY_LIST);
+//            return mRepository.fetchTasks(Type.ALL);
+//
+//        });
+
+        syncTasks();
 
     }
 
-    void updateTaskByCategory(Type category) {
-        mRepository.updateTasksCategory(category);
+
+    void syncTasks() {
+        tasksLD = mRepository.fetchTasks(Type.ALL);
+    }
+
+    LiveData<Resource<TasksList[]>> fetchTasks() {
+        return tasksLD;
+    }
+
+    void refreshTasks(boolean refreshAgain) {
+        reloadTrigger.setValue(refreshAgain);
     }
 
 
@@ -49,30 +61,27 @@ public class HomeViewModel extends ViewModel {
         return mRepository.getTestingModePref();
     }
 
-    public User getUser() {
+    User getUser() {
         return mRepository.getUser();
     }
 
-    LiveData<Resource<TasksList>> requestTasksByCategory(Type category) {
-        //TODO should this change with Transformations after login or user update?
-        return mRepository.requestTaskByCategory(category);
-    }
-
-    LiveData<Resource<VideoTopicSchema[]>> fetchCategories() {
-        return mRepository.fetchCategories();
-    }
-
-    LiveData<Resource<User>> updateUser(User userData) {
-        return mRepository.updateUser(userData);
+    void updateUser(User userData) {
+        mRepository.updateUser(userData);
     }
 
 
-    public String getSubtitleSize() {
-       return mRepository.getSubtitleSizePref();
+    LiveData<Resource<VideoTopic[]>> fetchCategories() {
+        return categoriesLD;
     }
 
-    public VideoDuration getVideoDuration() {
+
+    String getSubtitleSize() {
+        return mRepository.getSubtitleSizePref();
+    }
+
+    VideoDuration getVideoDuration() {
         return mRepository.getVideoDurationPref();
     }
+
 }
 

@@ -1,28 +1,11 @@
-package com.dream.dreamtv.data.networking.model;
+package com.dream.dreamtv.data.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.gson.annotations.SerializedName;
+import java.util.List;
 
 public class UserTaskError implements Parcelable {
-    @SerializedName("user_tasks_id")
-    private int userTasksId;
-    @SerializedName("reason_code")
-    private String reasonCode;
-    @SerializedName("subtitle_position")
-    private int subtitlePosition;
-    @SerializedName("comment")
-    private String comment;
-
-
-    public UserTaskError(Parcel in) {
-        userTasksId = in.readInt();
-        reasonCode = in.readString();
-        subtitlePosition = in.readInt();
-        comment = in.readString();
-    }
-
     public static final Creator<UserTaskError> CREATOR = new Creator<UserTaskError>() {
         @Override
         public UserTaskError createFromParcel(Parcel in) {
@@ -34,20 +17,35 @@ public class UserTaskError implements Parcelable {
             return new UserTaskError[size];
         }
     };
+    private String reasonCode;
+    private List<ErrorReason> errorReasonList;
+    private int subtitlePosition;
+    private String comment;
 
     public UserTaskError(String reasonCode, int subtitlePosition, String comment) {
         this.reasonCode = reasonCode;
         this.subtitlePosition = subtitlePosition;
         this.comment = comment;
-
     }
 
-    public int getUserTasksId() {
-        return userTasksId;
+    public UserTaskError(List<ErrorReason> errorReasonList, int subtitlePosition, String comment) {
+        this.errorReasonList = errorReasonList;
+        this.subtitlePosition = subtitlePosition;
+        this.comment = comment;
     }
 
-    public void setUserTasksId(int userTasksId) {
-        this.userTasksId = userTasksId;
+    public UserTaskError(Parcel in) {
+        reasonCode = in.readString();
+        subtitlePosition = in.readInt();
+        comment = in.readString();
+    }
+
+    public List<ErrorReason> getErrorReasonList() {
+        return errorReasonList;
+    }
+
+    public void setErrorReasonList(List<ErrorReason> errorReasonList) {
+        this.errorReasonList = errorReasonList;
     }
 
     public String getReasonCode() {
@@ -82,7 +80,6 @@ public class UserTaskError implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(userTasksId);
         dest.writeString(reasonCode);
         dest.writeInt(subtitlePosition);
         dest.writeString(comment);
@@ -91,7 +88,6 @@ public class UserTaskError implements Parcelable {
     @Override
     public String toString() {
         return "UserTaskError{" +
-                "userTasksId=" + userTasksId +
                 ", reasonCode='" + reasonCode + '\'' +
                 ", subtitlePosition=" + subtitlePosition +
                 ", comment='" + comment + '\'' +

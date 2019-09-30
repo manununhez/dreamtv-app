@@ -1,9 +1,7 @@
-package com.dream.dreamtv.data.networking.model;
+package com.dream.dreamtv.data.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,28 +27,26 @@ public class UserTask implements Parcelable {
     private static final int ONE_SEC_IN_MS = 1000;
     private static final int SECS_IN_ONE_MIN = 60;
 
-    @SerializedName("id")
     public int id;
-    @SerializedName("user_id")
     private int userId;
-    @SerializedName("task_id")
     private int taskId;
-    @SerializedName("subtitle_version")
-    private String subtitleVersion;
-    @SerializedName("completed")
     private int completed;
-    @SerializedName("rating")
     private int rating;
-    @SerializedName("user_task_errors")
-    private UserTaskError[] userTaskErrorList;
-    @SerializedName("time_watched")
     private int timeWatched;
-    @SerializedName("created_at")
-    private String created_at;
-    @SerializedName("updated_at")
-    private String updated_at;
+    private String subtitleVersion;
+    private UserTaskError[] userTaskErrorList;
 
-    public UserTask() {
+
+    public UserTask(int id, int userId, int taskId, int completed, int rating, int timeWatched,
+                    String subtitleVersion, UserTaskError[] userTaskErrorList) {
+        this.id = id;
+        this.userId = userId;
+        this.taskId = taskId;
+        this.completed = completed;
+        this.rating = rating;
+        this.timeWatched = timeWatched;
+        this.subtitleVersion = subtitleVersion;
+        this.userTaskErrorList = userTaskErrorList;
     }
 
     protected UserTask(Parcel in) {
@@ -62,8 +58,6 @@ public class UserTask implements Parcelable {
         completed = in.readInt();
         rating = in.readInt();
         userTaskErrorList = in.createTypedArray(UserTaskError.CREATOR);
-        created_at = in.readString();
-        updated_at = in.readString();
     }
 
     public int getTimeWatchedInSecs() {
@@ -87,7 +81,7 @@ public class UserTask implements Parcelable {
 
         if (this.userTaskErrorList != null && this.userTaskErrorList.length > 0)
             for (UserTaskError userTaskError : this.userTaskErrorList) {
-                if(userTaskError.getSubtitlePosition() > subtitlePosition)
+                if (userTaskError.getSubtitlePosition() > subtitlePosition)
                     break;
                 else if (userTaskError.getSubtitlePosition() == subtitlePosition) {
                     userTaskErrorList.add(userTaskError);
@@ -108,8 +102,6 @@ public class UserTask implements Parcelable {
         dest.writeInt(completed);
         dest.writeInt(rating);
         dest.writeTypedArray(userTaskErrorList, flags);
-        dest.writeString(created_at);
-        dest.writeString(updated_at);
     }
 
     @Override
@@ -174,21 +166,6 @@ public class UserTask implements Parcelable {
         this.userTaskErrorList = userTaskErrors.toArray(this.userTaskErrorList);
     }
 
-    public String getCreated_at() {
-        return created_at;
-    }
-
-    public void setCreated_at(String created_at) {
-        this.created_at = created_at;
-    }
-
-    public String getUpdated_at() {
-        return updated_at;
-    }
-
-    public void setUpdated_at(String updated_at) {
-        this.updated_at = updated_at;
-    }
 
     @Override
     public String toString() {
@@ -201,8 +178,6 @@ public class UserTask implements Parcelable {
                 ", rating=" + rating +
                 ", userTaskErrorList=" + Arrays.toString(userTaskErrorList) +
                 ", timeWatched=" + timeWatched +
-                ", created_at='" + created_at + '\'' +
-                ", updated_at='" + updated_at + '\'' +
                 '}';
     }
 }

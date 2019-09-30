@@ -25,7 +25,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.dream.dreamtv.R;
-import com.dream.dreamtv.data.networking.model.Task;
+import com.dream.dreamtv.data.model.Task;
 
 import timber.log.Timber;
 
@@ -80,10 +80,10 @@ public class VideoCardPresenter extends Presenter {
 
         Timber.d("onBindViewHolder");
 //        String videoTypeTitle = video.video_type != null ? ("[" + video.video_type.toLowerCase() + "] ") : "";
-        cardView.setTitleText(task.videoTitleTranslated);
-        cardView.setContentText(task.videoDescriptionTranslated);
+        cardView.setTitleText(task.getVideoTitleTranslated());
+        cardView.setContentText(task.getVideoDescriptionTranslated());
 
-        if (task.video.thumbnail != null) {
+        if (task.getVideo().thumbnail != null) {
             // Set card size from dimension resources.
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
 
@@ -95,7 +95,7 @@ public class VideoCardPresenter extends Presenter {
                     .priority(Priority.HIGH);
 
             Glide.with(viewHolder.view.getContext())
-                    .load(task.video.thumbnail)
+                    .load(task.getVideo().thumbnail)
                     .apply(options)
                     .into(cardView.getMainImageView());
         }

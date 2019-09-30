@@ -23,13 +23,13 @@ import androidx.lifecycle.ViewModelProviders;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
 import com.dream.dreamtv.data.model.Category;
+import com.dream.dreamtv.data.model.Subtitle;
+import com.dream.dreamtv.data.model.Subtitle.SubtitleText;
+import com.dream.dreamtv.data.model.Task;
+import com.dream.dreamtv.data.model.UserTask;
+import com.dream.dreamtv.data.model.UserTaskError;
 import com.dream.dreamtv.data.networking.model.Resource;
 import com.dream.dreamtv.data.networking.model.Resource.Status;
-import com.dream.dreamtv.data.networking.model.Subtitle;
-import com.dream.dreamtv.data.networking.model.SubtitleResponse;
-import com.dream.dreamtv.data.networking.model.Task;
-import com.dream.dreamtv.data.networking.model.UserTask;
-import com.dream.dreamtv.data.networking.model.UserTaskError;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment;
 import com.dream.dreamtv.ui.playVideo.dialogs.RatingDialogFragment;
@@ -97,7 +97,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private VideoView mVideoView;
     private LoadingDialog loadingDialog;
     private PlaybackViewModel mViewModel;
-    private SubtitleResponse mSubtitleResponse;
+    private Subtitle mSubtitleResponse;
     private RelativeLayout rlVideoPlayerInfo;
     private RelativeLayout rlVideoPlayerProgress;
     private TextView tvSubtitle;
@@ -121,8 +121,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playback_videos);
-
-        Timber.d("$$ onCreate");
 
         if (savedInstanceState != null) {
             mSelectedTask = savedInstanceState.getParcelable(INTENT_TASK);
@@ -309,16 +307,15 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         mVideoView.setFocusable(false);
         mVideoView.setFocusableInTouchMode(false);
 
-        mVideoView.setVideoPath(mSelectedTask.video.videoUrl);
+        mVideoView.setVideoPath(mSelectedTask.getVideo().videoUrl);
 
         mVideoView.setOnErrorListener((mp, what, extra) -> {
-            String msg = "";
             if (extra == MediaPlayer.MEDIA_ERROR_TIMED_OUT) {
-                msg = getString(R.string.video_error_media_load_timeout);
+                Timber.e(getString(R.string.video_error_media_load_timeout));
             } else if (what == MediaPlayer.MEDIA_ERROR_SERVER_DIED) {
-                msg = getString(R.string.video_error_server_inaccessible);
+                Timber.e(getString(R.string.video_error_server_inaccessible));
             } else {
-                msg = getString(R.string.video_error_unknown_error);
+                Timber.e(getString(R.string.video_error_unknown_error));
             }
             stopVideo();
             return false;
@@ -386,7 +383,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
         mVideoView.pause();
 
         String currentTime = TimeUtils.getTimeFormat(this, position);
-        String videoDuration = TimeUtils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs());
+        String videoDuration = TimeUtils.getTimeFormat(this, mSelectedTask.getVideo().getVideoDurationInMs());
 
         tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
 
@@ -424,16 +421,16 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
                     //Updating progress
                     tvCurrentTime.setText(TimeUtils.getTimeFormat(this, mVideoView.getCurrentPosition()));
-                    int videoProgress = (int) (((float) mVideoView.getCurrentPosition() / (float) mSelectedTask.video.getVideoDurationInMs()) * 100);
+                    int videoProgress = (int) (((float) mVideoView.getCurrentPosition() / (float) mSelectedTask.getVideo().getVideoDurationInMs()) * 100);
                     pbProgress.setProgress(videoProgress);
                     pbProgress.setSecondaryProgress(videoProgress + BUFFER_VALUE_PB);
                 }
 
                 //Subtitles
-                Subtitle selectedSubtitle = mSubtitleResponse.getSyncSubtitleText(mVideoView.getCurrentPosition());
+                SubtitleText selectedSubtitle = mSubtitleResponse.getSyncSubtitleText(mVideoView.getCurrentPosition());
 
                 if (selectedSubtitle != null) //if subtitle == null, there is not subtitle in the time selected
-                    userTaskErrorListForSttlPos = mUserTask.getUserTaskErrorsForASpecificSubtitlePosition(selectedSubtitle.position);
+                    userTaskErrorListForSttlPos = mUserTask.getUserTaskErrorsForASpecificSubtitlePosition(selectedSubtitle.getPosition());
                 else userTaskErrorListForSttlPos.clear();
 
                 showSubtitle(selectedSubtitle, userTaskErrorListForSttlPos);
@@ -466,31 +463,31 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     }
 
     @Override
-    public void showSubtitle(Subtitle subtitle) {
+    public void showSubtitle(SubtitleText subtitle) {
         if (subtitle == null) {
             tvSubtitle.setVisibility(View.GONE);
             tvSubtitleError.setVisibility(View.GONE);
         } else {
             tvSubtitleError.setVisibility(View.GONE);
             tvSubtitle.setVisibility(View.VISIBLE);
-            tvSubtitle.setText(Html.fromHtml(subtitle.text));
+            tvSubtitle.setText(Html.fromHtml(subtitle.getText()));
         }
     }
 
     @Override
-    public void showSubtitleWithErrors(Subtitle subtitle) {
+    public void showSubtitleWithErrors(SubtitleText subtitle) {
         if (subtitle == null) {
             tvSubtitle.setVisibility(View.GONE);
             tvSubtitleError.setVisibility(View.GONE);
         } else {
             tvSubtitle.setVisibility(View.GONE);
             tvSubtitleError.setVisibility(View.VISIBLE);
-            tvSubtitleError.setText(Html.fromHtml(subtitle.text));
+            tvSubtitleError.setText(Html.fromHtml(subtitle.getText()));
         }
     }
 
     @Override
-    public void showSubtitle(Subtitle subtitle, ArrayList<UserTaskError> userTaskErrorListForSttlPos) {
+    public void showSubtitle(SubtitleText subtitle, ArrayList<UserTaskError> userTaskErrorListForSttlPos) {
         if (userTaskErrorListForSttlPos.size() > 0) {
 //            Timber.d("Position = " + subtitle.position + " List: " + userTaskErrorListForSttlPos.toString());
             showSubtitleWithErrors(subtitle);
@@ -501,13 +498,13 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
     @Override
     public void showReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
-        Subtitle subtitle = mSubtitleResponse.getSyncSubtitleText(subtitlePosition);
+        SubtitleText subtitle = mSubtitleResponse.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) { //only shows the popup when exist an subtitle
 
             dismissLoading(); //in case the loading is still visible
 
             ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(mViewModel.getReasons(), mViewModel.getUser(), mSubtitleResponse,
-                    subtitle.position, mSelectedTask, userTask);
+                    subtitle.getPosition(), mSelectedTask, userTask);
             if (!isFinishing()) {
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction transaction = fm.beginTransaction();
@@ -520,13 +517,13 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     @Override
     public void showReasonDialogPopUp(long subtitlePosition, UserTask userTask,
                                       ArrayList<UserTaskError> userTaskErrorList) {
-        Subtitle subtitle = mSubtitleResponse.getSyncSubtitleText(subtitlePosition);
+        SubtitleText subtitle = mSubtitleResponse.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) { //only shows the popup when exist an subtitle
             dismissLoading(); //in case the loading is still visible
 
             ErrorSelectionDialogFragment errorSelectionDialogFragment =
                     ErrorSelectionDialogFragment.newInstance(mViewModel.getReasons(), mViewModel.getUser(), mSubtitleResponse,
-                            subtitle.position, mSelectedTask, userTask, userTaskErrorList);
+                            subtitle.getPosition(), mSelectedTask, userTask, userTaskErrorList);
             if (!isFinishing()) {
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction transaction = fm.beginTransaction();
@@ -552,20 +549,20 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     }
 
     @Override
-    public void onDialogClosed(Subtitle selectedSubtitle, int subtitleOriginalPosition) {
-        Subtitle subtitleOneBeforeNew;
+    public void onDialogClosed(SubtitleText selectedSubtitle, int subtitleOriginalPosition) {
+        SubtitleText subtitleOneBeforeNew;
 
         // A subtitle from the subtitle navigation was pressed. The video is moving forward or backward
-        if (selectedSubtitle.position != subtitleOriginalPosition) { //a different subtitle from the original was selected
-            if (selectedSubtitle.position - AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION >= 0) { //avoid index out of range
-                subtitleOneBeforeNew = mSubtitleResponse.subtitles.get(
-                        selectedSubtitle.position - AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION); //We go to the end of one subtitle before the previous of the selected subtitle
+        if (selectedSubtitle.getPosition() != subtitleOriginalPosition) { //a different subtitle from the original was selected
+            if (selectedSubtitle.getPosition() - AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION >= 0) { //avoid index out of range
+                subtitleOneBeforeNew = mSubtitleResponse.getSubtitles().get(
+                        selectedSubtitle.getPosition() - AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION); //We go to the end of one subtitle before the previous of the selected subtitle
                 if (selectedSubtitle.getStart() - subtitleOneBeforeNew.getEnd() < DIFFERENCE_TIME_IN_MS)
                     mVideoView.seekTo(subtitleOneBeforeNew.getEnd() - DIFFERENCE_TIME_IN_MS);
                 else
                     mVideoView.seekTo(subtitleOneBeforeNew.getEnd());
             } else {
-                subtitleOneBeforeNew = mSubtitleResponse.subtitles.get(0); //nos vamos al primer subtitulo
+                subtitleOneBeforeNew = mSubtitleResponse.getSubtitles().get(0); //nos vamos al primer subtitulo
                 mVideoView.seekTo(subtitleOneBeforeNew.getStart() - DIFFERENCE_TIME_IN_MS); //inicio del primer sub
             }
 
@@ -665,8 +662,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     }
 
     private void setupInfoPlayer() {
-        tvVideoTitle.setText(mSubtitleResponse.videoTitleTranslated);
-        tvTotalTime.setText(TimeUtils.getTimeFormat(this, mSelectedTask.video.getVideoDurationInMs()));
+        tvVideoTitle.setText(mSubtitleResponse.getVideoTitleTranslated());
+        tvTotalTime.setText(TimeUtils.getTimeFormat(this, mSelectedTask.getVideo().getVideoDurationInMs()));
         if (mPlayFromBeginning)
             tvCurrentTime.setText(TimeUtils.getTimeFormat(this, 0));
         else
@@ -688,7 +685,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             case FIREBASE_LOG_EVENT_PRESSED_SAVED_ERRORS:
             case FIREBASE_LOG_EVENT_PRESSED_UPDATED_ERRORS:
                 bundle.putInt(FIREBASE_KEY_USER_TASK_ID, mUserTask.id);
-                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.getTaskId());
                 break;
             case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY:
             case FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE:
@@ -700,22 +697,22 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             case FIREBASE_LOG_EVENT_PRESSED_DISMISS_PROGRESS_PLAYER:
             case FIREBASE_LOG_EVENT_PRESSED_REMOTE_BACK_BTN:
             case FIREBASE_LOG_EVENT_VIDEO_COMPLETED:
-                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.getTaskId());
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.getVideo().videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().primaryAudioLanguageCode);
                 break;
             case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T:
                 logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
-                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.getTaskId());
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.getVideo().videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().primaryAudioLanguageCode);
                 bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
                 break;
             case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F:
                 logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
-                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.taskId);
-                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.video.videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.video.primaryAudioLanguageCode);
+                bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.getTaskId());
+                bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.getVideo().videoId);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().primaryAudioLanguageCode);
                 bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
                 break;
             default:

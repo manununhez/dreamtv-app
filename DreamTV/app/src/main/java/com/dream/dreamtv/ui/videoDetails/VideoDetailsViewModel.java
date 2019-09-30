@@ -6,11 +6,11 @@ import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.dream.dreamtv.data.model.Category;
+import com.dream.dreamtv.data.model.Subtitle;
+import com.dream.dreamtv.data.model.Task;
+import com.dream.dreamtv.data.model.UserTask;
+import com.dream.dreamtv.data.model.VideoTest;
 import com.dream.dreamtv.data.networking.model.Resource;
-import com.dream.dreamtv.data.networking.model.SubtitleResponse;
-import com.dream.dreamtv.data.networking.model.Task;
-import com.dream.dreamtv.data.networking.model.UserTask;
-import com.dream.dreamtv.data.networking.model.VideoTest;
 import com.dream.dreamtv.repository.AppRepository;
 import com.dream.dreamtv.utils.AbsentLiveData;
 
@@ -22,7 +22,7 @@ import timber.log.Timber;
 public class VideoDetailsViewModel extends ViewModel {
     private final AppRepository mRepository;
     private final MutableLiveData<SubtitleId> subtitleIdMLD;
-    private final LiveData<Resource<SubtitleResponse>> subtitle;
+    private final LiveData<Resource<Subtitle>> subtitle;
 
     public VideoDetailsViewModel(AppRepository appRepository) {
         mRepository = appRepository;
@@ -51,7 +51,7 @@ public class VideoDetailsViewModel extends ViewModel {
     }
 
     void updateTaskByCategory(Category.Type category) {
-        mRepository.updateTasksCategory(category);
+        mRepository.fetchTasks(category);
     }
 
     boolean verifyIfTaskIsInList(Task task) {
@@ -60,14 +60,14 @@ public class VideoDetailsViewModel extends ViewModel {
 
 
     LiveData<Resource<Boolean>> requestAddToList(Task task) {
-        return mRepository.requestAddToList(task.taskId, task.subLanguage, task.video.primaryAudioLanguageCode);
+        return mRepository.requestAddToList(task.getTaskId(), task.getSubLanguage(), task.getVideo().primaryAudioLanguageCode);
     }
 
     LiveData<Resource<Boolean>> requestRemoveFromList(Task task) {
-        return mRepository.requestRemoveFromList(task.taskId);
+        return mRepository.requestRemoveFromList(task.getTaskId());
     }
 
-    LiveData<Resource<SubtitleResponse>> fetchSubtitle() {
+    LiveData<Resource<Subtitle>> fetchSubtitle() {
         return subtitle;
     }
 
@@ -77,7 +77,7 @@ public class VideoDetailsViewModel extends ViewModel {
 
 
     LiveData<Resource<UserTask>> createUserTask(Task task, int mSubtitleVersion) {
-        return mRepository.createUserTask(task.taskId, mSubtitleVersion);
+        return mRepository.createUserTask(task.getTaskId(), mSubtitleVersion);
     }
 
     List<VideoTest> getVideoTests() {

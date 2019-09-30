@@ -31,7 +31,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.data.model.Card;
-import com.dream.dreamtv.data.networking.model.Task;
+import com.dream.dreamtv.data.model.Task;
 import com.dream.dreamtv.utils.TimeUtils;
 
 import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
@@ -97,7 +97,7 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
                     .priority(Priority.HIGH);
 
             Glide.with(getContext())
-                    .load(task.video.thumbnail)
+                    .load(task.getVideo().thumbnail)
                     .apply(options)
                     .into(imageView);
         }
@@ -109,29 +109,29 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
 
         //-------------- VIDEO INFO
         TextView secondaryText = cardView.findViewById(R.id.secondary_text);
-        secondaryText.setText(getContext().getString(R.string.title_video_details_main, task.video.project,
-                task.video.primaryAudioLanguageCode, task.subLanguage));
+        secondaryText.setText(getContext().getString(R.string.title_video_details_main, task.getVideo().project,
+                task.getVideo().primaryAudioLanguageCode, task.getSubLanguage()));
 
         //-------------- VIDEO DESCRIPTION
 //        TextView extraText = cardView.findViewById(R.id.extra_text);
 //        extraText.setText(card.getExtraText());
 
         //-------------- VIDEO DURATION
-        String timeFormatted = TimeUtils.getTimeFormatMinSecsDoublePoints(task.video.getVideoDurationInMs());
+        String timeFormatted = TimeUtils.getTimeFormatMinSecsDoublePoints(task.getVideo().getVideoDurationInMs());
         TextView tvVideoDuration = cardView.findViewById(R.id.tvVideoDuration);
         tvVideoDuration.setText(timeFormatted);
 
         //-------------- ERRORS REPORT
         TextView errors = cardView.findViewById(R.id.tvErrorsSelected);
-        if (task.userTasks.length > 0 && task.userTasks[0].getUserTaskErrorList().length > 0) { //TODO what happened if we have more than one userTask, e.g same tasks, different subtVersions???
-            if (task.userTasks[0].getCompleted() == VIDEO_COMPLETED_WATCHING_TRUE)
+        if (task.getUserTasks().length > 0 && task.getUserTasks()[0].getUserTaskErrorList().length > 0) { //TODO what happened if we have more than one userTask, e.g same tasks, different subtVersions???
+            if (task.getUserTasks()[0].getCompleted() == VIDEO_COMPLETED_WATCHING_TRUE)
                 errors.setText(getContext().getResources()
                         .getQuantityString(R.plurals.errors_found_finished,
-                                task.userTasks[0].getUserTaskErrorList().length, task.userTasks[0].getUserTaskErrorList().length));
+                                task.getUserTasks()[0].getUserTaskErrorList().length, task.getUserTasks()[0].getUserTaskErrorList().length));
             else
                 errors.setText(getContext().getResources()
                         .getQuantityString(R.plurals.errors_found_continue,
-                                task.userTasks[0].getUserTaskErrorList().length, task.userTasks[0].getUserTaskErrorList().length));
+                                task.getUserTasks()[0].getUserTaskErrorList().length, task.getUserTasks()[0].getUserTaskErrorList().length));
         } else
             errors.setVisibility(View.GONE);
 
@@ -139,8 +139,8 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
         //-------------- VIDEO PROGRESS
         ProgressBar pbContinueWatching = cardView.findViewById(R.id.pbContinueWatching);
 
-        if (task.userTasks.length > 0 && task.userTasks[0].getTimeWatched() > 0) {  //TODO what happened if we have more than one userTask, e.g same tasks, different subtVersions???
-            int videoProgress = (int) (((float) task.userTasks[0].getTimeWatched() / (float) task.video.getVideoDurationInMs()) * 100);
+        if (task.getUserTasks().length > 0 && task.getUserTasks()[0].getTimeWatched() > 0) {  //TODO what happened if we have more than one userTask, e.g same tasks, different subtVersions???
+            int videoProgress = (int) (((float) task.getUserTasks()[0].getTimeWatched() / (float) task.getVideo().getVideoDurationInMs()) * 100);
             pbContinueWatching.setProgress(videoProgress);
         } else
             pbContinueWatching.setVisibility(View.GONE);
@@ -149,8 +149,8 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
         LinearLayout llTask = cardView.findViewById(R.id.llTask);
         RatingBar rbTask = cardView.findViewById(R.id.rbTask);
 
-        if (task.userTasks.length > 0 && task.userTasks[0].getRating() > 0)
-            rbTask.setRating(task.userTasks[0].getRating());
+        if (task.getUserTasks().length > 0 && task.getUserTasks()[0].getRating() > 0)
+            rbTask.setRating(task.getUserTasks()[0].getRating());
         else
             llTask.setVisibility(View.GONE);
 

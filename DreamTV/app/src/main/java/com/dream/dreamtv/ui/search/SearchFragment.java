@@ -26,9 +26,9 @@ import androidx.lifecycle.ViewModelProviders;
 import com.dream.dreamtv.R;
 import com.dream.dreamtv.ViewModelFactory;
 import com.dream.dreamtv.data.model.Card;
+import com.dream.dreamtv.data.model.Task;
 import com.dream.dreamtv.data.networking.model.Resource;
 import com.dream.dreamtv.data.networking.model.Resource.Status;
-import com.dream.dreamtv.data.networking.model.Task;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.presenter.CardPresenterSelector;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsActivity;
@@ -37,7 +37,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import timber.log.Timber;
 
@@ -55,12 +54,13 @@ import static com.dream.dreamtv.utils.Constants.STATUS_ERROR;
  */
 public class SearchFragment extends SearchSupportFragment
         implements SearchSupportFragment.SearchResultProvider {
+
     private static final boolean FINISH_ON_RECOGNIZER_CANCELED = true;
     private static final int REQUEST_SPEECH = 0x00000010;
     private final Handler mHandler = new Handler();
-    private ArrayObjectAdapter mRowsAdapter;
-    private String mQuery;
     private boolean mResultsFound = false;
+    private String mQuery;
+    private ArrayObjectAdapter mRowsAdapter;
     private SearchViewModel mViewModel;
     private LoadingDialog loadingDialog;
     private FirebaseAnalytics mFirebaseAnalytics;
@@ -72,14 +72,14 @@ public class SearchFragment extends SearchSupportFragment
 
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
 
-        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(Objects.requireNonNull(getActivity()));
+        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(requireActivity());
         mViewModel = ViewModelProviders.of(this, factory).get(SearchViewModel.class);
 
         setSearchResultProvider(this);
         instantiateLoading();
 
         // Obtain the FirebaseAnalytics instance.
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireActivity());
 
         setOnItemViewClickedListener(new ItemViewClickedListener());
         Timber.d("User is initiating a search. Do we have RECORD_AUDIO permission? %s", hasPermission(Manifest.permission.RECORD_AUDIO));
@@ -110,7 +110,7 @@ public class SearchFragment extends SearchSupportFragment
                 if (FINISH_ON_RECOGNIZER_CANCELED) {
                     if (!hasResults()) {
                         Timber.v("Voice search canceled");
-                        getView().findViewById(R.id.lb_search_bar_speech_orb).requestFocus();
+                        requireView().findViewById(R.id.lb_search_bar_speech_orb).requestFocus();
                     }
                 }
             }
@@ -141,7 +141,7 @@ public class SearchFragment extends SearchSupportFragment
     }
 
     private boolean hasPermission(final String permission) {
-        final Context context = getActivity();
+        final Context context = requireActivity();
         return PackageManager.PERMISSION_GRANTED == context.getPackageManager().checkPermission(
                 permission, context.getPackageName());
     }
@@ -163,7 +163,7 @@ public class SearchFragment extends SearchSupportFragment
     }
 
     private void showLoading() {
-        if (!Objects.requireNonNull(getActivity()).isFinishing())
+        if (!requireActivity().isFinishing())
             loadingDialog.show();
     }
 
@@ -229,7 +229,7 @@ public class SearchFragment extends SearchSupportFragment
     }
 
     public void focusOnSearch() {
-        getView().findViewById(R.id.lb_search_bar).requestFocus();
+        requireView().findViewById(R.id.lb_search_bar).requestFocus();
     }
 
     private void firebaseLoginEvents(String category, int taskId) {
@@ -262,7 +262,7 @@ public class SearchFragment extends SearchSupportFragment
 
                 startActivity(intent);
 
-                firebaseLoginEvents(card.getTitle(), task.taskId);
+                firebaseLoginEvents(card.getTitle(), task.getTaskId());
 
             } else
                 Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT).show();

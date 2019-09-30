@@ -16,8 +16,6 @@ package com.dream.dreamtv.data.model;
 
 import android.content.Context;
 
-import com.dream.dreamtv.data.networking.model.Task;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -48,11 +46,11 @@ public class Card {
     }
 
     public Card(Task task, Card.Type cardType) {
-        this(cardType, task.videoTitleTranslated);
+        this(cardType, task.getVideoTitleTranslated());
 
-        mDescription = !task.video.project.isEmpty() ? task.video.project : "<Project>";
-        mExtraText = !task.videoDescriptionTranslated.isEmpty() ? task.videoDescriptionTranslated : "<Description>";
-        mImageUrl = task.video.thumbnail;
+        mDescription = !task.getVideo().project.isEmpty() ? task.getVideo().project : "<Project>";
+        mExtraText = !task.getVideoDescriptionTranslated().isEmpty() ? task.getVideoDescriptionTranslated() : "<Description>";
+        mImageUrl = task.getVideo().thumbnail;
         mTask = task;
     }
 

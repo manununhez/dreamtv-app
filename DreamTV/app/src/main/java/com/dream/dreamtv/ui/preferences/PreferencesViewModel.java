@@ -16,6 +16,10 @@ public class PreferencesViewModel extends ViewModel {
         return mRepository.getUser();
     }
 
+    public void setUser(User user) {
+        mRepository.setUser(user);
+    }
+
     String getAudioLanguagePref() {
         return mRepository.getAudioLanguagePref();
     }
@@ -26,9 +30,5 @@ public class PreferencesViewModel extends ViewModel {
 
     String getInterfaceMode() {
         return mRepository.getInterfaceMode();
-    }
-
-    public void setUser(User user) {
-        mRepository.setUser(user);
     }
 }
