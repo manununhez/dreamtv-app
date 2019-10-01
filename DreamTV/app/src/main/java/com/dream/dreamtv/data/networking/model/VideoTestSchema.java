@@ -13,6 +13,6 @@ public class VideoTestSchema {
     public String videoId;
     @SerializedName("subtitle_version")
     public int subtitleVersion;
-    @SerializedName("subtitle_language_code")
-    public String subtitleLanguageCode;
+    @SerializedName("subtitle_language")
+    public String subLanguage;
 }

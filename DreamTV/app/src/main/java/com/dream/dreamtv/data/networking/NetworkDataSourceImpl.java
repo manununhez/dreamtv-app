@@ -61,7 +61,7 @@ import static com.dream.dreamtv.data.networking.NetworkUtils.searchURL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.userErrorsURL;
 import static com.dream.dreamtv.data.networking.NetworkUtils.userTaskURL;
 import static com.dream.dreamtv.data.networking.model.SubtitleSchema.SubtitleTextSchema;
-import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE_CONFIG;
+import static com.dream.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_CATEGORY;
 import static com.dream.dreamtv.utils.Constants.PARAM_COMPLETED;
 import static com.dream.dreamtv.utils.Constants.PARAM_EMAIL;
@@ -70,7 +70,7 @@ import static com.dream.dreamtv.utils.Constants.PARAM_PASSWORD;
 import static com.dream.dreamtv.utils.Constants.PARAM_QUERY;
 import static com.dream.dreamtv.utils.Constants.PARAM_RATING;
 import static com.dream.dreamtv.utils.Constants.PARAM_REASON_CODE;
-import static com.dream.dreamtv.utils.Constants.PARAM_SUB_LANGUAGE_CONFIG;
+import static com.dream.dreamtv.utils.Constants.PARAM_SUB_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.PARAM_SUB_POSITION;
 import static com.dream.dreamtv.utils.Constants.PARAM_SUB_VERSION;
 import static com.dream.dreamtv.utils.Constants.PARAM_TASK_ID;
@@ -709,12 +709,12 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_TASK_ID, String.valueOf(taskId));
-        params.put(PARAM_SUB_LANGUAGE_CONFIG, subLanguage);
-        params.put(PARAM_AUDIO_LANGUAGE_CONFIG, audioLanguage);
+        params.put(PARAM_SUB_LANGUAGE, subLanguage);
+        params.put(PARAM_AUDIO_LANGUAGE, audioLanguage);
 
         Timber.d("addTaskToList() Request URL: " + URL + " Params: " + PARAM_TASK_ID + "=>" + taskId
-                + "; " + PARAM_SUB_LANGUAGE_CONFIG + "=>" + subLanguage
-                + "; " + PARAM_AUDIO_LANGUAGE_CONFIG + "=>" + audioLanguage);
+                + "; " + PARAM_SUB_LANGUAGE + "=>" + subLanguage
+                + "; " + PARAM_AUDIO_LANGUAGE + "=>" + audioLanguage);
 
 
         mExecutors.networkIO().execute(() -> mVolley.requestString(POST, URL, params, new ResponseListener(mContext) {
@@ -1059,7 +1059,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
         VideoTest[] videoTests = new VideoTest[data.length];
         for (int i = 0; i < data.length; i++) {
             videoTests[i] = new VideoTest(data[i].id, data[i].videoId, data[i].subtitleVersion,
-                    data[i].subtitleLanguageCode);
+                    data[i].subLanguage);
         }
         return videoTests;
     }

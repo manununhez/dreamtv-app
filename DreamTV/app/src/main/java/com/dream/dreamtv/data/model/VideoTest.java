@@ -8,13 +8,13 @@ public class VideoTest {
     public int id;
     public String videoId;
     public int subtitleVersion;
-    public String subtitleLanguageCode;
+    public String subLanguage;
 
-    public VideoTest(int id, String videoId, int subtitleVersion, String subtitleLanguageCode) {
+    public VideoTest(int id, String videoId, int subtitleVersion, String subLanguage) {
         this.id = id;
         this.videoId = videoId;
         this.subtitleVersion = subtitleVersion;
-        this.subtitleLanguageCode = subtitleLanguageCode;
+        this.subLanguage = subLanguage;
     }
 
     @Override
@@ -23,7 +23,7 @@ public class VideoTest {
                 "id=" + id +
                 ", videoId='" + videoId + '\'' +
                 ", subtitleVersion=" + subtitleVersion +
-                ", languageCode='" + subtitleLanguageCode + '\'' +
+                ", languageCode='" + subLanguage + '\'' +
                 '}';
     }
 }

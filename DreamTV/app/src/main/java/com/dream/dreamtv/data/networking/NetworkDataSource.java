@@ -43,7 +43,7 @@ public interface NetworkDataSource {
 
     MutableLiveData<Resource<UserTask>> fetchUserTask();
 
-    MutableLiveData<Resource<Boolean>> addTaskToList(int taskId, String subLanguageConfig, String audioLanguageConfig);
+    MutableLiveData<Resource<Boolean>> addTaskToList(int taskId, String subLanguage, String audioLanguage);
 
     MutableLiveData<Resource<Boolean>> removeTaskFromList(int taskId);
 

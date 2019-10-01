@@ -108,8 +108,6 @@ public final class Constants {
     public static final String PARAM_AUDIO_LANGUAGE = "audio_language";
     public static final String PARAM_EMAIL = "email";
     public static final String PARAM_PASSWORD = "password";
-    public static final String PARAM_SUB_LANGUAGE_CONFIG = "sub_language_config";
-    public static final String PARAM_AUDIO_LANGUAGE_CONFIG = "audio_language_config";
     public static final String PARAM_SUB_VERSION = "subtitle_version";
     public static final String PARAM_TIME_WATCHED = "time_watched";
     public static final String PARAM_COMPLETED = "completed";

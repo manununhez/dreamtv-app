@@ -201,8 +201,8 @@ public class AppRepository {
         return mNetworkDataSource.createUserTask(taskId, mSubtitleVersion);
     }
 
-    public LiveData<Resource<Boolean>> requestAddToList(int taskId, String language, String primaryAudioLanguageCode) {
-        return mNetworkDataSource.addTaskToList(taskId, language, primaryAudioLanguageCode);
+    public LiveData<Resource<Boolean>> requestAddToList(int taskId, String language, String audioLanguage) {
+        return mNetworkDataSource.addTaskToList(taskId, language, audioLanguage);
 
     }
 
