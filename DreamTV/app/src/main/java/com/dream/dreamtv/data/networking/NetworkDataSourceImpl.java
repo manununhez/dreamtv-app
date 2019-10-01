@@ -783,14 +783,14 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
         Map<String, String> params = new HashMap<>();
         params.put(PARAM_TASK_ID, String.valueOf(userTask.getTaskId()));
-        params.put(PARAM_SUB_VERSION, userTask.getSubtitleVersion());
+        params.put(PARAM_SUB_VERSION, userTask.getSubVersion());
         params.put(PARAM_TIME_WATCHED, String.valueOf(userTask.getTimeWatched()));
         params.put(PARAM_COMPLETED, String.valueOf(userTask.
                 getCompleted()));
         params.put(PARAM_RATING, String.valueOf(userTask.getRating()));
 
         Timber.d("updateUserTask() Request URL: " + URL + " Params: " + PARAM_TASK_ID + "=>" + userTask.getTaskId()
-                + "; " + PARAM_SUB_VERSION + " => " + userTask.getSubtitleVersion());
+                + "; " + PARAM_SUB_VERSION + " => " + userTask.getSubVersion());
 
 
         mExecutors.networkIO().execute(() -> mVolley.requestString(PUT, URL, params, new ResponseListener(mContext) {
@@ -820,7 +820,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
     /**
      * @param taskId          taskId
-     * @param subtitleVersion subtitleVersion
+     * @param subtitleVersion subVersion
      * @param userTaskError   userTaskError
      * @return MutableLiveData<Resource < UserTaskError [ ]>>
      */
@@ -876,7 +876,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
     /**
      * @param taskId          taskId
-     * @param subtitleVersion subtitleVersion
+     * @param subtitleVersion subVersion
      * @param userTaskError   userTaskError
      * @return MutableLiveData<Resource < UserTaskError [ ]>>
      */
@@ -1021,7 +1021,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
     private UserTask getUserTaskFromSchema(UserTaskSchema userTaskSchema) {
         return new UserTask(userTaskSchema.id, userTaskSchema.userId, userTaskSchema.taskId, userTaskSchema.completed,
-                userTaskSchema.rating, userTaskSchema.timeWatched, userTaskSchema.subtitleVersion, getUserTaskErrorsFromSchema(userTaskSchema.userTaskErrorList));
+                userTaskSchema.rating, userTaskSchema.timeWatched, userTaskSchema.subVersion, getUserTaskErrorsFromSchema(userTaskSchema.userTaskErrorList));
     }
 
     private UserTaskError[] getUserTaskErrorsFromSchema(UserTaskErrorSchema[] userTaskErrorSchemas) {
@@ -1058,7 +1058,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     private VideoTest[] getVideoTestFromSchema(VideoTestSchema[] data) {
         VideoTest[] videoTests = new VideoTest[data.length];
         for (int i = 0; i < data.length; i++) {
-            videoTests[i] = new VideoTest(data[i].id, data[i].videoId, data[i].subtitleVersion,
+            videoTests[i] = new VideoTest(data[i].id, data[i].videoId, data[i].subVersion,
                     data[i].subLanguage);
         }
         return videoTests;

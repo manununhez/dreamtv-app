@@ -460,12 +460,12 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         // We first look is the video is a test video
         for (VideoTest videoTest : videoTestList)
             if (videoTest.videoId.equals(mSelectedTask.getVideo().videoId)) {
-                return String.valueOf(videoTest.subtitleVersion);
+                return String.valueOf(videoTest.subVersion);
             }
 
         //If is it not a test video, we look if the task has already an userTask with the subtitle version
         if (mUserTask != null)
-            return mUserTask.getSubtitleVersion();
+            return mUserTask.getSubVersion();
 
         // Finally, we look for the last version available
         return newestVersion;

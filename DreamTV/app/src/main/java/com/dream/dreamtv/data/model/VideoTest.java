@@ -7,13 +7,13 @@ package com.dream.dreamtv.data.model;
 public class VideoTest {
     public int id;
     public String videoId;
-    public int subtitleVersion;
+    public int subVersion;
     public String subLanguage;
 
-    public VideoTest(int id, String videoId, int subtitleVersion, String subLanguage) {
+    public VideoTest(int id, String videoId, int subVersion, String subLanguage) {
         this.id = id;
         this.videoId = videoId;
-        this.subtitleVersion = subtitleVersion;
+        this.subVersion = subVersion;
         this.subLanguage = subLanguage;
     }
 
@@ -22,7 +22,7 @@ public class VideoTest {
         return "VideoTest{" +
                 "id=" + id +
                 ", videoId='" + videoId + '\'' +
-                ", subtitleVersion=" + subtitleVersion +
+                ", subVersion=" + subVersion +
                 ", languageCode='" + subLanguage + '\'' +
                 '}';
     }

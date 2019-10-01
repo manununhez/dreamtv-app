@@ -33,19 +33,19 @@ public class UserTask implements Parcelable {
     private int completed;
     private int rating;
     private int timeWatched;
-    private String subtitleVersion;
+    private String subVersion;
     private UserTaskError[] userTaskErrorList;
 
 
     public UserTask(int id, int userId, int taskId, int completed, int rating, int timeWatched,
-                    String subtitleVersion, UserTaskError[] userTaskErrorList) {
+                    String subVersion, UserTaskError[] userTaskErrorList) {
         this.id = id;
         this.userId = userId;
         this.taskId = taskId;
         this.completed = completed;
         this.rating = rating;
         this.timeWatched = timeWatched;
-        this.subtitleVersion = subtitleVersion;
+        this.subVersion = subVersion;
         this.userTaskErrorList = userTaskErrorList;
     }
 
@@ -53,7 +53,7 @@ public class UserTask implements Parcelable {
         id = in.readInt();
         userId = in.readInt();
         taskId = in.readInt();
-        subtitleVersion = in.readString();
+        subVersion = in.readString();
         timeWatched = in.readInt();
         completed = in.readInt();
         rating = in.readInt();
@@ -97,7 +97,7 @@ public class UserTask implements Parcelable {
         dest.writeInt(id);
         dest.writeInt(userId);
         dest.writeInt(taskId);
-        dest.writeString(subtitleVersion);
+        dest.writeString(subVersion);
         dest.writeInt(timeWatched);
         dest.writeInt(completed);
         dest.writeInt(rating);
@@ -143,12 +143,12 @@ public class UserTask implements Parcelable {
         this.taskId = taskId;
     }
 
-    public String getSubtitleVersion() {
-        return subtitleVersion;
+    public String getSubVersion() {
+        return subVersion;
     }
 
-    public void setSubtitleVersion(String subtitleVersion) {
-        this.subtitleVersion = subtitleVersion;
+    public void setSubVersion(String subVersion) {
+        this.subVersion = subVersion;
     }
 
     public UserTaskError[] getUserTaskErrorList() {
@@ -173,7 +173,7 @@ public class UserTask implements Parcelable {
                 "id=" + id +
                 ", userId=" + userId +
                 ", taskId=" + taskId +
-                ", subtitleVersion='" + subtitleVersion + '\'' +
+                ", subVersion='" + subVersion + '\'' +
                 ", completed=" + completed +
                 ", rating=" + rating +
                 ", userTaskErrorList=" + Arrays.toString(userTaskErrorList) +

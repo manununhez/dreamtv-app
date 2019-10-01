@@ -19,8 +19,8 @@ public class UserTaskSchema {
     public int rating;
     @SerializedName("time_watched")
     public int timeWatched;
-    @SerializedName("subtitle_version")
-    public String subtitleVersion;
+    @SerializedName("sub_version")
+    public String subVersion;
     @SerializedName("created_at")
     public String created_at;
     @SerializedName("updated_at")
