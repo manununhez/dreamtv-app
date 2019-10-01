@@ -15,7 +15,7 @@
         android:background="@android:color/transparent"
         android:gravity="center_horizontal"
         android:layout_marginTop="60dp"
-        android:layout_below="@+id/myProgress"
+        android:layout_below="@id/myProgress"
         android:textColor="@color/white"
         android:textSize="20sp" />
 

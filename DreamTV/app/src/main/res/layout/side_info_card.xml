@@ -44,7 +44,7 @@
             android:id="@+id/main_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/llDescription"
+            android:layout_above="@id/llDescription"
             android:contentDescription="@string/task_image_content_desc"
             android:scaleType="centerInside"
             apps:src="@drawable/dreamtv_logo" />
