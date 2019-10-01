@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BackgroundManager;
 import androidx.leanback.app.DetailsSupportFragment;
+import androidx.leanback.app.ProgressBarManager;
 import androidx.leanback.widget.Action;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.ClassPresenterSelector;
@@ -105,6 +106,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private LiveData<Resource<Subtitle>> fetchSubtitleLiveData;
     private LiveData<Resource<UserTask>> fetchUserTaskLiveData;
     private LiveData<Resource<UserTask>> createUserTaskLiveData;
+    private ProgressBarManager mProgressBarManager;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -124,12 +126,17 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         mSelectedCategory = (Type) requireActivity().getIntent().getSerializableExtra(INTENT_CATEGORY);
 
+
+
+        mProgressBarManager = getProgressBarManager();
+        mProgressBarManager.setRootView((ViewGroup) getView());
+
+
         setupDetailsOverview();
 
         fetchUserTasksObserver();
 
         fetchSubtitle();
-
 
     }
 
@@ -389,7 +396,9 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             Subtitle data = subtitleResponseResource.data;
             String message = subtitleResponseResource.message;
 
-            if (status.equals(Status.SUCCESS)) {
+            if (status.equals(Status.LOADING)) {
+                mProgressBarManager.show();
+            } else if (status.equals(Status.SUCCESS)) {
                 Timber.d("Subtitle response");
 
                 if (data != null && mSelectedTask.getVideo().title.equals(data.getVideoTitleOriginal())) {
@@ -403,10 +412,13 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                         mSelectedTask.setVideoDescriptionTranslated(mSubtitleResponse.getVideoDescriptionTranslated());
                 }
 
+                mProgressBarManager.hide();
                 setupDetailsOverview();
 
             } else if (status.equals(Status.ERROR)) {
                 Timber.d(message != null ? message : STATUS_ERROR);
+                mProgressBarManager.hide();
+
             }
         });
 

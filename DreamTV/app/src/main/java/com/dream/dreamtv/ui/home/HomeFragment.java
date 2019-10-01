@@ -111,6 +111,8 @@ public class HomeFragment extends BrowseSupportFragment {
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext());
 
+        mViewModel.initSyncData();
+
         setupVideosList();
 
         instantiateLoading();
