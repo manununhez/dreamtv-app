@@ -1036,7 +1036,7 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
     }
 
     private Video getVideoFromSchema(VideoSchema videoSchema) {
-        return new Video(videoSchema.videoId, videoSchema.primaryAudioLanguageCode, videoSchema.speakerName,
+        return new Video(videoSchema.videoId, videoSchema.audioLanguage, videoSchema.speakerName,
                 videoSchema.title, videoSchema.description, videoSchema.duration, videoSchema.thumbnail,
                 videoSchema.team, videoSchema.project, videoSchema.videoUrl);
     }

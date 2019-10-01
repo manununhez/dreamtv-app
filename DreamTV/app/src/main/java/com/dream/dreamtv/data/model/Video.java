@@ -25,7 +25,7 @@ public class Video implements Parcelable {
     private static final String YOUTUBE_COM = "youtube.com";
     private static final String QUERY_PARAMETER = "v";
     public String videoId;
-    public String primaryAudioLanguageCode;
+    public String audioLanguage;
     public String speakerName;
     public String title;
     public String description;
@@ -35,10 +35,10 @@ public class Video implements Parcelable {
     public String project;
     public String videoUrl;
 
-    public Video(String videoId, String primaryAudioLanguageCode, String speakerName, String title, String description,
+    public Video(String videoId, String audioLanguage, String speakerName, String title, String description,
                  int duration, String thumbnail, String team, String project, String videoUrl) {
         this.videoId = videoId;
-        this.primaryAudioLanguageCode = primaryAudioLanguageCode;
+        this.audioLanguage = audioLanguage;
         this.speakerName = speakerName;
         this.title = title;
         this.description = description;
@@ -51,7 +51,7 @@ public class Video implements Parcelable {
 
     protected Video(Parcel in) {
         videoId = in.readString();
-        primaryAudioLanguageCode = in.readString();
+        audioLanguage = in.readString();
         speakerName = in.readString();
         title = in.readString();
         description = in.readString();
@@ -89,7 +89,7 @@ public class Video implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(videoId);
-        dest.writeString(primaryAudioLanguageCode);
+        dest.writeString(audioLanguage);
         dest.writeString(speakerName);
         dest.writeString(title);
         dest.writeString(description);
@@ -104,7 +104,7 @@ public class Video implements Parcelable {
     public String toString() {
         return "Video{" +
                 "videoId='" + videoId + '\'' +
-                ", primaryAudioLanguageCode='" + primaryAudioLanguageCode + '\'' +
+                ", audioLanguage='" + audioLanguage + '\'' +
                 ", speakerName='" + speakerName + '\'' +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +

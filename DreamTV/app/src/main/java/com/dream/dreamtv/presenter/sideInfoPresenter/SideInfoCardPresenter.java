@@ -110,7 +110,7 @@ public class SideInfoCardPresenter extends AbstractCardPresenter<BaseCardView> {
         //-------------- VIDEO INFO
         TextView secondaryText = cardView.findViewById(R.id.secondary_text);
         secondaryText.setText(getContext().getString(R.string.title_video_details_main, task.getVideo().project,
-                task.getVideo().primaryAudioLanguageCode, task.getSubLanguage()));
+                task.getVideo().audioLanguage, task.getSubLanguage()));
 
         //-------------- VIDEO DESCRIPTION
 //        TextView extraText = cardView.findViewById(R.id.extra_text);

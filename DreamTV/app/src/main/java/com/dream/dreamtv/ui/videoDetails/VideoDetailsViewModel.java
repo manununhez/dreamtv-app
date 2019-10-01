@@ -60,7 +60,7 @@ public class VideoDetailsViewModel extends ViewModel {
 
 
     LiveData<Resource<Boolean>> requestAddToList(Task task) {
-        return mRepository.requestAddToList(task.getTaskId(), task.getSubLanguage(), task.getVideo().primaryAudioLanguageCode);
+        return mRepository.requestAddToList(task.getTaskId(), task.getSubLanguage(), task.getVideo().audioLanguage);
     }
 
     LiveData<Resource<Boolean>> requestRemoveFromList(Task task) {

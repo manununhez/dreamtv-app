@@ -11,7 +11,7 @@ public class VideoSchema {
     @SerializedName("video_id")
     public String videoId;
     @SerializedName("primary_audio_language_code")
-    public String primaryAudioLanguageCode;
+    public String audioLanguage;
     @SerializedName("speaker_name")
     public String speakerName;
     @SerializedName("title")

@@ -343,7 +343,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         switch (logEventName) {
             case FIREBASE_LOG_EVENT_PRESSED_PLAY_VIDEO_BTN:
                 bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.getVideo().videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().primaryAudioLanguageCode);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().audioLanguage);
                 bundle.putString(FIREBASE_KEY_VIDEO_PROJECT_NAME, mSelectedTask.getVideo().project);
                 bundle.putLong(FIREBASE_KEY_VIDEO_DURATION, mSelectedTask.getVideo().getVideoDurationInMs());
                 break;
@@ -352,7 +352,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
             case FIREBASE_LOG_EVENT_PRESSED_RESTART_VIDEO:
             case FIREBASE_LOG_EVENT_PRESSED_CONTINUE_VIDEO:
                 bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.getVideo().videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().primaryAudioLanguageCode);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().audioLanguage);
                 break;
             default:
                 throw new RuntimeException("Event not contemplated: " + logEventName);

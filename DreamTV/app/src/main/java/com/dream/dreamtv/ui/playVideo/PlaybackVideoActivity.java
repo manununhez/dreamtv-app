@@ -699,20 +699,20 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
             case FIREBASE_LOG_EVENT_VIDEO_COMPLETED:
                 bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.getTaskId());
                 bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.getVideo().videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().primaryAudioLanguageCode);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().audioLanguage);
                 break;
             case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T:
                 logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
                 bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.getTaskId());
                 bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.getVideo().videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().primaryAudioLanguageCode);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().audioLanguage);
                 bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, true);
                 break;
             case FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_F:
                 logEventName = FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS;
                 bundle.putInt(FIREBASE_KEY_TASK_ID, mSelectedTask.getTaskId());
                 bundle.putString(FIREBASE_KEY_VIDEO_ID, mSelectedTask.getVideo().videoId);
-                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().primaryAudioLanguageCode);
+                bundle.putString(FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE, mSelectedTask.getVideo().audioLanguage);
                 bundle.putBoolean(FIREBASE_KEY_SUBTITLE_NAVEGATION, false);
                 break;
             default:

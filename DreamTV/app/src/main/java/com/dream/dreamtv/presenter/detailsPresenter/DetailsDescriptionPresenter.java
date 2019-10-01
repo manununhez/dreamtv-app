@@ -20,7 +20,7 @@ public class DetailsDescriptionPresenter extends CustomAbstractDetailsDescriptio
 
             viewHolder.getTitle().setText(task.getVideoTitleTranslated());
             viewHolder.getSubtitle().setText(context.getString(R.string.title_video_details, task.getVideo().project,
-                    task.getVideo().primaryAudioLanguageCode, task.getSubLanguage(), timeFormatted));
+                    task.getVideo().audioLanguage, task.getSubLanguage(), timeFormatted));
             viewHolder.getBody().setText(task.getVideoDescriptionTranslated());
         }
     }
