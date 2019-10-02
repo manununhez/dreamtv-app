@@ -50,8 +50,9 @@ public class VideoDetailsViewModel extends ViewModel {
         this.subtitleIdMLD.setValue(update);
     }
 
-    void updateTaskByCategory(Category.Type category) {
-        mRepository.fetchTasks(category);
+    void updateTaskByCategory() {
+        //TODO this can be later updated to update only the necessary categories, like only my list and/or finished
+        mRepository.fetchTasks();
     }
 
     boolean verifyIfTaskIsInList(Task task) {
@@ -60,11 +61,11 @@ public class VideoDetailsViewModel extends ViewModel {
 
 
     LiveData<Resource<Boolean>> requestAddToList(Task task) {
-        return mRepository.requestAddToList(task.getTaskId(), task.getSubLanguage(), task.getVideo().audioLanguage);
+        return mRepository.requestAddToList(task);
     }
 
     LiveData<Resource<Boolean>> requestRemoveFromList(Task task) {
-        return mRepository.requestRemoveFromList(task.getTaskId());
+        return mRepository.requestRemoveFromList(task);
     }
 
     LiveData<Resource<Subtitle>> fetchSubtitle() {

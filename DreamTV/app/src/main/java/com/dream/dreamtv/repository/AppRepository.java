@@ -141,10 +141,28 @@ public class AppRepository {
      **  NETWORK DATA SOURCE  **
      ***************************/
 
+    /**
+     * Fetch tasks by category
+     *
+     * @param category Specific category
+     * @return list of tasks from the selected category
+     */
     public LiveData<Resource<TasksList[]>> fetchTasks(Category.Type category) {
         VideoDuration videoDuration = getVideoDurationPref();
 
         return mNetworkDataSource.fetchTasks(category, videoDuration);
+
+    }
+
+    /**
+     * Fetch all tasks from all categories
+     *
+     * @return list of tasks from all categories
+     */
+    public LiveData<Resource<TasksList[]>> fetchTasks() {
+        VideoDuration videoDuration = getVideoDurationPref();
+
+        return mNetworkDataSource.fetchTasks(Category.Type.ALL, videoDuration);
 
     }
 
@@ -201,13 +219,13 @@ public class AppRepository {
         return mNetworkDataSource.createUserTask(taskId, mSubtitleVersion);
     }
 
-    public LiveData<Resource<Boolean>> requestAddToList(int taskId, String language, String audioLanguage) {
-        return mNetworkDataSource.addTaskToList(taskId, language, audioLanguage);
+    public LiveData<Resource<Boolean>> requestAddToList(Task task) {
+        return mNetworkDataSource.addTaskToList(task.getTaskId(), task.getSubLanguage(), task.getVideo().audioLanguage);
 
     }
 
-    public LiveData<Resource<Boolean>> requestRemoveFromList(int taskId) {
-        return mNetworkDataSource.removeTaskFromList(taskId);
+    public LiveData<Resource<Boolean>> requestRemoveFromList(Task task) {
+        return mNetworkDataSource.removeTaskFromList(task.getTaskId());
     }
 
     public LiveData<Resource<Task[]>> search(String query) {

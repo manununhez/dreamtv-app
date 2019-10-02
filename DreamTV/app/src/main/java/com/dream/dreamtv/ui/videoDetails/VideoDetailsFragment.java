@@ -513,7 +513,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
                     goToPlaybackVideo(playFromBeginning, logEventName);
 
-                    mViewModel.updateTaskByCategory(ALL); //update category after a new task was added
+                    mViewModel.updateTaskByCategory(); //update all categories after a new task was added
                 }
 
                 dismissLoading();
@@ -548,7 +548,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                         setupContinueAction();
 
                         //Actualizamos toda la pantalla, desde finished hasta continue. Empezamos la cadena de calls con este
-                        mViewModel.updateTaskByCategory(ALL); //trying to keep finished_category always updated
+                        mViewModel.updateTaskByCategory(); //update all categories
                     }
                 }
             } else if (status.equals(Status.ERROR)) {
@@ -577,7 +577,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                         new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
 
 
-                mViewModel.updateTaskByCategory(ALL); //update category after a new task was added
+                mViewModel.updateTaskByCategory(); //update all categories after a new task was added
 
                 //Analytics Report Event
                 firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_ADD_VIDEO_MY_LIST_BTN);
@@ -611,7 +611,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                         new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
 
 
-                mViewModel.updateTaskByCategory(ALL); //update category after a task was removed
+                mViewModel.updateTaskByCategory(); //update all categories after a task was removed
 
 
                 //Analytics Report Event

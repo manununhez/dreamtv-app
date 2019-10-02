@@ -33,7 +33,7 @@ public class HomeViewModel extends ViewModel {
 
 
     void syncTasks() {
-        tasksLD = mRepository.fetchTasks(Type.ALL);
+        tasksLD = mRepository.fetchTasks();
     }
 
 
