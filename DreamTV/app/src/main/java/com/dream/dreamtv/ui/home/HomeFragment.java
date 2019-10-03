@@ -276,9 +276,7 @@ public class HomeFragment extends BrowseSupportFragment {
             if (resource != null) {
                 Status status = resource.status;
 
-                if (status.equals(Status.LOADING)) {
-
-                } else if (status.equals(Status.SUCCESS)) {
+                if (status.equals(Status.SUCCESS)) {
                     VideoTopic[] data = resource.data;
 
                     if (data != null) {
@@ -525,6 +523,39 @@ public class HomeFragment extends BrowseSupportFragment {
 
     }
 
+    private void goToAppPreferences(String categoryTitle) {
+        Intent intent = new Intent(requireContext(), AppPreferencesActivity.class);
+        startActivityForResult(intent, REQUEST_APP_SETTINGS);
+        firebaseLogEvents(categoryTitle, FIREBASE_LOG_EVENT_SETTINGS);
+    }
+
+    private void goToVideoPreferences(String categoryTitle) {
+        Intent intent = new Intent(requireContext(), VideoPreferencesActivity.class);
+        startActivityForResult(intent, REQUEST_VIDEO_SETTINGS);
+        firebaseLogEvents(categoryTitle, FIREBASE_LOG_EVENT_SETTINGS);
+    }
+
+    private void goToCategories(String categoryTitle) {
+        Intent intent = new Intent(requireContext(), CategoryActivity.class);
+        intent.putExtra(INTENT_EXTRA_TOPIC_NAME, categoryTitle);
+        startActivity(intent);
+        firebaseLogEvents(categoryTitle, FIREBASE_LOG_EVENT_CATEGORIES);
+    }
+
+    private void goToVideoDetails(Presenter.ViewHolder itemViewHolder, Card card, Task task) {
+        Intent intent = new Intent(requireContext(), VideoDetailsActivity.class);
+        intent.putExtra(INTENT_TASK, task);
+        intent.putExtra(INTENT_CATEGORY, card.getCategory());
+
+        Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                requireActivity(), itemViewHolder.view,
+                VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
+
+        startActivity(intent, bundle);
+
+        firebaseLogEvents_TaskSelected(card.getCategory().toString(), task.getTaskId());
+    }
+
     public final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
@@ -532,35 +563,22 @@ public class HomeFragment extends BrowseSupportFragment {
 
             if (item instanceof Card) {
                 Card card = (Card) item;
-                if (row.getHeaderItem().getName().equals(getString(R.string.title_preferences_category))) {
-                    if (card.getTitle().equals(getString(R.string.pref_title_video_settings))) {
-                        Intent intent = new Intent(requireContext(), VideoPreferencesActivity.class);
-                        startActivityForResult(intent, REQUEST_VIDEO_SETTINGS);
-                        firebaseLogEvents(card.getTitle(), FIREBASE_LOG_EVENT_SETTINGS);
-                    } else if (card.getTitle().equals(getString(R.string.pref_title_app_settings))) {
-                        Intent intent = new Intent(requireContext(), AppPreferencesActivity.class);
-                        startActivityForResult(intent, REQUEST_APP_SETTINGS);
-                        firebaseLogEvents(card.getTitle(), FIREBASE_LOG_EVENT_SETTINGS);
+                String nameCategory = row.getHeaderItem().getName();
+                String title = card.getTitle();
+
+                if (nameCategory.equals(getString(R.string.title_preferences_category))) {
+
+                    if (title.equals(getString(R.string.pref_title_video_settings))) {
+                        goToVideoPreferences(title);
+                    } else if (title.equals(getString(R.string.pref_title_app_settings))) {
+                        goToAppPreferences(title);
                     }
-                } else if (row.getHeaderItem().getName().equals(getString(R.string.title_topics_category))) {
-                    Intent intent = new Intent(requireContext(), CategoryActivity.class);
-                    intent.putExtra(INTENT_EXTRA_TOPIC_NAME, card.getTitle());
-                    startActivity(intent);
-                    firebaseLogEvents(card.getTitle(), FIREBASE_LOG_EVENT_CATEGORIES);
+                } else if (nameCategory.equals(getString(R.string.title_topics_category))) {
+                    goToCategories(title);
                 } else {
                     Task task = card.getTask();
 
-                    Intent intent = new Intent(requireContext(), VideoDetailsActivity.class);
-                    intent.putExtra(INTENT_TASK, task);
-                    intent.putExtra(INTENT_CATEGORY, card.getCategory());
-
-                    Bundle bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            requireActivity(), itemViewHolder.view,
-                            VideoDetailsActivity.SHARED_ELEMENT_NAME).toBundle();
-
-                    startActivity(intent, bundle);
-
-                    firebaseLogEvents_TaskSelected(card.getCategory().toString(), task.getTaskId());
+                    goToVideoDetails(itemViewHolder, card, task);
                 }
             } else
                 Toast.makeText(requireContext(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();

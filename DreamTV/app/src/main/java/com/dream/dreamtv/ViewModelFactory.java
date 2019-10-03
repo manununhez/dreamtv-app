@@ -9,7 +9,8 @@ import com.dream.dreamtv.repository.AppRepository;
 import com.dream.dreamtv.ui.categories.CategoryViewModel;
 import com.dream.dreamtv.ui.home.HomeViewModel;
 import com.dream.dreamtv.ui.playVideo.PlaybackViewModel;
-import com.dream.dreamtv.ui.preferences.PreferencesViewModel;
+import com.dream.dreamtv.ui.preferences.AppPreferencesViewModel;
+import com.dream.dreamtv.ui.preferences.VideoPreferencesViewModel;
 import com.dream.dreamtv.ui.search.SearchViewModel;
 import com.dream.dreamtv.ui.videoDetails.VideoDetailsViewModel;
 import com.dream.dreamtv.ui.welcome.WelcomeViewModel;
@@ -41,9 +42,13 @@ public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
             //noinspection unchecked
             return (T) new PlaybackViewModel(mRepository);
 
-        } else if (modelClass.isAssignableFrom(PreferencesViewModel.class)) {
+        } else if (modelClass.isAssignableFrom(AppPreferencesViewModel.class)) {
             //noinspection unchecked
-            return (T) new PreferencesViewModel(mRepository);
+            return (T) new AppPreferencesViewModel(mRepository);
+
+        } else if (modelClass.isAssignableFrom(VideoPreferencesViewModel.class)) {
+            //noinspection unchecked
+            return (T) new VideoPreferencesViewModel(mRepository);
 
         } else if (modelClass.isAssignableFrom(SearchViewModel.class)) {
             //noinspection unchecked

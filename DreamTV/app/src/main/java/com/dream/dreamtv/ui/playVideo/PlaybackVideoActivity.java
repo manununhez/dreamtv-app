@@ -82,11 +82,12 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
     private static final int SUBTITLE_DELAY_IN_MS = 100;
     private static final int DELAY_IN_MS = 1000;
     private static final int AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION = 2;
-    private static final int ONE_SEC_IN_MS = 1000;
     private static final int DIFFERENCE_TIME_IN_MS = 1000;
     private static final int POSITION_OFFSET_IN_MS = 7000;//7 secs in ms
     private static final int BUFFER_VALUE_PB = 2;
     private static final int PLAYER_PROGRESS_SHOW_DELAY = 5000;
+
+
     private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
     private boolean mPlayFromBeginning;
     private long mLastClickTime = 0;
@@ -503,7 +504,8 @@ public class PlaybackVideoActivity extends FragmentActivity implements ErrorSele
 
             dismissLoading(); //in case the loading is still visible
 
-            ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(mViewModel.getReasons(), mViewModel.getUser(), mSubtitleResponse,
+            ErrorSelectionDialogFragment errorSelectionDialogFragment =
+                    ErrorSelectionDialogFragment.newInstance(mViewModel.getReasons(), mViewModel.getUser(), mSubtitleResponse,
                     subtitle.getPosition(), mSelectedTask, userTask);
             if (!isFinishing()) {
                 FragmentManager fm = getFragmentManager();

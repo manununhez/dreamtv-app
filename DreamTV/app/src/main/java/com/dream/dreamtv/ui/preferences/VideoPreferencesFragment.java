@@ -22,14 +22,14 @@ import com.dream.dreamtv.di.InjectorUtils;
 
 public class VideoPreferencesFragment extends LeanbackSettingsFragmentCompat {
 
-    private static PreferencesViewModel mViewModel;
+    private static VideoPreferencesViewModel mViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ViewModelFactory factory = InjectorUtils.provideViewModelFactory(requireActivity());
-        mViewModel = ViewModelProviders.of(this, factory).get(PreferencesViewModel.class);
+        mViewModel = ViewModelProviders.of(this, factory).get(VideoPreferencesViewModel.class);
     }
 
     @Override

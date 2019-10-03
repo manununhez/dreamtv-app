@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.leanback.app.SearchSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.HeaderItem;
@@ -58,17 +59,16 @@ public class SearchFragment extends SearchSupportFragment
     private static final boolean FINISH_ON_RECOGNIZER_CANCELED = true;
     private static final int REQUEST_SPEECH = 0x00000010;
     private final Handler mHandler = new Handler();
-    private boolean mResultsFound = false;
-    private String mQuery;
     private ArrayObjectAdapter mRowsAdapter;
     private SearchViewModel mViewModel;
     private LoadingDialog loadingDialog;
     private FirebaseAnalytics mFirebaseAnalytics;
     private LiveData<Resource<Task[]>> searchLiveData;
 
+
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
 
@@ -93,7 +93,10 @@ public class SearchFragment extends SearchSupportFragment
         } else {
             Timber.d("We DO have RECORD_AUDIO");
         }
+
+        search();
     }
+
 
     @Override
     public void onPause() {
@@ -136,8 +139,9 @@ public class SearchFragment extends SearchSupportFragment
         return true;
     }
 
-    public boolean hasResults() {
-        return mRowsAdapter.size() > 0 && mResultsFound;
+    boolean hasResults() {
+        return mRowsAdapter.size() > 0 &&
+                (hasFoundDataInResults());
     }
 
     private boolean hasPermission(final String permission) {
@@ -148,8 +152,9 @@ public class SearchFragment extends SearchSupportFragment
 
     private void loadQuery(String query) {
         if (!TextUtils.isEmpty(query) && !query.equals("nil")) {
-            mQuery = query;
-            search(query);
+            mViewModel.doQueryAndSearch(query);
+
+            firebaseLoginEvents(query);
         }
     }
 
@@ -167,8 +172,8 @@ public class SearchFragment extends SearchSupportFragment
             loadingDialog.show();
     }
 
-    private void search(String query) {
-        searchLiveData = mViewModel.search(query);
+    private void search() {
+        searchLiveData = mViewModel.search();
         searchLiveData.removeObservers(getViewLifecycleOwner());
         searchLiveData.observe(getViewLifecycleOwner(), tasksListResource -> {
             Status status = tasksListResource.status;
@@ -180,7 +185,6 @@ public class SearchFragment extends SearchSupportFragment
             else if (status.equals(Status.SUCCESS)) {
                 loadVideos(data);
 
-                firebaseLoginEvents(query);
 
                 Timber.d("task response");
                 dismissLoading();
@@ -202,17 +206,19 @@ public class SearchFragment extends SearchSupportFragment
             searchLiveData.removeObservers(getViewLifecycleOwner());
     }
 
-    private void loadVideos(Task[] results) {
-        int titleRes;
-        if (results != null && results.length > 0) {
-            mResultsFound = true;
-            titleRes = R.string.search_results;
-        } else {
-            mResultsFound = false;
-            titleRes = R.string.no_search_results;
-        }
+    private boolean hasFoundDataInResults(){
+        return (mViewModel.resultsFound().getValue() == null) ? false : (mViewModel.resultsFound().getValue());
+    }
 
-        HeaderItem header = new HeaderItem(getString(titleRes, mQuery));
+    private void loadVideos(Task[] results) {
+
+        int mTitleRes;
+        if (hasFoundDataInResults())
+            mTitleRes = R.string.search_results;
+        else
+            mTitleRes = R.string.no_search_results;
+
+        HeaderItem header = new HeaderItem(getString(mTitleRes, mViewModel.query.getValue()));
         ArrayObjectAdapter adapter = new ArrayObjectAdapter(new CardPresenterSelector(getActivity()));
         List<Card> cards = new ArrayList<>();
 
@@ -228,7 +234,7 @@ public class SearchFragment extends SearchSupportFragment
         mRowsAdapter.add(row);
     }
 
-    public void focusOnSearch() {
+    void focusOnSearch() {
         requireView().findViewById(R.id.lb_search_bar).requestFocus();
     }
 
@@ -247,6 +253,16 @@ public class SearchFragment extends SearchSupportFragment
         mFirebaseAnalytics.logEvent(FIREBASE_LOG_EVENT_SEARCH, bundle);
     }
 
+    private void goToVideoDetails(Card card, Task task) {
+        Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
+        intent.putExtra(INTENT_TASK, task);
+        intent.putExtra(INTENT_CATEGORY, card.getCategory());
+
+        startActivity(intent);
+
+        firebaseLoginEvents(card.getTitle(), task.getTaskId());
+    }
+
     public final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
@@ -256,17 +272,9 @@ public class SearchFragment extends SearchSupportFragment
                 Card card = (Card) item;
                 Task task = card.getTask();
 
-                Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
-                intent.putExtra(INTENT_TASK, task);
-                intent.putExtra(INTENT_CATEGORY, card.getCategory());
-
-                startActivity(intent);
-
-                firebaseLoginEvents(card.getTitle(), task.getTaskId());
-
+                goToVideoDetails(card, task);
             } else
                 Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT).show();
-
         }
     }
 }

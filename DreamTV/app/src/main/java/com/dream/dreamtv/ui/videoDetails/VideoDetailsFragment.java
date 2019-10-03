@@ -55,7 +55,6 @@ import java.util.List;
 
 import timber.log.Timber;
 
-import static com.dream.dreamtv.data.model.Category.Type.ALL;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_DURATION;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_VIDEO_ID;
@@ -125,7 +124,6 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         mSelectedTask = requireActivity().getIntent().getParcelableExtra(INTENT_TASK);
 
         mSelectedCategory = (Type) requireActivity().getIntent().getSerializableExtra(INTENT_CATEGORY);
-
 
 
         mProgressBarManager = getProgressBarManager();

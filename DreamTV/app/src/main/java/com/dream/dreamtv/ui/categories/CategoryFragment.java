@@ -174,6 +174,16 @@ public class CategoryFragment extends VerticalGridSupportFragment {
 
     }
 
+    private void goToVideoDetails(Card card, Task task) {
+        Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
+        intent.putExtra(INTENT_TASK, task);
+        intent.putExtra(INTENT_CATEGORY, card.getCategory());
+
+        startActivity(intent);
+
+        firebaseLoginEvents(title, task.getTaskId());
+    }
+
     public final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
@@ -183,13 +193,7 @@ public class CategoryFragment extends VerticalGridSupportFragment {
                 Card card = (Card) item;
                 Task task = card.getTask();
 
-                Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
-                intent.putExtra(INTENT_TASK, task);
-                intent.putExtra(INTENT_CATEGORY, card.getCategory());
-
-                startActivity(intent);
-
-                firebaseLoginEvents(title, task.getTaskId());
+                goToVideoDetails(card, task);
 
             } else
                 Toast.makeText(getActivity(), EMPTY_ITEM, Toast.LENGTH_SHORT).show();
