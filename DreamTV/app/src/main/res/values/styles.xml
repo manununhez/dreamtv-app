@@ -205,6 +205,9 @@
         <item name="android:minWidth">200dp</item>
         <item name="android:secondaryProgressTint">@color/colorAccent</item>
         <item name="android:max">100</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:layout_centerVertical">true</item>
     </style>
 
     <style name="RatingBar" parent="Theme.AppCompat">

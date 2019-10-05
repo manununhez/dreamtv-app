@@ -10,9 +10,7 @@ import android.text.Html;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Chronometer;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -29,6 +27,7 @@ import com.dream.dreamtv.data.model.UserTask;
 import com.dream.dreamtv.data.model.UserTaskError;
 import com.dream.dreamtv.data.networking.model.Resource;
 import com.dream.dreamtv.data.networking.model.Resource.Status;
+import com.dream.dreamtv.databinding.ActivityPlaybackVideosYoutubeBinding;
 import com.dream.dreamtv.di.InjectorUtils;
 import com.dream.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment;
 import com.dream.dreamtv.ui.playVideo.dialogs.RatingDialogFragment;
@@ -38,13 +37,20 @@ import com.dream.dreamtv.utils.TimeUtils;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import fr.bmartel.youtubetv.YoutubeTvView;
 import fr.bmartel.youtubetv.listener.IPlayerListener;
 import fr.bmartel.youtubetv.model.VideoInfo;
 import fr.bmartel.youtubetv.model.VideoState;
 import timber.log.Timber;
 
+import static android.widget.Toast.makeText;
+import static com.dream.dreamtv.ui.playVideo.PlaybackViewModel.AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION;
+import static com.dream.dreamtv.ui.playVideo.PlaybackViewModel.BUFFER_VALUE_PB;
+import static com.dream.dreamtv.ui.playVideo.PlaybackViewModel.DELAY_IN_MS;
+import static com.dream.dreamtv.ui.playVideo.PlaybackViewModel.DIFFERENCE_TIME_IN_SECS;
+import static com.dream.dreamtv.ui.playVideo.PlaybackViewModel.PLAYER_PROGRESS_SHOW_DELAY;
+import static com.dream.dreamtv.ui.playVideo.PlaybackViewModel.SUBTITLE_DELAY_IN_MS;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_PRIMARY_AUDIO_LANGUAGE;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_RATING;
 import static com.dream.dreamtv.utils.Constants.FIREBASE_KEY_SUBTITLE_NAVEGATION;
@@ -80,6 +86,7 @@ import static com.dream.dreamtv.utils.Constants.STATE_PLAY;
 import static com.dream.dreamtv.utils.Constants.STATE_UNSTARTED;
 import static com.dream.dreamtv.utils.Constants.STATE_VIDEO_CUED;
 import static com.dream.dreamtv.utils.Constants.STATUS_ERROR;
+import static com.dream.dreamtv.utils.Constants.VIDEO_COMPLETED_WATCHING_TRUE;
 import static com.dream.dreamtv.utils.Constants.YOUTUBE_AUTOPLAY;
 import static com.dream.dreamtv.utils.Constants.YOUTUBE_CLOSED_CAPTIONS;
 import static com.dream.dreamtv.utils.Constants.YOUTUBE_DEBUG;
@@ -89,99 +96,41 @@ import static com.dream.dreamtv.utils.Constants.YOUTUBE_VIDEO_ANNOTATION;
 import static com.dream.dreamtv.utils.Constants.YOUTUBE_VIDEO_ID;
 
 
-public class PlaybackVideoYoutubeActivity extends FragmentActivity implements ErrorSelectionDialogFragment.OnListener,
-        IPlayerListener, IPlayBackVideoListener, IReasonsDialogListener, ISubtitlePlayBackListener,
-        RatingDialogFragment.OnListener {
+public class PlaybackVideoYoutubeActivity extends FragmentActivity implements IPlaybackVideoListener,
+        IReasonsDialogListener, ISubtitlePlayBackListener, IMediaPlayerListener, IPlayerListener,
+        ErrorSelectionDialogFragment.OnListener, RatingDialogFragment.OnListener {
 
-    private static final int POSITION_OFFSET = 7;//7 secs
-    private static final int SUBTITLE_DELAY_IN_MS = 100;
-    private static final int DELAY_IN_MS = 1000;
-    private static final int AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION = 2;
-    private static final int DIFFERENCE_TIME_IN_SECS_ = 1;
-    private static final int VIDEO_COMPLETED_WATCHING_TRUE = 1;//7 secs in ms
-    private static final int BUFFER_VALUE_PB = 2;
-    private static final int PLAYER_PROGRESS_SHOW_DELAY = 5000;
+    public static final int POSITION_OFFSET = 7;//7 secs
 
     private boolean mPlayFromBeginning;
-    private boolean hasAlreadyPlayFromBeginning = false;
-    private long mLastClickTime = 0;
-    private long mLastProgressPlayerTime = 0;
-    private int counterClicks = 1;
 
-    private RelativeLayout rlVideoPlayerInfo;
-    private RelativeLayout rlVideoPlayerProgress;
-    private YoutubeTvView mYoutubeView;
-    private TextView tvSubtitle;
-    private TextView tvTime;
-    private TextView tvSubtitleError;
-    private TextView tvVideoTitle;
-    private TextView tvTotalTime;
-    private TextView tvCurrentTime;
+    private Subtitle mSubtitleResponse;
+    private UserTask mUserTask;
+    private Task mSelectedTask;
+    private Category.Type mSelectedCategory;
+
+    private Long elapsedRealtimeTemp;
+    private Long timeStoppedTemp;
+    private Long mLastClickTimeForward = 0L;
+    private Long mLastClickTimeBackward = 0L;
+    private Long mLastProgressPlayerActiveTime = 0L;
+
     private Handler handler;
     private Chronometer chronometer;
     private Runnable myRunnable;
-    private Long elapsedRealtimeTemp;
-    private Long timeStoppedTemp;
     private FirebaseAnalytics mFirebaseAnalytics;
-    private Subtitle mSubtitleResponse;
-    private UserTask mUserTask;
     private PlaybackViewModel mViewModel;
-    private Task mSelectedTask;
-    private Category.Type mSelectedCategory;
     private LoadingDialog loadingDialog;
-    private ProgressBar pbProgress;
     private ArrayList<UserTaskError> userTaskErrorListForSttlPos = new ArrayList<>();
     private LiveData<Resource<UserTaskError[]>> saveErrorsLiveData;
     private LiveData<Resource<UserTaskError[]>> updateErrorsLiveData;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    private ActivityPlaybackVideosYoutubeBinding binding;
 
-        setContentView(R.layout.activity_playback_videos_youtube);
-
-
-        if (savedInstanceState != null) {
-            mSelectedTask = savedInstanceState.getParcelable(INTENT_TASK);
-            mSelectedCategory = (Category.Type) savedInstanceState.getSerializable(INTENT_CATEGORY);
-            mSubtitleResponse = savedInstanceState.getParcelable(INTENT_SUBTITLE);
-            mUserTask = savedInstanceState.getParcelable(INTENT_USER_TASK);
-        } else {
-            mSelectedTask = getIntent().getParcelableExtra(INTENT_TASK);
-            mSelectedCategory = (Category.Type) getIntent().getSerializableExtra(INTENT_CATEGORY);
-            mSubtitleResponse = getIntent().getParcelableExtra(INTENT_SUBTITLE);
-            mUserTask = getIntent().getParcelableExtra(INTENT_USER_TASK);
-        }
-
-        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(this);
-        mViewModel = ViewModelProviders.of(this, factory).get(PlaybackViewModel.class);
-
-        tvSubtitle = findViewById(R.id.tvSubtitle);
-        tvSubtitle.setTextSize((Integer.parseInt(mViewModel.getListSubtitleSize())));
-
-        tvSubtitleError = findViewById(R.id.tvSubtitleError);
-        tvSubtitleError.setTextSize((Integer.parseInt(mViewModel.getListSubtitleSize())));
-
-        chronometer = new Chronometer(this); // initiate a chronometer
-        tvTime = findViewById(R.id.tvTime);
-        rlVideoPlayerInfo = findViewById(R.id.rlVideoPlayerInfo);
-
-        rlVideoPlayerProgress = findViewById(R.id.rlVideoPlayerProgress);
-        tvVideoTitle = findViewById(R.id.tvVideoTitle);
-        tvCurrentTime = findViewById(R.id.tvCurrentTime);
-        tvTotalTime = findViewById(R.id.tvTotalTime);
-        pbProgress = findViewById(R.id.pbProgress);
-
-
-        mPlayFromBeginning = getIntent().getBooleanExtra(INTENT_PLAY_FROM_BEGINNING, true);
-
-        // Obtain the FirebaseAnalytics instance.
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-
-        instantiateLoading();
-        setupInfoPlayer();
-        setupVideoPlayer();
-    }
+    private List<Long> lastClicksForward = new ArrayList<>();
+    private List<Long> lastClicksBackward = new ArrayList<>();
+    private Toast seekToast;
+    private boolean videoCompleted = false; //youtubeAPI error when video completed: it restarts again. We manually avoid to enter in other states again
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -191,7 +140,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         outState.putSerializable(INTENT_CATEGORY, mSelectedCategory);
         outState.putParcelable(INTENT_SUBTITLE, mSubtitleResponse);
         outState.putParcelable(INTENT_USER_TASK, mUserTask);
-
+        outState.putBoolean(INTENT_PLAY_FROM_BEGINNING, mPlayFromBeginning);
     }
 
     @Override
@@ -202,6 +151,8 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         mSelectedCategory = (Category.Type) savedInstanceState.getSerializable(INTENT_CATEGORY);
         mSubtitleResponse = savedInstanceState.getParcelable(INTENT_SUBTITLE);
         mUserTask = savedInstanceState.getParcelable(INTENT_USER_TASK);
+        mPlayFromBeginning = savedInstanceState.getBoolean(INTENT_PLAY_FROM_BEGINNING);
+
     }
 
     @Override
@@ -210,56 +161,113 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     }
 
     @Override
-    public void onPlayerStateChange(VideoState state, long position, float speed, float duration, VideoInfo videoInfo) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-        if (state.toString().equals(STATE_VIDEO_CUED)) {
-            Timber.d("State : %s", state.toString());
-            dismissLoading();
-        } else if (state.toString().equals(STATE_UNSTARTED) || state.toString().equals(STATE_BUFFERING)) {
-            Timber.d("State : %s", state.toString());
-            showLoading();
-        } else if (state.toString().equals(STATE_PLAY)) {
-            Timber.d("State : %s", STATE_PLAY);
-            dismissLoading();
+        binding = ActivityPlaybackVideosYoutubeBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-            //start sync subtitles
-            startSyncSubtitle(SystemClock.elapsedRealtime() - position);
+        if (savedInstanceState != null) {
+            mSelectedTask = savedInstanceState.getParcelable(INTENT_TASK);
+            mSelectedCategory = (Category.Type) savedInstanceState.getSerializable(INTENT_CATEGORY);
+            mSubtitleResponse = savedInstanceState.getParcelable(INTENT_SUBTITLE);
+            mUserTask = savedInstanceState.getParcelable(INTENT_USER_TASK);
+            mPlayFromBeginning = savedInstanceState.getBoolean(INTENT_PLAY_FROM_BEGINNING);
 
-
-            if (!mPlayFromBeginning && !hasAlreadyPlayFromBeginning) { //To continue playing a video, we first play and then seek to an specific time
-                Timber.d("$$ Seeking video()");
-                hasAlreadyPlayFromBeginning = true;
-                mYoutubeView.seekTo(mUserTask.getTimeWatchedInSecs());
-            }
-
-        } else if (state.toString().equals(STATE_PAUSED)) {
-            Timber.d("State : %s", STATE_PAUSED);
-
-            dismissLoading();
-
-            pauseVideo(position);
-            controlReasonDialogPopUp();
-
+        } else {
+            mSelectedTask = getIntent().getParcelableExtra(INTENT_TASK);
+            mSelectedCategory = (Category.Type) getIntent().getSerializableExtra(INTENT_CATEGORY);
+            mSubtitleResponse = getIntent().getParcelableExtra(INTENT_SUBTITLE);
+            mUserTask = getIntent().getParcelableExtra(INTENT_USER_TASK);
+            mPlayFromBeginning = getIntent().getBooleanExtra(INTENT_PLAY_FROM_BEGINNING, true);
         }
 
+        ViewModelFactory factory = InjectorUtils.provideViewModelFactory(this);
+        mViewModel = ViewModelProviders.of(this, factory).get(PlaybackViewModel.class);
 
-        if (state.toString().equals(STATE_ENDED)) {//at this moment we are in the end of the video. Duration in ms
-            Timber.d("State : %s", STATE_ENDED);
 
-            stopVideo();
-            showRatingDialog();
+        chronometer = new Chronometer(this); // initiate a chronometer
 
-            firebaseLoginEvents(FIREBASE_LOG_EVENT_VIDEO_COMPLETED);
+        seekToast = makeText(this, "message", Toast.LENGTH_SHORT);
+//        seekToast.setDuration(Toast.LENGTH_SHORT);
+
+        // Obtain the FirebaseAnalytics instance.
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+        instantiateLoading();
+        setupVideoPlayer();
+        setupInfoPlayer();
+        setupSubtitleScreening();
+    }
+
+    @Override
+    public void setupSubtitleScreening() {
+        binding.playbackLayout.tvSubtitle.setTextSize(mViewModel.getListSubtitleSize());
+
+        binding.playbackLayout.tvSubtitleError.setTextSize(mViewModel.getListSubtitleSize());
+    }
+
+    @Override
+    public void onPlayerStateChange(VideoState videoState, long position, float speed, float duration, VideoInfo videoInfo) {
+
+        String state = videoState.toString();
+
+        switch (state) {
+            case STATE_VIDEO_CUED:
+            case STATE_UNSTARTED:
+            case STATE_BUFFERING:
+                if (videoCompleted)
+                    return;
+
+                showLoading();
+                break;
+            case STATE_PLAY:
+                if (videoCompleted)
+                    return;
+
+                dismissLoading();
+                stateVideoPlaying(position);
+
+                break;
+            case STATE_PAUSED:
+                if (videoCompleted)
+                    return;
+
+                dismissLoading();
+                stateVideoPaused(position);
+
+                break;
+            case STATE_ENDED:
+                stateVideoCompleted();
+                videoCompleted = true; //TODO agregar esta variable a ViewModel - Lifecycle aware
+                break;
+            default:
+                Timber.d("Video state not contemplated!");
         }
 
     }
 
-    //Called when player is ready.
+
+    //Called when player is ready. Only once, at the beggining
     @Override
     public void onPlayerReady(VideoInfo videoInfo) {
         Timber.d("$$ onPlayerReady() -> playVideoMode()");
-        subtitleHandlerSyncConfig();
-        playVideoMode();
+
+        startVideoReproduction();
+    }
+
+    @Override
+    public void startVideoReproduction() {
+        playbackHandlerSync();
+
+        //If it is required, seek to video
+        if (!mPlayFromBeginning) { //To continue playing a video, we first play and then getSeek to an specific time
+            binding.youtubeTvView.seekTo(mUserTask.getTimeWatchedInSecs());
+        }
+
+        //play video
+        playVideo();
+
     }
 
     @Override
@@ -273,58 +281,57 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
                 if (action == KeyEvent.ACTION_UP) {
                     Timber.d("KEYCODE_DPAD_RIGHT");
 
-                    showPlayerProgress();
+                    //cancel backward buttons
+                    mLastClickTimeBackward = 0L;
+                    lastClicksBackward.clear();
+                    //------
+                    showProgressPlayer();
+                    mLastClickTimeForward = lastClicksForward.size() == 0 ? SystemClock.elapsedRealtime() :
+                            lastClicksForward.get(lastClicksForward.size() - 1);
 
                     // Handling multiple clicks, using threshold of 1 second
-                    if (SystemClock.elapsedRealtime() - mLastClickTime < DELAY_IN_MS)
-                        counterClicks++;
-                    else
-                        counterClicks = 1;
+                    if (SystemClock.elapsedRealtime() - mLastClickTimeForward < DELAY_IN_MS) {
+                        lastClicksForward.add(SystemClock.elapsedRealtime());
+                        int moveForward = lastClicksForward.size() * POSITION_OFFSET;
 
+                        seekToast.setText(getString(R.string.title_video_forward, moveForward));
+                        seekToast.show();
 
-                    Timber.d("Consecutive clicks =%s", counterClicks);
+                    }
 
-                    mLastClickTime = SystemClock.elapsedRealtime();
+                    mLastClickTimeForward = SystemClock.elapsedRealtime();
 
-                    int moveForward = counterClicks * POSITION_OFFSET;
-
-                    mYoutubeView.moveForward(moveForward);
-//                    Toast.makeText(this, getString(R.string.title_video_forward, POSITION_OFFSET),
-//                            Toast.LENGTH_SHORT).show();
-
-                    //Analytics Report Event
-                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO);
                     return true;
                 }
+
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 if (action == KeyEvent.ACTION_UP) {
                     Timber.d("KEYCODE_DPAD_LEFT");
 
-                    showPlayerProgress();
+                    //cancel forward buttons
+                    mLastClickTimeForward = 0L;
+                    lastClicksForward.clear();
+                    //------
+                    showProgressPlayer();
+                    mLastClickTimeBackward = lastClicksBackward.size() == 0 ? SystemClock.elapsedRealtime() :
+                            lastClicksBackward.get(lastClicksBackward.size() - 1);
 
                     // Handling multiple clicks, using threshold of 1 second
-                    if (SystemClock.elapsedRealtime() - mLastClickTime < DELAY_IN_MS)
-                        counterClicks++;
-                    else
-                        counterClicks = 1;
+                    if (SystemClock.elapsedRealtime() - mLastClickTimeBackward < DELAY_IN_MS) {
+                        lastClicksBackward.add(SystemClock.elapsedRealtime());
+                        int moveForward = lastClicksBackward.size() * POSITION_OFFSET;
 
+                        seekToast.setText(getString(R.string.title_video_backward, moveForward));
+                        seekToast.show();
 
-                    Timber.d("Consecutive clicks =%s", counterClicks);
+                    }
+                    mLastClickTimeBackward = SystemClock.elapsedRealtime();
 
-                    mLastClickTime = SystemClock.elapsedRealtime();
-
-                    int moveBackward = counterClicks * POSITION_OFFSET;
-                    mYoutubeView.moveBackward(moveBackward);
-//                    Toast.makeText(this, getString(R.string.title_video_backward, POSITION_OFFSET),
-//                            Toast.LENGTH_SHORT).show();
-
-                    //Analytics Report Event
-                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO);
                     return true;
                 }
             case KeyEvent.KEYCODE_DPAD_UP:
                 if (action == KeyEvent.ACTION_UP) {
-                    showPlayerProgress();
+                    showProgressPlayer();
                     firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SHOW_PROGRESS_PLAYER);
 
                     return true;
@@ -332,7 +339,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 if (action == KeyEvent.ACTION_UP) {
-                    dismissPlayerProgress();
+                    dismissProgressPlayer();
                     firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_DISMISS_PROGRESS_PLAYER);
 
                     return true;
@@ -340,12 +347,11 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 if (action == KeyEvent.ACTION_UP) {
-                    Timber.d("KEYCODE_DPAD_CENTER - dispatchKeyEvent");
 
-                    if (mYoutubeView.isPlaying()) {
-                        timeStoppedTemp = chronometer.getBase();
+                    if (binding.youtubeTvView.isPlaying()) {
+                        updateVideoCurrentPosition();
 
-                        mYoutubeView.pause();
+                        binding.youtubeTvView.pause();
                     }
 
                     return true;
@@ -354,16 +360,45 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
             case KeyEvent.KEYCODE_BACK:
                 if (action == KeyEvent.ACTION_UP) {
                     Timber.d("$$ dispatchKeyEvent() - KeyEvent.KEYCODE_BACK");
-                    stopVideo();
-                    mYoutubeView.closePlayer();
-                    finish();
-                    firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_REMOTE_BACK_BTN);
+                    stateVideoTerminated();
                     return true;
                 }
             default:
                 return super.dispatchKeyEvent(event);
         }
     }
+
+    private void verifySeekToBackwardForward() {
+        if (!lastClicksBackward.isEmpty()) { //Verify how many backward clicks was done
+            // Handling multiple clicks, using threshold of 1 second
+            if (SystemClock.elapsedRealtime() - mLastClickTimeBackward > DELAY_IN_MS) {
+
+                int moveBackward = lastClicksBackward.size() * POSITION_OFFSET;
+
+                binding.youtubeTvView.moveBackward(moveBackward);
+
+                lastClicksBackward.clear();
+                //Analytics Report Event
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_BACKWARD_VIDEO);
+
+                mLastClickTimeBackward = SystemClock.elapsedRealtime();
+            }
+        } else if (!lastClicksForward.isEmpty()) { //Verify how many forward clicks was done
+            // Handling multiple clicks, using threshold of 1 second
+            if (SystemClock.elapsedRealtime() - mLastClickTimeForward > DELAY_IN_MS) {
+                int moveForward = lastClicksForward.size() * POSITION_OFFSET;
+
+                binding.youtubeTvView.moveForward(moveForward);
+
+                lastClicksForward.clear();
+                //Analytics Report Event
+                firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_FORWARD_VIDEO);
+
+                mLastClickTimeForward = SystemClock.elapsedRealtime();
+            }
+        }
+    }
+
 
     @Override
     public void setupVideoPlayer() {
@@ -376,42 +411,14 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         youtubeOptions.putBoolean(YOUTUBE_DEBUG, false);
         youtubeOptions.putBoolean(YOUTUBE_CLOSED_CAPTIONS, false);
 
-        mYoutubeView = findViewById(R.id.video_1);
-        mYoutubeView.updateView(youtubeOptions);
-        mYoutubeView.playVideo(youtubeOptions.getString(YOUTUBE_VIDEO_ID, ""));
-        mYoutubeView.addPlayerListener(this);
+        binding.youtubeTvView.updateView(youtubeOptions);
+        binding.youtubeTvView.playVideo(youtubeOptions.getString(YOUTUBE_VIDEO_ID, ""));
+        binding.youtubeTvView.addPlayerListener(this);
     }
 
-    @Override
-    public void playVideoMode() {
-        playVideo(null);
-
-    }
-
-    @Override
-    public void playVideo(Integer seekToSecs) {
-        Timber.d("$$ playVideo()");
-
-        mYoutubeView.start();
-
-        //Analytics Report Event
-        firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY);
-    }
 
     @Override
     public void pauseVideo(Long position) {
-        Timber.d("$$ pauseVideo()");
-
-        stopSyncSubtitle();
-
-        String currentTime = TimeUtils.getTimeFormat(this, position);
-        String videoDuration = TimeUtils.getTimeFormat(this, mSelectedTask.getVideo().getVideoDurationInMs());
-
-        tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
-        showPlayerInfoOnPause();
-        dismissPlayerProgress();
-
-
         //Analytics Report Event
         firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PAUSE);
     }
@@ -419,49 +426,132 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     @Override
     public void stopVideo() {
         Timber.d("$$ stopVideo()");
-        stopSyncSubtitle();
 
         updateUserTimeWatched();
 
-        if (mYoutubeView != null)
-            mYoutubeView.stopVideo();
+        if (binding.youtubeTvView != null)
+            binding.youtubeTvView.stopVideo();
+
+        stopSyncSubtitle();
 
         //Analytics Report Event
         firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_STOP);
     }
 
     @Override
-    public void subtitleHandlerSyncConfig() {
+    public void playVideo() {
+        binding.youtubeTvView.start();
+
+        //Analytics Report Event
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_VIDEO_PLAY);
+    }
+
+    @Override
+    public void stateVideoPlaying(Long position) {
+        startSyncSubtitle(SystemClock.elapsedRealtime() - position);
+        dismissPlayerInfoOnPause();
+
+    }
+
+    @Override
+    public void stateVideoPaused(Long position) {
+        stopSyncSubtitle();
+
+        pauseVideo(position);
+
+        showPlayerInfoOnPause(position);
+
+        showReasonDialogPopUp((getCurrentPosition()),
+                mUserTask,
+                userTaskErrorListForSttlPos);
+
+    }
+
+    @Override
+    public void stateVideoCompleted() {
+        stopVideo();
+        showRatingDialog();
+        dismissLoading();
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_VIDEO_COMPLETED);
+    }
+
+    @Override
+    public void stateVideoTerminated() {
+        stopVideo();
+        binding.youtubeTvView.closePlayer();
+        firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_REMOTE_BACK_BTN);
+        finish();
+    }
+
+
+    public long getCurrentPosition() {
+        return elapsedRealtimeTemp - timeStoppedTemp;
+    }
+
+    @Override
+    public void updateSubtitleScreening() {
+        //Subtitles
+        SubtitleText selectedSubtitle = mSubtitleResponse.getSyncSubtitleText(getCurrentPosition());
+
+        if (selectedSubtitle != null) //if subtitle == null, there is not subtitle in the time selected
+            userTaskErrorListForSttlPos = mUserTask.getUserTaskErrorsForASpecificSubtitlePosition(selectedSubtitle.getPosition());
+        else userTaskErrorListForSttlPos.clear();
+
+        //Show subtitle
+        if (selectedSubtitle == null) {
+            binding.playbackLayout.tvSubtitle.setVisibility(View.GONE);
+            binding.playbackLayout.tvSubtitleError.setVisibility(View.GONE);
+        } else {
+            if (userTaskErrorListForSttlPos.size() > 0) {
+                binding.playbackLayout.tvSubtitle.setVisibility(View.GONE);
+                binding.playbackLayout.tvSubtitleError.setVisibility(View.VISIBLE);
+                binding.playbackLayout.tvSubtitleError.setText(Html.fromHtml(selectedSubtitle.getText()));
+            } else {
+                binding.playbackLayout.tvSubtitleError.setVisibility(View.GONE);
+                binding.playbackLayout.tvSubtitle.setVisibility(View.VISIBLE);
+                binding.playbackLayout.tvSubtitle.setText(Html.fromHtml(selectedSubtitle.getText()));
+            }
+        }
+    }
+
+    @Override
+    public void updateProgressPlayer() {
+        if (isProgressPlayerActive()) {
+            if (SystemClock.elapsedRealtime() - mLastProgressPlayerActiveTime > PLAYER_PROGRESS_SHOW_DELAY)
+                dismissProgressPlayer();
+
+            //Updating progress
+            binding.playbackLayout.tvCurrentTime.setText(TimeUtils.getTimeFormat(this, getCurrentPosition()));
+            int videoProgress = (int) ((((float) getCurrentPosition()) / (float) mSelectedTask.getVideo().getVideoDurationInMs()) * 100);
+            binding.playbackLayout.pbProgress.setProgress(videoProgress);
+            binding.playbackLayout.pbProgress.setSecondaryProgress(videoProgress + BUFFER_VALUE_PB);
+        }
+    }
+
+
+    @Override
+    public void playbackHandlerSync() {
         handler = new Handler();
         myRunnable = () -> {
             runOnUiThread(() -> {
-                timeStoppedTemp = chronometer.getBase();
-                elapsedRealtimeTemp = SystemClock.elapsedRealtime();
 
-                if (rlVideoPlayerProgress.getVisibility() == View.VISIBLE) {
-                    if (SystemClock.elapsedRealtime() - mLastProgressPlayerTime > PLAYER_PROGRESS_SHOW_DELAY)
-                        dismissPlayerProgress();
+                updateVideoCurrentPosition();
 
-                    //Updating progress
-                    tvCurrentTime.setText(TimeUtils.getTimeFormat(this, elapsedRealtimeTemp - timeStoppedTemp));
-                    int videoProgress = (int) ((((float) elapsedRealtimeTemp - timeStoppedTemp) / (float) mSelectedTask.getVideo().getVideoDurationInMs()) * 100);
-                    pbProgress.setProgress(videoProgress);
-                    pbProgress.setSecondaryProgress(videoProgress + BUFFER_VALUE_PB);
-                }
+                updateProgressPlayer();
 
+                updateSubtitleScreening();
 
-                //Subtitles
-                SubtitleText selectedSubtitle = mSubtitleResponse.getSyncSubtitleText(elapsedRealtimeTemp - timeStoppedTemp);
-
-                if (selectedSubtitle != null) //if subtitle == null, there is not subtitle in the time selected
-                    userTaskErrorListForSttlPos = mUserTask.getUserTaskErrorsForASpecificSubtitlePosition(selectedSubtitle.getPosition());
-                else userTaskErrorListForSttlPos.clear();
-
-                showSubtitle(selectedSubtitle, userTaskErrorListForSttlPos);
+                verifySeekToBackwardForward();
 
             });
             handler.postDelayed(myRunnable, SUBTITLE_DELAY_IN_MS);
         };
+    }
+
+
+    private void updateVideoCurrentPosition() {
+        timeStoppedTemp = chronometer.getBase();
+        elapsedRealtimeTemp = SystemClock.elapsedRealtime();
     }
 
     @Override
@@ -474,102 +564,64 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         }
     }
 
-    @Override
-    public void showSubtitle(SubtitleText subtitle) {
-        if (subtitle == null) {
-            tvSubtitle.setVisibility(View.GONE);
-            tvSubtitleError.setVisibility(View.GONE);
-        } else {
-            tvSubtitleError.setVisibility(View.GONE);
-            tvSubtitle.setVisibility(View.VISIBLE);
-            tvSubtitle.setText(Html.fromHtml(subtitle.getText()));
-        }
-    }
-
-    @Override
-    public void showSubtitleWithErrors(SubtitleText subtitle) {
-        if (subtitle == null) {
-            tvSubtitle.setVisibility(View.GONE);
-            tvSubtitleError.setVisibility(View.GONE);
-        } else {
-            tvSubtitle.setVisibility(View.GONE);
-            tvSubtitleError.setVisibility(View.VISIBLE);
-            tvSubtitleError.setText(Html.fromHtml(subtitle.getText()));
-        }
-    }
-
-    @Override
-    public void showSubtitle(SubtitleText subtitle, ArrayList<UserTaskError> userTaskErrorListForSttlPos) {
-        if (userTaskErrorListForSttlPos.size() > 0)
-            showSubtitleWithErrors(subtitle);
-        else
-            showSubtitle(subtitle);
-
-    }
-
-    @Override
-    public void showReasonDialogPopUp(long subtitlePosition, UserTask userTask) {
-        SubtitleText subtitle = mSubtitleResponse.getSyncSubtitleText(subtitlePosition);
-        if (subtitle != null) { //only shows the popup when exist an subtitle
-            ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(
-                    mViewModel.getReasons(), mViewModel.getUser(), mSubtitleResponse,
-                    subtitle.getPosition(), mSelectedTask, userTask);
-            if (!isFinishing()) {
-                FragmentManager fm = getFragmentManager();
-                FragmentTransaction transaction = fm.beginTransaction();
-                errorSelectionDialogFragment.show(transaction, "Sample Fragment");
-            }
-        }
-    }
 
     @Override
     public void showReasonDialogPopUp(long subtitlePosition, UserTask userTask,
                                       ArrayList<UserTaskError> userTaskErrorList) {
+
         SubtitleText subtitle = mSubtitleResponse.getSyncSubtitleText(subtitlePosition);
         if (subtitle != null) { //only shows the popup when exist an subtitle
-            ErrorSelectionDialogFragment errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(
-                    mViewModel.getReasons(), mViewModel.getUser(), mSubtitleResponse,
-                    subtitle.getPosition(), mSelectedTask, userTask, userTaskErrorList);
+            ErrorSelectionDialogFragment errorSelectionDialogFragment;
+            if (userTaskErrorList.size() > 0) {
+                errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(
+                        mViewModel.getReasons(), mViewModel.getUser(), mSubtitleResponse,
+                        subtitle.getPosition(), mSelectedTask, userTask, userTaskErrorList);
+            } else {
+                errorSelectionDialogFragment = ErrorSelectionDialogFragment.newInstance(
+                        mViewModel.getReasons(), mViewModel.getUser(), mSubtitleResponse,
+                        subtitle.getPosition(), mSelectedTask, userTask);
+            }
             if (!isFinishing()) {
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction transaction = fm.beginTransaction();
                 errorSelectionDialogFragment.show(transaction, "Sample Fragment");
             }
         }
-    }
-
-    @Override
-    public void controlReasonDialogPopUp() {
-        long subtitlePosition = elapsedRealtimeTemp - timeStoppedTemp;
-        if (userTaskErrorListForSttlPos.size() > 0)
-            showReasonDialogPopUp(subtitlePosition,
-                    mUserTask,
-                    userTaskErrorListForSttlPos);
-        else
-            showReasonDialogPopUp(subtitlePosition,
-                    mUserTask);
 
         //Analytics Report Event
         firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_SHOW_ERRORS);
     }
 
     @Override
-    public void onDialogClosed(SubtitleText selectedSubtitle, int subtitleOriginalPosition) {
+    public int getSubtitleNavigationSeekToValue(SubtitleText selectedSubtitle) {
         SubtitleText subtitleOneBeforeNew;
+
+        int value;
+
+        int subtitleIndexForVerification = selectedSubtitle.getPosition() - AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION;
+
+        if (subtitleIndexForVerification >= 0) { //avoid index out of range
+            subtitleOneBeforeNew = mSubtitleResponse.getSubtitles().get(subtitleIndexForVerification); //We go to the end of one subtitle before the previous of the selected subtitle
+            if (selectedSubtitle.getStartInSecs() - subtitleOneBeforeNew.getEndInSecs() < DIFFERENCE_TIME_IN_SECS)
+                value = subtitleOneBeforeNew.getEndInSecs() - DIFFERENCE_TIME_IN_SECS; //damos mas tiempo, para leer subtitulos anterioires
+            else
+                value = subtitleOneBeforeNew.getEndInSecs();
+        } else {
+            subtitleOneBeforeNew = mSubtitleResponse.getSubtitles().get(0); //we go to the first subtitle
+            value = subtitleOneBeforeNew.getStartInSecs() - DIFFERENCE_TIME_IN_SECS; //inicio del primer sub
+        }
+
+        return value;
+    }
+
+
+    @Override
+    public void onDialogClosed(SubtitleText selectedSubtitle, int subtitleOriginalPosition) {
 
         // A subtitle from the subtitle navigation was pressed. The video is moving forward or backward
         if (selectedSubtitle.getPosition() != subtitleOriginalPosition) { //a different subtitle from the original was selected
-            if (selectedSubtitle.getPosition() - AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION >= 0) { //avoid index out of range
-                subtitleOneBeforeNew = mSubtitleResponse.getSubtitles().get(
-                        selectedSubtitle.getPosition() - AMOUNT_OF_SUBS_RANGE_FOR_VERIFICATION); //We go to the end of one subtitle before the previous of the selected subtitle
-                if (selectedSubtitle.getStartInSecs() - subtitleOneBeforeNew.getEndInSecs() < DIFFERENCE_TIME_IN_SECS_)
-                    mYoutubeView.seekTo(subtitleOneBeforeNew.getEndInSecs() - DIFFERENCE_TIME_IN_SECS_); //damos mas tiempo, para leer subtitulos anterioires
-                else
-                    mYoutubeView.seekTo(subtitleOneBeforeNew.getEndInSecs());
-            } else {
-                subtitleOneBeforeNew = mSubtitleResponse.getSubtitles().get(0); //we go to the first subtitle
-                mYoutubeView.seekTo(subtitleOneBeforeNew.getStartInSecs() - DIFFERENCE_TIME_IN_SECS_); //inicio del primer sub
-            }
+
+            binding.youtubeTvView.seekTo(getSubtitleNavigationSeekToValue(selectedSubtitle));
 
             //Analytics Report Event
             firebaseLoginEvents(FIREBASE_LOG_EVENT_PRESSED_DISMISS_ERRORS_T);
@@ -580,9 +632,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
         }
 
-        Timber.d("$$ onDialogClosePlay()");
-
-        playVideo(null);
+        playVideo();
 
     }
 
@@ -669,21 +719,20 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
 
     @Override
     public void startSyncSubtitle(Long base) {
-        dismissPlayerInfoOnPause();
-
         chronometer.setBase(base);
         chronometer.start();
         handler.post(myRunnable);
 
     }
 
-    private void setupInfoPlayer() {
-        tvVideoTitle.setText(mSubtitleResponse.getVideoTitleTranslated());
-        tvTotalTime.setText(TimeUtils.getTimeFormat(this, mSelectedTask.getVideo().getVideoDurationInMs()));
+    @Override
+    public void setupInfoPlayer() {
+        binding.playbackLayout.tvVideoTitle.setText(mSelectedTask.getVideoTitleTranslated());
+        binding.playbackLayout.tvTotalTime.setText(TimeUtils.getTimeFormat(this, mSelectedTask.getVideo().getVideoDurationInMs()));
         if (mPlayFromBeginning)
-            tvCurrentTime.setText(TimeUtils.getTimeFormat(this, 0));
+            binding.playbackLayout.tvCurrentTime.setText(TimeUtils.getTimeFormat(this, 0));
         else
-            tvCurrentTime.setText(TimeUtils.getTimeFormat(this, mUserTask.getTimeWatched()));
+            binding.playbackLayout.tvCurrentTime.setText(TimeUtils.getTimeFormat(this, mUserTask.getTimeWatched()));
 
     }
 
@@ -768,9 +817,9 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
     }
 
     private void updateUserTimeWatched() {
-        long time = elapsedRealtimeTemp - timeStoppedTemp;
+        long time = getCurrentPosition();
         //Update current time of the video
-        if (time > 0) { //For some reason, youtube player sometimes restart with the current time in 0, after the correct current time was saved
+        if (getCurrentPosition() > 0) { //For some reason, youtube player sometimes restart with the current time in 0, after the correct current time was saved
             Timber.d("stopVideo() => Time (mYoutubeView)%s", time);
 
             mUserTask.setTimeWatched((int) time);
@@ -779,26 +828,37 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements Er
         }
     }
 
-    private void showPlayerInfoOnPause() {
-        rlVideoPlayerInfo.setVisibility(View.VISIBLE);
+    private void showPlayerInfoOnPause(Long position) {
+        dismissProgressPlayer();
+
+        String currentTime = TimeUtils.getTimeFormat(this, position);
+        String videoDuration = TimeUtils.getTimeFormat(this, mSelectedTask.getVideo().getVideoDurationInMs());
+
+        binding.playbackLayout.tvTime.setText(getString(R.string.title_current_time_video, currentTime, videoDuration));
+
+        binding.playbackLayout.rlVideoPlayerInfo.setVisibility(View.VISIBLE);
     }
 
     private void dismissPlayerInfoOnPause() {
-        rlVideoPlayerInfo.setVisibility(View.GONE);
+        binding.playbackLayout.rlVideoPlayerInfo.setVisibility(View.GONE);
     }
 
-    private void showPlayerProgress() {
-        if (rlVideoPlayerProgress.getVisibility() == View.GONE) {
-            mLastProgressPlayerTime = SystemClock.elapsedRealtime();
-            rlVideoPlayerProgress.setVisibility(View.VISIBLE);
+    private void showProgressPlayer() {
+        if (!isProgressPlayerActive()) {
+            mLastProgressPlayerActiveTime = SystemClock.elapsedRealtime();
+            binding.playbackLayout.rlVideoProgressPlayer.setVisibility(View.VISIBLE);
         }
     }
 
-    private void dismissPlayerProgress() {
-        if (rlVideoPlayerProgress.getVisibility() == View.VISIBLE) {
-            mLastProgressPlayerTime = 0;
-            rlVideoPlayerProgress.setVisibility(View.GONE);
+    private void dismissProgressPlayer() {
+        if (isProgressPlayerActive()) {
+            mLastProgressPlayerActiveTime = 0L;
+            binding.playbackLayout.rlVideoProgressPlayer.setVisibility(View.GONE);
         }
+    }
+
+    private boolean isProgressPlayerActive() {
+        return binding.playbackLayout.rlVideoProgressPlayer.getVisibility() == View.VISIBLE;
     }
 
     private void updateUserTask(UserTask userTask) {

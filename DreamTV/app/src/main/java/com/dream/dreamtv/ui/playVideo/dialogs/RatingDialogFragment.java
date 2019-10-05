@@ -21,6 +21,11 @@ public class RatingDialogFragment extends DialogFragment {
     private static final String TAG = RatingDialogFragment.class.getSimpleName();
 
 
+    // Container Activity must implement this interface
+    public interface OnListener {
+        void setRating(int rating);
+    }
+
     private OnListener mCallback;
     private RatingBar rtBar;
 
@@ -81,8 +86,4 @@ public class RatingDialogFragment extends DialogFragment {
         mCallback.setRating((int) rtBar.getRating());
     }
 
-    // Container Activity must implement this interface
-    public interface OnListener {
-        void setRating(int rating);
-    }
 }
