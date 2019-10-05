@@ -575,6 +575,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                         new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
 
 
+                Toast.makeText(requireContext(), getString(R.string.video_added_to_list), Toast.LENGTH_SHORT).show();
                 mViewModel.updateTaskByCategory(); //update all categories after a new task was added
 
                 //Analytics Report Event
@@ -608,6 +609,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                 setActionPanel(ACTION_REMOVE_MY_LIST,
                         new Action(ACTION_ADD_MY_LIST, getString(R.string.btn_add_to_my_list)));
 
+
+                Toast.makeText(requireContext(), getString(R.string.video_removed_to_list), Toast.LENGTH_SHORT).show();
 
                 mViewModel.updateTaskByCategory(); //update all categories after a task was removed
 

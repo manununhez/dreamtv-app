@@ -112,6 +112,8 @@
     <string name="subtitle_not_found_alert">Subtitle not found</string>
     <string name="subtitle_waiting_response">Waiting for subtitles. Please, try again in a moment.</string>
     <string name="task_image_content_desc">Image Card corresponding to a video task</string>
+    <string name="video_added_to_list">Video successfully added to My List</string>
+    <string name="video_removed_to_list">Video successfully removed from My List</string>
 
 
     <!--DATA FOR SETTINGS-->

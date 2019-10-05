@@ -105,6 +105,8 @@
     <string name="subtitle_not_found_alert">Nie znaleziono napisów</string>
     <string name="subtitle_waiting_response">Czekam na napisy. Spróbuj ponownie za chwilę.</string>
     <string name="task_image_content_desc">Karta graficzna odpowiadająca zadaniu wideo</string>
+    <string name="video_added_to_list">Film został pomyślnie dodany do Mojej Listy</string>
+    <string name="video_removed_to_list">Film został pomyślnie usunięty z Mojej Listy</string>
 
     <!--DATA FOR SETTINGS-->
     <string-array name="listAudioLanguages">
