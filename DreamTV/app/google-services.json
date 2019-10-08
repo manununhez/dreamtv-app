@@ -8,17 +8,25 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:153785724429:android:30011c5c7cee73bb",
+        "mobilesdk_app_id": "1:153785724429:android:b71aa8a23d81792adfef44",
         "android_client_info": {
-          "package_name": "com.dream.dreamtv"
+          "package_name": "com.manuelnunhez.dreamtv"
         }
       },
       "oauth_client": [
         {
-          "client_id": "153785724429-porm67kunv031i1ncjapol0jkjbmsiba.apps.googleusercontent.com",
+          "client_id": "153785724429-n8hvlhssdh87a4s13hbr0vmq7einqt8k.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.dream.dreamtv",
+            "package_name": "com.manuelnunhez.dreamtv",
+            "certificate_hash": "37d9c0818f20e1c5c000b7d3421b1f1e4eefd99b"
+          }
+        },
+        {
+          "client_id": "153785724429-u9f36jeig1gbf87b7oh7am3kv2dpjnr0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.manuelnunhez.dreamtv",
             "certificate_hash": "ebe5bc3a40e2901499dcaf016b110cc70f29991b"
           }
         },
@@ -33,20 +41,13 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "153785724429-okva3u1obfim3fb4mlm53sdjitkq2l01.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
       }
     }

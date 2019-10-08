@@ -5,7 +5,7 @@
     android:layout_centerInParent="true"
     android:background="@color/exit_dialog_background"
     android:gravity="center"
-    tools:context="com.dream.dreamtv.ui.playVideo.dialogs.RatingDialogFragment">
+    tools:context="com.manuelnunhez.dreamtv.ui.playVideo.dialogs.RatingDialogFragment">
 
     <Button
         android:id="@+id/btnSaveAndExit"

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/exit_dialog_background"
-    tools:context="com.dream.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment">
+    tools:context="com.manuelnunhez.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment">
 
     <LinearLayout
         android:layout_width="wrap_content"
