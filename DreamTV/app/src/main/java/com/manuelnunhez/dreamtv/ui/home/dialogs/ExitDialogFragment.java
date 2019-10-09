@@ -12,8 +12,8 @@ import android.widget.RatingBar;
 
 import androidx.annotation.NonNull;
 
-import com.manuelnunhez.dreamtv.R;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.manuelnunhez.dreamtv.R;
 
 import java.util.Objects;
 

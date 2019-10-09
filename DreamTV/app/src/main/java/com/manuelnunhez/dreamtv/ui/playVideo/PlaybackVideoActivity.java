@@ -17,16 +17,17 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.manuelnunhez.dreamtv.R;
 import com.manuelnunhez.dreamtv.ViewModelFactory;
 import com.manuelnunhez.dreamtv.data.model.Category;
+import com.manuelnunhez.dreamtv.data.model.Resource;
+import com.manuelnunhez.dreamtv.data.model.Resource.Status;
 import com.manuelnunhez.dreamtv.data.model.Subtitle;
 import com.manuelnunhez.dreamtv.data.model.Subtitle.SubtitleText;
 import com.manuelnunhez.dreamtv.data.model.Task;
 import com.manuelnunhez.dreamtv.data.model.UserTask;
 import com.manuelnunhez.dreamtv.data.model.UserTaskError;
-import com.manuelnunhez.dreamtv.data.model.Resource;
-import com.manuelnunhez.dreamtv.data.model.Resource.Status;
 import com.manuelnunhez.dreamtv.databinding.ActivityPlaybackVideosBinding;
 import com.manuelnunhez.dreamtv.di.InjectorUtils;
 import com.manuelnunhez.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment;
@@ -34,7 +35,6 @@ import com.manuelnunhez.dreamtv.ui.playVideo.dialogs.RatingDialogFragment;
 import com.manuelnunhez.dreamtv.utils.LoadingDialog;
 import com.manuelnunhez.dreamtv.utils.LocaleHelper;
 import com.manuelnunhez.dreamtv.utils.TimeUtils;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,11 +87,11 @@ public class PlaybackVideoActivity extends FragmentActivity implements IPlayback
     public static final int POSITION_OFFSET_IN_MS = 7000;//7 secs in ms
 
     private boolean handlerRunning = true; //we have to manually stop the handler execution, because apparently it is running in a different thread, and removeCallbacks does not work.
-    private long mLastClickTime = 0;
-    private long mLastProgressPlayerActiveTime = 0;
-    private int counterClicks = 1;
-
     private boolean mPlayFromBeginning;
+    private Long mLastProgressPlayerActiveTime = 0L;
+    private Long mLastClickTimeForward = 0L;
+    private Long mLastClickTimeBackward = 0L;
+
     private Subtitle mSubtitleResponse;
     private Category.Type mSelectedCategory;
     private Task mSelectedTask;
@@ -105,9 +105,6 @@ public class PlaybackVideoActivity extends FragmentActivity implements IPlayback
     private ArrayList<UserTaskError> userTaskErrorListForSttlPos = new ArrayList<>();
     private LiveData<Resource<UserTaskError[]>> saveErrorsLiveData;
     private LiveData<Resource<UserTaskError[]>> updateErrorsLiveData;
-
-    private Long mLastClickTimeForward = 0L;
-    private Long mLastClickTimeBackward = 0L;
 
     private List<Long> lastClicksForward = new ArrayList<>();
     private List<Long> lastClicksBackward = new ArrayList<>();
@@ -340,9 +337,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements IPlayback
             });
 
 
-            mp.setOnCompletionListener(mediaPlayer -> {
-                stateVideoCompleted();
-            });
+            mp.setOnCompletionListener(mediaPlayer -> stateVideoCompleted());
 
         });
 
@@ -827,7 +822,7 @@ public class PlaybackVideoActivity extends FragmentActivity implements IPlayback
 
     private void dismissProgressPlayer() {
         if (isProgressPlayerActive()) {
-            mLastProgressPlayerActiveTime = 0;
+            mLastProgressPlayerActiveTime = 0L;
             binding.playbackLayout.rlVideoProgressPlayer.setVisibility(View.GONE);
         }
     }

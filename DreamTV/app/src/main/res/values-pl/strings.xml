@@ -87,6 +87,8 @@
     <string name="pref_title_app_settings">Ustawienia Aplikacji</string>
     <string name="pref_title_subtitle_settings">Ustawienia napisów</string>
     <string name="pref_title_video_settings">Ustawienia filmu</string>
+    <string name="pref_title_about">Onas</string>
+    <string name="pref_title_privacy_policy">Polityka prywatności</string>
     <string name="pref_title_subtitle_size">Rozmiar czcionki</string>
     <string name="pref_title_app_language_dialog">Wybierz język aplikacji</string>
     <string name="pref_title_interface_mode_dialog">Wybierz tryb interfejsu</string>

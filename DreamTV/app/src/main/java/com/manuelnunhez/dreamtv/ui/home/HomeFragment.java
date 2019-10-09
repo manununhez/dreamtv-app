@@ -2,6 +2,7 @@ package com.manuelnunhez.dreamtv.ui.home;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -18,18 +19,19 @@ import androidx.leanback.widget.RowPresenter;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.manuelnunhez.dreamtv.R;
 import com.manuelnunhez.dreamtv.ViewModelFactory;
 import com.manuelnunhez.dreamtv.data.model.Card;
 import com.manuelnunhez.dreamtv.data.model.Category;
 import com.manuelnunhez.dreamtv.data.model.Category.Type;
+import com.manuelnunhez.dreamtv.data.model.Resource;
+import com.manuelnunhez.dreamtv.data.model.Resource.Status;
 import com.manuelnunhez.dreamtv.data.model.Task;
 import com.manuelnunhez.dreamtv.data.model.TasksList;
 import com.manuelnunhez.dreamtv.data.model.User;
 import com.manuelnunhez.dreamtv.data.model.VideoDuration;
 import com.manuelnunhez.dreamtv.data.model.VideoTopic;
-import com.manuelnunhez.dreamtv.data.model.Resource;
-import com.manuelnunhez.dreamtv.data.model.Resource.Status;
 import com.manuelnunhez.dreamtv.di.InjectorUtils;
 import com.manuelnunhez.dreamtv.presenter.CardPresenterSelector;
 import com.manuelnunhez.dreamtv.ui.categories.CategoryActivity;
@@ -38,7 +40,6 @@ import com.manuelnunhez.dreamtv.ui.preferences.VideoPreferencesActivity;
 import com.manuelnunhez.dreamtv.ui.search.SearchActivity;
 import com.manuelnunhez.dreamtv.ui.videoDetails.VideoDetailsActivity;
 import com.manuelnunhez.dreamtv.utils.LoadingDialog;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,10 +81,14 @@ import static com.manuelnunhez.dreamtv.utils.Constants.STATUS_ERROR;
 
 
 public class HomeFragment extends BrowseSupportFragment {
-    private static final String ICON_SETTINGS_APP = "ic_settings_app";
-    private static final String ICON_SETTINGS_VIDEO = "ic_settings_video";
     private static final int REQUEST_APP_SETTINGS = 45690;
     private static final int REQUEST_VIDEO_SETTINGS = 45710;
+    private static final String ICON_SETTINGS_APP = "ic_settings_app";
+    private static final String ICON_SETTINGS_VIDEO = "ic_settings_video";
+    private static final String ICON_ABOUT = "ic_about";
+    private static final String ICON_PRIVACY_POLICY = "ic_privacy_policy";
+    private static final String ABOUT_HTML = "http://dreamproject.pjwstk.edu.pl/docs/info/about.html";
+    private static final String PRIVACY_POLICY_HTML = "http://dreamproject.pjwstk.edu.pl/docs/info/privacy_policy.html";
     private ArrayObjectAdapter mRowsAdapter;
     private HomeViewModel mViewModel;
     private LoadingDialog loadingDialog;
@@ -318,6 +323,8 @@ public class HomeFragment extends BrowseSupportFragment {
 
                 gridRowAdapter.add(new Card(getString(R.string.pref_title_app_settings), Card.Type.ICON, ICON_SETTINGS_APP));
                 gridRowAdapter.add(new Card(getString(R.string.pref_title_video_settings), Card.Type.ICON, ICON_SETTINGS_VIDEO));
+                gridRowAdapter.add(new Card(getString(R.string.pref_title_about), Card.Type.ICON, ICON_ABOUT));
+                gridRowAdapter.add(new Card(getString(R.string.pref_title_privacy_policy), Card.Type.ICON, ICON_PRIVACY_POLICY));
 
                 return new ListRow(new HeaderItem(title), gridRowAdapter);
 
@@ -556,6 +563,14 @@ public class HomeFragment extends BrowseSupportFragment {
         firebaseLogEvents_TaskSelected(card.getCategory().toString(), task.getTaskId());
     }
 
+    public void openWebPage(String url) {
+        Uri webpage = Uri.parse(url);
+        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+        if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
     public final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
@@ -572,6 +587,10 @@ public class HomeFragment extends BrowseSupportFragment {
                         goToVideoPreferences(title);
                     } else if (title.equals(getString(R.string.pref_title_app_settings))) {
                         goToAppPreferences(title);
+                    } else if(title.equals(getString(R.string.pref_title_about))){
+                        openWebPage(ABOUT_HTML);
+                    } else if(title.equals(getString(R.string.pref_title_privacy_policy))){
+                        openWebPage(PRIVACY_POLICY_HTML);
                     }
                 } else if (nameCategory.equals(getString(R.string.title_topics_category))) {
                     goToCategories(title);

@@ -33,15 +33,16 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.manuelnunhez.dreamtv.R;
 import com.manuelnunhez.dreamtv.ViewModelFactory;
 import com.manuelnunhez.dreamtv.data.model.Category.Type;
+import com.manuelnunhez.dreamtv.data.model.Resource;
+import com.manuelnunhez.dreamtv.data.model.Resource.Status;
 import com.manuelnunhez.dreamtv.data.model.Subtitle;
 import com.manuelnunhez.dreamtv.data.model.Task;
 import com.manuelnunhez.dreamtv.data.model.UserTask;
 import com.manuelnunhez.dreamtv.data.model.VideoTest;
-import com.manuelnunhez.dreamtv.data.model.Resource;
-import com.manuelnunhez.dreamtv.data.model.Resource.Status;
 import com.manuelnunhez.dreamtv.di.InjectorUtils;
 import com.manuelnunhez.dreamtv.presenter.detailsPresenter.DetailsDescriptionPresenter;
 import com.manuelnunhez.dreamtv.ui.playVideo.PlaybackVideoActivity;
@@ -49,7 +50,6 @@ import com.manuelnunhez.dreamtv.ui.playVideo.PlaybackVideoYoutubeActivity;
 import com.manuelnunhez.dreamtv.utils.Constants;
 import com.manuelnunhez.dreamtv.utils.LoadingDialog;
 import com.manuelnunhez.dreamtv.utils.TimeUtils;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.List;
 
@@ -85,6 +85,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
     private static final int ACTION_REMOVE_MY_LIST = 5;
     private static final String BACKGROUND_DEFAULT_IMAGE = "ic_video_details_background";
     private static final String TYPE_DRAWABLE = "drawable";
+
     private BackgroundManager mBackgroundManager;
     private Drawable mDefaultBackground;
     private DisplayMetrics mMetrics;

@@ -17,16 +17,17 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.manuelnunhez.dreamtv.R;
 import com.manuelnunhez.dreamtv.ViewModelFactory;
 import com.manuelnunhez.dreamtv.data.model.Category;
+import com.manuelnunhez.dreamtv.data.model.Resource;
+import com.manuelnunhez.dreamtv.data.model.Resource.Status;
 import com.manuelnunhez.dreamtv.data.model.Subtitle;
 import com.manuelnunhez.dreamtv.data.model.Subtitle.SubtitleText;
 import com.manuelnunhez.dreamtv.data.model.Task;
 import com.manuelnunhez.dreamtv.data.model.UserTask;
 import com.manuelnunhez.dreamtv.data.model.UserTaskError;
-import com.manuelnunhez.dreamtv.data.model.Resource;
-import com.manuelnunhez.dreamtv.data.model.Resource.Status;
 import com.manuelnunhez.dreamtv.databinding.ActivityPlaybackVideosYoutubeBinding;
 import com.manuelnunhez.dreamtv.di.InjectorUtils;
 import com.manuelnunhez.dreamtv.ui.playVideo.dialogs.ErrorSelectionDialogFragment;
@@ -34,7 +35,6 @@ import com.manuelnunhez.dreamtv.ui.playVideo.dialogs.RatingDialogFragment;
 import com.manuelnunhez.dreamtv.utils.LoadingDialog;
 import com.manuelnunhez.dreamtv.utils.LocaleHelper;
 import com.manuelnunhez.dreamtv.utils.TimeUtils;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,17 +103,18 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements IP
     public static final int POSITION_OFFSET = 7;//7 secs
 
     private boolean mPlayFromBeginning;
-
-    private Subtitle mSubtitleResponse;
-    private UserTask mUserTask;
-    private Task mSelectedTask;
-    private Category.Type mSelectedCategory;
+    private boolean videoCompleted = false; //youtubeAPI error when video completed: it restarts again. We manually avoid to enter in other states again
 
     private Long elapsedRealtimeTemp;
     private Long timeStoppedTemp;
     private Long mLastClickTimeForward = 0L;
     private Long mLastClickTimeBackward = 0L;
     private Long mLastProgressPlayerActiveTime = 0L;
+
+    private Subtitle mSubtitleResponse;
+    private UserTask mUserTask;
+    private Task mSelectedTask;
+    private Category.Type mSelectedCategory;
 
     private Handler handler;
     private Chronometer chronometer;
@@ -130,7 +131,6 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements IP
     private List<Long> lastClicksForward = new ArrayList<>();
     private List<Long> lastClicksBackward = new ArrayList<>();
     private Toast seekToast;
-    private boolean videoCompleted = false; //youtubeAPI error when video completed: it restarts again. We manually avoid to enter in other states again
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {

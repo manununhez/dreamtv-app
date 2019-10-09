@@ -24,17 +24,17 @@ import androidx.leanback.widget.RowPresenter;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.manuelnunhez.dreamtv.R;
 import com.manuelnunhez.dreamtv.ViewModelFactory;
 import com.manuelnunhez.dreamtv.data.model.Card;
-import com.manuelnunhez.dreamtv.data.model.Task;
 import com.manuelnunhez.dreamtv.data.model.Resource;
 import com.manuelnunhez.dreamtv.data.model.Resource.Status;
+import com.manuelnunhez.dreamtv.data.model.Task;
 import com.manuelnunhez.dreamtv.di.InjectorUtils;
 import com.manuelnunhez.dreamtv.presenter.CardPresenterSelector;
 import com.manuelnunhez.dreamtv.ui.videoDetails.VideoDetailsActivity;
 import com.manuelnunhez.dreamtv.utils.LoadingDialog;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -206,7 +206,7 @@ public class SearchFragment extends SearchSupportFragment
             searchLiveData.removeObservers(getViewLifecycleOwner());
     }
 
-    private boolean hasFoundDataInResults(){
+    private boolean hasFoundDataInResults() {
         return (mViewModel.resultsFound().getValue() == null) ? false : (mViewModel.resultsFound().getValue());
     }
 
