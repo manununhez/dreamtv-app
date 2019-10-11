@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="@style/Theme.Custom.Dark.Leanback"></style>
+    <style name="AppTheme" parent="@style/Theme.Custom.Dark.Leanback"/>
 
     <!-- A default card style. Used in cards example. -->
 

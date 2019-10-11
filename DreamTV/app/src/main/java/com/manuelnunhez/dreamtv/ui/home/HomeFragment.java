@@ -1,11 +1,13 @@
 package com.manuelnunhez.dreamtv.ui.home;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import android.webkit.WebView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
@@ -564,11 +566,26 @@ public class HomeFragment extends BrowseSupportFragment {
     }
 
     public void openWebPage(String url) {
-        Uri webpage = Uri.parse(url);
-        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
-        if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
-            startActivity(intent);
-        }
+//        Uri webpage = Uri.parse(url);
+//        Intent intent = new Intent(Intent.ACTION_VIEW);
+//        intent.setData(webpage);
+//        if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
+//            startActivity(intent);
+//        }
+
+
+        // create a WebView
+        WebView webView = new WebView(requireContext());
+
+// populate the WebView with an HTML string
+        webView.loadUrl(url);
+
+// create an AlertDialog.Builder
+        Dialog builder =new Dialog(requireActivity(), R.style.Theme_AppCompat);
+
+// set the WebView as the AlertDialog.Builder’s view
+        builder.setContentView(webView);
+        builder.show();
     }
 
     public final class ItemViewClickedListener implements OnItemViewClickedListener {
@@ -587,9 +604,9 @@ public class HomeFragment extends BrowseSupportFragment {
                         goToVideoPreferences(title);
                     } else if (title.equals(getString(R.string.pref_title_app_settings))) {
                         goToAppPreferences(title);
-                    } else if(title.equals(getString(R.string.pref_title_about))){
+                    } else if (title.equals(getString(R.string.pref_title_about))) {
                         openWebPage(ABOUT_HTML);
-                    } else if(title.equals(getString(R.string.pref_title_privacy_policy))){
+                    } else if (title.equals(getString(R.string.pref_title_privacy_policy))) {
                         openWebPage(PRIVACY_POLICY_HTML);
                     }
                 } else if (nameCategory.equals(getString(R.string.title_topics_category))) {
