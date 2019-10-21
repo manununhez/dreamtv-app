@@ -576,7 +576,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
                         new Action(ACTION_REMOVE_MY_LIST, getString(R.string.btn_remove_to_my_list)));
 
 
-                Toast.makeText(requireContext(), getString(R.string.video_added_to_list), Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), getString(R.string.video_added_to_list), Toast.LENGTH_LONG).show();
                 mViewModel.updateTaskByCategory(); //update all categories after a new task was added
 
                 //Analytics Report Event
