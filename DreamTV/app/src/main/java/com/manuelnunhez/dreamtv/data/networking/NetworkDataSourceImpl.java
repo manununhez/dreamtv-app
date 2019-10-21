@@ -5,41 +5,35 @@ import android.content.Context;
 import androidx.lifecycle.MutableLiveData;
 
 import com.android.volley.VolleyError;
+import com.google.gson.reflect.TypeToken;
 import com.manuelnunhez.dreamtv.data.model.Authentication;
 import com.manuelnunhez.dreamtv.data.model.Category;
 import com.manuelnunhez.dreamtv.data.model.ErrorReason;
+import com.manuelnunhez.dreamtv.data.model.Resource;
 import com.manuelnunhez.dreamtv.data.model.Subtitle;
-import com.manuelnunhez.dreamtv.data.model.Subtitle.SubtitleText;
 import com.manuelnunhez.dreamtv.data.model.Task;
 import com.manuelnunhez.dreamtv.data.model.TasksList;
 import com.manuelnunhez.dreamtv.data.model.User;
 import com.manuelnunhez.dreamtv.data.model.UserTask;
 import com.manuelnunhez.dreamtv.data.model.UserTaskError;
-import com.manuelnunhez.dreamtv.data.model.Video;
 import com.manuelnunhez.dreamtv.data.model.VideoDuration;
 import com.manuelnunhez.dreamtv.data.model.VideoTest;
 import com.manuelnunhez.dreamtv.data.model.VideoTopic;
 import com.manuelnunhez.dreamtv.data.networking.model.AuthenticationSchema;
 import com.manuelnunhez.dreamtv.data.networking.model.ErrorReasonSchema;
 import com.manuelnunhez.dreamtv.data.networking.model.JsonResponseBaseBean;
-import com.manuelnunhez.dreamtv.data.model.Resource;
 import com.manuelnunhez.dreamtv.data.networking.model.SubtitleSchema;
 import com.manuelnunhez.dreamtv.data.networking.model.TaskSchema;
 import com.manuelnunhez.dreamtv.data.networking.model.TasksListSchema;
 import com.manuelnunhez.dreamtv.data.networking.model.UserSchema;
 import com.manuelnunhez.dreamtv.data.networking.model.UserTaskErrorSchema;
 import com.manuelnunhez.dreamtv.data.networking.model.UserTaskSchema;
-import com.manuelnunhez.dreamtv.data.networking.model.VideoSchema;
 import com.manuelnunhez.dreamtv.data.networking.model.VideoTestSchema;
 import com.manuelnunhez.dreamtv.data.networking.model.VideoTopicSchema;
 import com.manuelnunhez.dreamtv.ui.home.HomeFragment;
 import com.manuelnunhez.dreamtv.utils.AppExecutors;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import timber.log.Timber;
@@ -48,6 +42,16 @@ import static com.android.volley.Request.Method.DELETE;
 import static com.android.volley.Request.Method.GET;
 import static com.android.volley.Request.Method.POST;
 import static com.android.volley.Request.Method.PUT;
+import static com.manuelnunhez.dreamtv.data.networking.DataMapper.getErrorReasonListSchemaFromModel;
+import static com.manuelnunhez.dreamtv.data.networking.DataMapper.getReasonsFromSchema;
+import static com.manuelnunhez.dreamtv.data.networking.DataMapper.getSubtitleFromSchema;
+import static com.manuelnunhez.dreamtv.data.networking.DataMapper.getTasksFromSchema;
+import static com.manuelnunhez.dreamtv.data.networking.DataMapper.getTasksListFromSchema;
+import static com.manuelnunhez.dreamtv.data.networking.DataMapper.getTopicFromSchema;
+import static com.manuelnunhez.dreamtv.data.networking.DataMapper.getUserFromSchema;
+import static com.manuelnunhez.dreamtv.data.networking.DataMapper.getUserTaskErrorsFromSchema;
+import static com.manuelnunhez.dreamtv.data.networking.DataMapper.getUserTaskFromSchema;
+import static com.manuelnunhez.dreamtv.data.networking.DataMapper.getVideoTestFromSchema;
 import static com.manuelnunhez.dreamtv.data.networking.NetworkUtils.addTaskToUserListURL;
 import static com.manuelnunhez.dreamtv.data.networking.NetworkUtils.getCategoriesURL;
 import static com.manuelnunhez.dreamtv.data.networking.NetworkUtils.getErrorReasonsURL;
@@ -61,7 +65,6 @@ import static com.manuelnunhez.dreamtv.data.networking.NetworkUtils.searchByCate
 import static com.manuelnunhez.dreamtv.data.networking.NetworkUtils.searchURL;
 import static com.manuelnunhez.dreamtv.data.networking.NetworkUtils.userErrorsURL;
 import static com.manuelnunhez.dreamtv.data.networking.NetworkUtils.userTaskURL;
-import static com.manuelnunhez.dreamtv.data.networking.model.SubtitleSchema.SubtitleTextSchema;
 import static com.manuelnunhez.dreamtv.utils.Constants.PARAM_AUDIO_LANGUAGE;
 import static com.manuelnunhez.dreamtv.utils.Constants.PARAM_CATEGORY;
 import static com.manuelnunhez.dreamtv.utils.Constants.PARAM_COMPLETED;
@@ -962,126 +965,6 @@ public class NetworkDataSourceImpl implements NetworkDataSource {
 
     public MutableLiveData<Resource<Authentication>> responseFromAuth() {
         return responseFromAuth;
-    }
-
-
-    /*******************
-     * DATA MAPPER
-     *******************/
-
-    //*******SCHEMA TO Model************
-    private User getUserFromSchema(UserSchema userSchema) {
-        return new User(userSchema.email, userSchema.password, userSchema.subLanguage, userSchema.audioLanguage,
-                userSchema.interfaceMode);
-    }
-
-    private VideoTopic[] getTopicFromSchema(VideoTopicSchema[] videoTopicSchemas) {
-        VideoTopic[] videoTopics = new VideoTopic[videoTopicSchemas.length];
-
-        for (int i = 0; i < videoTopicSchemas.length; i++) {
-            videoTopics[i] = new VideoTopic(videoTopicSchemas[i].imageName, videoTopicSchemas[i].language,
-                    videoTopicSchemas[i].name);
-        }
-
-        return videoTopics;
-    }
-
-    private TasksList[] getTasksListFromSchema(TasksListSchema[] tasksListSchemas) {
-        TasksList[] tasksLists = new TasksList[tasksListSchemas.length];
-        for (int i = 0; i < tasksListSchemas.length; i++) {
-            tasksLists[i] = new TasksList(getTasksFromSchema(tasksListSchemas[i].tasks),
-                    new Category(tasksListSchemas[i].category.orderIndex,
-                            tasksListSchemas[i].category.name, tasksListSchemas[i].category.visible));
-        }
-
-        return tasksLists;
-    }
-
-    private ErrorReason[] getReasonsFromSchema(ErrorReasonSchema[] errorReasonSchemas) {
-        ErrorReason[] errorReasons = new ErrorReason[errorReasonSchemas.length];
-
-        for (int i = 0; i < errorReasonSchemas.length; i++) {
-            errorReasons[i] = new ErrorReason(errorReasonSchemas[i].reasonCode, errorReasonSchemas[i].name,
-                    errorReasonSchemas[i].description, errorReasonSchemas[i].language);
-        }
-
-        return errorReasons;
-    }
-
-    private Task[] getTasksFromSchema(TaskSchema[] taskSchemas) {
-        Task[] tasks = new Task[taskSchemas.length];
-
-        for (int i = 0; i < taskSchemas.length; i++) {
-            tasks[i] = new Task(taskSchemas[i].taskId, taskSchemas[i].videoId, taskSchemas[i].videoTitleTranslated,
-                    taskSchemas[i].videoDescriptionTranslated, taskSchemas[i].subLanguage, taskSchemas[i].type, getVideoFromSchema(taskSchemas[i].video),
-                    getUserTasksFromSchema(taskSchemas[i].userTasks));
-        }
-        return tasks;
-    }
-
-    private UserTask[] getUserTasksFromSchema(UserTaskSchema[] userTaskSchemas) {
-        UserTask[] userTasks = new UserTask[userTaskSchemas.length];
-        for (int i = 0; i < userTaskSchemas.length; i++) {
-            userTasks[i] = getUserTaskFromSchema(userTaskSchemas[i]);
-        }
-
-        return userTasks;
-    }
-
-    private UserTask getUserTaskFromSchema(UserTaskSchema userTaskSchema) {
-        return new UserTask(userTaskSchema.id, userTaskSchema.userId, userTaskSchema.taskId, userTaskSchema.completed,
-                userTaskSchema.rating, userTaskSchema.timeWatched, userTaskSchema.subVersion, getUserTaskErrorsFromSchema(userTaskSchema.userTaskErrorList));
-    }
-
-    private UserTaskError[] getUserTaskErrorsFromSchema(UserTaskErrorSchema[] userTaskErrorSchemas) {
-        UserTaskError[] userTaskErrors = new UserTaskError[userTaskErrorSchemas.length];
-
-        for (int i = 0; i < userTaskErrorSchemas.length; i++) {
-            userTaskErrors[i] = new UserTaskError(userTaskErrorSchemas[i].reasonCode,
-                    userTaskErrorSchemas[i].subtitlePosition, userTaskErrorSchemas[i].comment);
-        }
-
-        return userTaskErrors;
-    }
-
-    private Video getVideoFromSchema(VideoSchema videoSchema) {
-        return new Video(videoSchema.videoId, videoSchema.audioLanguage, videoSchema.speakerName,
-                videoSchema.title, videoSchema.description, videoSchema.duration, videoSchema.thumbnail,
-                videoSchema.team, videoSchema.project, videoSchema.videoUrl);
-    }
-
-    private Subtitle getSubtitleFromSchema(SubtitleSchema subtitleSchema) {
-        return new Subtitle(subtitleSchema.versionNumber, getSubtitleTextFromSchema(subtitleSchema.subtitles), subtitleSchema.subFormat, subtitleSchema.videoTitleTranslated,
-                subtitleSchema.videoDescriptionTranslated, subtitleSchema.videoTitleOriginal, subtitleSchema.videoDescriptionOriginal);
-    }
-
-    private List<SubtitleText> getSubtitleTextFromSchema(List<SubtitleTextSchema> subtitleTextSchema) {
-        List<SubtitleText> subtitleTextList = new ArrayList<>();
-        for (SubtitleTextSchema textSchema : subtitleTextSchema) {
-            subtitleTextList.add(new SubtitleText(textSchema.getText(), textSchema.getPosition(),
-                    textSchema.getStart(), textSchema.getEnd()));
-        }
-        return subtitleTextList;
-    }
-
-    private VideoTest[] getVideoTestFromSchema(VideoTestSchema[] data) {
-        VideoTest[] videoTests = new VideoTest[data.length];
-        for (int i = 0; i < data.length; i++) {
-            videoTests[i] = new VideoTest(data[i].id, data[i].videoId, data[i].subVersion,
-                    data[i].subLanguage);
-        }
-        return videoTests;
-    }
-
-
-    private String getErrorReasonListSchemaFromModel(List<ErrorReason> errorReasonList) {
-        List<ErrorReasonSchema> errorReasonSchemas = new ArrayList<>();
-        for (ErrorReason errorReason : errorReasonList) {
-            errorReasonSchemas.add(new ErrorReasonSchema(errorReason.getReasonCode(), errorReason.getName(),
-                    errorReason.getDescription(),
-                    errorReason.getLanguage()));
-        }
-        return new Gson().toJson(errorReasonSchemas);
     }
 
 }
