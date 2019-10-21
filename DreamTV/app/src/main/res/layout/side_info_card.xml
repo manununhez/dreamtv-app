@@ -21,23 +21,10 @@
     android:background="@color/dark_grey"
     android:elevation="02dp">
 
-    <ProgressBar
-        android:id="@+id/pbContinueWatching"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:layout_width="@dimen/side_info_card_width"
-        android:layout_height="@dimen/pb_height"
-        android:layout_alignParentBottom="true"
-        android:background="@color/default_background"
-        android:max="100"
-        android:theme="@style/ProgressBarVideoPlayer"
-        apps:progress="40" />
-
     <RelativeLayout
         android:id="@+id/rlContent"
         android:layout_width="@dimen/side_info_card_width"
         android:layout_height="@dimen/side_info_card_height"
-        android:layout_below="@id/tvErrorsSelected"
-        android:layout_marginBottom="@dimen/pb_height"
         android:gravity="center_horizontal">
 
         <ImageView
@@ -80,7 +67,10 @@
             android:layout_alignParentBottom="true"
             android:background="@color/text_background_card"
             android:orientation="vertical"
-            android:padding="4dp">
+            android:paddingStart="4dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="4dp"
+            android:paddingBottom="@dimen/pb_height">
 
 
             <TextView
@@ -123,28 +113,40 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:layout_marginEnd="6dp"
-            android:layout_marginBottom="2dp"
+            android:layout_marginBottom="@dimen/pb_height"
             android:fontFamily="@font/roboto"
             android:padding="2dp"
             android:textColor="@color/white"
             android:textSize="10sp"
             android:textStyle="bold"
             apps:text="23:15" />
-    </RelativeLayout>
 
-    <TextView
-        android:id="@+id/tvErrorsSelected"
-        android:layout_width="@dimen/side_info_card_width"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="@color/errors_found_report_background"
-        android:fontFamily="@font/roboto"
-        android:gravity="center_vertical"
-        android:maxLines="2"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
-        android:textAlignment="center"
-        android:textSize="12sp"
-        apps:text="Texto que vanj en la cabecera" />
+
+        <TextView
+            android:id="@+id/tvErrorsSelected"
+            android:layout_width="@dimen/side_info_card_width"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:background="@color/errors_found_report_background"
+            android:fontFamily="@font/roboto"
+            android:gravity="center_vertical"
+            android:maxLines="2"
+            android:textColor="@color/white"
+            android:padding="2dp"
+            android:textAlignment="center"
+            android:textSize="11sp"
+            apps:text="Texto que van en la cabecera" />
+
+        <ProgressBar
+            android:id="@+id/pbContinueWatching"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="@dimen/side_info_card_width"
+            android:layout_height="@dimen/pb_height"
+            android:layout_alignParentBottom="true"
+            android:background="@color/default_background"
+            android:max="100"
+            android:theme="@style/ProgressBarVideoPlayer"
+            apps:progress="40" />
+    </RelativeLayout>
 
 </RelativeLayout>

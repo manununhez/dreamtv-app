@@ -8,7 +8,7 @@
     <color name="background_gradient_start">#000000</color>
     <color name="background_gradient_end">#DDDDDD</color>
     <color name="default_background">#C3413D3D</color>
-    <color name="errors_found_report_background">#3E50B4</color>
+    <color name="errors_found_report_background">#DD3E50B4</color>
     <color name="colorAccent">#BB86FC</color>
     <color name="colorSecondary">#03DAC5</color>
     <color name="colorPrimary">#1F1A24</color>
