@@ -115,7 +115,7 @@ class DataMapper {
     }
 
     static Subtitle getSubtitleFromSchema(SubtitleSchema subtitleSchema) {
-        return new Subtitle(subtitleSchema.versionNumber, getSubtitleTextFromSchema(subtitleSchema.subtitles.subtitles), subtitleSchema.subFormat, subtitleSchema.videoTitleTranslated,
+        return new Subtitle(subtitleSchema.versionNumber, getSubtitleTextFromSchema(subtitleSchema.subtitles), subtitleSchema.subFormat, subtitleSchema.videoTitleTranslated,
                 subtitleSchema.videoDescriptionTranslated, subtitleSchema.videoTitleOriginal, subtitleSchema.videoDescriptionOriginal);
     }
 

@@ -14,7 +14,7 @@ public class SubtitleSchema {
     @SerializedName("sub_format")
     public String subFormat;
     @SerializedName("subtitles")
-    public SubtitleDetailsSchema subtitles;
+    public List<SubtitleTextSchema> subtitles;
     @SerializedName("title")
     public String videoTitleTranslated;
     @SerializedName("description")
@@ -24,10 +24,6 @@ public class SubtitleSchema {
     @SerializedName("video_description")
     public String videoDescriptionOriginal;
 
-    public static class SubtitleDetailsSchema {
-        @SerializedName("subtitles")
-        public List<SubtitleTextSchema> subtitles;
-    }
 
     public static class SubtitleTextSchema {
         private static final int ONE_SEC_IN_MS = 1000;
@@ -35,9 +31,9 @@ public class SubtitleSchema {
         private String text;
         @SerializedName("position")
         private int position;
-        @SerializedName("startTime")
+        @SerializedName("start")
         private int start; //msecs
-        @SerializedName("endTime")
+        @SerializedName("end")
         private int end; //msecs
 
 
