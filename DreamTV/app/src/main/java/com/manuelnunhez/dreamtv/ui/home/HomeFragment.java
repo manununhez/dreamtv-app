@@ -134,7 +134,7 @@ public class HomeFragment extends BrowseSupportFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setHeadersState(HEADERS_DISABLED);
+        //setHeadersState(HEADERS_DISABLED);
     }
 
     @Override
@@ -347,7 +347,9 @@ public class HomeFragment extends BrowseSupportFragment {
     private void setupVideosList() {
         Timber.d("setupVideosList()");
 
+
         setBadgeDrawable(requireContext().getResources().getDrawable(R.drawable.dreamtv_logo, null));
+        setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(false);
 
 
