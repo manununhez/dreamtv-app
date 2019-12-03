@@ -6,24 +6,23 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvSubtitle"
-            style="@style/SubtitleStyleWithoutError"
-            android:textSize="25sp"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/tvSubtitleError"
-            style="@style/SubtitleStyleError"
-            android:textSize="25sp"
-            android:visibility="gone" />
-
-
         <RelativeLayout
             android:id="@+id/rlVideoPlayerInfo"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:background="@color/dark_grey" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/dark_grey" />
+
 
             <TextView
                 android:id="@+id/tvTime"
@@ -33,7 +32,8 @@
                 android:layout_marginStart="40dp"
                 android:layout_marginTop="30dp"
                 android:textColor="@color/white"
-                android:textSize="30sp" />
+                android:textSize="30sp"
+                tools:text="25:00" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -45,6 +45,19 @@
                 android:textColor="@color/white"
                 android:textSize="30sp" />
         </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tvSubtitle"
+            style="@style/SubtitleStyleWithoutError"
+            android:textSize="25sp"
+            android:visibility="gone"
+            tools:text="Subtitle text text" />
+
+        <TextView
+            android:id="@+id/tvSubtitleError"
+            style="@style/SubtitleStyleError"
+            android:textSize="25sp"
+            android:visibility="gone" />
 
         <RelativeLayout
             android:id="@+id/rlVideoProgressPlayer"
