@@ -27,6 +27,7 @@ import androidx.leanback.widget.ListRowPresenter;
 import androidx.leanback.widget.RowPresenter;
 import androidx.leanback.widget.SparseArrayObjectAdapter;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.bumptech.glide.Glide;
@@ -116,7 +117,7 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
 
         // Get the ViewModel from the factory
         ViewModelFactory factory = InjectorUtils.provideViewModelFactory(requireContext());
-        mViewModel = ViewModelProviders.of(this, factory).get(VideoDetailsViewModel.class);
+        mViewModel = new ViewModelProvider(this, factory).get(VideoDetailsViewModel.class);
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext());

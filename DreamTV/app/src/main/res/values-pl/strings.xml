@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Error messages -->
     <string name="video_error_media_load_timeout">Czas ładowania multimediów został przekroczony</string>
@@ -22,7 +22,7 @@
     <string name="title_my_list_category">Moje filmy</string>
     <string name="title_finished_category">Zobacz jeszcze raz</string>
     <string name="title_test_category">Polecane filmy</string>
-    <string name="title_settings_category">Ustawienia</string>
+    <string name="title_settings_category" tools:keep="@string/title_settings_category">Ustawienia</string>
     <string name="title_preferences_category">Preferencje</string>
     <string name="title_continue_watching_category">Kontynuuj oglądanie</string>
     <string name="title_topics_category">Kategorie</string>
@@ -33,7 +33,7 @@
     <string name="title_video_details_main">Audio: %1$s | Napisy: %2$s</string>
     <string name="title_video_forward">+ %1$d s</string>
     <string name="title_video_backward">- %1$d s</string>
-    <string name="title_reasons_others_selected">Wybrane w trybie zaawansowanym: %1$s</string>
+    <string name="title_reasons_others_selected" tools:keep="@string/title_reasons_others_selected">Wybrane w trybie zaawansowanym: %1$s</string>
     <string name="select_errors_to_save">Wybierz jakąś obcję, aby anulować kliknij &lt;- </string>
 
     <plurals name="errors_found_finished">
@@ -59,7 +59,7 @@
     <string name="btn_cancel">Anuluj</string>
     <string name="btn_save_exit">Zapisz i wyjdź</string>
     <string name="btn_exit">Wyjście</string>
-    <string name="btn_ok">OK</string>
+    <string name="btn_ok" tools:keep="@string/btn_ok">OK</string>
     <string name="btn_start_recording">Kliknij na mikrofon żeby nagrać wiadomość</string>
     <string name="btn_continue_watching">Wznów: %1$s</string>
     <string name="btn_no_from_beggining">Odtwórz od początku</string>
@@ -71,7 +71,7 @@
 
     <!--loadingDialog-->
     <string name="title_loading_buffering">Buforowanie…</string>
-    <string name="title_loading_retrieve_subtitle">Pobieranie napisów…</string>
+    <string name="title_loading_retrieve_subtitle" tools:keep="@string/title_loading_retrieve_subtitle">Pobieranie napisów…</string>
     <string name="title_loading_retrieve_tasks">Pobieranie zadań…</string>
     <string name="title_loading_add_to_list">Dodawanie filmu do listy…</string>
     <string name="title_loading_preparing_task">Przygotowanie zadania…</string>
@@ -81,7 +81,7 @@
     <string name="time_format">%02d:%02d</string>
     <string name="alert_msg_video_terminated">Jak ci się podobał ten film?</string>
     <string name="alert_exit_app">Czy na pewno chcesz opuścić aplikację?</string>
-    <string name="text_pause">PAUZA</string>
+    <string name="text_pause" tools:keep="@string/text_pause">PAUZA</string>
 
     <!--PREFERENCES-->
     <string name="pref_title_app_settings">Ustawienia Aplikacji</string>
@@ -95,9 +95,9 @@
     <string name="pref_title_video_duration_dialog">Wybierz czas trwania filmu</string>
     <string name="pref_title_subtitle_size_dialog">Wybierz rozmiar napisów</string>
     <string name="pref_title_audio_language_dialog">Wybierz język nagrania</string>
-    <string name="pref_title_subtitle_language_dialog">Wybierz język napisów</string>
+    <string name="pref_title_subtitle_language_dialog" tools:keep="@string/pref_title_subtitle_language_dialog">Wybierz język napisów</string>
     <string name="pref_title_audio">Język nagrania</string>
-    <string name="pref_title_subtitle">Język napisów</string>
+    <string name="pref_title_subtitle" tools:keep="@string/pref_title_subtitle">Język napisów</string>
     <string name="pref_title_text_language_settings">Język aplikacji &amp; napisów</string>
     <string name="pref_title_reason_dialog_interface_settings">Interfejs</string>
     <string name="pref_title_testing_mode_settings">Tryb testowy</string>
@@ -132,12 +132,12 @@
     </string-array>
 
 
-    <string-array name="listSubtitleLanguages">
+    <string-array name="listSubtitleLanguages" tools:keep="@array/listSubtitleLanguages">
         <item>Angielski</item>
         <item>Polski</item>
     </string-array>
 
-    <string-array name="listSubtitleLanguagesValues">
+    <string-array name="listSubtitleLanguagesValues" tools:keep="@array/listSubtitleLanguagesValues">
         <item>en</item>
         <item>pl</item>
     </string-array>

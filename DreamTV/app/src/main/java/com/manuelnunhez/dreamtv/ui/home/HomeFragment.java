@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
@@ -19,7 +18,7 @@ import androidx.leanback.widget.Presenter;
 import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.manuelnunhez.dreamtv.R;
@@ -113,7 +112,7 @@ public class HomeFragment extends BrowseSupportFragment {
 
         // Get the ViewModel from the factory
         ViewModelFactory factory = InjectorUtils.provideViewModelFactory(requireContext());
-        mViewModel = ViewModelProviders.of(this, factory).get(HomeViewModel.class);
+        mViewModel = new ViewModelProvider(this, factory).get(HomeViewModel.class);
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireContext());
@@ -582,7 +581,7 @@ public class HomeFragment extends BrowseSupportFragment {
         webView.loadUrl(url);
 
 // create an AlertDialog.Builder
-        Dialog builder =new Dialog(requireActivity(), R.style.Theme_AppCompat);
+        Dialog builder = new Dialog(requireActivity(), R.style.Theme_AppCompat);
 
 // set the WebView as the AlertDialog.Builder’s view
         builder.setContentView(webView);

@@ -15,7 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.manuelnunhez.dreamtv.R;
@@ -183,7 +183,7 @@ public class PlaybackVideoYoutubeActivity extends FragmentActivity implements IP
         }
 
         ViewModelFactory factory = InjectorUtils.provideViewModelFactory(this);
-        mViewModel = ViewModelProviders.of(this, factory).get(PlaybackViewModel.class);
+        mViewModel = new ViewModelProvider(this, factory).get(PlaybackViewModel.class);
 
 
         chronometer = new Chronometer(this); // initiate a chronometer

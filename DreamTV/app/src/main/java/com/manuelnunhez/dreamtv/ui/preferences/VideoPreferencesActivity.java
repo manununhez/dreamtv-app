@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 
 import com.manuelnunhez.dreamtv.R;
@@ -29,7 +29,7 @@ public class VideoPreferencesActivity extends FragmentActivity implements Shared
 
 
         ViewModelFactory factory = InjectorUtils.provideViewModelFactory(this);
-        mViewModel = ViewModelProviders.of(this, factory).get(VideoPreferencesViewModel.class);
+        mViewModel = new ViewModelProvider(this, factory).get(VideoPreferencesViewModel.class);
 
         PreferenceManager.setDefaultValues(this, R.xml.video_preferences, false);
 

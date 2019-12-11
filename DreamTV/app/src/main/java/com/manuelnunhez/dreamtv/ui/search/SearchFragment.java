@@ -22,7 +22,7 @@ import androidx.leanback.widget.Presenter;
 import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.manuelnunhez.dreamtv.R;
@@ -73,7 +73,7 @@ public class SearchFragment extends SearchSupportFragment
         mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
 
         ViewModelFactory factory = InjectorUtils.provideViewModelFactory(requireActivity());
-        mViewModel = ViewModelProviders.of(this, factory).get(SearchViewModel.class);
+        mViewModel = new ViewModelProvider(this, factory).get(SearchViewModel.class);
 
         setSearchResultProvider(this);
         instantiateLoading();

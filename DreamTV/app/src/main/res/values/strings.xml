@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!--NON-TRANSLATABLE-->
     <string name="app_name" translatable="false">DreamTV</string>
@@ -7,7 +7,7 @@
     <string name="pref_key_list_interface_mode" translatable="false">listInterfaceMode</string>
     <string name="pref_key_testing_mode" translatable="false">testingMode</string>
     <string name="pref_key_list_audio_languages" translatable="false">listAudioLanguage</string>
-    <string name="pref_key_list_subtitle_languages" translatable="false">listSubtitleLanguage</string>
+    <string name="pref_key_list_subtitle_languages" translatable="false" tools:keep="@string/pref_key_list_subtitle_languages">listSubtitleLanguage</string>
     <string name="pref_key_video_duration" translatable="false">listVideoDuration</string>
     <string name="pref_key_subtitle_size" translatable="false">listSubtitleSize</string>
 
@@ -33,7 +33,7 @@
     <string name="title_my_list_category">My List</string>
     <string name="title_finished_category">Watch It Again</string>
     <string name="title_test_category">Recommended Videos</string>
-    <string name="title_settings_category">Settings</string>
+    <string name="title_settings_category" tools:keep="@string/title_settings_category">Settings</string>
     <string name="title_preferences_category">Preferences</string>
     <string name="title_continue_watching_category">Continue Watching</string>
     <string name="title_topics_category">Categories</string>
@@ -44,7 +44,7 @@
     <string name="title_video_details_main">Audio: %1$s | Subtitle: %2$s</string>
     <string name="title_video_forward">+ %1$d secs</string>
     <string name="title_video_backward">- %1$d secs</string>
-    <string name="title_reasons_others_selected">Selected in advanced mode: %1$s</string>
+    <string name="title_reasons_others_selected" tools:keep="@string/title_reasons_others_selected">Selected in advanced mode: %1$s</string>
     <string name="select_errors_to_save">Please, select some options to save. To exit the dialog press &lt;- </string>
 
     <plurals name="errors_found_finished">
@@ -66,7 +66,7 @@
     <string name="btn_cancel">Cancel</string>
     <string name="btn_save_exit">Save and Exit</string>
     <string name="btn_exit">Exit</string>
-    <string name="btn_ok">OK</string>
+    <string name="btn_ok" tools:keep="@string/btn_ok">OK</string>
     <string name="btn_start_recording">Click the mic to record your comment</string>
     <string name="btn_continue_watching">Resume: %1$s</string>
     <string name="btn_no_from_beggining">Play from beginning</string>
@@ -78,7 +78,7 @@
 
     <!--loadingDialog-->
     <string name="title_loading_buffering">Loading…</string>
-    <string name="title_loading_retrieve_subtitle">Retrieving subtitles…</string>
+    <string name="title_loading_retrieve_subtitle" tools:keep="@string/title_loading_retrieve_subtitle">Retrieving subtitles…</string>
     <string name="title_loading_retrieve_tasks">Retrieving tasks…</string>
     <string name="title_loading_add_to_list">Adding video to list…</string>
     <string name="title_loading_preparing_task">Preparing task…</string>
@@ -88,7 +88,7 @@
     <string name="time_format">%02d:%02d</string>
     <string name="alert_msg_video_terminated">How did you like the video?</string>
     <string name="alert_exit_app">Are you sure you want to leave the application?</string>
-    <string name="text_pause">PAUSE</string>
+    <string name="text_pause" tools:keep="@string/text_pause">PAUSE</string>
 
 
     <!--PREFERENCES-->
@@ -103,9 +103,9 @@
     <string name="pref_title_video_duration_dialog">Select video duration</string>
     <string name="pref_title_subtitle_size_dialog">Select subtitle size</string>
     <string name="pref_title_audio_language_dialog">Select audio language</string>
-    <string name="pref_title_subtitle_language_dialog">Select subtitle language</string>
+    <string name="pref_title_subtitle_language_dialog" tools:keep="@string/pref_title_subtitle_language_dialog">Select subtitle language</string>
     <string name="pref_title_audio">Audio language</string>
-    <string name="pref_title_subtitle">Subtitles language</string>
+    <string name="pref_title_subtitle" tools:keep="@string/pref_title_subtitle">Subtitles language</string>
     <string name="pref_title_text_language_settings">Application &amp; Subtitle language</string>
     <string name="pref_title_reason_dialog_interface_settings">Interface</string>
     <string name="pref_title_testing_mode_settings">Testing mode</string>
@@ -140,12 +140,12 @@
     </string-array>
 
 
-    <string-array name="listSubtitleLanguages">
+    <string-array name="listSubtitleLanguages" tools:keep="@array/listSubtitleLanguages">
         <item>English</item>
         <item>Polish</item>
     </string-array>
 
-    <string-array name="listSubtitleLanguagesValues">
+    <string-array name="listSubtitleLanguagesValues" tools:keep="@array/listSubtitleLanguagesValues">
         <item>en</item>
         <item>pl</item>
     </string-array>

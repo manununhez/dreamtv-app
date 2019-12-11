@@ -1,10 +1,12 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:width="@dimen/category_image_single_line_width"
     android:height="@dimen/category_image_single_line_height"
     android:alpha="0.9"
     android:tint="#FFFFFF"
     android:viewportWidth="24.0"
-    android:viewportHeight="24.0">
+    android:viewportHeight="24.0"
+    tools:keep="@drawable/category_artistic">
     <path
         android:fillColor="#FF000000"
         android:pathData="M12,3v10.55c-0.59,-0.34 -1.27,-0.55 -2,-0.55 -2.21,0 -4,1.79 -4,4s1.79,4 4,4 4,-1.79 4,-4V7h4V3h-6z" />

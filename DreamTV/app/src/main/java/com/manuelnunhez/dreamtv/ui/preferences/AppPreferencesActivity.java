@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 
 import com.manuelnunhez.dreamtv.R;
@@ -30,7 +30,7 @@ public class AppPreferencesActivity extends FragmentActivity implements SharedPr
 
 
         ViewModelFactory factory = InjectorUtils.provideViewModelFactory(this);
-        mViewModel = ViewModelProviders.of(this, factory).get(AppPreferencesViewModel.class);
+        mViewModel = new ViewModelProvider(this, factory).get(AppPreferencesViewModel.class);
 
         PreferenceManager.setDefaultValues(this, R.xml.app_preferences, false);
 

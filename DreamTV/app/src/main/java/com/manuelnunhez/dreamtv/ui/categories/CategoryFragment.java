@@ -29,19 +29,19 @@ import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
 import androidx.leanback.widget.VerticalGridPresenter;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.manuelnunhez.dreamtv.R;
 import com.manuelnunhez.dreamtv.ViewModelFactory;
 import com.manuelnunhez.dreamtv.data.model.Card;
-import com.manuelnunhez.dreamtv.data.model.Task;
 import com.manuelnunhez.dreamtv.data.model.Resource;
 import com.manuelnunhez.dreamtv.data.model.Resource.Status;
+import com.manuelnunhez.dreamtv.data.model.Task;
 import com.manuelnunhez.dreamtv.di.InjectorUtils;
 import com.manuelnunhez.dreamtv.presenter.CardPresenterSelector;
 import com.manuelnunhez.dreamtv.ui.videoDetails.VideoDetailsActivity;
 import com.manuelnunhez.dreamtv.utils.LoadingDialog;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +73,7 @@ public class CategoryFragment extends VerticalGridSupportFragment {
         super.onActivityCreated(savedInstanceState);
 
         ViewModelFactory factory = InjectorUtils.provideViewModelFactory(requireActivity());
-        CategoryViewModel mViewModel = ViewModelProviders.of(this, factory).get(CategoryViewModel.class);
+        CategoryViewModel mViewModel = new ViewModelProvider(this, factory).get(CategoryViewModel.class);
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(requireActivity());

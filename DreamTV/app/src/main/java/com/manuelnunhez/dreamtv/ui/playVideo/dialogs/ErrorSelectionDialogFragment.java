@@ -19,9 +19,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
@@ -87,15 +87,6 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
     private ArrayList<ErrorReason> mReasons;
     private User mUser;
 
-
-    // Container Activity must implement this interface
-    public interface OnListener {
-        void onDialogClosed(SubtitleText selectedSubtitle, int subtitleOriginalPosition);
-
-        void onSaveReasons(int taskId, int subtitleVersion, UserTaskError userTaskError);
-
-        void onUpdateReasons(int taskId, int subtitleVersion, UserTaskError userTaskError);
-    }
 
     public ErrorSelectionDialogFragment() {
         // Required empty public constructor
@@ -272,10 +263,9 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
 
     }
 
-
     private void setupSubtitleNavigationListView(int subtitlePosition) {
 
-        ListView mListView = viewRoot.findViewById(R.id.lv);
+        GridView mListView = viewRoot.findViewById(R.id.lv);
 
         // Initialize a new ArrayAdapter
         MySubtitleAdapter mySubtitleAdapter = new MySubtitleAdapter(getActivity(), mSubtitle.getSubtitles(),
@@ -601,6 +591,15 @@ public class ErrorSelectionDialogFragment extends DialogFragment {
         }
 
         return tempList;
+    }
+
+    // Container Activity must implement this interface
+    public interface OnListener {
+        void onDialogClosed(SubtitleText selectedSubtitle, int subtitleOriginalPosition);
+
+        void onSaveReasons(int taskId, int subtitleVersion, UserTaskError userTaskError);
+
+        void onUpdateReasons(int taskId, int subtitleVersion, UserTaskError userTaskError);
     }
 
 

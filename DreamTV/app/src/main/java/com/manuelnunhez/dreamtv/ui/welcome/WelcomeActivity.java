@@ -11,18 +11,18 @@ import android.widget.ProgressBar;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.common.AccountPicker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.manuelnunhez.dreamtv.R;
 import com.manuelnunhez.dreamtv.ViewModelFactory;
-import com.manuelnunhez.dreamtv.data.model.User;
 import com.manuelnunhez.dreamtv.data.model.Resource;
 import com.manuelnunhez.dreamtv.data.model.Resource.Status;
+import com.manuelnunhez.dreamtv.data.model.User;
 import com.manuelnunhez.dreamtv.di.InjectorUtils;
 import com.manuelnunhez.dreamtv.ui.home.HomeActivity;
 import com.manuelnunhez.dreamtv.utils.LocaleHelper;
-import com.google.android.gms.common.AccountPicker;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 import timber.log.Timber;
 
@@ -46,7 +46,7 @@ public class WelcomeActivity extends FragmentActivity {
 
         // Get the ViewModel from the factory
         ViewModelFactory factory = InjectorUtils.provideViewModelFactory(this);
-        mViewModel = ViewModelProviders.of(this, factory).get(WelcomeViewModel.class);
+        mViewModel = new ViewModelProvider(this, factory).get(WelcomeViewModel.class);
 
         // Obtain the FirebaseAnalytics instance.
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);

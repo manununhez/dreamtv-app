@@ -7,7 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.leanback.preference.LeanbackPreferenceFragmentCompat;
 import androidx.leanback.preference.LeanbackSettingsFragmentCompat;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceDialogFragmentCompat;
@@ -29,7 +29,7 @@ public class AppPreferencesFragment extends LeanbackSettingsFragmentCompat {
         super.onCreate(savedInstanceState);
 
         ViewModelFactory factory = InjectorUtils.provideViewModelFactory(requireActivity());
-        mViewModel = ViewModelProviders.of(this, factory).get(AppPreferencesViewModel.class);
+        mViewModel = new ViewModelProvider(this, factory).get(AppPreferencesViewModel.class);
     }
 
     @Override
