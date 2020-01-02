@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.manuelnunhez.dreamtv">
+    package="com.dreamproject.dreamtv">
     <!-- <uses-permission android:name="android.permission.GET_ACCOUNTS" /> -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -20,7 +20,7 @@
         android:required="false" />
 
     <application
-        android:name=".DreamTVApp"
+        android:name="com.dreamproject.dreamtv.DreamTVApp"
         android:allowBackup="true"
         android:banner="@drawable/banner_tv"
         android:fullBackupContent="@xml/backup_descriptor"
@@ -30,7 +30,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
 
-        <activity android:name=".ui.welcome.WelcomeActivity">
+        <activity android:name="com.dreamproject.dreamtv.ui.welcome.WelcomeActivity">
             <tools:validation testUrl="http://dreamproject.pjwstk.edu.pl/dreamtv" />
 
             <intent-filter>
@@ -50,22 +50,22 @@
                     android:scheme="http" />
             </intent-filter>
         </activity> <!-- configChanges, para evitar que cuando el control se desconecte, interrumpa el app -->
-        <activity android:name=".ui.home.HomeActivity" />
-        <activity android:name=".ui.videoDetails.VideoDetailsActivity" />
-        <activity android:name=".ui.playVideo.PlaybackVideoActivity" />
+        <activity android:name="com.dreamproject.dreamtv.ui.home.HomeActivity" />
+        <activity android:name="com.dreamproject.dreamtv.ui.videoDetails.VideoDetailsActivity" />
+        <activity android:name="com.dreamproject.dreamtv.ui.playVideo.PlaybackVideoActivity" />
         <activity
-            android:name=".ui.playVideo.PlaybackVideoYoutubeActivity"
+            android:name="com.dreamproject.dreamtv.ui.playVideo.PlaybackVideoYoutubeActivity"
             android:label="@string/app_name" />
         <activity
-            android:name=".ui.preferences.AppPreferencesActivity"
+            android:name="com.dreamproject.dreamtv.ui.preferences.AppPreferencesActivity"
             android:exported="true"
             android:theme="@style/LeanbackPreferences" />
         <activity
-            android:name=".ui.preferences.VideoPreferencesActivity"
+            android:name="com.dreamproject.dreamtv.ui.preferences.VideoPreferencesActivity"
             android:exported="true"
             android:theme="@style/LeanbackPreferences" />
-        <activity android:name=".ui.search.SearchActivity" />
-        <activity android:name=".ui.categories.CategoryActivity" />
+        <activity android:name="com.dreamproject.dreamtv.ui.search.SearchActivity" />
+        <activity android:name="com.dreamproject.dreamtv.ui.categories.CategoryActivity" />
 
         <meta-data
             android:name="preloaded_fonts"

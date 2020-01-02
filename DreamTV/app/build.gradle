@@ -15,10 +15,10 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.manuelnunhez.dreamtv"
+        applicationId "com.dreamproject.dreamtv"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 7
+        versionCode 1
         versionName "2.0.0"
     }
 
