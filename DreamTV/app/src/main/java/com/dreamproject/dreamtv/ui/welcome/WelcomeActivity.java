@@ -13,8 +13,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.gms.common.AccountPicker;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.dreamproject.dreamtv.R;
 import com.dreamproject.dreamtv.ViewModelFactory;
 import com.dreamproject.dreamtv.data.model.Resource;
@@ -23,6 +21,8 @@ import com.dreamproject.dreamtv.data.model.User;
 import com.dreamproject.dreamtv.di.InjectorUtils;
 import com.dreamproject.dreamtv.ui.home.HomeActivity;
 import com.dreamproject.dreamtv.utils.LocaleHelper;
+import com.google.android.gms.common.AccountPicker;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import timber.log.Timber;
 

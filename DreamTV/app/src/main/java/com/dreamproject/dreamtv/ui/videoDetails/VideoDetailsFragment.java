@@ -22,8 +22,6 @@ import androidx.leanback.widget.ClassPresenterSelector;
 import androidx.leanback.widget.DetailsOverviewRow;
 import androidx.leanback.widget.FullWidthDetailsOverviewRowPresenter;
 import androidx.leanback.widget.FullWidthDetailsOverviewSharedElementHelper;
-import androidx.leanback.widget.ListRow;
-import androidx.leanback.widget.ListRowPresenter;
 import androidx.leanback.widget.RowPresenter;
 import androidx.leanback.widget.SparseArrayObjectAdapter;
 import androidx.lifecycle.LiveData;
@@ -33,7 +31,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.dreamproject.dreamtv.R;
 import com.dreamproject.dreamtv.ViewModelFactory;
 import com.dreamproject.dreamtv.data.model.Category.Type;
@@ -50,6 +47,7 @@ import com.dreamproject.dreamtv.ui.playVideo.PlaybackVideoYoutubeActivity;
 import com.dreamproject.dreamtv.utils.Constants;
 import com.dreamproject.dreamtv.utils.LoadingDialog;
 import com.dreamproject.dreamtv.utils.TimeUtils;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.List;
 
@@ -237,12 +235,8 @@ public class VideoDetailsFragment extends DetailsSupportFragment {
         detailsPresenter.setParticipatingEntranceTransition(false);
         prepareEntranceTransition();
 
-        ListRowPresenter shadowDisabledRowPresenter = new ListRowPresenter();
-        shadowDisabledRowPresenter.setShadowEnabled(false);
-
         ClassPresenterSelector detailsPresenterSelector = new ClassPresenterSelector();
         detailsPresenterSelector.addClassPresenter(DetailsOverviewRow.class, detailsPresenter);
-        detailsPresenterSelector.addClassPresenter(ListRow.class, new ListRowPresenter());
         mAdapter = new ArrayObjectAdapter(detailsPresenterSelector);
 
         setupDetailsOverviewRow();

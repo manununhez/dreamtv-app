@@ -2,6 +2,8 @@ package com.dreamproject.dreamtv.presenter.detailsPresenter;
 
 import android.content.Context;
 
+import androidx.leanback.widget.AbstractDetailsDescriptionPresenter;
+
 import com.dreamproject.dreamtv.R;
 import com.dreamproject.dreamtv.data.model.Task;
 import com.dreamproject.dreamtv.utils.TimeUtils;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     tools:keep="@layout/activity_playback_videos">
 
     <RelativeLayout
@@ -13,7 +13,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="center" />
 
-        <include layout="@layout/playback_layout"
-            android:id="@+id/playbackLayout"/>
+        <include
+            android:id="@+id/playbackLayout"
+            layout="@layout/playback_layout" />
     </RelativeLayout>
 </layout>

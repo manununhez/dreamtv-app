@@ -3,55 +3,63 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/exit_dialog_background"
-    android:gravity="center"
     tools:context=".ui.home.dialogs.ExitDialogFragment">
 
-
-    <Button
-        android:id="@+id/btnExit"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tvTitle"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/button_focusable_selector"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:fontFamily="@font/roboto"
-        android:padding="10dp"
-        android:text="@string/btn_exit"
-        android:textColor="@color/white" />
-
-
-    <Button
-        android:id="@+id/btnCancel"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/btnExit"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/button_focusable_selector"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:fontFamily="@font/roboto"
-        android:padding="10dp"
-        android:text="@string/btn_cancel"
-        android:textColor="@color/white" />
-
-    <TextView
-        android:id="@+id/tvTitle"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:fontFamily="@font/roboto"
-        android:text="@string/alert_exit_app"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="19sp" />
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/safe_area_margin_start_end"
+        android:layout_marginTop="@dimen/safe_area_margin_top_bottom"
+        android:layout_marginEnd="@dimen/safe_area_margin_start_end"
+        android:layout_marginBottom="@dimen/safe_area_margin_top_bottom"
+        android:gravity="center">
 
+        <Button
+            android:id="@+id/btnExit"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvTitle"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/button_focusable_selector"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:fontFamily="@font/roboto"
+            android:padding="10dp"
+            android:text="@string/btn_exit"
+            android:textColor="@color/white" />
+
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btnExit"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/button_focusable_selector"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:fontFamily="@font/roboto"
+            android:padding="10dp"
+            android:text="@string/btn_cancel"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:fontFamily="@font/roboto"
+            android:text="@string/alert_exit_app"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="19sp" />
+
+    </RelativeLayout>
 </RelativeLayout>

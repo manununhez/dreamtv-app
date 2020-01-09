@@ -36,5 +36,7 @@
         android:id="@+id/lb_details_description_body"
         style="?attr/detailsDescriptionBodyStyle"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:maxLines="15"
+        android:ellipsize="end"/>
 </LinearLayout>

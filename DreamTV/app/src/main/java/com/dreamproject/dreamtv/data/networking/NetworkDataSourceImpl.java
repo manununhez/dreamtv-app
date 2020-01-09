@@ -5,7 +5,6 @@ import android.content.Context;
 import androidx.lifecycle.MutableLiveData;
 
 import com.android.volley.VolleyError;
-import com.google.gson.reflect.TypeToken;
 import com.dreamproject.dreamtv.data.model.Authentication;
 import com.dreamproject.dreamtv.data.model.Category;
 import com.dreamproject.dreamtv.data.model.ErrorReason;
@@ -32,6 +31,7 @@ import com.dreamproject.dreamtv.data.networking.model.VideoTestSchema;
 import com.dreamproject.dreamtv.data.networking.model.VideoTopicSchema;
 import com.dreamproject.dreamtv.ui.home.HomeFragment;
 import com.dreamproject.dreamtv.utils.AppExecutors;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
 import java.util.Map;

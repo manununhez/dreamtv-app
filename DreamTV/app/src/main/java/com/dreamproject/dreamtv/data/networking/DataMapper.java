@@ -120,6 +120,9 @@ class DataMapper {
     }
 
     static List<SubtitleText> getSubtitleTextFromSchema(List<SubtitleTextSchema> subtitleTextSchema) {
+
+        if(subtitleTextSchema == null) return null;
+
         List<SubtitleText> subtitleTextList = new ArrayList<>();
         for (int i = 0; i < subtitleTextSchema.size(); i++) {
             SubtitleTextSchema textSchema = subtitleTextSchema.get(i);

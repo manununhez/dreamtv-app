@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     tools:keep="@layout/playback_layout">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <RelativeLayout
             android:id="@+id/rlVideoPlayerInfo"
@@ -26,100 +25,112 @@
                 android:background="@color/dark_grey" />
 
 
-            <TextView
-                android:id="@+id/tvTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="40dp"
-                android:layout_marginTop="30dp"
-                android:fontFamily="@font/roboto"
-                android:textColor="@color/white"
-                android:textSize="30sp"
-                tools:text="25:00" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/safe_area_margin_start_end"
+                android:layout_marginTop="@dimen/safe_area_margin_top_bottom"
+                android:layout_marginEnd="@dimen/safe_area_margin_start_end"
+                android:layout_marginBottom="@dimen/safe_area_margin_top_bottom">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginTop="30dp"
-                android:layout_marginEnd="40dp"
-                android:fontFamily="@font/roboto"
-                android:text="@string/text_pause"
-                android:gravity="end"
-                android:layout_toEndOf="@id/tvTime"
-                android:textColor="@color/white"
-                android:textSize="30sp" />
+                <TextView
+                    android:id="@+id/tvTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="@font/roboto"
+                    android:textColor="@color/white"
+                    android:textSize="30sp"
+                    tools:text="25:00" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_toEndOf="@id/tvTime"
+                    android:fontFamily="@font/roboto"
+                    android:gravity="end"
+                    android:text="@string/text_pause"
+                    android:textColor="@color/white"
+                    android:textSize="30sp" />
+            </RelativeLayout>
+
         </RelativeLayout>
-
-        <TextView
-            android:id="@+id/tvSubtitle"
-            style="@style/SubtitleStyleWithoutError"
-            android:textSize="25sp"
-            android:visibility="gone"
-            tools:text="Subtitle text text" />
-
-        <TextView
-            android:id="@+id/tvSubtitleError"
-            style="@style/SubtitleStyleError"
-            android:textSize="25sp"
-            android:visibility="gone" />
 
         <RelativeLayout
-            android:id="@+id/rlVideoProgressPlayer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="40dp"
-            android:layout_marginTop="30dp"
-            android:layout_marginEnd="40dp"
-            android:layout_marginBottom="90dp"
-            android:visibility="gone">
+            android:layout_marginStart="@dimen/safe_area_margin_start_end"
+            android:layout_marginTop="@dimen/safe_area_margin_top_bottom"
+            android:layout_marginEnd="@dimen/safe_area_margin_start_end"
+            android:layout_marginBottom="@dimen/safe_area_margin_top_bottom"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tvCurrentTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentBottom="true"
-                android:fontFamily="@font/roboto"
+                android:id="@+id/tvSubtitle"
+                style="@style/SubtitleStyleWithoutError"
                 android:textSize="25sp"
-                android:textStyle="bold"
-                tools:text="01:30" />
+                android:visibility="gone"
+                tools:text="Subtitle text text" />
 
-            <ProgressBar
-                android:id="@+id/pbProgress"
-                style="@style/ProgressBarVideoPlayer"
+            <TextView
+                android:id="@+id/tvSubtitleError"
+                style="@style/SubtitleStyleError"
+                android:textSize="25sp"
+                android:visibility="gone" />
+
+            <RelativeLayout
+                android:id="@+id/rlVideoProgressPlayer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_marginBottom="10dp"
-                android:layout_toStartOf="@id/tvTotalTime"
-                android:layout_toEndOf="@id/tvCurrentTime"
-                tools:progress="50" />
+                android:layout_height="match_parent"
+                android:layout_marginBottom="90dp"
+                android:visibility="gone">
 
+                <TextView
+                    android:id="@+id/tvCurrentTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentBottom="true"
+                    android:fontFamily="@font/roboto"
+                    android:textSize="25sp"
+                    android:textStyle="bold"
+                    tools:text="01:30" />
 
-            <TextView
-                android:id="@+id/tvTotalTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
-                android:fontFamily="@font/roboto"
-                android:textSize="25sp"
-                android:textStyle="bold"
-                tools:text="10:50" />
+                <ProgressBar
+                    android:id="@+id/pbProgress"
+                    style="@style/ProgressBarVideoPlayer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="10dp"
+                    android:layout_toStartOf="@id/tvTotalTime"
+                    android:layout_toEndOf="@id/tvCurrentTime"
+                    tools:progress="50" />
 
-            <TextView
-                android:id="@+id/tvVideoTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:fontFamily="@font/roboto"
-                android:textColor="@color/white"
-                android:textSize="40sp"
-                tools:text="Video Title" />
+                <TextView
+                    android:id="@+id/tvTotalTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:fontFamily="@font/roboto"
+                    android:textSize="25sp"
+                    android:textStyle="bold"
+                    tools:text="10:50" />
+
+                <TextView
+                    android:id="@+id/tvVideoTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:fontFamily="@font/roboto"
+                    android:textColor="@color/white"
+                    android:textSize="40sp"
+                    tools:text="Video Title" />
+
+            </RelativeLayout>
 
         </RelativeLayout>
-
     </RelativeLayout>
 </layout>

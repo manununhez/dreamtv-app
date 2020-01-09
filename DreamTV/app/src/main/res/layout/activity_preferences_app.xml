@@ -2,9 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <androidx.fragment.app.FragmentContainerView
+
+    <fragment
         android:id="@+id/preferencesFragment"
-        android:name="com.manuelnunhez.dreamtv.ui.preferences.AppPreferencesFragment"
+        android:name="com.dreamproject.dreamtv.ui.preferences.AppPreferencesFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 </RelativeLayout>

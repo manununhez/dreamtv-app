@@ -4,50 +4,61 @@
     android:layout_height="match_parent"
     android:layout_centerInParent="true"
     android:background="@color/exit_dialog_background"
-    android:gravity="center"
     tools:context="com.dreamproject.dreamtv.ui.playVideo.dialogs.RatingDialogFragment">
 
-    <Button
-        android:id="@+id/btnSaveAndExit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/rtBar"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center"
-        android:layout_marginTop="25dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/button_focusable_selector"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:fontFamily="@font/roboto"
-        android:padding="10dp"
-        android:text="@string/btn_save_exit"
-        android:textColor="@color/white" />
-
-    <RatingBar
-        android:id="@+id/rtBar"
-        style="@style/Widget.AppCompat.RatingBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tvTitle"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="5dp"
-        android:max="5"
-        android:numStars="5"
-        android:rating="3"
-        android:stepSize="1"
-        android:theme="@style/RatingBar" />
-
-    <TextView
-        android:id="@+id/tvTitle"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:fontFamily="@font/roboto"
-        android:text="@string/alert_msg_video_terminated"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="19sp" />
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/safe_area_margin_start_end"
+        android:layout_marginTop="@dimen/safe_area_margin_top_bottom"
+        android:layout_marginEnd="@dimen/safe_area_margin_start_end"
+        android:layout_marginBottom="@dimen/safe_area_margin_top_bottom"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btnSaveAndExit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rtBar"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_marginTop="25dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/button_focusable_selector"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:fontFamily="@font/roboto"
+            android:padding="10dp"
+            android:text="@string/btn_save_exit"
+            android:textColor="@color/white" />
+
+        <RatingBar
+            android:id="@+id/rtBar"
+            style="@style/Widget.AppCompat.RatingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvTitle"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:max="5"
+            android:numStars="5"
+            android:rating="3"
+            android:stepSize="1"
+            android:theme="@style/RatingBar" />
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/safe_area_margin_start_end"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="@dimen/safe_area_margin_start_end"
+            android:layout_marginBottom="20dp"
+            android:fontFamily="@font/roboto"
+            android:text="@string/alert_msg_video_terminated"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="19sp" />
+    </RelativeLayout>
 </RelativeLayout>
