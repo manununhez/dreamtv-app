@@ -9,9 +9,14 @@ Development of a smart TV application (client side: Android TV platform; server 
 ![Pilot setting](img/dreamtv_pilot_setting.jpg)
 
 ![Main Screen](img/dreamtv_main_screen.png)
+
+![Main Screen 1](img/dreamtv_main_screen_1.png)
+
 ![Main Screen 2](img/dreamtv_main_screen_2.png)
 
 The current version of the DreamTV app runs over Android TV platform. The remote controller is used to interact with the application. The idea is that the user watches some videos, select problem lines and suggests the possible reasons of mistakes. Our aim was to make the application as simple as possible.
+
+![Video playing](img/dreamtv_video_playing.png)
 
 ![Reasons dialog](img/dreamtv_reasons_dialog.png)
 
